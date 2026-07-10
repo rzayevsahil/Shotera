@@ -8,12 +8,18 @@ import { listen } from "@tauri-apps/api/event";
 import shutterSoundUrl from "../assets/shutter.mp3";
 import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
+import { getVersion } from "@tauri-apps/api/app";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
   const [lang, setLang] = useState<Language>(getLanguage);
+  const [appVersion, setAppVersion] = useState("v0.1.0");
+
+  useEffect(() => {
+    getVersion().then(v => setAppVersion(`v${v}`)).catch(() => { });
+  }, []);
 
   // Settings state synced with localStorage
   const [startAtBoot, setStartAtBoot] = useState(() => localStorage.getItem("startAtBoot") === "true");
@@ -109,7 +115,7 @@ function SettingsWindow() {
       if (e.metaKey) parts.push("Super");
 
       let keyName = e.key;
-      
+
       if (keyName === "PrintScreen" || keyName === "Snapshot" || e.code === "PrintScreen") {
         keyName = "PrintScreen";
       } else if (e.code.startsWith("Key")) {
@@ -209,7 +215,7 @@ function SettingsWindow() {
       window.removeEventListener("keydown", handleKeyDown, true);
       window.removeEventListener("keyup", handleKeyUp, true);
       window.removeEventListener("click", handleOuterClick, true);
-      
+
       // 2. Re-register and sync shortcuts from localStorage on exit/cleanup
       const regShortcut = localStorage.getItem("regionShortcut") || "Ctrl+Shift+S";
       const fsShortcut = localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F";
@@ -331,7 +337,7 @@ function SettingsWindow() {
         </div>
 
         <div className="sidebar-footer">
-          v0.1.0 (Beta)
+          {appVersion}
         </div>
       </aside>
 
@@ -505,19 +511,19 @@ function SettingsWindow() {
                 <span className="setting-label">{t.editorShortcuts}</span>
                 <span className="setting-desc">{t.editorShortcutsDesc}</span>
               </div>
-              <div style={{ 
-                display: "grid", 
-                gridTemplateColumns: "auto auto", 
-                columnGap: "16px", 
-                rowGap: "8px", 
-                alignItems: "center" 
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "auto auto",
+                columnGap: "16px",
+                rowGap: "8px",
+                alignItems: "center"
               }}>
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorCopy}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + C</span>
-                
+
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorSave}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + S</span>
-                
+
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorClose}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>ESC</span>
               </div>
@@ -641,7 +647,7 @@ function SettingsWindow() {
                     color: "var(--text-muted)",
                     fontWeight: 600
                   }}>
-                    {t.appVersion}: v0.1.0
+                    {t.appVersion}: {appVersion}
                   </span>
                 </div>
               </div>
@@ -666,16 +672,16 @@ function SettingsWindow() {
                       height: "8px",
                       borderRadius: "50%",
                       backgroundColor: updateStatus === "checking" || updateStatus === "downloading" ? "var(--accent-cyan)" :
-                                       updateStatus === "available" ? "#f59e0b" :
-                                       updateStatus === "up-to-date" || updateStatus === "downloaded" ? "#10b981" :
-                                       updateStatus === "error" ? "#ef4444" : "rgba(255,255,255,0.2)",
+                        updateStatus === "available" ? "#f59e0b" :
+                          updateStatus === "up-to-date" || updateStatus === "downloaded" ? "#10b981" :
+                            updateStatus === "error" ? "#ef4444" : "rgba(255,255,255,0.2)",
                       boxShadow: updateStatus === "checking" || updateStatus === "downloading" ? "0 0 8px var(--accent-cyan)" :
-                                 updateStatus === "available" ? "0 0 8px #f59e0b" :
-                                 updateStatus === "up-to-date" || updateStatus === "downloaded" ? "0 0 8px #10b981" : "none",
+                        updateStatus === "available" ? "0 0 8px #f59e0b" :
+                          updateStatus === "up-to-date" || updateStatus === "downloaded" ? "0 0 8px #10b981" : "none",
                       animation: updateStatus === "checking" || updateStatus === "downloading" ? "pulse-border 1.5s infinite" : "none"
                     }} />
                     <span style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.85)" }}>
-                      {updateStatus === "idle" && `${t.appVersion}: v0.1.0`}
+                      {updateStatus === "idle" && `${t.appVersion}: ${appVersion}`}
                       {updateStatus === "checking" && t.checkingUpdates}
                       {updateStatus === "up-to-date" && t.appUpToDate}
                       {updateStatus === "available" && `${t.updateAvailable} (v${updateVersion})`}
