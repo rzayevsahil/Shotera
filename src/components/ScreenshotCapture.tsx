@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { Copy, Download, X, Pencil, ArrowUpRight, Square, Type, Trash2 } from "lucide-react";
+import { translations, getLanguage, Language } from "../i18n";
 
 interface SelectionRect {
   x: number;
@@ -74,6 +75,16 @@ const getCursorForHandle = (handle: string | null, tool: Tool): string => {
 };
 
 function ScreenshotCapture() {
+  const [lang, setLang] = useState<Language>(getLanguage);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLang(getLanguage());
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -649,11 +660,13 @@ function ScreenshotCapture() {
     return { top, left: selection.x };
   };
 
+  const t = translations[lang];
+
   return (
     <div className="capture-container" ref={containerRef}>
       {!selection && (
         <div className="capture-instructions">
-          Sürükleyip Alan Seçin | Çıkmak için ESC
+          {t.dragToSelect}
         </div>
       )}
 
@@ -702,7 +715,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "select" ? "active" : ""}`}
             onClick={() => setActiveTool("select")}
-            title="Seçim Aracı (Taşı / Yeniden Boyutlandır)"
+            title={t.toolSelect}
           >
             <Square size={16} style={{ opacity: 0.3 }} />
           </button>
@@ -710,7 +723,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "pencil" ? "active" : ""}`}
             onClick={() => setActiveTool("pencil")}
-            title="Serbest Kalem"
+            title={t.toolPencil}
           >
             <Pencil size={16} />
           </button>
@@ -718,7 +731,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "arrow" ? "active" : ""}`}
             onClick={() => setActiveTool("arrow")}
-            title="Ok Ekle"
+            title={t.toolArrow}
           >
             <ArrowUpRight size={16} />
           </button>
@@ -726,7 +739,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "rect" ? "active" : ""}`}
             onClick={() => setActiveTool("rect")}
-            title="Dikdörtgen Çiz"
+            title={t.toolRect}
           >
             <Square size={16} />
           </button>
@@ -734,7 +747,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "text" ? "active" : ""}`}
             onClick={() => setActiveTool("text")}
-            title="Metin Yaz"
+            title={t.toolText}
           >
             <Type size={16} />
           </button>
@@ -742,7 +755,7 @@ function ScreenshotCapture() {
           <button
             className="toolbar-btn"
             onClick={() => setDrawings([])}
-            title="Çizimleri Temizle"
+            title={t.toolClear}
             disabled={drawings.length === 0}
             style={{ opacity: drawings.length === 0 ? 0.3 : 1 }}
           >
@@ -767,7 +780,7 @@ function ScreenshotCapture() {
           <button
             className="toolbar-btn action-copy"
             onClick={handleCopy}
-            title="Panoya Kopyala (Enter)"
+            title={t.actionCopy}
           >
             <Copy size={16} />
           </button>
@@ -775,7 +788,7 @@ function ScreenshotCapture() {
           <button
             className="toolbar-btn action-save"
             onClick={handleSave}
-            title="Dosyaya Kaydet"
+            title={t.actionSave}
           >
             <Download size={16} />
           </button>
@@ -783,7 +796,7 @@ function ScreenshotCapture() {
           <button
             className="toolbar-btn action-close"
             onClick={handleClose}
-            title="Kapat (ESC)"
+            title={t.actionClose}
           >
             <X size={16} />
           </button>

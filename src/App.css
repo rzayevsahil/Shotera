@@ -43,13 +43,16 @@
 }
 
 /* Ensure transparent webview window can display transparency */
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: transparent; /* Needed for transparent window overlay */
+  background-color: transparent;
+  /* Needed for transparent window overlay */
 }
 
 /* Reset basic styling */
@@ -64,19 +67,27 @@ html, body, #root {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.02);
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
 /* Typography styles */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-title);
   font-weight: 600;
   color: var(--text-main);
@@ -89,7 +100,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 100vh;
   background-color: var(--bg-app);
   background-image: radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
-                    radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.05) 0%, transparent 40%);
+    radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.05) 0%, transparent 40%);
   display: grid;
   grid-template-columns: 240px 1fr;
   color: var(--text-main);
@@ -155,7 +166,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.25s ease;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover,
+.nav-item.active {
   color: var(--text-main);
   background: rgba(255, 255, 255, 0.04);
 }
@@ -344,11 +356,11 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background: var(--accent-gradient);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(24px);
 }
 
@@ -471,7 +483,8 @@ input:checked + .slider:before {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.color-option:hover, .color-option.active {
+.color-option:hover,
+.color-option.active {
   transform: scale(1.25);
   border-color: #fff;
 }
@@ -505,7 +518,7 @@ input:checked + .slider:before {
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   color: var(--text-main);
   pointer-events: none;
   animation: slideDown 0.3s ease-out;
@@ -526,17 +539,32 @@ input:checked + .slider:before {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   transition: border-color 0.2s ease;
 }
+
 .canvas-text-input:focus {
   border-color: #ffffff;
 }
 
 /* Keyframe animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes slideDown {
-  from { transform: translate(-50%, -20px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+  from {
+    transform: translate(-50%, -20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }

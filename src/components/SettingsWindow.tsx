@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Settings, Camera, FolderOpen, Info } from "lucide-react";
 import logo from "../assets/logo.png";
+import { translations, getLanguage, setLanguage, Language } from "../i18n";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
-  
+  const [lang, setLang] = useState<Language>(getLanguage);
+
   // Settings state synced with localStorage
   const [startAtBoot, setStartAtBoot] = useState(() => localStorage.getItem("startAtBoot") === "true");
   const [startInTray, setStartInTray] = useState(() => localStorage.getItem("startInTray") !== "false"); // default true
@@ -28,14 +30,24 @@ function SettingsWindow() {
     localStorage.setItem("imageQuality", String(imageQuality));
   }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality]);
 
+  // Sync language with multi-window storage events
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLang(getLanguage());
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const handleTakeScreenshot = async () => {
     try {
-      // Call Tauri command to trigger screen capture
       await invoke("trigger_capture_command");
     } catch (e) {
       console.error("Failed to trigger screenshot:", e);
     }
   };
+
+  const t = translations[lang];
 
   return (
     <div className="settings-container">
@@ -56,33 +68,33 @@ function SettingsWindow() {
           </div>
 
           <nav className="nav-links">
-            <div 
+            <div
               className={`nav-item ${activeTab === "general" ? "active" : ""}`}
               onClick={() => setActiveTab("general")}
             >
               <Settings className="nav-icon" />
-              <span>Genel</span>
+              <span>{t.sidebarGeneral}</span>
             </div>
-            <div 
+            <div
               className={`nav-item ${activeTab === "capture" ? "active" : ""}`}
               onClick={() => setActiveTab("capture")}
             >
               <Camera className="nav-icon" />
-              <span>Yakalama</span>
+              <span>{t.sidebarCapture}</span>
             </div>
-            <div 
+            <div
               className={`nav-item ${activeTab === "save" ? "active" : ""}`}
               onClick={() => setActiveTab("save")}
             >
               <FolderOpen className="nav-icon" />
-              <span>Kaydetme</span>
+              <span>{t.sidebarSave}</span>
             </div>
-            <div 
+            <div
               className={`nav-item ${activeTab === "about" ? "active" : ""}`}
               onClick={() => setActiveTab("about")}
             >
               <Info className="nav-icon" />
-              <span>Hakkında</span>
+              <span>{t.sidebarAbout}</span>
             </div>
           </nav>
         </div>
@@ -96,16 +108,16 @@ function SettingsWindow() {
       <main className="settings-content">
         <div>
           <h2 className="section-title">
-            {activeTab === "general" && "Genel Ayarlar"}
-            {activeTab === "capture" && "Yakalama Ayarları"}
-            {activeTab === "save" && "Kaydetme ve Dosya Ayarları"}
-            {activeTab === "about" && "Shotera Hakkında"}
+            {activeTab === "general" && t.generalTitle}
+            {activeTab === "capture" && t.captureTitle}
+            {activeTab === "save" && t.saveTitle}
+            {activeTab === "about" && t.aboutTitle}
           </h2>
           <p className="section-subtitle">
-            {activeTab === "general" && "Uygulamanın genel çalışma biçimini ve başlangıç davranışını özelleştirin."}
-            {activeTab === "capture" && "Ekran görüntüsü yakalama yöntemlerini ve kısayolları yönetin."}
-            {activeTab === "save" && "Dosyaların nereye ve hangi formatta kaydedileceğini yapılandırın."}
-            {activeTab === "about" && "Shotera projesi ve kurulu sürüm detayları."}
+            {activeTab === "general" && t.generalSubtitle}
+            {activeTab === "capture" && t.captureSubtitle}
+            {activeTab === "save" && t.saveSubtitle}
+            {activeTab === "about" && t.aboutSubtitle}
           </p>
         </div>
 
@@ -114,14 +126,14 @@ function SettingsWindow() {
           <div className="settings-card">
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Sistem Başlangıcında Çalıştır</span>
-                <span className="setting-desc">Windows açıldığında Shotera uygulamasını otomatik olarak başlat.</span>
+                <span className="setting-label">{t.runAtStartup}</span>
+                <span className="setting-desc">{t.runAtStartupDesc}</span>
               </div>
               <label className="switch">
-                <input 
-                  type="checkbox" 
-                  checked={startAtBoot} 
-                  onChange={(e) => setStartAtBoot(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={startAtBoot}
+                  onChange={(e) => setStartAtBoot(e.target.checked)}
                 />
                 <span className="slider"></span>
               </label>
@@ -129,27 +141,47 @@ function SettingsWindow() {
 
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Sistem Tepsisinde Başlat</span>
-                <span className="setting-desc">Uygulama açıldığında ana pencereyi gösterme, arka planda sistem tepsisinde çalıştır.</span>
+                <span className="setting-label">{t.startInTray}</span>
+                <span className="setting-desc">{t.startInTrayDesc}</span>
               </div>
               <label className="switch">
-                <input 
-                  type="checkbox" 
-                  checked={startInTray} 
-                  onChange={(e) => setStartInTray(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={startInTray}
+                  onChange={(e) => setStartInTray(e.target.checked)}
                 />
                 <span className="slider"></span>
               </label>
             </div>
 
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{t.languageSetting}</span>
+                <span className="setting-desc">{t.languageSettingDesc}</span>
+              </div>
+              <select
+                className="premium-input"
+                value={lang}
+                onChange={(e) => {
+                  const val = e.target.value as Language;
+                  setLang(val);
+                  setLanguage(val);
+                }}
+                style={{ width: "240px" }}
+              >
+                <option value="tr">Türkçe</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
             <div className="setting-row" style={{ marginTop: "12px" }}>
               <div className="setting-info">
-                <span className="setting-label">Ekran Görüntüsü Al</span>
-                <span className="setting-desc">Yakalama arayüzünü açmak için anında test edin. Kısayol: <span style={{color: "var(--accent-cyan)"}}>Print Screen</span> veya <span style={{color: "var(--accent-cyan)"}}>Ctrl + Shift + S</span></span>
+                <span className="setting-label">{t.takeScreenshot}</span>
+                <span className="setting-desc">{t.takeScreenshotDesc} <span style={{ color: "var(--accent-cyan)" }}>Print Screen</span> veya <span style={{ color: "var(--accent-cyan)" }}>Ctrl + Shift + S</span></span>
               </div>
               <button className="premium-button" onClick={handleTakeScreenshot}>
                 <Camera size={16} />
-                Şimdi Yakala
+                {t.captureNow}
               </button>
             </div>
           </div>
@@ -159,14 +191,14 @@ function SettingsWindow() {
           <div className="settings-card">
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Kamera Deklanşör Sesi Çal</span>
-                <span className="setting-desc">Başarıyla ekran görüntüsü alındığında ses efekti duyur.</span>
+                <span className="setting-label">{t.playShutterSound}</span>
+                <span className="setting-desc">{t.playShutterSoundDesc}</span>
               </div>
               <label className="switch">
-                <input 
-                  type="checkbox" 
-                  checked={playAudio} 
-                  onChange={(e) => setPlayAudio(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={playAudio}
+                  onChange={(e) => setPlayAudio(e.target.checked)}
                 />
                 <span className="slider"></span>
               </label>
@@ -174,14 +206,14 @@ function SettingsWindow() {
 
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Fare İmlecini Dahil Et (Deneysel)</span>
-                <span className="setting-desc">Alınan ekran görüntülerine sistem imlecini de yerleştir.</span>
+                <span className="setting-label">{t.includeCursor}</span>
+                <span className="setting-desc">{t.includeCursorDesc}</span>
               </div>
               <label className="switch">
-                <input 
-                  type="checkbox" 
-                  checked={includeCursor} 
-                  onChange={(e) => setIncludeCursor(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  checked={includeCursor}
+                  onChange={(e) => setIncludeCursor(e.target.checked)}
                 />
                 <span className="slider"></span>
               </label>
@@ -189,8 +221,8 @@ function SettingsWindow() {
 
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Global Kısayol (Capture Region)</span>
-                <span className="setting-desc">Bölge seçimi ekran görüntüsünü tetikleyen ana kısayollar.</span>
+                <span className="setting-label">{t.globalShortcut}</span>
+                <span className="setting-desc">{t.globalShortcutDesc}</span>
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
                 <span className="shortcut-badge">Print Screen</span>
@@ -204,45 +236,45 @@ function SettingsWindow() {
           <div className="settings-card">
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Varsayılan Kayıt Dizini</span>
-                <span className="setting-desc">Ekran görüntülerinin kaydedileceği klasör.</span>
+                <span className="setting-label">{t.defaultSaveDir}</span>
+                <span className="setting-desc">{t.defaultSaveDirDesc}</span>
               </div>
-              <input 
-                type="text" 
-                className="premium-input" 
-                value={savePath} 
-                onChange={(e) => setSavePath(e.target.value)} 
+              <input
+                type="text"
+                className="premium-input"
+                value={savePath}
+                onChange={(e) => setSavePath(e.target.value)}
               />
             </div>
 
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Dosya Biçimi</span>
-                <span className="setting-desc">Ekran görüntülerinin kaydedileceği dosya formatı.</span>
+                <span className="setting-label">{t.fileFormat}</span>
+                <span className="setting-desc">{t.fileFormatDesc}</span>
               </div>
-              <select 
-                className="premium-input" 
-                value={fileFormat} 
+              <select
+                className="premium-input"
+                value={fileFormat}
                 onChange={(e) => setFileFormat(e.target.value)}
                 style={{ width: "240px" }}
               >
-                <option value="PNG">PNG (Kayıpsız)</option>
-                <option value="JPG">JPG (Sıkıştırılmış)</option>
-                <option value="WebP">WebP (Modern Sıkıştırma)</option>
+                <option value="PNG">PNG ({lang === "tr" ? "Kayıpsız" : "Lossless"})</option>
+                <option value="JPG">JPG ({lang === "tr" ? "Sıkıştırılmış" : "Compressed"})</option>
+                <option value="WebP">WebP ({lang === "tr" ? "Modern Sıkıştırma" : "Modern Compression"})</option>
               </select>
             </div>
 
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Görüntü Kalitesi</span>
-                <span className="setting-desc">Görüntü kalitesi yüzdesi (JPG ve WebP formatları için geçerlidir).</span>
+                <span className="setting-label">{t.imageQuality}</span>
+                <span className="setting-desc">{t.imageQualityDesc}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
-                <input 
-                  type="range" 
-                  min="30" 
-                  max="100" 
-                  value={imageQuality} 
+                <input
+                  type="range"
+                  min="30"
+                  max="100"
+                  value={imageQuality}
                   onChange={(e) => setImageQuality(Number(e.target.value))}
                   style={{ flexGrow: 1, accentColor: "var(--accent-cyan)" }}
                 />
@@ -263,20 +295,20 @@ function SettingsWindow() {
             </div>
 
             <p style={{ lineHeight: "1.6", color: "rgba(255,255,255,0.7)" }}>
-              Shotera, Windows, macOS ve Linux üzerinde çalışan, Rust ve Tauri ile geliştirilmiş, ultra hafif, hızlı ve gizlilik odaklı bir ekran görüntüsü alma aracıdır. Tüm görüntüleriniz cihazınızda yerel (offline) olarak işlenir.
+              {t.aboutDesc}
             </p>
 
             <div style={{ borderTop: "1px solid var(--border-color)", paddingTop: "20px", display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
               <div>
-                <span style={{ color: "var(--text-muted)" }}>Geliştirici: </span>
+                <span style={{ color: "var(--text-muted)" }}>{t.developer}: </span>
                 <span style={{ fontWeight: 500 }}>Antigravity Team</span>
               </div>
               <div>
-                <span style={{ color: "var(--text-muted)" }}>Lisans: </span>
+                <span style={{ color: "var(--text-muted)" }}>{t.license}: </span>
                 <span style={{ fontWeight: 500 }}>MIT</span>
               </div>
               <div>
-                <span style={{ color: "var(--text-muted)" }}>Altyapı: </span>
+                <span style={{ color: "var(--text-muted)" }}>{t.infrastructure}: </span>
                 <span style={{ fontWeight: 500 }}>Tauri v2 + React</span>
               </div>
             </div>
