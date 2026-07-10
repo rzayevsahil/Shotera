@@ -341,6 +341,18 @@ function ScreenshotCapture() {
     }
   }, [textInput.visible]);
 
+  useEffect(() => {
+    if (canvasRef.current) {
+      if (activeTool === "text") {
+        canvasRef.current.style.cursor = "text";
+      } else if (activeTool === "select" && selection) {
+        // Handled dynamically by handleMouseMove
+      } else {
+        canvasRef.current.style.cursor = "crosshair";
+      }
+    }
+  }, [activeTool]);
+
   const handleClose = async () => {
     try {
       setImageSrc(null);
@@ -468,11 +480,16 @@ function ScreenshotCapture() {
       } else {
         setDrawingEnd({ x: clampedX, y: clampedY });
       }
-    } else if (selection && activeTool === "select") {
-      // Update cursor based on hover region
-      const handle = getResizeHandle(x, y, selection);
+    } else {
       if (canvasRef.current) {
-        canvasRef.current.style.cursor = getCursorForHandle(handle, activeTool);
+        if (activeTool !== "select") {
+          canvasRef.current.style.cursor = activeTool === "text" ? "text" : "crosshair";
+        } else if (selection) {
+          const handle = getResizeHandle(x, y, selection);
+          canvasRef.current.style.cursor = getCursorForHandle(handle, activeTool);
+        } else {
+          canvasRef.current.style.cursor = "crosshair";
+        }
       }
     }
   };
