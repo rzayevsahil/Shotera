@@ -235,6 +235,7 @@ pub fn run() {
             let _tray = TrayIconBuilder::with_id("main-tray")
                 .menu(&menu)
                 .tooltip("Shotera")
+                .icon(app.default_window_icon().cloned().unwrap())
                 .on_menu_event(move |app_handle_tray, event| {
                     match event.id.as_ref() {
                         "quit" => {
