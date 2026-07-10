@@ -563,23 +563,25 @@ function SettingsWindow() {
               </select>
             </div>
 
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{t.imageQuality}</span>
-                <span className="setting-desc">{t.imageQualityDesc}</span>
+            {fileFormat !== "PNG" && (
+              <div className="setting-row">
+                <div className="setting-info">
+                  <span className="setting-label">{t.imageQuality}</span>
+                  <span className="setting-desc">{t.imageQualityDesc}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                  <input
+                    type="range"
+                    min="30"
+                    max="100"
+                    value={imageQuality}
+                    onChange={(e) => setImageQuality(Number(e.target.value))}
+                    style={{ flexGrow: 1, accentColor: "var(--accent-cyan)" }}
+                  />
+                  <span style={{ minWidth: "36px", textAlign: "right", fontWeight: 600 }}>%{imageQuality}</span>
+                </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
-                <input
-                  type="range"
-                  min="30"
-                  max="100"
-                  value={imageQuality}
-                  onChange={(e) => setImageQuality(Number(e.target.value))}
-                  style={{ flexGrow: 1, accentColor: "var(--accent-cyan)" }}
-                />
-                <span style={{ minWidth: "36px", textAlign: "right", fontWeight: 600 }}>%{imageQuality}</span>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
