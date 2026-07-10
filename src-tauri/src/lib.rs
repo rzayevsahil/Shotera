@@ -5,9 +5,19 @@ use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use base64::prelude::*;
 use chrono::Local;
+use tauri_plugin_notification::NotificationExt;
 
 struct AppState {
     last_screenshot: Mutex<Option<image::RgbaImage>>,
+    language: Mutex<String>,
+}
+
+fn show_app_notification(app_handle: &AppHandle, title: &str, body: &str) {
+    let _ = app_handle.notification()
+        .builder()
+        .title(title)
+        .body(body)
+        .show();
 }
 
 // Function to trigger screenshot and notify the screenshot window
@@ -69,6 +79,18 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
     };
     ctx.set_image(img_data).map_err(|e| e.to_string())?;
     
+    // 4. Send notification
+    let lang = {
+        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+        state_lang.clone()
+    };
+    let body = if lang == "tr" {
+        "Tam ekran görüntüsü kaydedildi ve panoya kopyalandı!"
+    } else {
+        "Full screenshot saved and copied to clipboard!"
+    };
+    show_app_notification(app_handle, "Shotera", body);
+    
     Ok(())
 }
 
@@ -92,6 +114,7 @@ fn get_last_screenshot(state: State<'_, AppState>) -> Result<String, String> {
 
 #[tauri::command]
 fn copy_to_clipboard(
+    app_handle: AppHandle,
     state: State<'_, AppState>,
     x: u32,
     y: u32,
@@ -122,6 +145,18 @@ fn copy_to_clipboard(
         bytes: std::borrow::Cow::from(cropped.into_raw()),
     };
     ctx.set_image(img_data).map_err(|e| e.to_string())?;
+    
+    // Send notification
+    let lang = {
+        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+        state_lang.clone()
+    };
+    let body = if lang == "tr" {
+        "Ekran görüntüsü panoya kopyalandı!"
+    } else {
+        "Screenshot copied to clipboard!"
+    };
+    show_app_notification(&app_handle, "Shotera", body);
     
     Ok(())
 }
@@ -168,11 +203,26 @@ fn save_to_file(
     // Save image
     cropped.save(&path).map_err(|e| e.to_string())?;
     
+    // Send notification
+    let lang = {
+        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+        state_lang.clone()
+    };
+    let body = if lang == "tr" {
+        "Ekran görüntüsü başarıyla kaydedildi!"
+    } else {
+        "Screenshot saved successfully!"
+    };
+    show_app_notification(&app_handle, "Shotera", body);
+    
     Ok(path.to_string_lossy().to_string())
 }
 
 #[tauri::command]
-fn update_tray_language(app_handle: AppHandle, lang: String) {
+fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang: String) {
+    if let Ok(mut state_lang) = state.language.lock() {
+        *state_lang = lang.clone();
+    }
     if let Some(tray) = app_handle.tray_by_id("main-tray") {
         let (capture_label, settings_label, quit_label) = if lang == "tr" {
             ("Ekran Görüntüsü Al", "Ayarlar", "Çıkış")
@@ -230,7 +280,7 @@ fn trigger_capture_command(app_handle: AppHandle, state: State<'_, AppState>) ->
 }
 
 #[tauri::command]
-fn save_base64_image(app_handle: AppHandle, base64_str: String) -> Result<String, String> {
+fn save_base64_image(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
     use base64::prelude::*;
     let bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
     
@@ -243,11 +293,24 @@ fn save_base64_image(app_handle: AppHandle, base64_str: String) -> Result<String
     path.push(filename);
     
     std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
+
+    // Send notification
+    let lang = {
+        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+        state_lang.clone()
+    };
+    let body = if lang == "tr" {
+        "Ekran görüntüsü başarıyla kaydedildi!"
+    } else {
+        "Screenshot saved successfully!"
+    };
+    show_app_notification(&app_handle, "Shotera", body);
+
     Ok(path.to_string_lossy().to_string())
 }
 
 #[tauri::command]
-fn copy_base64_image_to_clipboard(base64_str: String) -> Result<(), String> {
+fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<(), String> {
     use base64::prelude::*;
     let bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
     
@@ -262,16 +325,50 @@ fn copy_base64_image_to_clipboard(base64_str: String) -> Result<(), String> {
         bytes: std::borrow::Cow::from(img.into_raw()),
     };
     ctx.set_image(img_data).map_err(|e| e.to_string())?;
+
+    // Send notification
+    let lang = {
+        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+        state_lang.clone()
+    };
+    let body = if lang == "tr" {
+        "Ekran görüntüsü panoya kopyalandı!"
+    } else {
+        "Screenshot copied to clipboard!"
+    };
+    show_app_notification(&app_handle, "Shotera", body);
+
     Ok(())
+}
+
+#[cfg(target_os = "windows")]
+fn set_app_user_model_id() {
+    use windows_sys::Win32::UI::Shell::SetCurrentProcessExplicitAppUserModelID;
+    use std::ffi::OsStr;
+    use std::os::windows::ffi::OsStrExt;
+
+    let app_id = OsStr::new("com.sahil.shotera")
+        .encode_wide()
+        .chain(Some(0))
+        .collect::<Vec<u16>>();
+    
+    unsafe {
+        SetCurrentProcessExplicitAppUserModelID(app_id.as_ptr());
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(target_os = "windows")]
+    set_app_user_model_id();
+
     tauri::Builder::default()
         .manage(AppState {
             last_screenshot: Mutex::new(None),
+            language: Mutex::new("tr".to_string()),
         })
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             // 1. Setup Global Shortcut Plugin
             let shortcut_plugin = tauri_plugin_global_shortcut::Builder::new()
