@@ -115,7 +115,7 @@ fn save_to_file(
     
     // Resolve output path (Pictures folder)
     let mut path = app_handle.path().picture_dir().map_err(|e| e.to_string())?;
-    path.push("CrossShot");
+    path.push("Shotera");
     
     // Ensure directory exists
     std::fs::create_dir_all(&path).map_err(|e| e.to_string())?;
@@ -174,7 +174,7 @@ fn save_base64_image(app_handle: AppHandle, base64_str: String) -> Result<String
     let filename = now.format("Screenshot_%Y%m%d_%H%M%S.png").to_string();
     
     let mut path = app_handle.path().picture_dir().map_err(|e| e.to_string())?;
-    path.push("CrossShot");
+    path.push("Shotera");
     std::fs::create_dir_all(&path).map_err(|e| e.to_string())?;
     path.push(filename);
     
@@ -234,7 +234,7 @@ pub fn run() {
 
             let _tray = TrayIconBuilder::with_id("main-tray")
                 .menu(&menu)
-                .tooltip("CrossShot")
+                .tooltip("Shotera")
                 .on_menu_event(move |app_handle_tray, event| {
                     match event.id.as_ref() {
                         "quit" => {

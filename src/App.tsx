@@ -20,7 +20,7 @@ function App() {
   if (!label) {
     return (
       <div style={{ background: "#0b0c10", width: "100vw", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#8e9aaf" }}>
-        Loading CrossShot...
+        Loading Shotera...
       </div>
     );
   }

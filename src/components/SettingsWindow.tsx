@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Settings, Camera, FolderOpen, Info } from "lucide-react";
+import logo from "../assets/logo.png";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
 
@@ -12,7 +13,7 @@ function SettingsWindow() {
   const [startInTray, setStartInTray] = useState(() => localStorage.getItem("startInTray") !== "false"); // default true
   const [includeCursor, setIncludeCursor] = useState(() => localStorage.getItem("includeCursor") === "true");
   const [playAudio, setPlayAudio] = useState(() => localStorage.getItem("playAudio") !== "false"); // default true
-  const [savePath, setSavePath] = useState(() => localStorage.getItem("savePath") || "Pictures/CrossShot");
+  const [savePath, setSavePath] = useState(() => localStorage.getItem("savePath") || "Pictures/Shotera");
   const [fileFormat, setFileFormat] = useState(() => localStorage.getItem("fileFormat") || "PNG");
   const [imageQuality, setImageQuality] = useState(() => Number(localStorage.getItem("imageQuality") || "90"));
 
@@ -41,11 +42,17 @@ function SettingsWindow() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div>
-          <div className="brand">
-            <div className="brand-icon">
-              <Camera size={18} />
-            </div>
-            <span className="brand-name">CrossShot</span>
+          <div className="brand" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px" }}>
+            <img src={logo} alt="Shotera Logo" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
+            <span className="brand-name" style={{
+              fontFamily: "var(--font-title)",
+              fontWeight: 800,
+              fontSize: "1.45rem",
+              color: "#ffffff",
+              background: "none",
+              WebkitTextFillColor: "initial",
+              WebkitBackgroundClip: "initial"
+            }}>Shotera</span>
           </div>
 
           <nav className="nav-links">
@@ -92,13 +99,13 @@ function SettingsWindow() {
             {activeTab === "general" && "Genel Ayarlar"}
             {activeTab === "capture" && "Yakalama Ayarları"}
             {activeTab === "save" && "Kaydetme ve Dosya Ayarları"}
-            {activeTab === "about" && "CrossShot Hakkında"}
+            {activeTab === "about" && "Shotera Hakkında"}
           </h2>
           <p className="section-subtitle">
             {activeTab === "general" && "Uygulamanın genel çalışma biçimini ve başlangıç davranışını özelleştirin."}
             {activeTab === "capture" && "Ekran görüntüsü yakalama yöntemlerini ve kısayolları yönetin."}
             {activeTab === "save" && "Dosyaların nereye ve hangi formatta kaydedileceğini yapılandırın."}
-            {activeTab === "about" && "CrossShot projesi ve kurulu sürüm detayları."}
+            {activeTab === "about" && "Shotera projesi ve kurulu sürüm detayları."}
           </p>
         </div>
 
@@ -108,7 +115,7 @@ function SettingsWindow() {
             <div className="setting-row">
               <div className="setting-info">
                 <span className="setting-label">Sistem Başlangıcında Çalıştır</span>
-                <span className="setting-desc">Windows açıldığında CrossShot uygulamasını otomatik olarak başlat.</span>
+                <span className="setting-desc">Windows açıldığında Shotera uygulamasını otomatik olarak başlat.</span>
               </div>
               <label className="switch">
                 <input 
@@ -248,17 +255,15 @@ function SettingsWindow() {
         {activeTab === "about" && (
           <div className="settings-card" style={{ gap: "24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <div className="brand-icon" style={{ width: "64px", height: "64px", borderRadius: "16px" }}>
-                <Camera size={36} />
-              </div>
+              <img src={logo} alt="Shotera Logo" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
               <div>
-                <h3 style={{ fontSize: "1.4rem", marginBottom: "4px" }}>CrossShot Desktop</h3>
+                <h3 style={{ fontSize: "1.45rem", marginBottom: "4px", fontWeight: 800, color: "#ffffff" }}>Shotera Desktop</h3>
                 <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>Cross-Platform Lightweight Screenshot Suite</p>
               </div>
             </div>
 
             <p style={{ lineHeight: "1.6", color: "rgba(255,255,255,0.7)" }}>
-              CrossShot, Windows, macOS ve Linux üzerinde çalışan, Rust ve Tauri ile geliştirilmiş, ultra hafif, hızlı ve gizlilik odaklı bir ekran görüntüsü alma aracıdır. Tüm görüntüleriniz cihazınızda yerel (offline) olarak işlenir.
+              Shotera, Windows, macOS ve Linux üzerinde çalışan, Rust ve Tauri ile geliştirilmiş, ultra hafif, hızlı ve gizlilik odaklı bir ekran görüntüsü alma aracıdır. Tüm görüntüleriniz cihazınızda yerel (offline) olarak işlenir.
             </p>
 
             <div style={{ borderTop: "1px solid var(--border-color)", paddingTop: "20px", display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
