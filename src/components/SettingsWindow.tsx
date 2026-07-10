@@ -300,12 +300,53 @@ function SettingsWindow() {
                 <span className="setting-label">{t.defaultSaveDir}</span>
                 <span className="setting-desc">{t.defaultSaveDirDesc}</span>
               </div>
-              <input
-                type="text"
-                className="premium-input"
-                value={savePath}
-                onChange={(e) => setSavePath(e.target.value)}
-              />
+              <div style={{ display: "flex", gap: "8px", width: "240px" }}>
+                <input
+                  type="text"
+                  className="premium-input"
+                  value={savePath}
+                  readOnly
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setSavePath(folder);
+                    }
+                  }}
+                  style={{ minWidth: "0", flexGrow: 1, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer" }}
+                />
+                <button
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setSavePath(folder);
+                    }
+                  }}
+                  className="action-btn"
+                  title={lang === "tr" ? "Klasör Seç" : "Select Folder"}
+                  style={{
+                    padding: "0 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    color: "white",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                    e.currentTarget.style.borderColor = "var(--accent-cyan)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                    e.currentTarget.style.borderColor = "var(--border-color)";
+                  }}
+                >
+                  <FolderOpen size={16} />
+                </button>
+              </div>
             </div>
 
             <div className="setting-row">

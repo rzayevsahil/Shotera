@@ -30,6 +30,7 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg",
 base64 = "0.22"
 chrono = "0.4"
 windows-sys = { version = "0.59", features = ["Win32_Graphics_Dwm", "Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell"] }
+rfd = "0.15"
 
 # Optimize all dependencies even in dev/debug mode for maximum performance (e.g. ultra-fast PNG compression)
 [profile.dev.package."*"]

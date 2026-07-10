@@ -405,6 +405,13 @@ fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang:
 }
 
 #[tauri::command]
+fn select_folder() -> Option<String> {
+    rfd::FileDialog::new()
+        .pick_folder()
+        .map(|p| p.to_string_lossy().to_string())
+}
+
+#[tauri::command]
 fn hide_screenshot_window(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("screenshot") {
         window.hide().map_err(|e| e.to_string())?;
@@ -630,7 +637,8 @@ pub fn run() {
             save_base64_image,
             copy_base64_image_to_clipboard,
             update_tray_language,
-            update_save_settings
+            update_save_settings,
+            select_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
