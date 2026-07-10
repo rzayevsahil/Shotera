@@ -133,6 +133,12 @@ function ScreenshotCapture() {
       loadScreenshot();
     });
 
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (textInput.visible) {
@@ -140,15 +146,26 @@ function ScreenshotCapture() {
         } else {
           handleClose();
         }
+        return;
+      }
+
+      // Do not trigger global copy/save shortcuts when typing text
+      if (textInput.visible) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+        e.preventDefault();
+        handleCopy();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        handleSave();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
 
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      unlisten.then((fn) => fn());
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [textInput.visible]);
+  }, [textInput.visible, selection, drawings, imgElement]);
 
   useEffect(() => {
     if (!imageSrc) return;
