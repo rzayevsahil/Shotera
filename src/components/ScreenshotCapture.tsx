@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { Copy, Download, X, Pencil, ArrowUpRight, Square, Type, Trash2, Slash, Circle } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
 
@@ -946,7 +946,9 @@ function ScreenshotCapture() {
             onClick={() => setActiveTool("select")}
             title={t.toolSelect}
           >
-            <Square size={16} style={{ opacity: 0.3 }} />
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" strokeLinecap="round">
+              <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
+            </svg>
           </button>
           
           <button
@@ -978,7 +980,9 @@ function ScreenshotCapture() {
             onClick={() => setActiveTool("rect")}
             title={t.toolRect}
           >
-            <Square size={16} />
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
+            </svg>
           </button>
 
           <button
