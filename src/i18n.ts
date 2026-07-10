@@ -83,9 +83,12 @@ export const translations = {
     toolArrow: "Ok Ekle",
     toolRect: "Dikdörtgen Çiz",
     toolText: "Metin Yaz",
+    toolBlur: "Bulanıklaştır (Blur)",
     toolClear: "Çizimleri Temizle",
     actionCopy: "Panoya Kopyala (Enter)",
     actionSave: "Dosyaya Kaydet",
+    actionUpload: "Buluta Yükle (Link Paylaş)",
+    actionPin: "Ekrana İğnele (Her Şeyin Üstünde)",
     actionClose: "Kapat (ESC)",
   },
   en: {
@@ -170,9 +173,12 @@ export const translations = {
     toolArrow: "Add Arrow",
     toolRect: "Draw Rectangle",
     toolText: "Write Text",
+    toolBlur: "Blur / Pixelate",
     toolClear: "Clear Drawings",
     actionCopy: "Copy to Clipboard (Enter)",
     actionSave: "Save to File",
+    actionUpload: "Upload to Cloud (Share Link)",
+    actionPin: "Pin to Screen (Always on Top)",
     actionClose: "Close (ESC)",
   }
 };

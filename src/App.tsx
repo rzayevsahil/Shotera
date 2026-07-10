@@ -3,6 +3,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import SettingsWindow from "./components/SettingsWindow";
 import ScreenshotCapture from "./components/ScreenshotCapture";
+import PinnedImage from "./components/PinnedImage";
 import "./App.css";
 
 function App() {
@@ -32,6 +33,10 @@ function App() {
 
   if (label === "screenshot") {
     return <ScreenshotCapture />;
+  }
+
+  if (label.startsWith("pinned_")) {
+    return <PinnedImage />;
   }
 
   return <SettingsWindow />;

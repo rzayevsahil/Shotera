@@ -10,6 +10,34 @@ npm install
 npm run tauri dev
 ```
 
+## 📦 Kurulum Dosyası (.exe) Oluşturma (3 Farklı Yöntem)
+
+Kendi bilgisayarınızda veya başka bilgisayarlarda çalıştırmak için kurulum dosyasını (Setup.exe) oluşturmanın 3 yolu vardır:
+
+### Yöntem 1: Hazır Olan Dosyayı Kullanmak
+Uygulama zaten bir kez derlendiyse, kurulum dosyası proje dizininde hazır bekliyor olabilir.
+Dosyanın konumu:
+📁 `src-tauri/target/release/bundle/nsis/Shotera_0.1.0_x64-setup.exe`
+*(Bu dosyayı kopyalayıp başka bir bilgisayarda doğrudan çalıştırabilirsiniz.)*
+
+### Yöntem 2: Gelecekte Kendiniz Manuel Üretmek İsterseniz (Lokal Build)
+Eğer kodlarda bir değişiklik yapıp, GitHub ile uğraşmadan direkt kendi bilgisayarımda yeni bir `.exe` üreteyim derseniz, terminale (PowerShell) şu komutu yazmanız yeterlidir:
+
+```powershell
+$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content "signer-key" -Raw; npm run tauri build
+```
+*(Bu komut, oluşturduğumuz gizli anahtarı okur ve güncellemeler için imzalayarak uygulamanızı derler. İşlem bitince `.exe` dosyası yine `nsis` klasörüne düşer.)*
+
+### Yöntem 3: GitHub Actions ile Otomatik Üretmek (Önerilen)
+Siz kodunuzu GitHub'a yüklediğinizde, `.github/workflows/release.yml` dosyası sayesinde her şey otomatik gerçekleşir. (Bkz. Otomatik Güncelleme Sistemi)
+Sadece şu komutları terminale girmeniz yeterlidir:
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+Bunu yaptığınızda GitHub sunucuları 5-10 dakika içinde uygulamayı derleyecek, paketleyecek ve `.exe` dosyasını GitHub reponuzdaki **Releases** sayfasına koyacaktır.
+
+
 ## 🔄 Otomatik Güncelleme Sistemi (GitHub Releases & Actions)
 
 Uygulamanın yeni bir sürümünü yayınladığınızda, kullanıcılarınızın program içindeki **"Güncellemeleri Denetle"** butonuyla otomatik güncelleme almasını sağlamak için aşağıdaki adımları izleyin. Arka plandaki tüm derleme ve imzalama işlemleri `.github/workflows/release.yml` dosyasındaki GitHub Actions tarafından otomatik yapılacaktır.

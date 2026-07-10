@@ -15,6 +15,7 @@ struct AppState {
     include_cursor: Mutex<bool>,
     region_shortcut: Mutex<String>,
     fullscreen_shortcut: Mutex<String>,
+    pinned_image: Mutex<Option<String>>,
 }
 
 fn show_app_notification(app_handle: &AppHandle, title: &str, body: &str) {
@@ -243,6 +244,99 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
 #[tauri::command]
 fn trigger_fullscreen_capture_command(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     trigger_fullscreen_screenshot(&app_handle, &state)
+}
+
+#[tauri::command]
+async fn pin_image(
+    app_handle: AppHandle, 
+    state: State<'_, AppState>, 
+    base64_str: String,
+    width: f64,
+    height: f64,
+    x: f64,
+    y: f64,
+) -> Result<(), String> {
+    // Save image to state
+    {
+        let mut pinned = state.pinned_image.lock().map_err(|e| e.to_string())?;
+        *pinned = Some(base64_str);
+    }
+    
+    // Generate a unique label for the window
+    let timestamp = chrono::Local::now().timestamp_millis();
+    let label = format!("pinned_{}", timestamp);
+
+    // Create the pinned window
+    tauri::WebviewWindowBuilder::new(
+        &app_handle,
+        label,
+        tauri::WebviewUrl::App("index.html?pin=true".into())
+    )
+    .title("Pinned Image")
+    .inner_size(width, height)
+    .position(x, y)
+    .decorations(false)
+    .transparent(true)
+    .always_on_top(true)
+    .resizable(true)
+    .skip_taskbar(true)
+    .build()
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn upload_to_imgur(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
+    let client = reqwest::Client::new();
+    let mut form = reqwest::multipart::Form::new();
+    form = form.text("image", base64_str);
+    form = form.text("type", "base64");
+
+    let res = client.post("https://api.imgur.com/3/image")
+        .header("Authorization", "Client-ID 546c25a59c58ad7")
+        .multipart(form)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let json: serde_json::Value = res.json().await.map_err(|e| e.to_string())?;
+    
+    if let Some(link) = json["data"]["link"].as_str() {
+        let mut ctx = arboard::Clipboard::new().map_err(|e| e.to_string())?;
+        ctx.set_text(link.to_string()).map_err(|e| e.to_string())?;
+
+        let lang = {
+            let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+            state_lang.clone()
+        };
+        let body = if lang == "tr" {
+            "Görsel buluta yüklendi ve link panoya kopyalandı!"
+        } else {
+            "Image uploaded to cloud and link copied to clipboard!"
+        };
+        show_app_notification(&app_handle, "Shotera", body);
+
+        Ok(link.to_string())
+    } else {
+        Err("Failed to upload image".into())
+    }
+}
+
+#[tauri::command]
+fn get_pinned_image(state: State<'_, AppState>) -> Result<String, String> {
+    let pinned = state.pinned_image.lock().map_err(|e| e.to_string())?;
+    pinned.clone().ok_or("No pinned image available".into())
+}
+
+#[tauri::command]
+fn start_drag(window: tauri::Window) -> Result<(), String> {
+    window.start_dragging().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn close_pinned(window: tauri::Window) -> Result<(), String> {
+    window.close().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -593,6 +687,7 @@ pub fn run() {
             include_cursor: Mutex::new(false),
             region_shortcut: Mutex::new("ctrl+shift+s".to_string()),
             fullscreen_shortcut: Mutex::new("ctrl+shift+f".to_string()),
+            pinned_image: Mutex::new(None),
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -699,7 +794,12 @@ pub fn run() {
             update_save_settings,
             select_folder,
             update_shortcuts,
-            unregister_global_shortcuts
+            unregister_global_shortcuts,
+            pin_image,
+            get_pinned_image,
+            upload_to_imgur,
+            start_drag,
+            close_pinned
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

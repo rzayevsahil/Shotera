@@ -1,6 +1,6 @@
 [package]
 name = "tauri-app"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -33,6 +33,7 @@ base64 = "0.22"
 chrono = "0.4"
 windows-sys = { version = "0.59", features = ["Win32_Graphics_Dwm", "Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell"] }
 rfd = "0.15"
+reqwest = { version = "0.12", features = ["json", "multipart"] }
 
 # Optimize all dependencies even in dev/debug mode for maximum performance (e.g. ultra-fast PNG compression)
 [profile.dev.package."*"]

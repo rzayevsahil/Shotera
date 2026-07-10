@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
 
@@ -12,7 +12,7 @@ interface SelectionRect {
   h: number;
 }
 
-type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text";
+type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur";
 
 interface Point {
   x: number;
@@ -313,6 +313,27 @@ function ScreenshotCapture() {
             toY - headLength * Math.sin(angle + Math.PI / 6)
           );
           ctx.fill();
+        } else if (act.type === "blur" && act.start && act.end) {
+          ctx.save();
+          const bx = Math.min(act.start.x, act.end.x);
+          const by = Math.min(act.start.y, act.end.y);
+          const bw = Math.abs(act.end.x - act.start.x);
+          const bh = Math.abs(act.end.y - act.start.y);
+
+          ctx.beginPath();
+          ctx.rect(bx, by, bw, bh);
+          ctx.clip();
+
+          ctx.filter = "blur(8px)";
+          ctx.drawImage(
+            imgElement,
+            (bx * imgElement.naturalWidth) / w,
+            (by * imgElement.naturalHeight) / h,
+            (bw * imgElement.naturalWidth) / w,
+            (bh * imgElement.naturalHeight) / h,
+            bx, by, bw, bh
+          );
+          ctx.restore();
         } else if (act.type === "text" && act.start && act.text) {
           const fontStyle = act.italic ? "italic" : "normal";
           const fontWeight = act.bold ? "bold" : "normal";
@@ -383,6 +404,14 @@ function ScreenshotCapture() {
             start: drawingStart,
             end: drawingEnd,
             color: drawColor,
+            width: 3,
+          });
+        } else if (activeTool === "blur" && drawingStart && drawingEnd) {
+          drawAction({
+            type: "blur",
+            start: drawingStart,
+            end: drawingEnd,
+            color: drawColor, // not used
             width: 3,
           });
         }
@@ -654,6 +683,17 @@ function ScreenshotCapture() {
             width: 3,
           },
         ]);
+      } else if (activeTool === "blur" && drawingStart && drawingEnd) {
+        setDrawings((prev) => [
+          ...prev,
+          {
+            type: "blur",
+            start: drawingStart,
+            end: drawingEnd,
+            color: drawColor,
+            width: 3,
+          },
+        ]);
       }
       
       setCurrentPencilPoints([]);
@@ -781,6 +821,27 @@ function ScreenshotCapture() {
           toY - headLength * Math.sin(angle + Math.PI / 6)
         );
         tempCtx.fill();
+      } else if (act.type === "blur" && act.start && act.end) {
+        tempCtx.save();
+        const bx = Math.min(act.start.x, act.end.x);
+        const by = Math.min(act.start.y, act.end.y);
+        const bw = Math.abs(act.end.x - act.start.x);
+        const bh = Math.abs(act.end.y - act.start.y);
+
+        tempCtx.beginPath();
+        tempCtx.rect(bx, by, bw, bh);
+        tempCtx.clip();
+
+        tempCtx.filter = "blur(8px)";
+        tempCtx.drawImage(
+          imgElement,
+          (bx * imgElement.naturalWidth) / window.innerWidth,
+          (by * imgElement.naturalHeight) / window.innerHeight,
+          (bw * imgElement.naturalWidth) / window.innerWidth,
+          (bh * imgElement.naturalHeight) / window.innerHeight,
+          bx, by, bw, bh
+        );
+        tempCtx.restore();
       } else if (act.type === "text" && act.start && act.text) {
         const fontStyle = act.italic ? "italic" : "normal";
         const fontWeight = act.bold ? "bold" : "normal";
@@ -854,6 +915,42 @@ function ScreenshotCapture() {
       handleClose();
     } catch (e) {
       console.error("Failed to save image:", e);
+    }
+  };
+
+  const [isUploading, setIsUploading] = useState(false);
+  const handleUpload = async () => {
+    const base64 = getCroppedBase64("PNG", 100);
+    if (!base64) return;
+    setIsUploading(true);
+    try {
+      const link = await invoke("upload_to_imgur", { base64Str: base64 });
+      if (link) {
+        playShutterSoundIfEnabled(); // success sound
+        handleClose();
+      }
+    } catch (err) {
+      console.error("Upload error", err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handlePin = async () => {
+    const base64 = getCroppedBase64("PNG", 100);
+    if (!base64) return;
+    
+    const w = selection ? selection.w : window.innerWidth;
+    const h = selection ? selection.h : window.innerHeight;
+    const x = selection ? selection.x : 0;
+    const y = selection ? selection.y : 0;
+    
+    try {
+      playShutterSoundIfEnabled();
+      await invoke("pin_image", { base64Str: base64, width: w, height: h, x: x, y: y });
+      handleClose();
+    } catch (e) {
+      console.error("Failed to pin image:", e);
     }
   };
 
@@ -1002,6 +1099,14 @@ function ScreenshotCapture() {
           </button>
 
           <button
+            className={`toolbar-btn ${activeTool === "blur" ? "active" : ""}`}
+            onClick={() => setActiveTool("blur")}
+            title={t.toolBlur}
+          >
+            <Droplets size={16} />
+          </button>
+
+          <button
             className="toolbar-btn"
             onClick={() => setDrawings([])}
             title={t.toolClear}
@@ -1130,6 +1235,25 @@ function ScreenshotCapture() {
             title={t.actionCopy}
           >
             <Copy size={16} />
+          </button>
+
+          <button
+            className="toolbar-btn"
+            style={{ color: "#f59e0b" }}
+            onClick={handlePin}
+            title={t.actionPin}
+          >
+            <Pin size={16} />
+          </button>
+
+          <button
+            className="toolbar-btn"
+            style={{ color: "#3b82f6", opacity: isUploading ? 0.5 : 1 }}
+            disabled={isUploading}
+            onClick={handleUpload}
+            title={t.actionUpload}
+          >
+            <CloudUpload size={16} />
           </button>
 
           <button
