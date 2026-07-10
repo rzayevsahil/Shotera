@@ -52,6 +52,9 @@ function SettingsWindow() {
   useEffect(() => {
     if (!recordingType) return;
 
+    // 1. Temporarily unregister global shortcuts so they don't trigger capture actions
+    invoke("unregister_global_shortcuts").catch((err) => console.error(err));
+
     const handleKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -99,16 +102,44 @@ function SettingsWindow() {
 
       if (recordingType === "region") {
         setRegionShortcut(shortcutStr);
+        localStorage.setItem("regionShortcut", shortcutStr);
       } else {
         setFullscreenShortcut(shortcutStr);
+        localStorage.setItem("fullscreenShortcut", shortcutStr);
       }
 
       setRecordingType(null);
     };
 
+    // Cancel if user clicks outside
+    const handleOuterClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".customizable")) {
+        setRecordingType(null);
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown, true);
-    return () => window.removeEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("click", handleOuterClick, true);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("click", handleOuterClick, true);
+      
+      // 2. Re-register and sync shortcuts from localStorage on exit/cleanup
+      const regShortcut = localStorage.getItem("regionShortcut") || "Ctrl+Shift+S";
+      const fsShortcut = localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F";
+      invoke("update_shortcuts", {
+        regionShortcut: regShortcut,
+        fullscreenShortcut: fsShortcut
+      }).catch((err) => console.error(err));
+    };
   }, [recordingType]);
+
+  // Cancel recording shortcut when changing tabs
+  useEffect(() => {
+    setRecordingType(null);
+  }, [activeTab]);
 
   // Sync file format and quality settings with Rust backend
   useEffect(() => {

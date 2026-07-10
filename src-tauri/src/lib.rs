@@ -424,6 +424,12 @@ fn update_shortcuts(
 }
 
 #[tauri::command]
+fn unregister_global_shortcuts(app_handle: AppHandle) -> Result<(), String> {
+    let _ = app_handle.global_shortcut().unregister_all();
+    Ok(())
+}
+
+#[tauri::command]
 fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang: String) {
     if let Ok(mut state_lang) = state.language.lock() {
         *state_lang = lang.clone();
@@ -704,7 +710,8 @@ pub fn run() {
             update_tray_language,
             update_save_settings,
             select_folder,
-            update_shortcuts
+            update_shortcuts,
+            unregister_global_shortcuts
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
