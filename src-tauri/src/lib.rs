@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use base64::prelude::*;
@@ -400,13 +400,7 @@ fn update_shortcuts(
     // 2. Unregister ALL old shortcuts first
     let _ = app_handle.global_shortcut().unregister_all();
 
-    // 3. Register the new ones (plus the default hardcoded PrintScreen / Ctrl+PrintScreen)
-    let printscreen_shortcut = Shortcut::new(None, Code::PrintScreen);
-    let fs_printscreen_shortcut = Shortcut::new(Some(Modifiers::CONTROL), Code::PrintScreen);
-
-    let _ = app_handle.global_shortcut().register(printscreen_shortcut);
-    let _ = app_handle.global_shortcut().register(fs_printscreen_shortcut);
-    
+    // 3. Register the new customizable ones
     app_handle.global_shortcut().register(reg_shortcut)
         .map_err(|e| format!("Failed to register region shortcut: {}", e))?;
     app_handle.global_shortcut().register(fs_shortcut)
@@ -612,14 +606,11 @@ pub fn run() {
                         let reg_shortcut_str = state.region_shortcut.lock().unwrap().clone();
                         let fs_shortcut_str = state.fullscreen_shortcut.lock().unwrap().clone();
                         
-                        let fs_printscreen_shortcut = Shortcut::new(Some(Modifiers::CONTROL), Code::PrintScreen);
-                        let printscreen_shortcut = Shortcut::new(None, Code::PrintScreen);
-
                         let matches_fs = if let Ok(fs_shortcut) = fs_shortcut_str.parse::<Shortcut>() {
                             shortcut == &fs_shortcut
                         } else {
                             false
-                        } || shortcut == &fs_printscreen_shortcut;
+                        };
 
                         if matches_fs {
                             let _ = trigger_fullscreen_screenshot(app_handle_shortcut, &state);
@@ -630,7 +621,7 @@ pub fn run() {
                             shortcut == &reg_shortcut
                         } else {
                             false
-                        } || shortcut == &printscreen_shortcut;
+                        };
 
                         if matches_reg {
                             let _ = trigger_screenshot(app_handle_shortcut, &state);
@@ -641,18 +632,13 @@ pub fn run() {
                 .build();
             app.handle().plugin(shortcut_plugin)?;
 
-            // Register Region Shortcuts: PrintScreen and Ctrl+Shift+S
-            let printscreen_shortcut = Shortcut::new(None, Code::PrintScreen);
-            let ctrl_shift_s_shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyS);
+            // Register Region and Fullscreen Shortcuts using default values on initial startup
+            use std::str::FromStr;
+            let reg_shortcut = Shortcut::from_str("ctrl+shift+s").unwrap();
+            let fs_shortcut = Shortcut::from_str("ctrl+shift+f").unwrap();
             
-            // Register Fullscreen Shortcuts: Ctrl+PrintScreen and Ctrl+Shift+F
-            let fs_printscreen_shortcut = Shortcut::new(Some(Modifiers::CONTROL), Code::PrintScreen);
-            let fs_ctrl_shift_f_shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyF);
-            
-            let _ = app.global_shortcut().register(printscreen_shortcut);
-            let _ = app.global_shortcut().register(ctrl_shift_s_shortcut);
-            let _ = app.global_shortcut().register(fs_printscreen_shortcut);
-            let _ = app.global_shortcut().register(fs_ctrl_shift_f_shortcut);
+            let _ = app.global_shortcut().register(reg_shortcut);
+            let _ = app.global_shortcut().register(fs_shortcut);
 
             // 2. Setup System Tray
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

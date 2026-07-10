@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -24,6 +24,7 @@ function SettingsWindow() {
   const [regionShortcut, setRegionShortcut] = useState(() => localStorage.getItem("regionShortcut") || "Ctrl+Shift+S");
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | null>(null);
+  const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   // Sync settings with localStorage
   useEffect(() => {
@@ -72,13 +73,14 @@ function SettingsWindow() {
 
       let keyName = e.key;
       
-      if (e.code.startsWith("Key")) {
+      if (keyName === "PrintScreen" || keyName === "Snapshot" || e.code === "PrintScreen") {
+        keyName = "PrintScreen";
+      } else if (e.code.startsWith("Key")) {
         keyName = e.code.slice(3); // e.g. "S", "F"
       } else if (e.code.startsWith("Digit")) {
         keyName = e.code.slice(5); // e.g. "1"
       } else {
         const specialMap: Record<string, string> = {
-          "PrintScreen": "PrintScreen",
           "Space": "Space",
           "Escape": "Escape",
           "Enter": "Enter",
@@ -100,6 +102,53 @@ function SettingsWindow() {
       parts.push(keyName);
       const shortcutStr = parts.join("+");
 
+      if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s") {
+        setWarningMessage(
+          lang === "tr"
+            ? "Ctrl+C ve Ctrl+S kısayolları kopyalama ve kaydetme işlemleri için ayrılmıştır. Lütfen başka bir kombinasyon seçin."
+            : "Ctrl+C and Ctrl+S shortcuts are reserved for copy and save actions. Please select another combination."
+        );
+        setRecordingType(null);
+        return;
+      }
+
+      if (recordingType === "region") {
+        setRegionShortcut(shortcutStr);
+        localStorage.setItem("regionShortcut", shortcutStr);
+      } else {
+        setFullscreenShortcut(shortcutStr);
+        localStorage.setItem("fullscreenShortcut", shortcutStr);
+      }
+
+      setRecordingType(null);
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const isPrintScreen = e.key === "PrintScreen" || e.key === "Snapshot" || e.code === "PrintScreen";
+      if (!isPrintScreen) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const parts: string[] = [];
+      if (e.ctrlKey) parts.push("Ctrl");
+      if (e.shiftKey) parts.push("Shift");
+      if (e.altKey) parts.push("Alt");
+      if (e.metaKey) parts.push("Super");
+
+      parts.push("PrintScreen");
+      const shortcutStr = parts.join("+");
+
+      if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s") {
+        setWarningMessage(
+          lang === "tr"
+            ? "Ctrl+C ve Ctrl+S kısayolları kopyalama ve kaydetme işlemleri için ayrılmıştır. Lütfen başka bir kombinasyon seçin."
+            : "Ctrl+C and Ctrl+S shortcuts are reserved for copy and save actions. Please select another combination."
+        );
+        setRecordingType(null);
+        return;
+      }
+
       if (recordingType === "region") {
         setRegionShortcut(shortcutStr);
         localStorage.setItem("regionShortcut", shortcutStr);
@@ -120,10 +169,12 @@ function SettingsWindow() {
     };
 
     window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("keyup", handleKeyUp, true);
     window.addEventListener("click", handleOuterClick, true);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("keyup", handleKeyUp, true);
       window.removeEventListener("click", handleOuterClick, true);
       
       // 2. Re-register and sync shortcuts from localStorage on exit/cleanup
@@ -140,6 +191,16 @@ function SettingsWindow() {
   useEffect(() => {
     setRecordingType(null);
   }, [activeTab]);
+
+  // Automatically clear warning message after 3.5 seconds (Toast effect)
+  useEffect(() => {
+    if (warningMessage) {
+      const timer = setTimeout(() => {
+        setWarningMessage(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [warningMessage]);
 
   // Sync file format and quality settings with Rust backend
   useEffect(() => {
@@ -362,7 +423,6 @@ function SettingsWindow() {
                 <span className="setting-desc">{t.globalShortcutDesc}</span>
               </div>
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <span className="shortcut-badge" style={{ opacity: 0.6 }}>Print Screen</span>
                 <button
                   className={`shortcut-badge customizable ${recordingType === "region" ? "recording" : ""}`}
                   onClick={() => setRecordingType(recordingType === "region" ? null : "region")}
@@ -388,7 +448,6 @@ function SettingsWindow() {
                 <span className="setting-desc">{t.globalFullscreenShortcutDesc}</span>
               </div>
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <span className="shortcut-badge" style={{ opacity: 0.6 }}>Ctrl + Print Screen</span>
                 <button
                   className={`shortcut-badge customizable ${recordingType === "fullscreen" ? "recording" : ""}`}
                   onClick={() => setRecordingType(recordingType === "fullscreen" ? null : "fullscreen")}
@@ -651,6 +710,72 @@ function SettingsWindow() {
           </div>
         )}
       </main>
+      {warningMessage && (
+        <div style={{
+          position: "fixed",
+          top: "20px",
+          left: "50%",
+          transform: "translate(-50%, 0)",
+          background: "linear-gradient(135deg, #2a1b1b 0%, #1a0f0f 100%)",
+          border: "1px solid rgba(255, 69, 58, 0.4)",
+          borderRadius: "8px",
+          padding: "12px 20px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.6), 0 0 15px rgba(255, 69, 58, 0.15)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          zIndex: 10000,
+          animation: "slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+          maxWidth: "90%",
+          width: "360px"
+        }}>
+          <div style={{
+            color: "#ff453a",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0
+          }}>
+            <AlertTriangle size={18} />
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px" }}>
+            <span style={{
+              color: "#ffffff",
+              fontSize: "0.85rem",
+              fontWeight: 700,
+              fontFamily: "var(--font-title)"
+            }}>
+              {lang === "tr" ? "Geçersiz Kısayol" : "Invalid Shortcut"}
+            </span>
+            <span style={{
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "0.78rem",
+              lineHeight: "1.4"
+            }}>
+              {warningMessage}
+            </span>
+          </div>
+          <button
+            onClick={() => setWarningMessage(null)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "rgba(255,255,255,0.4)",
+              cursor: "pointer",
+              fontSize: "1.1rem",
+              padding: "0 4px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#ffffff"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+          >
+            &times;
+          </button>
+        </div>
+      )}
     </div>
   );
 }
