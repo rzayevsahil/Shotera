@@ -12,6 +12,7 @@ struct AppState {
     language: Mutex<String>,
     file_format: Mutex<String>,
     image_quality: Mutex<u32>,
+    include_cursor: Mutex<bool>,
 }
 
 fn show_app_notification(app_handle: &AppHandle, title: &str, body: &str) {
@@ -20,6 +21,76 @@ fn show_app_notification(app_handle: &AppHandle, title: &str, body: &str) {
         .title(title)
         .body(body)
         .show();
+}
+
+const CURSOR_WIDTH: usize = 12;
+const CURSOR_HEIGHT: usize = 19;
+const CURSOR_BITMAP: [&str; 19] = [
+    "B...........",
+    "BB..........",
+    "BWB.........",
+    "BWWB........",
+    "BWWWB.......",
+    "BWWWWB......",
+    "BWWWWWB.....",
+    "BWWWWWWB....",
+    "BWWWWWWWB...",
+    "BWWWWWWWWB..",
+    "BWWWWWWWWWB.",
+    "BWWWWWWBBBBB",
+    "BWWWBWWB....",
+    "BWWB.BWWB...",
+    "BWB..BWWB...",
+    "BB....BWWB..",
+    "......BWWB..",
+    ".......BB...",
+    "............",
+];
+
+#[cfg(target_os = "windows")]
+fn get_cursor_position() -> Option<(i32, i32)> {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{GetCursorInfo, CURSORINFO, CURSOR_SHOWING};
+    
+    let mut cursor_info = CURSORINFO {
+        cbSize: std::mem::size_of::<CURSORINFO>() as u32,
+        flags: 0,
+        hCursor: std::ptr::null_mut(),
+        ptScreenPos: windows_sys::Win32::Foundation::POINT { x: 0, y: 0 },
+    };
+    
+    unsafe {
+        if GetCursorInfo(&mut cursor_info) != 0 && (cursor_info.flags & CURSOR_SHOWING) != 0 {
+            Some((cursor_info.ptScreenPos.x, cursor_info.ptScreenPos.y))
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn get_cursor_position() -> Option<(i32, i32)> {
+    None
+}
+
+fn draw_cursor(img: &mut image::RgbaImage, start_x: i32, start_y: i32) {
+    let img_w = img.width() as i32;
+    let img_h = img.height() as i32;
+    
+    for row in 0..CURSOR_HEIGHT {
+        let chars = CURSOR_BITMAP[row].as_bytes();
+        for col in 0..CURSOR_WIDTH {
+            let px = start_x + col as i32;
+            let py = start_y + row as i32;
+            if px >= 0 && px < img_w && py >= 0 && py < img_h {
+                let color_char = chars[col];
+                if color_char == b'B' {
+                    img.put_pixel(px as u32, py as u32, image::Rgba([0, 0, 0, 255]));
+                } else if color_char == b'W' {
+                    img.put_pixel(px as u32, py as u32, image::Rgba([255, 255, 255, 255]));
+                }
+            }
+        }
+    }
 }
 
 // Function to trigger screenshot and notify the screenshot window
@@ -31,7 +102,29 @@ fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Re
     }
     // For MVP, capture the first/primary monitor
     let monitor = &monitors[0];
-    let image = monitor.capture_image().map_err(|e| e.to_string())?;
+    let mut image = monitor.capture_image().map_err(|e| e.to_string())?;
+    
+    // Draw cursor if option is enabled
+    let include_cursor = {
+        let cursor_opt = state.include_cursor.lock().map_err(|e| e.to_string())?;
+        *cursor_opt
+    };
+    
+    if include_cursor {
+        if let Some((cx, cy)) = get_cursor_position() {
+            let mx = monitor.x().unwrap_or(0);
+            let my = monitor.y().unwrap_or(0);
+            let mw = monitor.width().unwrap_or(1920);
+            let mh = monitor.height().unwrap_or(1080);
+            
+            let scale_x = image.width() as f32 / mw as f32;
+            let scale_y = image.height() as f32 / mh as f32;
+            let cx_pixel = ((cx - mx) as f32 * scale_x) as i32;
+            let cy_pixel = ((cy - my) as f32 * scale_y) as i32;
+            
+            draw_cursor(&mut image, cx_pixel, cy_pixel);
+        }
+    }
     
     // Store in state
     let mut last_ss = state.last_screenshot.lock().map_err(|e| e.to_string())?;
@@ -53,7 +146,29 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
         return Err("No monitors found".into());
     }
     let monitor = &monitors[0];
-    let image = monitor.capture_image().map_err(|e| e.to_string())?;
+    let mut image = monitor.capture_image().map_err(|e| e.to_string())?;
+    
+    // Draw cursor if option is enabled
+    let include_cursor = {
+        let cursor_opt = state.include_cursor.lock().map_err(|e| e.to_string())?;
+        *cursor_opt
+    };
+    
+    if include_cursor {
+        if let Some((cx, cy)) = get_cursor_position() {
+            let mx = monitor.x().unwrap_or(0);
+            let my = monitor.y().unwrap_or(0);
+            let mw = monitor.width().unwrap_or(1920);
+            let mh = monitor.height().unwrap_or(1080);
+            
+            let scale_x = image.width() as f32 / mw as f32;
+            let scale_y = image.height() as f32 / mh as f32;
+            let cx_pixel = ((cx - mx) as f32 * scale_x) as i32;
+            let cy_pixel = ((cy - my) as f32 * scale_y) as i32;
+            
+            draw_cursor(&mut image, cx_pixel, cy_pixel);
+        }
+    }
     
     // Store in state
     let mut last_ss = state.last_screenshot.lock().map_err(|e| e.to_string())?;
@@ -252,12 +367,16 @@ fn update_save_settings(
     state: State<'_, AppState>,
     file_format: String,
     image_quality: u32,
+    include_cursor: bool,
 ) {
     if let Ok(mut format) = state.file_format.lock() {
         *format = file_format;
     }
     if let Ok(mut qual) = state.image_quality.lock() {
         *qual = image_quality;
+    }
+    if let Ok(mut cursor) = state.include_cursor.lock() {
+        *cursor = include_cursor;
     }
 }
 
@@ -421,6 +540,7 @@ pub fn run() {
             language: Mutex::new("tr".to_string()),
             file_format: Mutex::new("PNG".to_string()),
             image_quality: Mutex::new(90),
+            include_cursor: Mutex::new(false),
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())

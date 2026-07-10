@@ -37,11 +37,12 @@ function SettingsWindow() {
   useEffect(() => {
     invoke("update_save_settings", {
       fileFormat: fileFormat,
-      imageQuality: imageQuality
+      imageQuality: imageQuality,
+      includeCursor: includeCursor
     }).catch((e) => {
       console.error("Failed to sync save settings with Rust backend:", e);
     });
-  }, [fileFormat, imageQuality]);
+  }, [fileFormat, imageQuality, includeCursor]);
 
   // Sync language with multi-window storage events
   useEffect(() => {
