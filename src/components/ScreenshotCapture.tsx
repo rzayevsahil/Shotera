@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { Copy, Download, X, Pencil, ArrowUpRight, Square, Type, Trash2 } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Square, Type, Trash2, Slash, Circle } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
 
@@ -12,7 +12,7 @@ interface SelectionRect {
   h: number;
 }
 
-type Tool = "select" | "pencil" | "arrow" | "rect" | "text";
+type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text";
 
 interface Point {
   x: number;
@@ -27,6 +27,10 @@ interface DrawingAction {
   text?: string;    // for text
   color: string;
   width: number;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
 }
 
 // Helpers for selection resizing and cursor changes
@@ -113,6 +117,10 @@ function ScreenshotCapture() {
   // Text tool state
   const [textInput, setTextInput] = useState({ visible: false, x: 0, y: 0, val: "" });
   const textInputRef = useRef<HTMLInputElement | null>(null);
+  const [textBold, setTextBold] = useState(true);
+  const [textItalic, setTextItalic] = useState(false);
+  const [textUnderline, setTextUnderline] = useState(false);
+  const [textStrikethrough, setTextStrikethrough] = useState(false);
 
   // Load screenshot from Rust backend
   const loadScreenshot = async () => {
@@ -267,6 +275,19 @@ function ScreenshotCapture() {
             act.end.x - act.start.x,
             act.end.y - act.start.y
           );
+        } else if (act.type === "line" && act.start && act.end) {
+          ctx.beginPath();
+          ctx.moveTo(act.start.x, act.start.y);
+          ctx.lineTo(act.end.x, act.end.y);
+          ctx.stroke();
+        } else if (act.type === "circle" && act.start && act.end) {
+          const rx = Math.abs(act.end.x - act.start.x) / 2;
+          const ry = Math.abs(act.end.y - act.start.y) / 2;
+          const cx = act.start.x + (act.end.x - act.start.x) / 2;
+          const cy = act.start.y + (act.end.y - act.start.y) / 2;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+          ctx.stroke();
         } else if (act.type === "arrow" && act.start && act.end) {
           const fromX = act.start.x;
           const fromY = act.start.y;
@@ -293,8 +314,33 @@ function ScreenshotCapture() {
           );
           ctx.fill();
         } else if (act.type === "text" && act.start && act.text) {
-          ctx.font = "bold 16px Inter";
+          let styleStr = "";
+          if (act.italic) styleStr += "italic ";
+          if (act.bold) styleStr += "bold ";
+          ctx.font = `${styleStr || "normal"} 16px Inter`;
           ctx.fillText(act.text, act.start.x, act.start.y);
+
+          // Draw underline or strikethrough if needed
+          const textWidth = ctx.measureText(act.text).width;
+          const textHeight = 16;
+
+          if (act.underline) {
+            ctx.beginPath();
+            ctx.moveTo(act.start.x, act.start.y + 3);
+            ctx.lineTo(act.start.x + textWidth, act.start.y + 3);
+            ctx.strokeStyle = act.color;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+
+          if (act.strikethrough) {
+            ctx.beginPath();
+            ctx.moveTo(act.start.x, act.start.y - textHeight / 3);
+            ctx.lineTo(act.start.x + textWidth, act.start.y - textHeight / 3);
+            ctx.strokeStyle = act.color;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
         }
       };
 
@@ -316,6 +362,22 @@ function ScreenshotCapture() {
             color: drawColor,
             width: 3,
           });
+        } else if (activeTool === "line" && drawingStart && drawingEnd) {
+          drawAction({
+            type: "line",
+            start: drawingStart,
+            end: drawingEnd,
+            color: drawColor,
+            width: 3,
+          });
+        } else if (activeTool === "circle" && drawingStart && drawingEnd) {
+          drawAction({
+            type: "circle",
+            start: drawingStart,
+            end: drawingEnd,
+            color: drawColor,
+            width: 3,
+          });
         } else if (activeTool === "arrow" && drawingStart && drawingEnd) {
           drawAction({
             type: "arrow",
@@ -329,7 +391,7 @@ function ScreenshotCapture() {
 
       ctx.restore();
     }
-  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, drawingStart, drawingEnd, activeTool, drawColor]);
+  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough]);
 
   useEffect(() => {
     if (textInput.visible && textInputRef.current) {
@@ -560,6 +622,28 @@ function ScreenshotCapture() {
             width: 3,
           },
         ]);
+      } else if (activeTool === "line" && drawingStart && drawingEnd) {
+        setDrawings((prev) => [
+          ...prev,
+          {
+            type: "line",
+            start: drawingStart,
+            end: drawingEnd,
+            color: drawColor,
+            width: 3,
+          },
+        ]);
+      } else if (activeTool === "circle" && drawingStart && drawingEnd) {
+        setDrawings((prev) => [
+          ...prev,
+          {
+            type: "circle",
+            start: drawingStart,
+            end: drawingEnd,
+            color: drawColor,
+            width: 3,
+          },
+        ]);
       } else if (activeTool === "arrow" && drawingStart && drawingEnd) {
         setDrawings((prev) => [
           ...prev,
@@ -604,6 +688,10 @@ function ScreenshotCapture() {
           text: textInput.val,
           color: drawColor,
           width: 3,
+          bold: textBold,
+          italic: textItalic,
+          underline: textUnderline,
+          strikethrough: textStrikethrough
         },
       ]);
     }
@@ -657,6 +745,19 @@ function ScreenshotCapture() {
           act.end.x - act.start.x,
           act.end.y - act.start.y
         );
+      } else if (act.type === "line" && act.start && act.end) {
+        tempCtx.beginPath();
+        tempCtx.moveTo(act.start.x, act.start.y);
+        tempCtx.lineTo(act.end.x, act.end.y);
+        tempCtx.stroke();
+      } else if (act.type === "circle" && act.start && act.end) {
+        const rx = Math.abs(act.end.x - act.start.x) / 2;
+        const ry = Math.abs(act.end.y - act.start.y) / 2;
+        const cx = act.start.x + (act.end.x - act.start.x) / 2;
+        const cy = act.start.y + (act.end.y - act.start.y) / 2;
+        tempCtx.beginPath();
+        tempCtx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+        tempCtx.stroke();
       } else if (act.type === "arrow" && act.start && act.end) {
         const fromX = act.start.x;
         const fromY = act.start.y;
@@ -682,8 +783,33 @@ function ScreenshotCapture() {
         );
         tempCtx.fill();
       } else if (act.type === "text" && act.start && act.text) {
-        tempCtx.font = "bold 16px Inter";
+        let styleStr = "";
+        if (act.italic) styleStr += "italic ";
+        if (act.bold) styleStr += "bold ";
+        tempCtx.font = `${styleStr || "normal"} 16px Inter`;
         tempCtx.fillText(act.text, act.start.x, act.start.y);
+
+        // Draw underline/strikethrough if needed
+        const textWidth = tempCtx.measureText(act.text).width;
+        const textHeight = 16;
+
+        if (act.underline) {
+          tempCtx.beginPath();
+          tempCtx.moveTo(act.start.x, act.start.y + 3);
+          tempCtx.lineTo(act.start.x + textWidth, act.start.y + 3);
+          tempCtx.strokeStyle = act.color;
+          tempCtx.lineWidth = 1.5;
+          tempCtx.stroke();
+        }
+
+        if (act.strikethrough) {
+          tempCtx.beginPath();
+          tempCtx.moveTo(act.start.x, act.start.y - textHeight / 3);
+          tempCtx.lineTo(act.start.x + textWidth, act.start.y - textHeight / 3);
+          tempCtx.strokeStyle = act.color;
+          tempCtx.lineWidth = 1.5;
+          tempCtx.stroke();
+        }
       }
     };
 
@@ -737,7 +863,7 @@ function ScreenshotCapture() {
     if (!selection) return {};
     const margin = 12;
     const toolbarHeight = 44;
-    const toolbarWidth = 510; // Accurate estimation of toolbar width
+    const toolbarWidth = 720; // Accurate estimation of toolbar width with new tools
     const screenH = window.innerHeight;
     const screenW = window.innerWidth;
 
@@ -808,6 +934,9 @@ function ScreenshotCapture() {
             top: textInput.y - 12,
             left: textInput.x,
             color: drawColor,
+            fontWeight: textBold ? "bold" : "normal",
+            fontStyle: textItalic ? "italic" : "normal",
+            textDecoration: `${textUnderline ? "underline" : ""} ${textStrikethrough ? "line-through" : ""}`.trim() || "none",
           }}
         />
       )}
@@ -831,6 +960,14 @@ function ScreenshotCapture() {
           </button>
 
           <button
+            className={`toolbar-btn ${activeTool === "line" ? "active" : ""}`}
+            onClick={() => setActiveTool("line")}
+            title={lang === "tr" ? "Çizgi Çiz" : "Draw Line"}
+          >
+            <Slash size={16} />
+          </button>
+
+          <button
             className={`toolbar-btn ${activeTool === "arrow" ? "active" : ""}`}
             onClick={() => setActiveTool("arrow")}
             title={t.toolArrow}
@@ -844,6 +981,14 @@ function ScreenshotCapture() {
             title={t.toolRect}
           >
             <Square size={16} />
+          </button>
+
+          <button
+            className={`toolbar-btn ${activeTool === "circle" ? "active" : ""}`}
+            onClick={() => setActiveTool("circle")}
+            title={lang === "tr" ? "Daire Çiz" : "Draw Circle"}
+          >
+            <Circle size={16} />
           </button>
 
           <button
@@ -864,9 +1009,49 @@ function ScreenshotCapture() {
             <Trash2 size={16} />
           </button>
 
+          {activeTool === "text" && (
+            <>
+              <div className="toolbar-divider" />
+              <div style={{ display: "flex", gap: "2px" }}>
+                <button
+                  className={`toolbar-btn ${textBold ? "active" : ""}`}
+                  onClick={() => setTextBold(!textBold)}
+                  style={{ fontWeight: "bold", width: "28px", height: "28px" }}
+                  title={lang === "tr" ? "Kalın" : "Bold"}
+                >
+                  B
+                </button>
+                <button
+                  className={`toolbar-btn ${textItalic ? "active" : ""}`}
+                  onClick={() => setTextItalic(!textItalic)}
+                  style={{ fontStyle: "italic", width: "28px", height: "28px" }}
+                  title={lang === "tr" ? "İtalik" : "Italic"}
+                >
+                  I
+                </button>
+                <button
+                  className={`toolbar-btn ${textUnderline ? "active" : ""}`}
+                  onClick={() => setTextUnderline(!textUnderline)}
+                  style={{ textDecoration: "underline", width: "28px", height: "28px" }}
+                  title={lang === "tr" ? "Altı Çizgili" : "Underline"}
+                >
+                  U
+                </button>
+                <button
+                  className={`toolbar-btn ${textStrikethrough ? "active" : ""}`}
+                  onClick={() => setTextStrikethrough(!textStrikethrough)}
+                  style={{ textDecoration: "line-through", width: "28px", height: "28px" }}
+                  title={lang === "tr" ? "Üstü Çizgili" : "Strikethrough"}
+                >
+                  S
+                </button>
+              </div>
+            </>
+          )}
+
           <div className="toolbar-divider" />
 
-          <div style={{ display: "flex", gap: "6px", margin: "0 4px" }}>
+          <div style={{ display: "flex", gap: "6px", alignItems: "center", margin: "0 4px" }}>
             {["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#ffffff"].map((c) => (
               <div
                 key={c}
@@ -875,6 +1060,64 @@ function ScreenshotCapture() {
                 onClick={() => setDrawColor(c)}
               />
             ))}
+            
+            {/* Custom Color Picker Dot */}
+            <div 
+              className="color-option"
+              style={{ 
+                position: "relative",
+                backgroundColor: drawColor,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "1px dashed rgba(255,255,255,0.6)"
+              }}
+              title={lang === "tr" ? "Gelişmiş Renk Seçici" : "Advanced Color Picker"}
+            >
+              <input
+                type="color"
+                value={drawColor.startsWith("#") && drawColor.length === 7 ? drawColor : "#ef4444"}
+                onChange={(e) => setDrawColor(e.target.value)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  opacity: 0,
+                  cursor: "pointer"
+                }}
+              />
+              <span style={{ fontSize: "11px", color: "#fff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1 }}>+</span>
+            </div>
+
+            {/* Direct Hex Code input */}
+            <input
+              type="text"
+              value={drawColor}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
+                  setDrawColor(val);
+                }
+              }}
+              style={{
+                width: "60px",
+                height: "22px",
+                fontSize: "0.75rem",
+                background: "rgba(0, 0, 0, 0.4)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: "4px",
+                color: "#ffffff",
+                padding: "2px 4px",
+                outline: "none",
+                fontFamily: "monospace",
+                textAlign: "center",
+                marginLeft: "2px"
+              }}
+              placeholder="#FF0000"
+              maxLength={7}
+            />
           </div>
 
           <div className="toolbar-divider" />
