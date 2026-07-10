@@ -558,6 +558,21 @@ function ScreenshotCapture() {
     }
   };
 
+  const handleMouseUpRef = useRef(handleMouseUp);
+  useEffect(() => {
+    handleMouseUpRef.current = handleMouseUp;
+  }, [handleMouseUp]);
+
+  useEffect(() => {
+    const onGlobalMouseUp = () => {
+      handleMouseUpRef.current();
+    };
+    window.addEventListener("mouseup", onGlobalMouseUp);
+    return () => {
+      window.removeEventListener("mouseup", onGlobalMouseUp);
+    };
+  }, []);
+
   const handleTextSubmit = () => {
     if (textInput.val.trim() && selection) {
       setDrawings((prev) => [
@@ -683,14 +698,19 @@ function ScreenshotCapture() {
     if (!selection) return {};
     const margin = 12;
     const toolbarHeight = 44;
+    const toolbarWidth = 510; // Accurate estimation of toolbar width
     const screenH = window.innerHeight;
+    const screenW = window.innerWidth;
 
     let top = selection.y + selection.h + margin;
     if (top + toolbarHeight > screenH) {
       top = Math.max(margin, selection.y - toolbarHeight - margin);
     }
 
-    const left = Math.max(margin, selection.x + selection.w - 380);
+    const left = Math.min(
+      screenW - toolbarWidth - margin,
+      Math.max(margin, selection.x + selection.w - toolbarWidth)
+    );
     return { top, left };
   };
 
@@ -701,7 +721,8 @@ function ScreenshotCapture() {
     if (top < 0) {
       top = selection.y + margin;
     }
-    return { top, left: selection.x };
+    const left = Math.min(window.innerWidth - 100 - margin, selection.x);
+    return { top, left };
   };
 
   const t = translations[lang];
@@ -719,7 +740,6 @@ function ScreenshotCapture() {
         className="capture-canvas"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
       />
 
       {selection && (
