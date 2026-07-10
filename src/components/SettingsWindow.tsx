@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail } from "lucide-react";
 import logo from "../assets/logo.png";
+import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
@@ -285,31 +286,127 @@ function SettingsWindow() {
         )}
 
         {activeTab === "about" && (
-          <div className="settings-card" style={{ gap: "24px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <img src={logo} alt="Shotera Logo" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
-              <div>
-                <h3 style={{ fontSize: "1.45rem", marginBottom: "4px", fontWeight: 800, color: "#ffffff" }}>Shotera Desktop</h3>
-                <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>{t.aboutSubtitleDesc}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {/* Shotera Info Card */}
+            <div className="settings-card" style={{ gap: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <img src={logo} alt="Shotera Logo" style={{ width: "60px", height: "60px", objectFit: "contain" }} />
+                <div>
+                  <h3 style={{ fontSize: "1.45rem", marginBottom: "4px", fontWeight: 800, color: "#ffffff" }}>Shotera Desktop</h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>{t.aboutSubtitleDesc}</p>
+                </div>
               </div>
+
+              <p style={{ lineHeight: "1.6", color: "rgba(255,255,255,0.7)", fontSize: "0.95rem", margin: 0 }}>
+                {t.aboutDesc}
+              </p>
             </div>
 
-            <p style={{ lineHeight: "1.6", color: "rgba(255,255,255,0.7)" }}>
-              {t.aboutDesc}
-            </p>
+            {/* Developer Card */}
+            <div className="settings-card" style={{
+              background: "linear-gradient(135deg, rgba(31, 40, 51, 0.6) 0%, rgba(20, 26, 33, 0.8) 100%)",
+              border: "1px solid rgba(0, 242, 254, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "24px",
+              position: "relative",
+              overflow: "hidden"
+            }}>
+              <div style={{
+                position: "absolute",
+                top: "-50px",
+                right: "-50px",
+                width: "150px",
+                height: "150px",
+                background: "radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, transparent 70%)",
+                pointerEvents: "none"
+              }} />
 
-            <div style={{ borderTop: "1px solid var(--border-color)", paddingTop: "20px", display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
-              <div>
-                <span style={{ color: "var(--text-muted)" }}>{t.developer}: </span>
-                <span style={{ fontWeight: 500 }}>Antigravity Team</span>
-              </div>
-              <div>
-                <span style={{ color: "var(--text-muted)" }}>{t.license}: </span>
-                <span style={{ fontWeight: 500 }}>MIT</span>
-              </div>
-              <div>
-                <span style={{ color: "var(--text-muted)" }}>{t.infrastructure}: </span>
-                <span style={{ fontWeight: 500 }}>Tauri v2 + React</span>
+              <img
+                src={avatar}
+                alt="Sahil Rzayev"
+                style={{
+                  width: "110px",
+                  height: "110px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "2.5px solid var(--accent-cyan)",
+                  boxShadow: "0 0 20px rgba(0, 242, 254, 0.3)"
+                }}
+              />
+
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", width: "100%" }}>
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <h4 style={{ fontSize: "1.35rem", fontWeight: 700, color: "#ffffff", margin: 0 }}>Sahil Rzayev</h4>
+                </div>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "14px", fontWeight: 500 }}>
+                  {t.devTitle}
+                </p>
+
+                <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+                  <a
+                    href="https://github.com/rzayevsahil"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      color: "rgba(255,255,255,0.8)",
+                      textDecoration: "none",
+                      fontSize: "0.85rem",
+                      background: "rgba(255,255,255,0.05)",
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(0, 242, 254, 0.1)";
+                      e.currentTarget.style.borderColor = "var(--accent-cyan)";
+                      e.currentTarget.style.color = "var(--accent-cyan)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                      e.currentTarget.style.color = "rgba(255,255,255,0.8)";
+                    }}
+                  >
+                    <Github size={14} />
+                    <span>GitHub</span>
+                  </a>
+
+                  <a
+                    href="mailto:rzayevsahil200d@gmail.com"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      color: "rgba(255,255,255,0.8)",
+                      textDecoration: "none",
+                      fontSize: "0.85rem",
+                      background: "rgba(255,255,255,0.05)",
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(0, 242, 254, 0.1)";
+                      e.currentTarget.style.borderColor = "var(--accent-cyan)";
+                      e.currentTarget.style.color = "var(--accent-cyan)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                      e.currentTarget.style.color = "rgba(255,255,255,0.8)";
+                    }}
+                  >
+                    <Mail size={14} />
+                    <span>Email</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
