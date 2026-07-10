@@ -103,11 +103,7 @@ function SettingsWindow() {
       const shortcutStr = parts.join("+");
 
       if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s") {
-        setWarningMessage(
-          lang === "tr"
-            ? "Ctrl+C ve Ctrl+S kısayolları kopyalama ve kaydetme işlemleri için ayrılmıştır. Lütfen başka bir kombinasyon seçin."
-            : "Ctrl+C and Ctrl+S shortcuts are reserved for copy and save actions. Please select another combination."
-        );
+        setWarningMessage(t.shortcutConflictMsg);
         setRecordingType(null);
         return;
       }
@@ -426,7 +422,7 @@ function SettingsWindow() {
                 <button
                   className={`shortcut-badge customizable ${recordingType === "region" ? "recording" : ""}`}
                   onClick={() => setRecordingType(recordingType === "region" ? null : "region")}
-                  title={lang === "tr" ? "Değiştirmek için tıklayın" : "Click to change"}
+                  title={t.shortcutChangeHint}
                   style={{
                     cursor: "pointer",
                     border: recordingType === "region" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
@@ -437,7 +433,7 @@ function SettingsWindow() {
                     outline: "none"
                   }}
                 >
-                  {recordingType === "region" ? (lang === "tr" ? "Tuşlayın..." : "Press keys...") : regionShortcut}
+                  {recordingType === "region" ? t.shortcutPressKeys : regionShortcut}
                 </button>
               </div>
             </div>
@@ -451,7 +447,7 @@ function SettingsWindow() {
                 <button
                   className={`shortcut-badge customizable ${recordingType === "fullscreen" ? "recording" : ""}`}
                   onClick={() => setRecordingType(recordingType === "fullscreen" ? null : "fullscreen")}
-                  title={lang === "tr" ? "Değiştirmek için tıklayın" : "Click to change"}
+                  title={t.shortcutChangeHint}
                   style={{
                     cursor: "pointer",
                     border: recordingType === "fullscreen" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
@@ -462,7 +458,7 @@ function SettingsWindow() {
                     outline: "none"
                   }}
                 >
-                  {recordingType === "fullscreen" ? (lang === "tr" ? "Tuşlayın..." : "Press keys...") : fullscreenShortcut}
+                  {recordingType === "fullscreen" ? t.shortcutPressKeys : fullscreenShortcut}
                 </button>
               </div>
             </div>
@@ -479,13 +475,13 @@ function SettingsWindow() {
                 rowGap: "8px", 
                 alignItems: "center" 
               }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{lang === "tr" ? "Kopyala:" : "Copy:"}</span>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorCopy}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + C</span>
                 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{lang === "tr" ? "Kaydet:" : "Save:"}</span>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorSave}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + S</span>
                 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{lang === "tr" ? "Kapat:" : "Close:"}</span>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorClose}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>ESC</span>
               </div>
             </div>
@@ -521,7 +517,7 @@ function SettingsWindow() {
                     }
                   }}
                   className="action-btn"
-                  title={lang === "tr" ? "Klasör Seç" : "Select Folder"}
+                  title={t.selectFolder}
                   style={{
                     padding: "0 12px",
                     display: "flex",
@@ -559,9 +555,9 @@ function SettingsWindow() {
                 onChange={(e) => setFileFormat(e.target.value)}
                 style={{ width: "240px" }}
               >
-                <option value="PNG">PNG ({lang === "tr" ? "Kayıpsız" : "Lossless"})</option>
-                <option value="JPG">JPG ({lang === "tr" ? "Sıkıştırılmış" : "Compressed"})</option>
-                <option value="WebP">WebP ({lang === "tr" ? "Modern Sıkıştırma" : "Modern Compression"})</option>
+                <option value="PNG">PNG ({t.formatLossless})</option>
+                <option value="JPG">JPG ({t.formatCompressed})</option>
+                <option value="WebP">WebP ({t.formatModern})</option>
               </select>
             </div>
 
@@ -749,7 +745,7 @@ function SettingsWindow() {
               fontWeight: 700,
               fontFamily: "var(--font-title)"
             }}>
-              {lang === "tr" ? "Geçersiz Kısayol" : "Invalid Shortcut"}
+              {t.invalidShortcut}
             </span>
             <span style={{
               color: "rgba(255,255,255,0.7)",
