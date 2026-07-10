@@ -589,7 +589,7 @@ pub fn run() {
             last_screenshot: Mutex::new(None),
             language: Mutex::new("tr".to_string()),
             file_format: Mutex::new("PNG".to_string()),
-            image_quality: Mutex::new(90),
+            image_quality: Mutex::new(100),
             include_cursor: Mutex::new(false),
             region_shortcut: Mutex::new("ctrl+shift+s".to_string()),
             fullscreen_shortcut: Mutex::new("ctrl+shift+f".to_string()),

@@ -20,7 +20,7 @@ function SettingsWindow() {
   const [playAudio, setPlayAudio] = useState(() => localStorage.getItem("playAudio") !== "false"); // default true
   const [savePath, setSavePath] = useState(() => localStorage.getItem("savePath") || "Pictures/Shotera");
   const [fileFormat, setFileFormat] = useState(() => localStorage.getItem("fileFormat") || "PNG");
-  const [imageQuality, setImageQuality] = useState(() => Number(localStorage.getItem("imageQuality") || "90"));
+  const [imageQuality, setImageQuality] = useState(() => Number(localStorage.getItem("imageQuality") || "100"));
   const [regionShortcut, setRegionShortcut] = useState(() => localStorage.getItem("regionShortcut") || "Ctrl+Shift+S");
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | null>(null);
