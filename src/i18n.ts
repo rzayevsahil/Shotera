@@ -28,6 +28,8 @@ export const translations = {
     includeCursorDesc: "Alınan ekran görüntülerine sistem imlecini de yerleştir.",
     globalShortcut: "Global Kısayol (Bölge Seçimi)",
     globalShortcutDesc: "Bölge seçimi ekran görüntüsünü tetikleyen ana kısayollar.",
+    globalFullscreenShortcut: "Global Kısayol (Tam Ekran)",
+    globalFullscreenShortcutDesc: "Ekranın tamamını doğrudan panoya kopyalayan ve dosyaya kaydeden kısayollar.",
     editorShortcuts: "Yakalama Ekranı Kısayolları",
     editorShortcutsDesc: "Ekran görüntüsü düzenleyicisinde kullanabileceğiniz hızlı kısayollar.",
 
@@ -87,6 +89,8 @@ export const translations = {
     includeCursorDesc: "Render the system cursor on captured screenshots.",
     globalShortcut: "Global Shortcut (Capture Region)",
     globalShortcutDesc: "Main shortcuts to trigger area-selection screen capture.",
+    globalFullscreenShortcut: "Global Shortcut (Full Screen)",
+    globalFullscreenShortcutDesc: "Main shortcuts to capture the full screen directly to clipboard and file.",
     editorShortcuts: "Capture Editor Shortcuts",
     editorShortcutsDesc: "Quick keyboard shortcuts you can use inside the screenshot editor.",
 

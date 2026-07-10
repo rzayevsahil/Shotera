@@ -231,6 +231,17 @@ function SettingsWindow() {
               </div>
             </div>
 
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{t.globalFullscreenShortcut}</span>
+                <span className="setting-desc">{t.globalFullscreenShortcutDesc}</span>
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <span className="shortcut-badge">Ctrl + Print Screen</span>
+                <span className="shortcut-badge">Ctrl + Shift + F</span>
+              </div>
+            </div>
+
             <div className="setting-row" style={{ borderTop: "1px solid var(--border-color)", paddingTop: "16px", marginTop: "16px" }}>
               <div className="setting-info">
                 <span className="setting-label">{t.editorShortcuts}</span>

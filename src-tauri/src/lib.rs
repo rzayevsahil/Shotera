@@ -34,6 +34,49 @@ fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Re
     Ok(())
 }
 
+fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+    // 1. Capture screen
+    let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
+    if monitors.is_empty() {
+        return Err("No monitors found".into());
+    }
+    let monitor = &monitors[0];
+    let image = monitor.capture_image().map_err(|e| e.to_string())?;
+    
+    // Store in state
+    let mut last_ss = state.last_screenshot.lock().map_err(|e| e.to_string())?;
+    *last_ss = Some(image.clone());
+    drop(last_ss);
+
+    // 2. Save to file (Pictures/Shotera)
+    let now = Local::now();
+    let filename = now.format("Screenshot_%Y%m%d_%H%M%S.png").to_string();
+    let mut path = app_handle.path().picture_dir().map_err(|e| e.to_string())?;
+    path.push("Shotera");
+    std::fs::create_dir_all(&path).map_err(|e| e.to_string())?;
+    path.push(filename);
+    image.save(&path).map_err(|e| e.to_string())?;
+    
+    // 3. Copy to clipboard
+    let mut ctx = arboard::Clipboard::new().map_err(|e| e.to_string())?;
+    let width = image.width() as usize;
+    let height = image.height() as usize;
+    let bytes = image.into_raw();
+    let img_data = arboard::ImageData {
+        width,
+        height,
+        bytes: std::borrow::Cow::from(bytes),
+    };
+    ctx.set_image(img_data).map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+fn trigger_fullscreen_capture_command(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    trigger_fullscreen_screenshot(&app_handle, &state)
+}
+
 #[tauri::command]
 fn get_last_screenshot(state: State<'_, AppState>) -> Result<String, String> {
     let last_ss = state.last_screenshot.lock().map_err(|e| e.to_string())?;
@@ -232,21 +275,34 @@ pub fn run() {
         .setup(|app| {
             // 1. Setup Global Shortcut Plugin
             let shortcut_plugin = tauri_plugin_global_shortcut::Builder::new()
-                .with_handler(move |app_handle_shortcut, _shortcut, event| {
+                .with_handler(move |app_handle_shortcut, shortcut, event| {
                     if event.state() == ShortcutState::Pressed {
                         let state = app_handle_shortcut.state::<AppState>();
-                        let _ = trigger_screenshot(app_handle_shortcut, &state);
+                        
+                        if shortcut.matches(Modifiers::CONTROL, Code::PrintScreen)
+                            || shortcut.matches(Modifiers::CONTROL | Modifiers::SHIFT, Code::KeyF)
+                        {
+                            let _ = trigger_fullscreen_screenshot(app_handle_shortcut, &state);
+                        } else {
+                            let _ = trigger_screenshot(app_handle_shortcut, &state);
+                        }
                     }
                 })
                 .build();
             app.handle().plugin(shortcut_plugin)?;
 
-            // Register Shortcuts: PrintScreen and Ctrl+Shift+S
+            // Register Region Shortcuts: PrintScreen and Ctrl+Shift+S
             let printscreen_shortcut = Shortcut::new(None, Code::PrintScreen);
             let ctrl_shift_s_shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyS);
             
+            // Register Fullscreen Shortcuts: Ctrl+PrintScreen and Ctrl+Shift+F
+            let fs_printscreen_shortcut = Shortcut::new(Some(Modifiers::CONTROL), Code::PrintScreen);
+            let fs_ctrl_shift_f_shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyF);
+            
             let _ = app.global_shortcut().register(printscreen_shortcut);
             let _ = app.global_shortcut().register(ctrl_shift_s_shortcut);
+            let _ = app.global_shortcut().register(fs_printscreen_shortcut);
+            let _ = app.global_shortcut().register(fs_ctrl_shift_f_shortcut);
 
             // 2. Setup System Tray
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -298,6 +354,7 @@ pub fn run() {
             hide_screenshot_window,
             show_screenshot_window,
             trigger_capture_command,
+            trigger_fullscreen_capture_command,
             save_base64_image,
             copy_base64_image_to_clipboard,
             update_tray_language
