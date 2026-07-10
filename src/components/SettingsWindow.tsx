@@ -6,6 +6,8 @@ import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
 import { listen } from "@tauri-apps/api/event";
 import shutterSoundUrl from "../assets/shutter.mp3";
+import { check as checkUpdate } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
 
@@ -25,6 +27,41 @@ function SettingsWindow() {
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
+
+  // Updater state
+  const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null);
+  const [updateManifest, setUpdateManifest] = useState<any>(null);
+
+  const handleUpdateCheck = async () => {
+    setUpdateStatus("checking");
+    try {
+      const update = await checkUpdate();
+      if (update) {
+        setUpdateVersion(update.version);
+        setUpdateManifest(update);
+        setUpdateStatus("available");
+      } else {
+        setUpdateStatus("up-to-date");
+      }
+    } catch (err) {
+      console.error("Failed to check for updates:", err);
+      setUpdateStatus("error");
+    }
+  };
+
+  const handleUpdateInstall = async () => {
+    if (!updateManifest) return;
+    setUpdateStatus("downloading");
+    try {
+      await updateManifest.downloadAndInstall();
+      setUpdateStatus("downloaded");
+      await relaunch();
+    } catch (err) {
+      console.error("Failed to download and install update:", err);
+      setUpdateStatus("error");
+    }
+  };
 
   // Sync settings with localStorage
   useEffect(() => {
@@ -587,17 +624,127 @@ function SettingsWindow() {
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Shotera Info Card */}
             <div className="settings-card" style={{ gap: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                <img src={logo} alt="Shotera Logo" style={{ width: "60px", height: "60px", objectFit: "contain" }} />
-                <div>
-                  <h3 style={{ fontSize: "1.45rem", marginBottom: "4px", fontWeight: 800, color: "#ffffff" }}>Shotera Desktop</h3>
-                  <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>{t.aboutSubtitleDesc}</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                  <img src={logo} alt="Shotera Logo" style={{ width: "60px", height: "60px", objectFit: "contain" }} />
+                  <div>
+                    <h3 style={{ fontSize: "1.45rem", marginBottom: "4px", fontWeight: 800, color: "#ffffff" }}>Shotera Desktop</h3>
+                    <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>{t.aboutSubtitleDesc}</p>
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <span style={{
+                    fontSize: "0.85rem",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    background: "rgba(255,255,255,0.08)",
+                    color: "var(--text-muted)",
+                    fontWeight: 600
+                  }}>
+                    {t.appVersion}: v0.1.0
+                  </span>
                 </div>
               </div>
 
               <p style={{ lineHeight: "1.6", color: "rgba(255,255,255,0.7)", fontSize: "0.95rem", margin: 0 }}>
                 {t.aboutDesc}
               </p>
+
+              {/* Updater Section */}
+              <div style={{
+                marginTop: "12px",
+                paddingTop: "16px",
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: updateStatus === "checking" || updateStatus === "downloading" ? "var(--accent-cyan)" :
+                                       updateStatus === "available" ? "#f59e0b" :
+                                       updateStatus === "up-to-date" || updateStatus === "downloaded" ? "#10b981" :
+                                       updateStatus === "error" ? "#ef4444" : "rgba(255,255,255,0.2)",
+                      boxShadow: updateStatus === "checking" || updateStatus === "downloading" ? "0 0 8px var(--accent-cyan)" :
+                                 updateStatus === "available" ? "0 0 8px #f59e0b" :
+                                 updateStatus === "up-to-date" || updateStatus === "downloaded" ? "0 0 8px #10b981" : "none",
+                      animation: updateStatus === "checking" || updateStatus === "downloading" ? "pulse-border 1.5s infinite" : "none"
+                    }} />
+                    <span style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.85)" }}>
+                      {updateStatus === "idle" && `${t.appVersion}: v0.1.0`}
+                      {updateStatus === "checking" && t.checkingUpdates}
+                      {updateStatus === "up-to-date" && t.appUpToDate}
+                      {updateStatus === "available" && `${t.updateAvailable} (v${updateVersion})`}
+                      {updateStatus === "downloading" && t.installingUpdate}
+                      {updateStatus === "downloaded" && t.updateSuccess}
+                      {updateStatus === "error" && t.updateError}
+                    </span>
+                  </div>
+
+                  {updateStatus === "available" ? (
+                    <button
+                      onClick={handleUpdateInstall}
+                      className="action-btn"
+                      style={{
+                        padding: "8px 16px",
+                        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                        border: "none",
+                        borderRadius: "6px",
+                        color: "#fff",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)",
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      {lang === "tr" ? "Şimdi Kur ve Yeniden Başlat" : "Install & Relaunch"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleUpdateCheck}
+                      disabled={updateStatus === "checking" || updateStatus === "downloading" || updateStatus === "downloaded"}
+                      className="action-btn"
+                      style={{
+                        padding: "8px 16px",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "6px",
+                        color: "#fff",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        opacity: (updateStatus === "checking" || updateStatus === "downloading" || updateStatus === "downloaded") ? 0.5 : 1,
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      {t.checkForUpdates}
+                    </button>
+                  )}
+                </div>
+
+                {updateStatus === "available" && updateManifest?.body && (
+                  <div style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: "6px",
+                    padding: "10px 14px",
+                    fontSize: "0.85rem",
+                    color: "var(--text-muted)",
+                    maxHeight: "100px",
+                    overflowY: "auto",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: "1.5"
+                  }}>
+                    <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>
+                      {lang === "tr" ? "Yenilikler:" : "What's New:"}
+                    </strong>
+                    {updateManifest.body}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Developer Card */}

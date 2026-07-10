@@ -37,6 +37,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -44,5 +45,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJGRjU0NTQyRTYxQjg4RUQKUldUdGlCdm1Ra1gxdjZGSThiMW8rU2ZwM1JEZ0JXeU1NQnVKaWR4WXR5MEZYZ24xejNZRmZVM1AK",
+      "endpoints": [
+        "https://github.com/rzayevsahil/Shotera/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
