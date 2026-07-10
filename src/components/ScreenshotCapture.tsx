@@ -609,7 +609,7 @@ function ScreenshotCapture() {
     setTextInput({ visible: false, x: 0, y: 0, val: "" });
   };
 
-  const getCroppedBase64 = (): string | null => {
+  const getCroppedBase64 = (format = "PNG", quality = 90): string | null => {
     if (!selection || !imgElement) return null;
 
     const tempCanvas = document.createElement("canvas");
@@ -689,11 +689,16 @@ function ScreenshotCapture() {
     drawings.forEach(drawAction);
     tempCtx.restore();
 
-    return tempCanvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+    const mimeType = format.toLowerCase() === "jpg" ? "image/jpeg" : `image/${format.toLowerCase()}`;
+    const qValue = quality / 100;
+    const dataUrl = tempCanvas.toDataURL(mimeType, qValue);
+    const parts = dataUrl.split(",");
+    return parts.length > 1 ? parts[1] : null;
   };
 
   const handleCopy = async () => {
-    const base64 = getCroppedBase64();
+    // Copy to clipboard should always remain lossless PNG for high compatibility
+    const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
     try {
       await invoke("copy_base64_image_to_clipboard", { base64Str: base64 });
@@ -704,10 +709,12 @@ function ScreenshotCapture() {
   };
 
   const handleSave = async () => {
-    const base64 = getCroppedBase64();
+    const format = localStorage.getItem("fileFormat") || "PNG";
+    const quality = Number(localStorage.getItem("imageQuality") || "90");
+    const base64 = getCroppedBase64(format, quality);
     if (!base64) return;
     try {
-      await invoke("save_base64_image", { base64Str: base64 });
+      await invoke("save_base64_image", { base64Str: base64, format: format });
       handleClose();
     } catch (e) {
       console.error("Failed to save image:", e);

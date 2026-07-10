@@ -31,6 +31,16 @@ function SettingsWindow() {
     localStorage.setItem("imageQuality", String(imageQuality));
   }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality]);
 
+  // Sync file format and quality settings with Rust backend
+  useEffect(() => {
+    invoke("update_save_settings", {
+      fileFormat: fileFormat,
+      imageQuality: imageQuality
+    }).catch((e) => {
+      console.error("Failed to sync save settings with Rust backend:", e);
+    });
+  }, [fileFormat, imageQuality]);
+
   // Sync language with multi-window storage events
   useEffect(() => {
     const handleStorageChange = () => {

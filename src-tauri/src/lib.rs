@@ -10,6 +10,8 @@ use tauri_plugin_notification::NotificationExt;
 struct AppState {
     last_screenshot: Mutex<Option<image::RgbaImage>>,
     language: Mutex<String>,
+    file_format: Mutex<String>,
+    image_quality: Mutex<u32>,
 }
 
 fn show_app_notification(app_handle: &AppHandle, title: &str, body: &str) {
@@ -59,13 +61,37 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
     drop(last_ss);
 
     // 2. Save to file (Pictures/Shotera)
+    let format = {
+        let fmt = state.file_format.lock().map_err(|e| e.to_string())?;
+        fmt.clone()
+    };
+    let quality = {
+        let qual = state.image_quality.lock().map_err(|e| e.to_string())?;
+        *qual
+    };
+
     let now = Local::now();
-    let filename = now.format("Screenshot_%Y%m%d_%H%M%S.png").to_string();
+    let ext = match format.to_lowercase().as_str() {
+        "jpg" | "jpeg" => "jpg",
+        "webp" => "webp",
+        _ => "png",
+    };
+    let filename = now.format(&format!("Screenshot_%Y%m%d_%H%M%S.{}", ext)).to_string();
     let mut path = app_handle.path().picture_dir().map_err(|e| e.to_string())?;
     path.push("Shotera");
     std::fs::create_dir_all(&path).map_err(|e| e.to_string())?;
     path.push(filename);
-    image.save(&path).map_err(|e| e.to_string())?;
+
+    match ext {
+        "jpg" => {
+            let file = std::fs::File::create(&path).map_err(|e| e.to_string())?;
+            let mut encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(file, quality as u8);
+            encoder.encode_image(&image).map_err(|e| e.to_string())?;
+        }
+        _ => {
+            image.save(&path).map_err(|e| e.to_string())?;
+        }
+    }
     
     // 3. Copy to clipboard
     let mut ctx = arboard::Clipboard::new().map_err(|e| e.to_string())?;
@@ -219,6 +245,20 @@ fn save_to_file(
 }
 
 #[tauri::command]
+fn update_save_settings(
+    state: State<'_, AppState>,
+    file_format: String,
+    image_quality: u32,
+) {
+    if let Ok(mut format) = state.file_format.lock() {
+        *format = file_format;
+    }
+    if let Ok(mut qual) = state.image_quality.lock() {
+        *qual = image_quality;
+    }
+}
+
+#[tauri::command]
 fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang: String) {
     if let Ok(mut state_lang) = state.language.lock() {
         *state_lang = lang.clone();
@@ -280,12 +320,22 @@ fn trigger_capture_command(app_handle: AppHandle, state: State<'_, AppState>) ->
 }
 
 #[tauri::command]
-fn save_base64_image(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
+fn save_base64_image(
+    app_handle: AppHandle, 
+    state: State<'_, AppState>, 
+    base64_str: String,
+    format: String,
+) -> Result<String, String> {
     use base64::prelude::*;
     let bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
     
     let now = Local::now();
-    let filename = now.format("Screenshot_%Y%m%d_%H%M%S.png").to_string();
+    let ext = match format.to_lowercase().as_str() {
+        "jpg" | "jpeg" => "jpg",
+        "webp" => "webp",
+        _ => "png",
+    };
+    let filename = now.format(&format!("Screenshot_%Y%m%d_%H%M%S.{}", ext)).to_string();
     
     let mut path = app_handle.path().picture_dir().map_err(|e| e.to_string())?;
     path.push("Shotera");
@@ -366,6 +416,8 @@ pub fn run() {
         .manage(AppState {
             last_screenshot: Mutex::new(None),
             language: Mutex::new("tr".to_string()),
+            file_format: Mutex::new("PNG".to_string()),
+            image_quality: Mutex::new(90),
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -454,7 +506,8 @@ pub fn run() {
             trigger_fullscreen_capture_command,
             save_base64_image,
             copy_base64_image_to_clipboard,
-            update_tray_language
+            update_tray_language,
+            update_save_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
