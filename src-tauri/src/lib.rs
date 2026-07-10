@@ -129,6 +129,27 @@ fn save_to_file(
 }
 
 #[tauri::command]
+fn update_tray_language(app_handle: AppHandle, lang: String) {
+    if let Some(tray) = app_handle.tray_by_id("main-tray") {
+        let (capture_label, settings_label, quit_label) = if lang == "tr" {
+            ("Ekran Görüntüsü Al", "Ayarlar", "Çıkış")
+        } else {
+            ("Take Screenshot", "Settings", "Quit")
+        };
+        
+        if let Ok(quit_i) = MenuItem::with_id(&app_handle, "quit", quit_label, true, None::<&str>) {
+            if let Ok(settings_i) = MenuItem::with_id(&app_handle, "settings", settings_label, true, None::<&str>) {
+                if let Ok(capture_i) = MenuItem::with_id(&app_handle, "capture", capture_label, true, None::<&str>) {
+                    if let Ok(menu) = Menu::with_items(&app_handle, &[&capture_i, &settings_i, &quit_i]) {
+                        let _ = tray.set_menu(Some(menu));
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[tauri::command]
 fn hide_screenshot_window(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("screenshot") {
         window.hide().map_err(|e| e.to_string())?;
@@ -229,8 +250,9 @@ pub fn run() {
 
             // 2. Setup System Tray
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+            let settings_i = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
             let capture_i = MenuItem::with_id(app, "capture", "Take Screenshot", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&capture_i, &quit_i])?;
+            let menu = Menu::with_items(app, &[&capture_i, &settings_i, &quit_i])?;
 
             let _tray = TrayIconBuilder::with_id("main-tray")
                 .menu(&menu)
@@ -241,6 +263,12 @@ pub fn run() {
                         "quit" => {
                             app_handle_tray.exit(0);
                         }
+                        "settings" => {
+                            if let Some(window) = app_handle_tray.get_webview_window("main") {
+                                let _ = window.show();
+                                let _ = window.set_focus();
+                            }
+                        }
                         "capture" => {
                             let state = app_handle_tray.state::<AppState>();
                             let _ = trigger_screenshot(app_handle_tray, &state);
@@ -249,6 +277,17 @@ pub fn run() {
                     }
                 })
                 .build(app)?;
+
+            // 3. Prevent close on main settings window, hide instead
+            if let Some(window) = app.get_webview_window("main") {
+                let window_ = window.clone();
+                window.on_window_event(move |event| {
+                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                        api.prevent_close();
+                        let _ = window_.hide();
+                    }
+                });
+            }
 
             Ok(())
         })
@@ -260,7 +299,8 @@ pub fn run() {
             show_screenshot_window,
             trigger_capture_command,
             save_base64_image,
-            copy_base64_image_to_clipboard
+            copy_base64_image_to_clipboard,
+            update_tray_language
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

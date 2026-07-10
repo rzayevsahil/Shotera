@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
 import SettingsWindow from "./components/SettingsWindow";
 import ScreenshotCapture from "./components/ScreenshotCapture";
 import "./App.css";
@@ -15,6 +16,10 @@ function App() {
       console.error("Failed to get window label, defaulting to main", e);
       setLabel("main");
     }
+
+    // Sync initial system tray language preference on app startup
+    const currentLang = localStorage.getItem("language") || (navigator.language.substring(0, 2).toLowerCase() === "tr" ? "tr" : "en");
+    invoke("update_tray_language", { lang: currentLang }).catch((err) => console.error("Failed to update initial tray language:", err));
   }, []);
 
   if (!label) {

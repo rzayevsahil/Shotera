@@ -177,7 +177,7 @@ function SettingsWindow() {
             <div className="setting-row" style={{ marginTop: "12px" }}>
               <div className="setting-info">
                 <span className="setting-label">{t.takeScreenshot}</span>
-                <span className="setting-desc">{t.takeScreenshotDesc} <span style={{ color: "var(--accent-cyan)" }}>Print Screen</span> veya <span style={{ color: "var(--accent-cyan)" }}>Ctrl + Shift + S</span></span>
+                <span className="setting-desc">{t.takeScreenshotDesc} <span style={{ color: "var(--accent-cyan)" }}>Print Screen</span> {lang === "tr" ? "veya" : "or"} <span style={{ color: "var(--accent-cyan)" }}>Ctrl + Shift + S</span></span>
               </div>
               <button className="premium-button" onClick={handleTakeScreenshot}>
                 <Camera size={16} />
@@ -290,7 +290,7 @@ function SettingsWindow() {
               <img src={logo} alt="Shotera Logo" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
               <div>
                 <h3 style={{ fontSize: "1.45rem", marginBottom: "4px", fontWeight: 800, color: "#ffffff" }}>Shotera Desktop</h3>
-                <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>Cross-Platform Lightweight Screenshot Suite</p>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>{t.aboutSubtitleDesc}</p>
               </div>
             </div>
 

@@ -1,3 +1,5 @@
+import { invoke } from "@tauri-apps/api/core";
+
 export const translations = {
   tr: {
     sidebarGeneral: "Genel",
@@ -38,7 +40,8 @@ export const translations = {
 
     aboutTitle: "Shotera Hakkında",
     aboutSubtitle: "Shotera projesi ve kurulu sürüm detayları.",
-    aboutDesc: "Shotera, Windows, macOS ve Linux üzerinde çalışan, Rust ve Tauri ile geliştirilmiş, ultra hafif, hızlı ve gizlilik odaklı bir ekran görüntüsü alma aracıdır. Tüm görüntüleriniz cihazınızda yerel (offline) olarak işlenir.",
+    aboutSubtitleDesc: "Çapraz Platform Hafif Ekran Görüntüsü Aracı",
+    aboutDesc: "Shotera, Windows, macOS ve Linux üzerinde çalışan, Rust ve Tauri ile geliştirilmiş, ultra hafif, hızlı ve gizlilik odaklı bir ekran görüntüsü alma aracıdır. Görüntüleriniz cihazınızda yerel (offline) olarak işlenir.",
     developer: "Geliştirici",
     license: "Lisans",
     infrastructure: "Altyapı",
@@ -93,6 +96,7 @@ export const translations = {
 
     aboutTitle: "About Shotera",
     aboutSubtitle: "Shotera project and installed version details.",
+    aboutSubtitleDesc: "Cross-Platform Lightweight Screenshot Suite",
     aboutDesc: "Shotera is an ultra-lightweight, fast, and privacy-focused screenshot utility running on Windows, macOS, and Linux, built with Rust and Tauri. All your images are processed locally (offline) on your device.",
     developer: "Developer",
     license: "License",
@@ -126,4 +130,6 @@ export function setLanguage(lang: Language) {
   localStorage.setItem("language", lang);
   // Dispatch custom storage event for multi-webview tab coordination
   window.dispatchEvent(new Event("storage"));
+  // Sync language with native system tray menu
+  invoke("update_tray_language", { lang }).catch((err) => console.error("Failed to update tray language:", err));
 }
