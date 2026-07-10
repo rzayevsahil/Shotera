@@ -314,10 +314,9 @@ function ScreenshotCapture() {
           );
           ctx.fill();
         } else if (act.type === "text" && act.start && act.text) {
-          let styleStr = "";
-          if (act.italic) styleStr += "italic ";
-          if (act.bold) styleStr += "bold ";
-          ctx.font = `${styleStr || "normal"} 16px Inter`;
+          const fontStyle = act.italic ? "italic" : "normal";
+          const fontWeight = act.bold ? "bold" : "normal";
+          ctx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
           ctx.fillText(act.text, act.start.x, act.start.y);
 
           // Draw underline or strikethrough if needed
@@ -783,10 +782,9 @@ function ScreenshotCapture() {
         );
         tempCtx.fill();
       } else if (act.type === "text" && act.start && act.text) {
-        let styleStr = "";
-        if (act.italic) styleStr += "italic ";
-        if (act.bold) styleStr += "bold ";
-        tempCtx.font = `${styleStr || "normal"} 16px Inter`;
+        const fontStyle = act.italic ? "italic" : "normal";
+        const fontWeight = act.bold ? "bold" : "normal";
+        tempCtx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
         tempCtx.fillText(act.text, act.start.x, act.start.y);
 
         // Draw underline/strikethrough if needed
