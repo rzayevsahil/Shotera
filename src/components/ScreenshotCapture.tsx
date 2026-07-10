@@ -426,11 +426,16 @@ function ScreenshotCapture() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: MouseEvent) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+
+    // Clamp coordinates to screen boundaries
+    const clientX = Math.max(0, Math.min(window.innerWidth, e.clientX));
+    const clientY = Math.max(0, Math.min(window.innerHeight, e.clientY));
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
     if (isSelecting && startPoint) {
       const w = Math.abs(x - startPoint.x);
@@ -503,6 +508,21 @@ function ScreenshotCapture() {
       }
     }
   };
+
+  const handleMouseMoveRef = useRef(handleMouseMove);
+  useEffect(() => {
+    handleMouseMoveRef.current = handleMouseMove;
+  }, [handleMouseMove]);
+
+  useEffect(() => {
+    const onGlobalMouseMove = (e: MouseEvent) => {
+      handleMouseMoveRef.current(e);
+    };
+    window.addEventListener("mousemove", onGlobalMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", onGlobalMouseMove);
+    };
+  }, []);
 
   const handleMouseUp = () => {
     if (isSelecting) {
@@ -739,7 +759,6 @@ function ScreenshotCapture() {
         ref={canvasRef}
         className="capture-canvas"
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
       />
 
       {selection && (
