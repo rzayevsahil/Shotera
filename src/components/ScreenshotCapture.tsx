@@ -962,7 +962,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "line" ? "active" : ""}`}
             onClick={() => setActiveTool("line")}
-            title={lang === "tr" ? "Çizgi Çiz" : "Draw Line"}
+            title={t.toolLine}
           >
             <Slash size={16} />
           </button>
@@ -988,7 +988,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "circle" ? "active" : ""}`}
             onClick={() => setActiveTool("circle")}
-            title={lang === "tr" ? "Daire Çiz" : "Draw Circle"}
+            title={t.toolCircle}
           >
             <Circle size={16} />
           </button>
@@ -1019,7 +1019,7 @@ function ScreenshotCapture() {
                   className={`toolbar-btn ${textBold ? "active" : ""}`}
                   onClick={() => setTextBold(!textBold)}
                   style={{ fontWeight: "bold", width: "28px", height: "28px" }}
-                  title={lang === "tr" ? "Kalın" : "Bold"}
+                  title={t.textBold}
                 >
                   B
                 </button>
@@ -1027,7 +1027,7 @@ function ScreenshotCapture() {
                   className={`toolbar-btn ${textItalic ? "active" : ""}`}
                   onClick={() => setTextItalic(!textItalic)}
                   style={{ fontStyle: "italic", width: "28px", height: "28px" }}
-                  title={lang === "tr" ? "İtalik" : "Italic"}
+                  title={t.textItalic}
                 >
                   I
                 </button>
@@ -1035,7 +1035,7 @@ function ScreenshotCapture() {
                   className={`toolbar-btn ${textUnderline ? "active" : ""}`}
                   onClick={() => setTextUnderline(!textUnderline)}
                   style={{ textDecoration: "underline", width: "28px", height: "28px" }}
-                  title={lang === "tr" ? "Altı Çizgili" : "Underline"}
+                  title={t.textUnderline}
                 >
                   U
                 </button>
@@ -1043,7 +1043,7 @@ function ScreenshotCapture() {
                   className={`toolbar-btn ${textStrikethrough ? "active" : ""}`}
                   onClick={() => setTextStrikethrough(!textStrikethrough)}
                   style={{ textDecoration: "line-through", width: "28px", height: "28px" }}
-                  title={lang === "tr" ? "Üstü Çizgili" : "Strikethrough"}
+                  title={t.textStrikethrough}
                 >
                   S
                 </button>
@@ -1074,7 +1074,7 @@ function ScreenshotCapture() {
                 justifyContent: "center",
                 border: "1px dashed rgba(255,255,255,0.6)"
               }}
-              title={lang === "tr" ? "Gelişmiş Renk Seçici" : "Advanced Color Picker"}
+              title={t.colorPicker}
             >
               <input
                 type="color"
