@@ -363,6 +363,16 @@ function ScreenshotCapture() {
     }
   };
 
+  useEffect(() => {
+    const handleBlur = () => {
+      handleClose();
+    };
+    window.addEventListener("blur", handleBlur);
+    return () => {
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, []);
+
   // Drag selection handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
