@@ -21,6 +21,9 @@ function SettingsWindow() {
   const [savePath, setSavePath] = useState(() => localStorage.getItem("savePath") || "Pictures/Shotera");
   const [fileFormat, setFileFormat] = useState(() => localStorage.getItem("fileFormat") || "PNG");
   const [imageQuality, setImageQuality] = useState(() => Number(localStorage.getItem("imageQuality") || "90"));
+  const [regionShortcut, setRegionShortcut] = useState(() => localStorage.getItem("regionShortcut") || "Ctrl+Shift+S");
+  const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
+  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | null>(null);
 
   // Sync settings with localStorage
   useEffect(() => {
@@ -31,7 +34,81 @@ function SettingsWindow() {
     localStorage.setItem("savePath", savePath);
     localStorage.setItem("fileFormat", fileFormat);
     localStorage.setItem("imageQuality", String(imageQuality));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality]);
+    localStorage.setItem("regionShortcut", regionShortcut);
+    localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut]);
+
+  // Sync keyboard shortcuts with Rust backend
+  useEffect(() => {
+    invoke("update_shortcuts", {
+      regionShortcut: regionShortcut,
+      fullscreenShortcut: fullscreenShortcut
+    }).catch((e) => {
+      console.error("Failed to sync shortcuts with Rust backend:", e);
+    });
+  }, [regionShortcut, fullscreenShortcut]);
+
+  // Handle global shortcut recording
+  useEffect(() => {
+    if (!recordingType) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Ignore single modifier key presses
+      if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) {
+        return;
+      }
+
+      const parts: string[] = [];
+      if (e.ctrlKey) parts.push("Ctrl");
+      if (e.shiftKey) parts.push("Shift");
+      if (e.altKey) parts.push("Alt");
+      if (e.metaKey) parts.push("Super");
+
+      let keyName = e.key;
+      
+      if (e.code.startsWith("Key")) {
+        keyName = e.code.slice(3); // e.g. "S", "F"
+      } else if (e.code.startsWith("Digit")) {
+        keyName = e.code.slice(5); // e.g. "1"
+      } else {
+        const specialMap: Record<string, string> = {
+          "PrintScreen": "PrintScreen",
+          "Space": "Space",
+          "Escape": "Escape",
+          "Enter": "Enter",
+          "Backspace": "Backspace",
+          "Delete": "Delete",
+          "ArrowUp": "Up",
+          "ArrowDown": "Down",
+          "ArrowLeft": "Left",
+          "ArrowRight": "Right",
+        };
+        keyName = specialMap[e.code] || e.key;
+      }
+
+      const isFunctionKey = /^F[1-9][0-2]?$/.test(keyName) || keyName === "PrintScreen";
+      if (parts.length === 0 && !isFunctionKey) {
+        return;
+      }
+
+      parts.push(keyName);
+      const shortcutStr = parts.join("+");
+
+      if (recordingType === "region") {
+        setRegionShortcut(shortcutStr);
+      } else {
+        setFullscreenShortcut(shortcutStr);
+      }
+
+      setRecordingType(null);
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [recordingType]);
 
   // Sync file format and quality settings with Rust backend
   useEffect(() => {
@@ -253,9 +330,24 @@ function SettingsWindow() {
                 <span className="setting-label">{t.globalShortcut}</span>
                 <span className="setting-desc">{t.globalShortcutDesc}</span>
               </div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <span className="shortcut-badge">Print Screen</span>
-                <span className="shortcut-badge">Ctrl + Shift + S</span>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <span className="shortcut-badge" style={{ opacity: 0.6 }}>Print Screen</span>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "region" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "region" ? null : "region")}
+                  title={lang === "tr" ? "Değiştirmek için tıklayın" : "Click to change"}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "region" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "region" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "region" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "region" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none"
+                  }}
+                >
+                  {recordingType === "region" ? (lang === "tr" ? "Tuşlayın..." : "Press keys...") : regionShortcut}
+                </button>
               </div>
             </div>
 
@@ -264,9 +356,24 @@ function SettingsWindow() {
                 <span className="setting-label">{t.globalFullscreenShortcut}</span>
                 <span className="setting-desc">{t.globalFullscreenShortcutDesc}</span>
               </div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <span className="shortcut-badge">Ctrl + Print Screen</span>
-                <span className="shortcut-badge">Ctrl + Shift + F</span>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <span className="shortcut-badge" style={{ opacity: 0.6 }}>Ctrl + Print Screen</span>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "fullscreen" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "fullscreen" ? null : "fullscreen")}
+                  title={lang === "tr" ? "Değiştirmek için tıklayın" : "Click to change"}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "fullscreen" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "fullscreen" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "fullscreen" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "fullscreen" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none"
+                  }}
+                >
+                  {recordingType === "fullscreen" ? (lang === "tr" ? "Tuşlayın..." : "Press keys...") : fullscreenShortcut}
+                </button>
               </div>
             </div>
 

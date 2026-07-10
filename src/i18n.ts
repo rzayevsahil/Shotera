@@ -27,9 +27,9 @@ export const translations = {
     includeCursor: "Fare İmlecini Dahil Et",
     includeCursorDesc: "Alınan ekran görüntülerine sistem imlecini de yerleştir.",
     globalShortcut: "Global Kısayol (Bölge Seçimi)",
-    globalShortcutDesc: "Bölge seçimi ekran görüntüsünü tetikleyen ana kısayollar.",
+    globalShortcutDesc: "Bölge seçimi ekran görüntüsünü tetikleyen ana kısayollar. (Değiştirmek için tuş kutusuna tıklayın)",
     globalFullscreenShortcut: "Global Kısayol (Tam Ekran)",
-    globalFullscreenShortcutDesc: "Ekranın tamamını doğrudan panoya kopyalayan ve dosyaya kaydeden kısayollar.",
+    globalFullscreenShortcutDesc: "Ekranın tamamını doğrudan panoya kopyalayan ve kaydeden kısayollar. (Değiştirmek için tuş kutusuna tıklayın)",
     editorShortcuts: "Yakalama Ekranı Kısayolları",
     editorShortcutsDesc: "Ekran görüntüsü düzenleyicisinde kullanabileceğiniz hızlı kısayollar.",
 
@@ -88,9 +88,9 @@ export const translations = {
     includeCursor: "Include Mouse Cursor",
     includeCursorDesc: "Render the system cursor on captured screenshots.",
     globalShortcut: "Global Shortcut (Capture Region)",
-    globalShortcutDesc: "Main shortcuts to trigger area-selection screen capture.",
+    globalShortcutDesc: "Main shortcuts to trigger area-selection screen capture. (Click the key box to customize)",
     globalFullscreenShortcut: "Global Shortcut (Full Screen)",
-    globalFullscreenShortcutDesc: "Main shortcuts to capture the full screen directly to clipboard and file.",
+    globalFullscreenShortcutDesc: "Main shortcuts to capture the full screen directly to clipboard and file. (Click the key box to customize)",
     editorShortcuts: "Capture Editor Shortcuts",
     editorShortcutsDesc: "Quick keyboard shortcuts you can use inside the screenshot editor.",
 

@@ -13,6 +13,8 @@ struct AppState {
     file_format: Mutex<String>,
     image_quality: Mutex<u32>,
     include_cursor: Mutex<bool>,
+    region_shortcut: Mutex<String>,
+    fullscreen_shortcut: Mutex<String>,
 }
 
 fn show_app_notification(app_handle: &AppHandle, title: &str, body: &str) {
@@ -381,6 +383,47 @@ fn update_save_settings(
 }
 
 #[tauri::command]
+fn update_shortcuts(
+    app_handle: AppHandle,
+    state: State<'_, AppState>,
+    region_shortcut: String,
+    fullscreen_shortcut: String,
+) -> Result<(), String> {
+    use std::str::FromStr;
+
+    // 1. Validate shortcut format by parsing
+    let reg_shortcut = Shortcut::from_str(&region_shortcut.to_lowercase())
+        .map_err(|e| format!("Invalid region shortcut: {}", e))?;
+    let fs_shortcut = Shortcut::from_str(&fullscreen_shortcut.to_lowercase())
+        .map_err(|e| format!("Invalid fullscreen shortcut: {}", e))?;
+
+    // 2. Unregister ALL old shortcuts first
+    let _ = app_handle.global_shortcut().unregister_all();
+
+    // 3. Register the new ones (plus the default hardcoded PrintScreen / Ctrl+PrintScreen)
+    let printscreen_shortcut = Shortcut::new(None, Code::PrintScreen);
+    let fs_printscreen_shortcut = Shortcut::new(Some(Modifiers::CONTROL), Code::PrintScreen);
+
+    let _ = app_handle.global_shortcut().register(printscreen_shortcut);
+    let _ = app_handle.global_shortcut().register(fs_printscreen_shortcut);
+    
+    app_handle.global_shortcut().register(reg_shortcut)
+        .map_err(|e| format!("Failed to register region shortcut: {}", e))?;
+    app_handle.global_shortcut().register(fs_shortcut)
+        .map_err(|e| format!("Failed to register fullscreen shortcut: {}", e))?;
+
+    // 4. Update the state
+    if let Ok(mut reg_state) = state.region_shortcut.lock() {
+        *reg_state = region_shortcut.to_lowercase();
+    }
+    if let Ok(mut fs_state) = state.fullscreen_shortcut.lock() {
+        *fs_state = fullscreen_shortcut.to_lowercase();
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang: String) {
     if let Ok(mut state_lang) = state.language.lock() {
         *state_lang = lang.clone();
@@ -548,6 +591,8 @@ pub fn run() {
             file_format: Mutex::new("PNG".to_string()),
             image_quality: Mutex::new(90),
             include_cursor: Mutex::new(false),
+            region_shortcut: Mutex::new("ctrl+shift+s".to_string()),
+            fullscreen_shortcut: Mutex::new("ctrl+shift+f".to_string()),
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -558,12 +603,32 @@ pub fn run() {
                     if event.state() == ShortcutState::Pressed {
                         let state = app_handle_shortcut.state::<AppState>();
                         
-                        if shortcut.matches(Modifiers::CONTROL, Code::PrintScreen)
-                            || shortcut.matches(Modifiers::CONTROL | Modifiers::SHIFT, Code::KeyF)
-                        {
-                            let _ = trigger_fullscreen_screenshot(app_handle_shortcut, &state);
+                        let reg_shortcut_str = state.region_shortcut.lock().unwrap().clone();
+                        let fs_shortcut_str = state.fullscreen_shortcut.lock().unwrap().clone();
+                        
+                        let fs_printscreen_shortcut = Shortcut::new(Some(Modifiers::CONTROL), Code::PrintScreen);
+                        let printscreen_shortcut = Shortcut::new(None, Code::PrintScreen);
+
+                        let matches_fs = if let Ok(fs_shortcut) = fs_shortcut_str.parse::<Shortcut>() {
+                            shortcut == &fs_shortcut
                         } else {
+                            false
+                        } || shortcut == &fs_printscreen_shortcut;
+
+                        if matches_fs {
+                            let _ = trigger_fullscreen_screenshot(app_handle_shortcut, &state);
+                            return;
+                        }
+
+                        let matches_reg = if let Ok(reg_shortcut) = reg_shortcut_str.parse::<Shortcut>() {
+                            shortcut == &reg_shortcut
+                        } else {
+                            false
+                        } || shortcut == &printscreen_shortcut;
+
+                        if matches_reg {
                             let _ = trigger_screenshot(app_handle_shortcut, &state);
+                            return;
                         }
                     }
                 })
@@ -638,7 +703,8 @@ pub fn run() {
             copy_base64_image_to_clipboard,
             update_tray_language,
             update_save_settings,
-            select_folder
+            select_folder,
+            update_shortcuts
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
