@@ -467,24 +467,26 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row" style={{ borderTop: "1px solid var(--border-color)", paddingTop: "16px", marginTop: "16px" }}>
+            <div className="setting-row" style={{ borderTop: "none", paddingTop: "16px" }}>
               <div className="setting-info">
                 <span className="setting-label">{t.editorShortcuts}</span>
                 <span className="setting-desc">{t.editorShortcutsDesc}</span>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>{lang === "tr" ? "Kopyala:" : "Copy:"}</span>
-                  <span className="shortcut-badge">Ctrl + C</span>
-                </div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>{lang === "tr" ? "Kaydet:" : "Save:"}</span>
-                  <span className="shortcut-badge">Ctrl + S</span>
-                </div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>{lang === "tr" ? "Kapat:" : "Close:"}</span>
-                  <span className="shortcut-badge">ESC</span>
-                </div>
+              <div style={{ 
+                display: "grid", 
+                gridTemplateColumns: "auto auto", 
+                columnGap: "16px", 
+                rowGap: "8px", 
+                alignItems: "center" 
+              }}>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{lang === "tr" ? "Kopyala:" : "Copy:"}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + C</span>
+                
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{lang === "tr" ? "Kaydet:" : "Save:"}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + S</span>
+                
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{lang === "tr" ? "Kapat:" : "Close:"}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>ESC</span>
               </div>
             </div>
           </div>
