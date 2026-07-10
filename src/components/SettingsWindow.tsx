@@ -4,6 +4,8 @@ import { Settings, Camera, FolderOpen, Info, Github, Mail } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
+import { listen } from "@tauri-apps/api/event";
+import shutterSoundUrl from "../assets/shutter.mp3";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
 
@@ -48,6 +50,21 @@ function SettingsWindow() {
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Listen for global fullscreen screenshots and play shutter sound if enabled
+  useEffect(() => {
+    const unlisten = listen("fullscreen-captured", () => {
+      const playAudioSetting = localStorage.getItem("playAudio") !== "false";
+      if (playAudioSetting) {
+        new Audio(shutterSoundUrl).play().catch((err) => {
+          console.error("Failed to play shutter sound:", err);
+        });
+      }
+    });
+    return () => {
+      unlisten.then((fn) => fn());
+    };
   }, []);
 
   const handleTakeScreenshot = async () => {

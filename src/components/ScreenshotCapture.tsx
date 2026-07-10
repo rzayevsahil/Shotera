@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { Copy, Download, X, Pencil, ArrowUpRight, Square, Type, Trash2 } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
+import shutterSoundUrl from "../assets/shutter.mp3";
 
 interface SelectionRect {
   x: number;
@@ -696,11 +697,21 @@ function ScreenshotCapture() {
     return parts.length > 1 ? parts[1] : null;
   };
 
+  const playShutterSoundIfEnabled = () => {
+    const playAudioSetting = localStorage.getItem("playAudio") !== "false";
+    if (playAudioSetting) {
+      new Audio(shutterSoundUrl).play().catch((err) => {
+        console.error("Failed to play shutter sound:", err);
+      });
+    }
+  };
+
   const handleCopy = async () => {
     // Copy to clipboard should always remain lossless PNG for high compatibility
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
     try {
+      playShutterSoundIfEnabled();
       await invoke("copy_base64_image_to_clipboard", { base64Str: base64 });
       handleClose();
     } catch (e) {
@@ -714,6 +725,7 @@ function ScreenshotCapture() {
     const base64 = getCroppedBase64(format, quality);
     if (!base64) return;
     try {
+      playShutterSoundIfEnabled();
       await invoke("save_base64_image", { base64Str: base64, format: format });
       handleClose();
     } catch (e) {

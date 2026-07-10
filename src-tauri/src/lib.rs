@@ -117,6 +117,9 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
     };
     show_app_notification(app_handle, "Shotera", body);
     
+    // 5. Emit event to frontend to play shutter sound
+    let _ = app_handle.emit("fullscreen-captured", ());
+    
     Ok(())
 }
 
