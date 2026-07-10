@@ -375,7 +375,7 @@ function SettingsWindow() {
             <div className="setting-row" style={{ marginTop: "12px" }}>
               <div className="setting-info">
                 <span className="setting-label">{t.takeScreenshot}</span>
-                <span className="setting-desc">{t.takeScreenshotDesc} <span style={{ color: "var(--accent-cyan)" }}>Print Screen</span> {lang === "tr" ? "veya" : "or"} <span style={{ color: "var(--accent-cyan)" }}>Ctrl + Shift + S</span></span>
+                <span className="setting-desc">{t.takeScreenshotDesc} <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>{regionShortcut}</span></span>
               </div>
               <button className="premium-button" onClick={handleTakeScreenshot}>
                 <Camera size={16} />
