@@ -300,7 +300,7 @@ function SettingsWindow() {
                 <span className="setting-label">{t.defaultSaveDir}</span>
                 <span className="setting-desc">{t.defaultSaveDirDesc}</span>
               </div>
-              <div style={{ display: "flex", gap: "8px", width: "240px" }}>
+              <div style={{ display: "flex", gap: "8px", flex: 1, maxWidth: "500px", minWidth: "240px" }}>
                 <input
                   type="text"
                   className="premium-input"
