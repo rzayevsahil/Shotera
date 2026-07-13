@@ -5,7 +5,7 @@ use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use base64::prelude::*;
 use chrono::Local;
-use tauri_plugin_notification::NotificationExt;
+// use tauri_plugin_notification::NotificationExt;
 
 struct AppState {
     last_screenshot: Mutex<Option<image::RgbaImage>>,
@@ -18,12 +18,19 @@ struct AppState {
     pinned_image: Mutex<Option<String>>,
 }
 
-fn show_app_notification(app_handle: &AppHandle, title: &str, body: &str) {
-    let _ = app_handle.notification()
-        .builder()
-        .title(title)
-        .body(body)
-        .show();
+fn show_app_notification(title: &str, body: &str, image_path: Option<&str>) {
+    let mut notification = notify_rust::Notification::new();
+    notification
+        .appname("Shotera")
+        .summary(title)
+        .body(body);
+        
+    if let Some(path) = image_path {
+        // notify-rust uses image_path on Windows to show the large image in the notification
+        notification.image_path(path);
+    }
+    
+    let _ = notification.show();
 }
 
 const CURSOR_WIDTH: usize = 12;
@@ -233,7 +240,7 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
     } else {
         "Full screenshot saved and copied to clipboard!"
     };
-    show_app_notification(app_handle, "Shotera", body);
+    show_app_notification("Shotera", body, None);
     
     // 5. Emit event to frontend to play shutter sound
     let _ = app_handle.emit("fullscreen-captured", ());
@@ -315,7 +322,7 @@ async fn upload_to_imgur(app_handle: AppHandle, state: State<'_, AppState>, base
         } else {
             "Image uploaded to cloud and link copied to clipboard!"
         };
-        show_app_notification(&app_handle, "Shotera", body);
+        show_app_notification("Shotera", body, None);
 
         Ok(link.to_string())
     } else {
@@ -396,7 +403,7 @@ fn copy_to_clipboard(
     } else {
         "Screenshot copied to clipboard!"
     };
-    show_app_notification(&app_handle, "Shotera", body);
+    show_app_notification("Shotera", body, None);
     
     Ok(())
 }
@@ -453,7 +460,7 @@ fn save_to_file(
     } else {
         "Screenshot saved successfully!"
     };
-    show_app_notification(&app_handle, "Shotera", body);
+    show_app_notification("Shotera", body, None);
     
     Ok(path.to_string_lossy().to_string())
 }
@@ -610,6 +617,17 @@ fn save_base64_image(
     
     std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
 
+    let lang = {
+        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+        state_lang.clone()
+    };
+    let body = if lang == "tr" {
+        "Ekran görüntüsü başarıyla kaydedildi!"
+    } else {
+        "Screenshot saved successfully!"
+    };
+    show_app_notification("Shotera", body, Some(&path.to_string_lossy()));
+
     Ok(path.to_string_lossy().to_string())
 }
 
@@ -630,11 +648,21 @@ fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppSta
     };
     ctx.set_image(img_data).map_err(|e| e.to_string())?;
 
-    // Save to temp file for notification preview
     let temp_dir = std::env::temp_dir();
     let temp_path = temp_dir.join(format!("shotera_clipboard_preview_{}.png", chrono::Local::now().format("%Y%m%d%H%M%S")));
     let mut file = std::fs::File::create(&temp_path).map_err(|e| e.to_string())?;
     std::io::Write::write_all(&mut file, &bytes).map_err(|e| e.to_string())?;
+
+    let lang = {
+        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+        state_lang.clone()
+    };
+    let body = if lang == "tr" {
+        "Ekran görüntüsü panoya kopyalandı!"
+    } else {
+        "Screenshot copied to clipboard!"
+    };
+    show_app_notification("Shotera", body, Some(&temp_path.to_string_lossy()));
 
     Ok(temp_path.to_string_lossy().to_string())
 }

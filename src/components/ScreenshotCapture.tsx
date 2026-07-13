@@ -941,13 +941,7 @@ function ScreenshotCapture() {
     if (!base64) return;
     try {
       playShutterSoundIfEnabled();
-      const tempPath = await invoke<string>("copy_base64_image_to_clipboard", { base64Str: base64 });
-      sendNotification({
-        title: "Shotera",
-        body: lang === "tr" ? "Ekran görüntüsü panoya kopyalandı!" : "Screenshot copied to clipboard!",
-        attachments: [{ id: "preview", url: `file:///${tempPath.replace(/\\/g, "/")}` }],
-        icon: `file:///${tempPath.replace(/\\/g, "/")}`
-      });
+      await invoke("copy_base64_image_to_clipboard", { base64Str: base64 });
       handleClose();
     } catch (e) {
       console.error("Failed to copy image:", e);
@@ -961,13 +955,7 @@ function ScreenshotCapture() {
     if (!base64) return;
     try {
       playShutterSoundIfEnabled();
-      const savedPath = await invoke<string>("save_base64_image", { base64Str: base64, format: format });
-      sendNotification({
-        title: "Shotera",
-        body: lang === "tr" ? "Ekran görüntüsü başarıyla kaydedildi!" : "Screenshot saved successfully!",
-        attachments: [{ id: "preview", url: `file:///${savedPath.replace(/\\/g, "/")}` }],
-        icon: `file:///${savedPath.replace(/\\/g, "/")}`
-      });
+      await invoke("save_base64_image", { base64Str: base64, format: format });
       handleClose();
     } catch (e) {
       console.error("Failed to save image:", e);
