@@ -755,7 +755,17 @@ function SettingsWindow() {
                     <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>
                       {lang === "tr" ? "Yenilikler:" : "What's New:"}
                     </strong>
-                    {updateManifest.body}
+                    {(() => {
+                      const body = updateManifest.body;
+                      if (body.includes("TR:") && body.includes("EN:")) {
+                        const parts = body.split("||");
+                        for (const part of parts) {
+                          if (lang === "tr" && part.trim().startsWith("TR:")) return part.trim().substring(3).trim();
+                          if (lang === "en" && part.trim().startsWith("EN:")) return part.trim().substring(3).trim();
+                        }
+                      }
+                      return body;
+                    })()}
                   </div>
                 )}
               </div>

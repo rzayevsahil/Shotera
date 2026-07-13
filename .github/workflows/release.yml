@@ -45,7 +45,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Shotera ${{ github.ref_name }}"
-          releaseBody: "Shotera'nın yeni sürümü yayında! Nelerin değiştiğini görmek için aşağıdan setup dosyasını indirebilirsiniz."
+          releaseBody: "TR: Shotera'nın yeni sürümü yayında! Güncellemeyi otomatik olarak kurmak ve yeniden başlatmak için yukarıdaki butona tıklayabilirsiniz. || EN: A new version of Shotera is available! You can automatically install the update and relaunch by clicking the button above."
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.platform == 'windows-latest' && '--target x86_64-pc-windows-msvc' || '' }}
