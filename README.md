@@ -35,6 +35,7 @@
 - 🔄 **Otomatik Güncelleme:** Uygulama içinden tek tıkla yeni sürümleri kontrol edin ve yükleyin.
 - 🚀 **Arka Planda Çalışma (Oto-Başlatma):** İşletim sistemiyle birlikte başlar ve sistem tepsisinde sessizce görevini yapmaya hazır bekler.
 - 🔍 **Metin Tanıma (OCR):** Ekrandaki kopyalanamayan yazıları tek tıkla okuyun ve metin olarak panoya kopyalayın (Tesseract WebAssembly ile tamamen internetsiz çalışır).
+- 🔢 **Adım Sayacı (Tutorial Modu):** Ekrana tıkladıkça 1, 2, 3 şeklinde otomatik artan numaralar ekleyin. Eğitim ve rehber görselleri hazırlamak için birebir!
 
 <p align="center">
   <!-- UYGULAMADAN DİĞER GÖRSELLERİ VEYA GIF'LERİ BURAYA EKLEYEBİLİRSİNİZ -->
@@ -90,6 +91,7 @@ Bu projenin geliştirme ve build (derleme) adımları ile ilgili talimatlar proj
 - 🔄 **Auto-Updater:** Check for and install new updates with one click from within the app.
 - 🚀 **Background Execution (Auto-Start):** Launches automatically with your operating system and waits quietly in the system tray, ready for use.
 - 🔍 **Text Recognition (OCR):** Extract text from uncopyable areas on your screen with a single click and copy it as text (Powered by Tesseract WebAssembly, works completely offline).
+- 🔢 **Step Counter (Tutorial Mode):** Click on the screen to add auto-incrementing numbers (1, 2, 3...). Perfect for creating educational and guide images!
 
 <p align="center">
   <!-- YOU CAN ADD OTHER SCREENSHOTS OR GIFS OF THE APP HERE -->
