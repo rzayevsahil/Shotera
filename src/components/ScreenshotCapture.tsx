@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
@@ -14,7 +14,7 @@ interface SelectionRect {
   h: number;
 }
 
-type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur";
+type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur" | "step";
 
 interface Point {
   x: number;
@@ -33,6 +33,7 @@ interface DrawingAction {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
+  stepNumber?: number;
 }
 
 // Helpers for selection resizing and cursor changes
@@ -336,7 +337,21 @@ function ScreenshotCapture() {
             bx, by, bw, bh
           );
           ctx.restore();
+        } else if (act.type === "step" && act.start && act.stepNumber) {
+          const radius = 14;
+          ctx.beginPath();
+          ctx.arc(act.start.x, act.start.y, radius, 0, 2 * Math.PI);
+          ctx.fillStyle = act.color;
+          ctx.fill();
+          
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 16px Inter, Arial, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(act.stepNumber.toString(), act.start.x, act.start.y + 1);
         } else if (act.type === "text" && act.start && act.text) {
+          ctx.textAlign = "left";
+          ctx.textBaseline = "alphabetic";
           const fontStyle = act.italic ? "italic" : "normal";
           const fontWeight = act.bold ? "bold" : "normal";
           ctx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
@@ -504,7 +519,20 @@ function ScreenshotCapture() {
         y >= selection.y &&
         y <= selection.y + selection.h
       ) {
-        if (activeTool === "text") {
+        if (activeTool === "step") {
+          e.preventDefault();
+          const nextStep = drawings.filter((d) => d.type === "step").length + 1;
+          setDrawings((prev) => [
+            ...prev,
+            {
+              type: "step",
+              start: { x, y },
+              color: drawColor,
+              width: 3,
+              stepNumber: nextStep,
+            },
+          ]);
+        } else if (activeTool === "text") {
           e.preventDefault();
           setTextInput({ visible: true, x, y, val: "" });
         } else {
@@ -591,7 +619,7 @@ function ScreenshotCapture() {
     } else {
       if (canvasRef.current) {
         if (activeTool !== "select") {
-          canvasRef.current.style.cursor = activeTool === "text" ? "text" : "crosshair";
+          canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "step" ? "crosshair" : "crosshair");
         } else if (selection) {
           const handle = getResizeHandle(x, y, selection);
           canvasRef.current.style.cursor = getCursorForHandle(handle, activeTool);
@@ -844,9 +872,23 @@ function ScreenshotCapture() {
           bx, by, bw, bh
         );
         tempCtx.restore();
-      } else if (act.type === "text" && act.start && act.text) {
-        const fontStyle = act.italic ? "italic" : "normal";
-        const fontWeight = act.bold ? "bold" : "normal";
+        } else if (act.type === "step" && act.start && act.stepNumber) {
+          const radius = 14;
+          tempCtx.beginPath();
+          tempCtx.arc(act.start.x, act.start.y, radius, 0, 2 * Math.PI);
+          tempCtx.fillStyle = act.color;
+          tempCtx.fill();
+          
+          tempCtx.fillStyle = "#ffffff";
+          tempCtx.font = "bold 16px Inter, Arial, sans-serif";
+          tempCtx.textAlign = "center";
+          tempCtx.textBaseline = "middle";
+          tempCtx.fillText(act.stepNumber.toString(), act.start.x, act.start.y + 1);
+        } else if (act.type === "text" && act.start && act.text) {
+          tempCtx.textAlign = "left";
+          tempCtx.textBaseline = "alphabetic";
+          const fontStyle = act.italic ? "italic" : "normal";
+          const fontWeight = act.bold ? "bold" : "normal";
         tempCtx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
         tempCtx.fillText(act.text, act.start.x, act.start.y);
 
@@ -1137,6 +1179,14 @@ function ScreenshotCapture() {
             title={t.toolText}
           >
             <Type size={16} />
+          </button>
+
+          <button
+            className={`toolbar-btn ${activeTool === "step" ? "active" : ""}`}
+            onClick={() => setActiveTool("step")}
+            title={lang === "tr" ? "Adım/Numara (Tutorial Modu)" : "Step/Numbering (Tutorial Mode)"}
+          >
+            <ListOrdered size={16} />
           </button>
 
           <button
