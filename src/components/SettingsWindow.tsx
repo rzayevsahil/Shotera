@@ -9,6 +9,7 @@ import shutterSoundUrl from "../assets/shutter.mp3";
 import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
+import { enable, disable } from "@tauri-apps/plugin-autostart";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
 
@@ -80,6 +81,13 @@ function SettingsWindow() {
     localStorage.setItem("imageQuality", String(imageQuality));
     localStorage.setItem("regionShortcut", regionShortcut);
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
+
+    // Sync autostart
+    if (startAtBoot) {
+      enable().catch(err => console.error("Failed to enable autostart:", err));
+    } else {
+      disable().catch(err => console.error("Failed to disable autostart:", err));
+    }
   }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut]);
 
   // Sync keyboard shortcuts with Rust backend
