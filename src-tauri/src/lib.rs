@@ -610,23 +610,11 @@ fn save_base64_image(
     
     std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
 
-    // Send notification
-    let lang = {
-        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
-        state_lang.clone()
-    };
-    let body = if lang == "tr" {
-        "Ekran görüntüsü başarıyla kaydedildi!"
-    } else {
-        "Screenshot saved successfully!"
-    };
-    show_app_notification(&app_handle, "Shotera", body);
-
     Ok(path.to_string_lossy().to_string())
 }
 
 #[tauri::command]
-fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<(), String> {
+fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
     use base64::prelude::*;
     let bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
     
@@ -642,19 +630,13 @@ fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppSta
     };
     ctx.set_image(img_data).map_err(|e| e.to_string())?;
 
-    // Send notification
-    let lang = {
-        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
-        state_lang.clone()
-    };
-    let body = if lang == "tr" {
-        "Ekran görüntüsü panoya kopyalandı!"
-    } else {
-        "Screenshot copied to clipboard!"
-    };
-    show_app_notification(&app_handle, "Shotera", body);
+    // Save to temp file for notification preview
+    let temp_dir = std::env::temp_dir();
+    let temp_path = temp_dir.join(format!("shotera_clipboard_preview_{}.png", chrono::Local::now().format("%Y%m%d%H%M%S")));
+    let mut file = std::fs::File::create(&temp_path).map_err(|e| e.to_string())?;
+    std::io::Write::write_all(&mut file, &bytes).map_err(|e| e.to_string())?;
 
-    Ok(())
+    Ok(temp_path.to_string_lossy().to_string())
 }
 
 
