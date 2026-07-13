@@ -1,84 +1,122 @@
-# Shotera
+<p align="center">
+  <!-- LOGO GÖRSELİNİZİ BURAYA EKLEYEBİLİRSİNİZ (Örn: <img src="assets/logo.png" width="128" />) -->
+  <h1 align="center">Shotera</h1>
+</p>
 
-Modern, hızlı ve şık tasarımlı bir ekran yakalama uygulaması. React, TypeScript ve Tauri (v2) kullanılarak geliştirilmiştir.
+<p align="center">
+  <a href="#türkçe">Türkçe</a> | <a href="#english">English</a>
+</p>
 
-## 🚀 Kurulum ve Geliştirme
+---
 
-Projeyi yerel ortamınızda çalıştırmak için:
-```bash
-npm install
-npm run tauri dev
-```
+<h2 id="türkçe">🇹🇷 Türkçe</h2>
 
-## 📦 Kurulum Dosyası (.exe) Oluşturma (3 Farklı Yöntem)
+<p align="center">
+  <strong>Modern, Hızlı ve Şık Tasarımlı Ekran Yakalama Uygulaması</strong>
+</p>
 
-Kendi bilgisayarınızda veya başka bilgisayarlarda çalıştırmak için kurulum dosyasını (Setup.exe) oluşturmanın 3 yolu vardır:
+<p align="center">
+  <!-- UYGULAMANIN GENEL GÖRÜNÜMÜNÜ (SCREENSHOT) BURAYA EKLEYEBİLİRSİNİZ -->
+  <!-- <img src="assets/screenshot1.png" width="600" /> -->
+</p>
 
-### Yöntem 1: Hazır Olan Dosyayı Kullanmak
-Uygulama zaten bir kez derlendiyse, kurulum dosyası proje dizininde hazır bekliyor olabilir.
-Dosyanın konumu:
-📁 `src-tauri/target/release/bundle/nsis/Shotera_0.1.0_x64-setup.exe`
-*(Bu dosyayı kopyalayıp başka bir bilgisayarda doğrudan çalıştırabilirsiniz.)*
+### 🌟 Nedir?
 
-### Yöntem 2: Gelecekte Kendiniz Manuel Üretmek İsterseniz (Lokal Build)
-Eğer kodlarda bir değişiklik yapıp, GitHub ile uğraşmadan direkt kendi bilgisayarımda yeni bir `.exe` üreteyim derseniz, terminale (PowerShell) şu komutu yazmanız yeterlidir:
+**Shotera**, Tauri, React ve Rust kullanılarak geliştirilmiş, düşük kaynak tüketimi ve modern tasarımıyla öne çıkan bir ekran yakalama aracıdır. Standart ekran görüntüsü alma deneyimini gelişmiş özellikler (buluta yükleme, ekrana sabitleme vb.) ile birleştirerek üretkenliğinizi artırmayı hedefler.
 
-```powershell
-$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content "signer-key" -Raw; npm run tauri build
-```
-*(Bu komut, oluşturduğumuz gizli anahtarı okur ve güncellemeler için imzalayarak uygulamanızı derler. İşlem bitince `.exe` dosyası yine `nsis` klasörüne düşer.)*
+### ✨ Temel Özellikler
 
-### Yöntem 3: GitHub Actions ile Otomatik Üretmek (Önerilen)
-Siz kodunuzu GitHub'a yüklediğinizde, `.github/workflows/release.yml` dosyası sayesinde her şey otomatik gerçekleşir. (Bkz. Otomatik Güncelleme Sistemi)
-Sadece şu komutları terminale girmeniz yeterlidir:
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-Bunu yaptığınızda GitHub sunucuları 5-10 dakika içinde uygulamayı derleyecek, paketleyecek ve `.exe` dosyasını GitHub reponuzdaki **Releases** sayfasına koyacaktır.
+- 📸 **Bölgesel ve Tam Ekran Yakalama:** Ekranın istediğiniz bir bölümünü veya tamamını hızlıca kaydedin.
+- 📌 **Ekrana Sabitleme (Pin):** Aldığınız ekran görüntülerini ekranın herhangi bir yerinde, diğer pencerelerin üzerinde "her zaman üstte" (always-on-top) kalacak şekilde sabitleyin. Referans görsellerle çalışırken çok kullanışlıdır.
+- ☁️ **Hızlı Bulut Yükleme:** Ekran görüntülerini tek tıkla Imgur'a yükleyin ve bağlantısını anında panoya (clipboard) kopyalayın.
+- ⚙️ **Özelleştirilebilir Kısayollar:** Global klavye kısayollarını kendi çalışma alışkanlıklarınıza göre kişiselleştirin.
+- 💾 **Çoklu Format Desteği:** Ekran görüntülerinizi PNG, JPG veya modern WebP formatlarında, belirlediğiniz kalite ayarlarıyla kaydedin.
+- 🌍 **Çoklu Dil Desteği:** İngilizce (EN) ve Türkçe (TR) dil seçenekleri ile kullanın.
+- 🔄 **Otomatik Güncelleme:** Uygulama içinden tek tıkla yeni sürümleri kontrol edin ve yükleyin.
+- 🚀 **Arka Planda Çalışma (Oto-Başlatma):** İşletim sistemiyle birlikte başlar ve sistem tepsisinde sessizce görevini yapmaya hazır bekler.
 
+<p align="center">
+  <!-- UYGULAMADAN DİĞER GÖRSELLERİ VEYA GIF'LERİ BURAYA EKLEYEBİLİRSİNİZ -->
+  <!-- <img src="assets/settings.png" width="400" /> <img src="assets/pin_feature.gif" width="400" /> -->
+</p>
 
-## 🔄 Otomatik Güncelleme Sistemi (GitHub Releases & Actions)
+### 📥 İndirme ve Kurulum
 
-Uygulamanın yeni bir sürümünü yayınladığınızda, kullanıcılarınızın program içindeki **"Güncellemeleri Denetle"** butonuyla otomatik güncelleme almasını sağlamak için aşağıdaki adımları izleyin. Arka plandaki tüm derleme ve imzalama işlemleri `.github/workflows/release.yml` dosyasındaki GitHub Actions tarafından otomatik yapılacaktır.
+Uygulamayı kullanmaya başlamak çok kolaydır:
 
-### 1. GitHub Secrets Ayarı (Sadece Bir Kez Yapılır)
-Uygulamanın güncellemeleri doğrulayabilmesi için imzalama anahtarınızın Private Key (gizli) kısmını GitHub'a eklemelisiniz:
-1. Bilgisayarınızdaki proje ana dizininde bulunan **`signer-key`** (uzantısı olmayan) dosyasını metin editörüyle açın ve içindeki metni kopyalayın. *(Not: `.pub` uzantılı olan dosyayı DEĞİL, uzantısız olanı kopyalayacaksınız)*
-2. Tarayıcınızda GitHub'daki reponuza gidin.
-3. **Settings** (Ayarlar) > **Secrets and variables** > **Actions** menüsünü açın.
-4. **"New repository secret"** butonuna tıklayın.
-5. **Name** kısmına: `TAURI_SIGNING_PRIVATE_KEY` yazın.
-6. **Secret** kısmına kopyaladığınız metni yapıştırın ve kaydedin.
+1. Bu sayfanın sağ tarafında yer alan **[Releases (Sürümler)](https://github.com/rzayevsahil/Shotera/releases/latest)** bölümüne gidin.
+2. En güncel sürüme tıklayın.
+3. İndirilebilir dosyalar arasından işletim sisteminize uygun olan `.exe` kurulum dosyasını indirin.
+4. Dosyayı çalıştırıp kurulumu tamamlayın.
+5. Sistem tepsisinde (sağ alt köşede) yer alan Shotera ikonuna tıklayarak veya belirlediğiniz kısayol tuşlarını kullanarak hemen ekran görüntüsü almaya başlayabilirsiniz!
 
-### 2. Yeni Sürüm Yayınlama (Release Çıkmak)
-Kodunuzda yeni özellikler eklediniz ve kullanıcılara dağıtmak istiyorsunuz. Şu 3 adımı uygulamanız yeterlidir:
+### ⌨️ Varsayılan Kısayollar
 
-**Adım 1: Sürüm Numarasını Yükseltin**
-Aşağıdaki iki dosyada bulunan `"version"` numaralarını bir üst sürüme (örneğin `0.1.1`) çekin:
-- `tauri.conf.json`
-- `package.json`
+- **Bölgesel Ekran Görüntüsü:** `Ctrl` + `Shift` + `S`
+- **Tam Ekran Görüntüsü:** `Ctrl` + `Shift` + `F`
 
-**Adım 2: Kodları GitHub'a Pushlayın**
-Yaptığınız değişiklikleri commit'leyip repoya gönderin:
-```bash
-git add .
-git commit -m "feat: yeni ozellikler eklendi"
-git push
-```
+*(Bu kısayolları uygulamanın "Ayarlar" menüsünden dilediğiniz gibi değiştirebilirsiniz.)*
 
-**Adım 3: Sürüm Etiketi (Tag) Oluşturun ve Pushlayın (ÖNEMLİ)**
-GitHub Actions'ın tetiklenmesi için bir `v` ile başlayan tag oluşturup göndermelisiniz:
-```bash
-git tag v0.1.1
-git push origin v0.1.1
-```
+### 🧑‍💻 Geliştiriciler İçin
 
-🎉 **Hepsi Bu Kadar!**
-Bu adımları tamamladığınızda GitHub Actions otomatik olarak tetiklenir:
-1. Uygulamayı derler ve kurulum `.exe` dosyasını oluşturur.
-2. Özel anahtarınızla (`TAURI_SIGNING_PRIVATE_KEY`) güncellemeyi imzalar.
-3. GitHub reponuzda "Draft" (Taslak) halinde yeni bir Release oluşturur ve içine kurulum dosyasını (`.exe`), `.zip` güncelleme paketini ve uygulamanın okuyacağı `latest.json` dosyasını otomatik yükler.
+Bu projenin geliştirme ve build (derleme) adımları ile ilgili talimatlar proje içindeki geliştirici notlarında yer almaktadır. Projeye katkıda bulunmak isteyenler için temel gereksinimler **Tauri v2, Rust ve Node.js**'tir.
 
-**Son Dokunuş:**
-GitHub reponuzun **Releases** sayfasına gidin, oluşturulan taslak sürüme tıklayın. İsterseniz "Neler değişti?" kısmına güncelleme notlarınızı yazın ve **Publish** diyerek yayına alın. Artık uygulamanızı kullanan herkes, "Güncellemeleri Denetle" butonuna basarak yeni sürüme geçebilir!
+---
+
+<h2 id="english">🇬🇧 English</h2>
+
+<p align="center">
+  <strong>Modern, Fast, and Elegant Screen Capture Application</strong>
+</p>
+
+<p align="center">
+  <!-- YOU CAN ADD A GENERAL SCREENSHOT OF THE APP HERE -->
+  <!-- <img src="assets/screenshot1_en.png" width="600" /> -->
+</p>
+
+### 🌟 What is it?
+
+**Shotera** is a screen capture tool built using Tauri, React, and Rust, distinguished by its low resource consumption and modern design. It aims to boost your productivity by combining the standard screenshot experience with advanced features such as cloud uploading and screen pinning.
+
+### ✨ Key Features
+
+- 📸 **Region & Full-Screen Capture:** Quickly record a specific region or the entire screen.
+- 📌 **Screen Pinning:** Pin your screenshots anywhere on your screen as "always-on-top" windows. Highly useful when working with reference images.
+- ☁️ **Quick Cloud Upload:** Upload screenshots to Imgur with a single click and instantly copy the link to your clipboard.
+- ⚙️ **Customizable Shortcuts:** Personalize global keyboard shortcuts to match your workflow.
+- 💾 **Multi-Format Support:** Save your screenshots in PNG, JPG, or modern WebP formats with adjustable quality settings.
+- 🌍 **Multi-Language Support:** Available in both English (EN) and Turkish (TR).
+- 🔄 **Auto-Updater:** Check for and install new updates with one click from within the app.
+- 🚀 **Background Execution (Auto-Start):** Launches automatically with your operating system and waits quietly in the system tray, ready for use.
+
+<p align="center">
+  <!-- YOU CAN ADD OTHER SCREENSHOTS OR GIFS OF THE APP HERE -->
+  <!-- <img src="assets/settings_en.png" width="400" /> <img src="assets/pin_feature_en.gif" width="400" /> -->
+</p>
+
+### 📥 Download & Installation
+
+Getting started is extremely simple:
+
+1. Navigate to the **[Releases](https://github.com/rzayevsahil/Shotera/releases/latest)** section on the right side of this page.
+2. Click on the latest version.
+3. Download the appropriate `.exe` installer for your operating system.
+4. Run the installer to complete the setup.
+5. You can immediately start taking screenshots by clicking the Shotera icon in your system tray (bottom-right corner) or by using your assigned shortcut keys!
+
+### ⌨️ Default Shortcuts
+
+- **Region Capture:** `Ctrl` + `Shift` + `S`
+- **Full-Screen Capture:** `Ctrl` + `Shift` + `F`
+
+*(You can easily modify these shortcuts from the "Settings" menu inside the application.)*
+
+### 🧑‍💻 For Developers
+
+Development and build instructions are documented in the internal developer notes of the project. If you wish to contribute to the project, the primary prerequisites are **Tauri v2, Rust, and Node.js**.
+
+---
+
+<p align="center">
+  Built with love and <strong>Rust & React</strong> ❤️
+</p>
