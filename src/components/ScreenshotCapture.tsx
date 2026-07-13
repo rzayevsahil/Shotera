@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText } from "lucide-react";
+import Tesseract from "tesseract.js";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
 
@@ -960,12 +961,25 @@ function ScreenshotCapture() {
     if (!base64) return;
     setIsOcring(true);
     try {
-      await invoke("recognize_text", { base64Str: base64 });
-      playShutterSoundIfEnabled();
+      const dataUrl = `data:image/png;base64,${base64}`;
+      const worker = await Tesseract.createWorker(["tur", "eng"]);
+      const { data: { text } } = await worker.recognize(dataUrl);
+      await worker.terminate();
+
+      const textClean = text.trim();
+      
+      if (textClean) {
+        // Use browser clipboard API since it's just text
+        await navigator.clipboard.writeText(textClean);
+        playShutterSoundIfEnabled();
+        alert(lang === "tr" ? "Metin okundu ve panoya kopyalandı!" : "Text recognized and copied to clipboard!");
+      } else {
+        alert(lang === "tr" ? "Okunabilir bir metin bulunamadı." : "No readable text found.");
+      }
       handleClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error("OCR error", err);
-      alert(err);
+      alert(lang === "tr" ? `OCR İşlem Hatası: ${err.message || err}` : `OCR Error: ${err.message || err}`);
     } finally {
       setIsOcring(false);
     }

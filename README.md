@@ -34,6 +34,7 @@
 - 🌍 **Çoklu Dil Desteği:** İngilizce (EN) ve Türkçe (TR) dil seçenekleri ile kullanın.
 - 🔄 **Otomatik Güncelleme:** Uygulama içinden tek tıkla yeni sürümleri kontrol edin ve yükleyin.
 - 🚀 **Arka Planda Çalışma (Oto-Başlatma):** İşletim sistemiyle birlikte başlar ve sistem tepsisinde sessizce görevini yapmaya hazır bekler.
+- 🔍 **Metin Tanıma (OCR):** Ekrandaki kopyalanamayan yazıları tek tıkla okuyun ve metin olarak panoya kopyalayın (Tesseract WebAssembly ile tamamen internetsiz çalışır).
 
 <p align="center">
   <!-- UYGULAMADAN DİĞER GÖRSELLERİ VEYA GIF'LERİ BURAYA EKLEYEBİLİRSİNİZ -->
@@ -88,6 +89,7 @@ Bu projenin geliştirme ve build (derleme) adımları ile ilgili talimatlar proj
 - 🌍 **Multi-Language Support:** Available in both English (EN) and Turkish (TR).
 - 🔄 **Auto-Updater:** Check for and install new updates with one click from within the app.
 - 🚀 **Background Execution (Auto-Start):** Launches automatically with your operating system and waits quietly in the system tray, ready for use.
+- 🔍 **Text Recognition (OCR):** Extract text from uncopyable areas on your screen with a single click and copy it as text (Powered by Tesseract WebAssembly, works completely offline).
 
 <p align="center">
   <!-- YOU CAN ADD OTHER SCREENSHOTS OR GIFS OF THE APP HERE -->

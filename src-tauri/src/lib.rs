@@ -657,39 +657,6 @@ fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppSta
     Ok(())
 }
 
-#[tauri::command]
-fn recognize_text(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
-    use base64::prelude::*;
-    let bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
-    let img = image::load_from_memory(&bytes).map_err(|e| e.to_string())?;
-    
-    let tesseract_img = rusty_tesseract::Image::from_dynamic_image(&img).map_err(|e| e.to_string())?;
-    
-    // Configure Tesseract to use both Turkish and English if possible, or fallback to default
-    let mut args = rusty_tesseract::Args::default();
-    args.lang = "tur+eng".to_string(); // Try Turkish and English
-    
-    let text = rusty_tesseract::image_to_string(&tesseract_img, &args)
-        .map_err(|e| format!("OCR Hatası (Lütfen Tesseract-OCR'nin sistemde kurulu olduğundan emin olun): {}", e))?;
-    
-    let text_clean = text.trim().to_string();
-    
-    let mut ctx = arboard::Clipboard::new().map_err(|e| e.to_string())?;
-    ctx.set_text(text_clean.clone()).map_err(|e| e.to_string())?;
-    
-    let lang = {
-        let state_lang = state.language.lock().map_err(|e| e.to_string())?;
-        state_lang.clone()
-    };
-    let body = if lang == "tr" {
-        "Metin okundu ve panoya kopyalandı!"
-    } else {
-        "Text recognized and copied to clipboard!"
-    };
-    show_app_notification(&app_handle, "Shotera OCR", body);
-    
-    Ok(text_clean)
-}
 
 #[cfg(target_os = "windows")]
 fn set_app_user_model_id() {
@@ -838,7 +805,6 @@ pub fn run() {
             unregister_global_shortcuts,
             pin_image,
             get_pinned_image,
-            recognize_text,
             upload_to_imgur,
             start_drag,
             close_pinned
