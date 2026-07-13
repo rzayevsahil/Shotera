@@ -945,8 +945,8 @@ function ScreenshotCapture() {
       sendNotification({
         title: "Shotera",
         body: lang === "tr" ? "Ekran görüntüsü panoya kopyalandı!" : "Screenshot copied to clipboard!",
-        attachments: [{ id: "preview", url: `file://${tempPath.replace(/\\/g, "/")}` }],
-        icon: `file://${tempPath.replace(/\\/g, "/")}`
+        attachments: [{ id: "preview", url: `file:///${tempPath.replace(/\\/g, "/")}` }],
+        icon: `file:///${tempPath.replace(/\\/g, "/")}`
       });
       handleClose();
     } catch (e) {
@@ -965,8 +965,8 @@ function ScreenshotCapture() {
       sendNotification({
         title: "Shotera",
         body: lang === "tr" ? "Ekran görüntüsü başarıyla kaydedildi!" : "Screenshot saved successfully!",
-        attachments: [{ id: "preview", url: `file://${savedPath.replace(/\\/g, "/")}` }],
-        icon: `file://${savedPath.replace(/\\/g, "/")}`
+        attachments: [{ id: "preview", url: `file:///${savedPath.replace(/\\/g, "/")}` }],
+        icon: `file:///${savedPath.replace(/\\/g, "/")}`
       });
       handleClose();
     } catch (e) {
