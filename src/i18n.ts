@@ -89,6 +89,7 @@ export const translations = {
     actionSave: "Dosyaya Kaydet",
     actionUpload: "Buluta Yükle (Link Paylaş)",
     actionPin: "Ekrana İğnele (Her Şeyin Üstünde)",
+    actionOcr: "Metin Olarak Kopyala (OCR)",
     actionClose: "Kapat (ESC)",
   },
   en: {
@@ -179,6 +180,7 @@ export const translations = {
     actionSave: "Save to File",
     actionUpload: "Upload to Cloud (Share Link)",
     actionPin: "Pin to Screen (Always on Top)",
+    actionOcr: "Copy as Text (OCR)",
     actionClose: "Close (ESC)",
   }
 };

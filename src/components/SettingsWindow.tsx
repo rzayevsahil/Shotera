@@ -386,13 +386,10 @@ function SettingsWindow() {
           </nav>
         </div>
 
-        <div className="sidebar-footer" style={{ position: "relative", display: "inline-block" }}>
-          {appVersion}
+        <div className="sidebar-footer" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}>
+          <span>{appVersion}</span>
           {updateStatus === "available" && (
             <div style={{
-              position: "absolute",
-              right: "-12px",
-              top: "2px",
               width: "6px",
               height: "6px",
               borderRadius: "50%",

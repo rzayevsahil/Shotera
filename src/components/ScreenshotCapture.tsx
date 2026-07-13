@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
 
@@ -954,6 +954,23 @@ function ScreenshotCapture() {
     }
   };
 
+  const [isOcring, setIsOcring] = useState(false);
+  const handleOcr = async () => {
+    const base64 = getCroppedBase64("PNG", 100);
+    if (!base64) return;
+    setIsOcring(true);
+    try {
+      await invoke("recognize_text", { base64Str: base64 });
+      playShutterSoundIfEnabled();
+      handleClose();
+    } catch (err) {
+      console.error("OCR error", err);
+      alert(err);
+    } finally {
+      setIsOcring(false);
+    }
+  };
+
   const getToolbarStyle = () => {
     if (!selection) return {};
     const margin = 12;
@@ -1254,6 +1271,16 @@ function ScreenshotCapture() {
             title={t.actionUpload}
           >
             <CloudUpload size={16} />
+          </button>
+
+          <button
+            className="toolbar-btn"
+            style={{ color: "#8b5cf6", opacity: isOcring ? 0.5 : 1 }}
+            disabled={isOcring}
+            onClick={handleOcr}
+            title={t.actionOcr}
+          >
+            <ScanText size={16} />
           </button>
 
           <button
