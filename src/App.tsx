@@ -13,6 +13,14 @@ function App() {
     try {
       const win = getCurrentWindow();
       setLabel(win.label);
+
+      if (win.label === "main") {
+        const startInTray = localStorage.getItem("startInTray") !== "false"; // default is true
+        if (!startInTray) {
+          win.show();
+          win.setFocus();
+        }
+      }
     } catch (e) {
       console.error("Failed to get window label, defaulting to main", e);
       setLabel("main");
