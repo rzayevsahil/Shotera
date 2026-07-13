@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { sendNotification } from "@tauri-apps/plugin-notification";
 import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { translations, getLanguage, Language } from "../i18n";
@@ -972,14 +973,23 @@ function ScreenshotCapture() {
         // Use browser clipboard API since it's just text
         await navigator.clipboard.writeText(textClean);
         playShutterSoundIfEnabled();
-        alert(lang === "tr" ? "Metin okundu ve panoya kopyalandı!" : "Text recognized and copied to clipboard!");
+        sendNotification({
+          title: "Shotera OCR",
+          body: lang === "tr" ? "Metin okundu ve panoya kopyalandı!" : "Text recognized and copied to clipboard!"
+        });
       } else {
-        alert(lang === "tr" ? "Okunabilir bir metin bulunamadı." : "No readable text found.");
+        sendNotification({
+          title: "Shotera OCR",
+          body: lang === "tr" ? "Okunabilir bir metin bulunamadı." : "No readable text found."
+        });
       }
       handleClose();
     } catch (err: any) {
       console.error("OCR error", err);
-      alert(lang === "tr" ? `OCR İşlem Hatası: ${err.message || err}` : `OCR Error: ${err.message || err}`);
+      sendNotification({
+        title: "Shotera OCR Error",
+        body: lang === "tr" ? `İşlem Hatası: ${err.message || err}` : `Error: ${err.message || err}`
+      });
     } finally {
       setIsOcring(false);
     }
