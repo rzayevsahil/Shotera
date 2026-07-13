@@ -10,6 +10,7 @@ import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable } from "@tauri-apps/plugin-autostart";
+import { sendNotification } from "@tauri-apps/plugin-notification";
 
 type ActiveTab = "general" | "capture" | "save" | "about";
 
@@ -39,29 +40,55 @@ function SettingsWindow() {
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
   const [updateVersion, setUpdateVersion] = useState<string | null>(null);
   const [updateManifest, setUpdateManifest] = useState<any>(null);
+  const [downloadProgress, setDownloadProgress] = useState<number>(0);
 
-  const handleUpdateCheck = async () => {
-    setUpdateStatus("checking");
+  const handleUpdateCheck = async (silent = false) => {
+    if (!silent) setUpdateStatus("checking");
     try {
       const update = await checkUpdate();
       if (update) {
         setUpdateVersion(update.version);
         setUpdateManifest(update);
         setUpdateStatus("available");
+        if (silent) {
+          sendNotification({
+            title: "Shotera",
+            body: lang === "tr" 
+              ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.` 
+              : `A new update is available (v${update.version})! Visit Settings > About to install it.`
+          });
+        }
       } else {
-        setUpdateStatus("up-to-date");
+        if (!silent) setUpdateStatus("up-to-date");
       }
     } catch (err) {
       console.error("Failed to check for updates:", err);
-      setUpdateStatus("error");
+      if (!silent) setUpdateStatus("error");
     }
   };
+
+  // Auto-check for updates on mount
+  useEffect(() => {
+    handleUpdateCheck(true);
+  }, []);
 
   const handleUpdateInstall = async () => {
     if (!updateManifest) return;
     setUpdateStatus("downloading");
+    setDownloadProgress(0);
     try {
-      await updateManifest.downloadAndInstall();
+      let downloaded = 0;
+      let total = 0;
+      await updateManifest.downloadAndInstall((event: any) => {
+        if (event.event === 'Started') {
+          total = event.data.contentLength || 0;
+        } else if (event.event === 'Progress') {
+          downloaded += event.data.chunkLength;
+          if (total > 0) {
+            setDownloadProgress(Math.round((downloaded / total) * 100));
+          }
+        }
+      });
       setUpdateStatus("downloaded");
       await relaunch();
     } catch (err) {
@@ -337,15 +364,42 @@ function SettingsWindow() {
             <div
               className={`nav-item ${activeTab === "about" ? "active" : ""}`}
               onClick={() => setActiveTab("about")}
+              style={{ position: "relative" }}
             >
               <Info className="nav-icon" />
               <span>{t.sidebarAbout}</span>
+              {updateStatus === "available" && (
+                <div style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  backgroundColor: "#f59e0b",
+                  boxShadow: "0 0 8px #f59e0b",
+                  animation: "pulse-border 1.5s infinite"
+                }} />
+              )}
             </div>
           </nav>
         </div>
 
-        <div className="sidebar-footer">
+        <div className="sidebar-footer" style={{ position: "relative", display: "inline-block" }}>
           {appVersion}
+          {updateStatus === "available" && (
+            <div style={{
+              position: "absolute",
+              right: "-12px",
+              top: "2px",
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              backgroundColor: "#f59e0b",
+              boxShadow: "0 0 6px #f59e0b",
+            }} title={lang === "tr" ? "Yeni güncelleme var!" : "Update available!"} />
+          )}
         </div>
       </aside>
 
@@ -693,7 +747,7 @@ function SettingsWindow() {
                       {updateStatus === "checking" && t.checkingUpdates}
                       {updateStatus === "up-to-date" && t.appUpToDate}
                       {updateStatus === "available" && `${t.updateAvailable} (v${updateVersion})`}
-                      {updateStatus === "downloading" && t.installingUpdate}
+                      {updateStatus === "downloading" && `${t.installingUpdate} (%${downloadProgress})`}
                       {updateStatus === "downloaded" && t.updateSuccess}
                       {updateStatus === "error" && t.updateError}
                     </span>
@@ -719,7 +773,7 @@ function SettingsWindow() {
                     </button>
                   ) : (
                     <button
-                      onClick={handleUpdateCheck}
+                      onClick={() => handleUpdateCheck()}
                       disabled={updateStatus === "checking" || updateStatus === "downloading" || updateStatus === "downloaded"}
                       className="action-btn"
                       style={{
