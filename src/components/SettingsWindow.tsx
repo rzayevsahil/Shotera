@@ -10,8 +10,8 @@ import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable } from "@tauri-apps/plugin-autostart";
-import { sendNotification } from "@tauri-apps/plugin-notification";
-
+import { sendNotification, onAction } from "@tauri-apps/plugin-notification";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 type ActiveTab = "general" | "capture" | "save" | "about";
 
 function SettingsWindow() {
@@ -52,6 +52,7 @@ function SettingsWindow() {
         setUpdateStatus("available");
         if (silent) {
           sendNotification({
+            id: 999,
             title: "Shotera",
             body: lang === "tr" 
               ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.` 
@@ -66,6 +67,25 @@ function SettingsWindow() {
       if (!silent) setUpdateStatus("error");
     }
   };
+
+  // Listen to notification clicks
+  useEffect(() => {
+    let unlistenFn: (() => void) | undefined;
+    onAction((notification) => {
+      if (notification.id === 999) {
+        setActiveTab("about");
+        const win = getCurrentWindow();
+        win.show().catch(console.error);
+        win.setFocus().catch(console.error);
+      }
+    }).then((fn) => {
+      unlistenFn = fn;
+    }).catch(console.error);
+
+    return () => {
+      if (unlistenFn) unlistenFn();
+    };
+  }, []);
 
   // Auto-check for updates on mount
   useEffect(() => {
@@ -89,8 +109,11 @@ function SettingsWindow() {
           }
         }
       });
+      setDownloadProgress(100);
       setUpdateStatus("downloaded");
-      await relaunch();
+      setTimeout(async () => {
+        await relaunch();
+      }, 1500);
     } catch (err) {
       console.error("Failed to download and install update:", err);
       setUpdateStatus("error");
