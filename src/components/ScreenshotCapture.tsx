@@ -1050,7 +1050,7 @@ function ScreenshotCapture() {
     if (!selection) return {};
     const margin = 12;
     const toolbarHeight = 44;
-    const toolbarWidth = 720; // Accurate estimation of toolbar width with new tools
+    const toolbarWidth = 950; // Increased to accommodate new tools like OCR and text formatting
     const screenH = window.innerHeight;
     const screenW = window.innerWidth;
 
