@@ -351,7 +351,7 @@ function ScreenshotCapture() {
           ctx.fillText(act.stepNumber.toString(), act.start.x, act.start.y + 1);
         } else if (act.type === "text" && act.start && act.text) {
           ctx.textAlign = "left";
-          ctx.textBaseline = "alphabetic";
+          ctx.textBaseline = "top";
           const fontStyle = act.italic ? "italic" : "normal";
           const fontWeight = act.bold ? "bold" : "normal";
           ctx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
@@ -363,8 +363,8 @@ function ScreenshotCapture() {
 
           if (act.underline) {
             ctx.beginPath();
-            ctx.moveTo(act.start.x, act.start.y + 3);
-            ctx.lineTo(act.start.x + textWidth, act.start.y + 3);
+            ctx.moveTo(act.start.x, act.start.y + textHeight + 2);
+            ctx.lineTo(act.start.x + textWidth, act.start.y + textHeight + 2);
             ctx.strokeStyle = act.color;
             ctx.lineWidth = 1.5;
             ctx.stroke();
@@ -372,8 +372,8 @@ function ScreenshotCapture() {
 
           if (act.strikethrough) {
             ctx.beginPath();
-            ctx.moveTo(act.start.x, act.start.y - textHeight / 3);
-            ctx.lineTo(act.start.x + textWidth, act.start.y - textHeight / 3);
+            ctx.moveTo(act.start.x, act.start.y + textHeight / 2 + 1);
+            ctx.lineTo(act.start.x + textWidth, act.start.y + textHeight / 2 + 1);
             ctx.strokeStyle = act.color;
             ctx.lineWidth = 1.5;
             ctx.stroke();
@@ -886,7 +886,7 @@ function ScreenshotCapture() {
           tempCtx.fillText(act.stepNumber.toString(), act.start.x, act.start.y + 1);
         } else if (act.type === "text" && act.start && act.text) {
           tempCtx.textAlign = "left";
-          tempCtx.textBaseline = "alphabetic";
+          tempCtx.textBaseline = "top";
           const fontStyle = act.italic ? "italic" : "normal";
           const fontWeight = act.bold ? "bold" : "normal";
         tempCtx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
@@ -898,8 +898,8 @@ function ScreenshotCapture() {
 
         if (act.underline) {
           tempCtx.beginPath();
-          tempCtx.moveTo(act.start.x, act.start.y + 3);
-          tempCtx.lineTo(act.start.x + textWidth, act.start.y + 3);
+          tempCtx.moveTo(act.start.x, act.start.y + textHeight + 2);
+          tempCtx.lineTo(act.start.x + textWidth, act.start.y + textHeight + 2);
           tempCtx.strokeStyle = act.color;
           tempCtx.lineWidth = 1.5;
           tempCtx.stroke();
@@ -907,8 +907,8 @@ function ScreenshotCapture() {
 
         if (act.strikethrough) {
           tempCtx.beginPath();
-          tempCtx.moveTo(act.start.x, act.start.y - textHeight / 3);
-          tempCtx.lineTo(act.start.x + textWidth, act.start.y - textHeight / 3);
+          tempCtx.moveTo(act.start.x, act.start.y + textHeight / 2 + 1);
+          tempCtx.lineTo(act.start.x + textWidth, act.start.y + textHeight / 2 + 1);
           tempCtx.strokeStyle = act.color;
           tempCtx.lineWidth = 1.5;
           tempCtx.stroke();
@@ -1109,8 +1109,8 @@ function ScreenshotCapture() {
             if (e.key === "Escape") setTextInput({ visible: false, x: 0, y: 0, val: "" });
           }}
           style={{
-            top: textInput.y - 12,
-            left: textInput.x,
+            top: textInput.y - 6,
+            left: textInput.x - 9,
             color: drawColor,
             fontWeight: textBold ? "bold" : "normal",
             fontStyle: textItalic ? "italic" : "normal",
