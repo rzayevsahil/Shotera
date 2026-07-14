@@ -10,8 +10,7 @@ import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable } from "@tauri-apps/plugin-autostart";
-import { sendNotification, onAction } from "@tauri-apps/plugin-notification";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { sendNotification } from "@tauri-apps/plugin-notification";
 type ActiveTab = "general" | "capture" | "save" | "about";
 
 function SettingsWindow() {
