@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
@@ -1204,6 +1204,16 @@ function ScreenshotCapture() {
             title={t.toolBlur}
           >
             <Droplets size={16} />
+          </button>
+
+          <button
+            className="toolbar-btn"
+            onClick={() => setDrawings((prev) => prev.slice(0, -1))}
+            title={lang === "tr" ? "Geri Al" : "Undo"}
+            disabled={drawings.length === 0}
+            style={{ opacity: drawings.length === 0 ? 0.3 : 1 }}
+          >
+            <Undo size={16} />
           </button>
 
           <button
