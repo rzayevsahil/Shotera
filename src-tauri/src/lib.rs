@@ -27,6 +27,7 @@ fn show_app_notification(state: &State<'_, AppState>, title: &str, body: &str, i
     }
     let mut notification = notify_rust::Notification::new();
     notification
+        .app_id("com.sahil.shotera")
         .appname("Shotera")
         .summary(title)
         .body(body);
