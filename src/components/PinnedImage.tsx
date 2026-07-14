@@ -65,7 +65,7 @@ export default function PinnedImage() {
         >
           <img
             src={imageSrc}
-            style={{ width: "100%", height: "100%", objectFit: "fill", cursor: "move", userSelect: "none" }}
+            style={{ width: "100%", height: "100%", objectFit: "contain", display: "block", cursor: "move", userSelect: "none" }}
             alt="Pinned"
             draggable={false}
             onPointerDown={startDrag}
