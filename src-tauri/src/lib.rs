@@ -301,7 +301,7 @@ async fn pin_image(
 }
 
 #[tauri::command]
-async fn upload_to_imgur(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
+async fn upload_to_imgur(_app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
     let client = reqwest::Client::new();
     let mut form = reqwest::multipart::Form::new();
     form = form.text("image", base64_str);
@@ -368,7 +368,7 @@ fn get_last_screenshot(state: State<'_, AppState>) -> Result<String, String> {
 
 #[tauri::command]
 fn copy_to_clipboard(
-    app_handle: AppHandle,
+    _app_handle: AppHandle,
     state: State<'_, AppState>,
     x: u32,
     y: u32,
@@ -646,7 +646,7 @@ fn save_base64_image(
 }
 
 #[tauri::command]
-fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
+fn copy_base64_image_to_clipboard(_app_handle: AppHandle, state: State<'_, AppState>, base64_str: String) -> Result<String, String> {
     use base64::prelude::*;
     let bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
     
