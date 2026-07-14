@@ -602,6 +602,16 @@ fn show_screenshot_window(app_handle: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn show_settings_window(app_handle: AppHandle) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
+    Ok(())
+}
+
+#[tauri::command]
 fn trigger_capture_command(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     trigger_screenshot(&app_handle, &state)
 }
@@ -819,6 +829,7 @@ pub fn run() {
             save_to_file,
             hide_screenshot_window,
             show_screenshot_window,
+            show_settings_window,
             trigger_capture_command,
             trigger_fullscreen_capture_command,
             save_base64_image,

@@ -71,23 +71,23 @@ function SettingsWindow() {
 
   // Listen to notification clicks
   useEffect(() => {
-    let unlistenFn: any;
-    onAction((notification: any) => {
-      // notification id could be a string or number, or undefined
-      if (notification?.id == 999 || notification?.title === "Shotera" || !notification?.id) {
-        setActiveTab("about");
-        const win = getCurrentWindow();
-        win.show().then(() => win.unminimize()).then(() => win.setFocus()).catch(console.error);
-      }
-    }).then((fn) => {
-      unlistenFn = fn;
-    }).catch(console.error);
+    import("@tauri-apps/plugin-notification").then(({ onAction }) => {
+      let unlistenFn: any;
+      onAction((notification: any) => {
+        if (notification?.id == 999 || notification?.title === "Shotera" || !notification?.id) {
+          setActiveTab("about");
+          invoke("show_settings_window").catch(console.error);
+        }
+      }).then((fn) => {
+        unlistenFn = fn;
+      }).catch(console.error);
 
-    return () => {
-      if (unlistenFn && typeof unlistenFn.unregister === 'function') {
-        unlistenFn.unregister();
-      }
-    };
+      return () => {
+        if (unlistenFn && typeof unlistenFn.unregister === 'function') {
+          unlistenFn.unregister();
+        }
+      };
+    });
   }, []);
 
   // Auto-check for updates on mount
