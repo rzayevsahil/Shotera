@@ -19,6 +19,8 @@ export const translations = {
     captureNow: "Şimdi Yakala",
     languageSetting: "Dil Ayarı / Language",
     languageSettingDesc: "Uygulama dilini seçin / Select application language",
+    showNotifications: "Sistem Bildirimlerini Göster",
+    showNotificationsDesc: "Kopyalama, kaydetme vb. işlemlerden sonra Windows/macOS bildirimi gösterir (Güncellemeler hariç).",
 
     captureTitle: "Yakalama Ayarları",
     captureSubtitle: "Ekran görüntüsü yakalama yöntemlerini ve kısayolları yönetin.",
@@ -110,6 +112,8 @@ export const translations = {
     captureNow: "Capture Now",
     languageSetting: "Language",
     languageSettingDesc: "Select application language",
+    showNotifications: "Show System Notifications",
+    showNotificationsDesc: "Show Windows/macOS notifications after copy, save, etc. operations (Except updates).",
 
     captureTitle: "Capture Settings",
     captureSubtitle: "Manage screen capture methods and shortcuts.",

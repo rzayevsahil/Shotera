@@ -1015,23 +1015,32 @@ function ScreenshotCapture() {
         // Use browser clipboard API since it's just text
         await navigator.clipboard.writeText(textClean);
         playShutterSoundIfEnabled();
-        sendNotification({
-          title: "Shotera OCR",
-          body: lang === "tr" ? "Metin okundu ve panoya kopyalandı!" : "Text recognized and copied to clipboard!"
-        });
+        const showNotif = localStorage.getItem("showNotifications") !== "false";
+        if (showNotif) {
+          sendNotification({
+            title: "Shotera OCR",
+            body: lang === "tr" ? "Metin okundu ve panoya kopyalandı!" : "Text recognized and copied to clipboard!"
+          });
+        }
       } else {
-        sendNotification({
-          title: "Shotera OCR",
-          body: lang === "tr" ? "Okunabilir bir metin bulunamadı." : "No readable text found."
-        });
+        const showNotif = localStorage.getItem("showNotifications") !== "false";
+        if (showNotif) {
+          sendNotification({
+            title: "Shotera OCR",
+            body: lang === "tr" ? "Okunabilir bir metin bulunamadı." : "No readable text found."
+          });
+        }
       }
       handleClose();
     } catch (err: any) {
       console.error("OCR error", err);
-      sendNotification({
-        title: "Shotera OCR Error",
-        body: lang === "tr" ? `İşlem Hatası: ${err.message || err}` : `Error: ${err.message || err}`
-      });
+      const showNotif = localStorage.getItem("showNotifications") !== "false";
+      if (showNotif) {
+        sendNotification({
+          title: "Shotera OCR Error",
+          body: lang === "tr" ? `İşlem Hatası: ${err.message || err}` : `Error: ${err.message || err}`
+        });
+      }
     } finally {
       setIsOcring(false);
     }

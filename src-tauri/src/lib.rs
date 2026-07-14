@@ -16,9 +16,15 @@ struct AppState {
     region_shortcut: Mutex<String>,
     fullscreen_shortcut: Mutex<String>,
     pinned_image: Mutex<Option<String>>,
+    show_notifications: Mutex<bool>,
 }
 
-fn show_app_notification(title: &str, body: &str, image_path: Option<&str>) {
+fn show_app_notification(state: &State<'_, AppState>, title: &str, body: &str, image_path: Option<&str>) {
+    if let Ok(show) = state.show_notifications.lock() {
+        if !*show {
+            return;
+        }
+    }
     let mut notification = notify_rust::Notification::new();
     notification
         .appname("Shotera")
@@ -240,7 +246,7 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
     } else {
         "Full screenshot saved and copied to clipboard!"
     };
-    show_app_notification("Shotera", body, None);
+    show_app_notification(state, "Shotera", body, None);
     
     // 5. Emit event to frontend to play shutter sound
     let _ = app_handle.emit("fullscreen-captured", ());
@@ -322,7 +328,7 @@ async fn upload_to_imgur(app_handle: AppHandle, state: State<'_, AppState>, base
         } else {
             "Image uploaded to cloud and link copied to clipboard!"
         };
-        show_app_notification("Shotera", body, None);
+        show_app_notification(&state, "Shotera", body, None);
 
         Ok(link.to_string())
     } else {
@@ -403,7 +409,7 @@ fn copy_to_clipboard(
     } else {
         "Screenshot copied to clipboard!"
     };
-    show_app_notification("Shotera", body, None);
+    show_app_notification(&state, "Shotera", body, None);
     
     Ok(())
 }
@@ -460,7 +466,7 @@ fn save_to_file(
     } else {
         "Screenshot saved successfully!"
     };
-    show_app_notification("Shotera", body, None);
+    show_app_notification(&state, "Shotera", body, None);
     
     Ok(path.to_string_lossy().to_string())
 }
@@ -480,6 +486,13 @@ fn update_save_settings(
     }
     if let Ok(mut cursor) = state.include_cursor.lock() {
         *cursor = include_cursor;
+    }
+}
+
+#[tauri::command]
+fn update_notification_setting(state: State<'_, AppState>, show: bool) {
+    if let Ok(mut show_state) = state.show_notifications.lock() {
+        *show_state = show;
     }
 }
 
@@ -626,7 +639,7 @@ fn save_base64_image(
     } else {
         "Screenshot saved successfully!"
     };
-    show_app_notification("Shotera", body, Some(&path.to_string_lossy()));
+    show_app_notification(&state, "Shotera", body, Some(&path.to_string_lossy()));
 
     Ok(path.to_string_lossy().to_string())
 }
@@ -662,7 +675,7 @@ fn copy_base64_image_to_clipboard(app_handle: AppHandle, state: State<'_, AppSta
     } else {
         "Screenshot copied to clipboard!"
     };
-    show_app_notification("Shotera", body, Some(&temp_path.to_string_lossy()));
+    show_app_notification(&state, "Shotera", body, Some(&temp_path.to_string_lossy()));
 
     Ok(temp_path.to_string_lossy().to_string())
 }
@@ -699,6 +712,7 @@ pub fn run() {
             region_shortcut: Mutex::new("ctrl+shift+s".to_string()),
             fullscreen_shortcut: Mutex::new("ctrl+shift+f".to_string()),
             pinned_image: Mutex::new(None),
+            show_notifications: Mutex::new(true),
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -810,6 +824,7 @@ pub fn run() {
             copy_base64_image_to_clipboard,
             update_tray_language,
             update_save_settings,
+            update_notification_setting,
             select_folder,
             update_shortcuts,
             unregister_global_shortcuts,

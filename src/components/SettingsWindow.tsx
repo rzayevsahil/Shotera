@@ -26,6 +26,7 @@ function SettingsWindow() {
   // Settings state synced with localStorage
   const [startAtBoot, setStartAtBoot] = useState(() => localStorage.getItem("startAtBoot") === "true");
   const [startInTray, setStartInTray] = useState(() => localStorage.getItem("startInTray") !== "false"); // default true
+  const [showNotifications, setShowNotifications] = useState(() => localStorage.getItem("showNotifications") !== "false"); // default true
   const [includeCursor, setIncludeCursor] = useState(() => localStorage.getItem("includeCursor") === "true");
   const [playAudio, setPlayAudio] = useState(() => localStorage.getItem("playAudio") !== "false"); // default true
   const [savePath, setSavePath] = useState(() => localStorage.getItem("savePath") || "Pictures/Shotera");
@@ -132,13 +133,15 @@ function SettingsWindow() {
     localStorage.setItem("regionShortcut", regionShortcut);
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
 
+    localStorage.setItem("showNotifications", String(showNotifications));
+
     // Sync autostart
     if (startAtBoot) {
       enable().catch(err => console.error("Failed to enable autostart:", err));
     } else {
       disable().catch(err => console.error("Failed to disable autostart:", err));
     }
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, showNotifications]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -308,7 +311,9 @@ function SettingsWindow() {
     }).catch((e) => {
       console.error("Failed to sync save settings with Rust backend:", e);
     });
-  }, [fileFormat, imageQuality, includeCursor]);
+
+    invoke("update_notification_setting", { show: showNotifications }).catch(console.error);
+  }, [fileFormat, imageQuality, includeCursor, showNotifications]);
 
   // Sync language with multi-window storage events
   useEffect(() => {
@@ -468,6 +473,21 @@ function SettingsWindow() {
                   type="checkbox"
                   checked={startInTray}
                   onChange={(e) => setStartInTray(e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{t.showNotifications}</span>
+                <span className="setting-desc">{t.showNotificationsDesc}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={showNotifications}
+                  onChange={(e) => setShowNotifications(e.target.checked)}
                 />
                 <span className="slider"></span>
               </label>
