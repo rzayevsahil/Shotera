@@ -71,7 +71,7 @@ function SettingsWindow() {
 
   // Listen to notification clicks
   useEffect(() => {
-    let unlistenFn: (() => void) | undefined;
+    let unlistenFn: any;
     onAction((notification) => {
       if (notification.id === 999) {
         setActiveTab("about");
@@ -84,7 +84,9 @@ function SettingsWindow() {
     }).catch(console.error);
 
     return () => {
-      if (unlistenFn) unlistenFn();
+      if (unlistenFn && typeof unlistenFn.unregister === 'function') {
+        unlistenFn.unregister();
+      }
     };
   }, []);
 
