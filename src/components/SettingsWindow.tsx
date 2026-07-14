@@ -72,12 +72,12 @@ function SettingsWindow() {
   // Listen to notification clicks
   useEffect(() => {
     let unlistenFn: any;
-    onAction((notification) => {
-      if (notification.id === 999) {
+    onAction((notification: any) => {
+      // notification id could be a string or number, or undefined
+      if (notification?.id == 999 || notification?.title === "Shotera" || !notification?.id) {
         setActiveTab("about");
         const win = getCurrentWindow();
-        win.show().catch(console.error);
-        win.setFocus().catch(console.error);
+        win.show().then(() => win.unminimize()).then(() => win.setFocus()).catch(console.error);
       }
     }).then((fn) => {
       unlistenFn = fn;
