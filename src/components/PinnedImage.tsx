@@ -53,11 +53,10 @@ export default function PinnedImage() {
     >
       {imageSrc && (
         <div style={{
-          width: "calc(100% - 8px)",
-          height: "calc(100% - 8px)",
-          margin: "4px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
-          border: "2px solid rgba(0, 242, 254, 0.8)",
+          width: "100%",
+          height: "100%",
+          boxSizing: "border-box",
+          border: isHovering ? "2px solid rgba(0, 242, 254, 0.9)" : "2px solid rgba(150, 150, 150, 0.5)",
           borderRadius: "6px",
           overflow: "hidden",
           background: "transparent",
@@ -75,24 +74,8 @@ export default function PinnedImage() {
 
       {isHovering && (
         <button
+          className="pinned-close-btn"
           onPointerDown={closeWindow}
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            background: "rgba(239, 68, 68, 0.9)",
-            border: "1px solid rgba(255,255,255,0.3)",
-            color: "white",
-            borderRadius: "50%",
-            width: 28,
-            height: 28,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            zIndex: 9999,
-            boxShadow: "0 2px 10px rgba(0,0,0,0.5)"
-          }}
         >
           <X size={16} />
         </button>

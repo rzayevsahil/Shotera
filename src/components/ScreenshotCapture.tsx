@@ -991,7 +991,7 @@ function ScreenshotCapture() {
     
     try {
       playShutterSoundIfEnabled();
-      await invoke("pin_image", { base64Str: base64, width: w + 12, height: h + 12, x: x - 6, y: y - 6 });
+      await invoke("pin_image", { base64Str: base64, width: w + 4, height: h + 4, x: x - 2, y: y - 2 });
       handleClose();
     } catch (e) {
       console.error("Failed to pin image:", e);
