@@ -629,6 +629,9 @@ function SettingsWindow() {
 
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorClose}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>ESC</span>
+
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorUndo}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + Z</span>
               </div>
             </div>
           </div>

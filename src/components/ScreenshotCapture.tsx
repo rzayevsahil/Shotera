@@ -170,6 +170,9 @@ function ScreenshotCapture() {
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
         handleSave();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        setDrawings((prev) => prev.slice(0, -1));
       }
     };
 
