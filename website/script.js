@@ -35,6 +35,9 @@ const translations = {
         "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
         "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
         "btn-download": "Download",
+        "cta-title": "Love using Shotera?",
+        "cta-desc": "Shotera is completely free and open-source. If you find it useful, please consider giving us a star on GitHub to support the development!",
+        "cta-btn": "Star on GitHub",
         "footer-desc1": "Open Source Screen Capture Utility.",
         "footer-desc2": "Created by <a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a>",
         "settings-img-src": "assets/settings_en1.png"
@@ -75,6 +78,9 @@ const translations = {
         "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
         "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
         "btn-download": "İndir",
+        "cta-title": "Shotera'yı sevdiniz mi?",
+        "cta-desc": "Shotera tamamen ücretsiz ve açık kaynaklıdır. Eğer uygulamanın faydalı olduğunu düşünüyorsanız, gelişimi desteklemek için bize GitHub'da yıldız verebilirsiniz!",
+        "cta-btn": "GitHub'da Yıldız Ver",
         "footer-desc1": "Açık Kaynaklı Ekran Yakalama Aracı.",
         "footer-desc2": "<a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a> tarafından geliştirildi.",
         "settings-img-src": "assets/settings_tr1.png"
