@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shotera | Cross-Platform Screenshot Suite</title>
+    <meta name="description" content="Shotera is an ultra-lightweight, fast, and privacy-focused screenshot utility running on Windows, macOS, and Linux.">
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="assets/logo.png" alt="Shotera Logo" class="logo-img">
+                <span class="logo-text">Shotera</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#downloads">Download</a>
+                <a href="https://github.com/rzayevsahil/Shotera" target="_blank" class="github-btn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content fade-in-up">
+            <h1 class="hero-title">Capture the web.<br><span class="gradient-text">Beautifully.</span></h1>
+            <p class="hero-subtitle">The ultra-lightweight, cross-platform screenshot utility for Windows, macOS, and Linux. Built with Rust and Tauri for maximum performance and privacy.</p>
+            
+            <div class="hero-actions">
+                <a href="#downloads" class="btn btn-primary" id="auto-download-btn">
+                    Download for <span id="os-name">Windows</span>
+                </a>
+                <a href="#features" class="btn btn-secondary">Explore Features</a>
+            </div>
+            <p class="version-info">Latest Release: v0.5.4</p>
+        </div>
+
+        <div class="hero-image glass-panel fade-in-up" style="animation-delay: 0.2s;">
+            <img src="assets/screenshot1.png" alt="Shotera App Screenshot">
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="features section">
+        <h2 class="section-title">Why choose Shotera?</h2>
+        <div class="features-grid">
+            
+            <div class="feature-card glass-panel fade-in-up">
+                <div class="feature-icon">🚀</div>
+                <h3>Blazing Fast</h3>
+                <p>Written in Rust, Shotera uses minimal system resources and starts instantly, capturing your screen with zero lag.</p>
+            </div>
+
+            <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.1s;">
+                <div class="feature-icon">🔒</div>
+                <h3>100% Offline & Private</h3>
+                <p>No telemetry, no tracking. All captures and edits happen completely offline on your own device.</p>
+            </div>
+
+            <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.2s;">
+                <div class="feature-icon">📌</div>
+                <h3>Pin to Screen</h3>
+                <p>Pin important screenshots above all other windows. Perfect for reference while coding or designing.</p>
+            </div>
+
+            <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.3s;">
+                <div class="feature-icon">🖌️</div>
+                <h3>Powerful Editor</h3>
+                <p>Instantly draw arrows, boxes, text, or blur sensitive information before saving or copying.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- UI Showcase Section -->
+    <section class="showcase section">
+        <div class="showcase-content">
+            <div class="showcase-text fade-in-up">
+                <h2>Designed to be <span class="gradient-text">elegant</span></h2>
+                <p>Shotera provides a modern, customizable Settings interface available in both English and Turkish. Define your own global shortcuts to trigger area or fullscreen captures natively.</p>
+                <ul class="feature-list">
+                    <li>✓ Custom Global Shortcuts (e.g., Cmd+Shift+S)</li>
+                    <li>✓ Multi-format support (PNG, JPG, WebP)</li>
+                    <li>✓ Run in background / system tray</li>
+                </ul>
+            </div>
+            <div class="showcase-gallery glass-panel fade-in-up">
+                <img src="assets/settings_en1.png" alt="Shotera Settings" class="gallery-img active">
+            </div>
+        </div>
+    </section>
+
+    <!-- Downloads Section -->
+    <section id="downloads" class="downloads section">
+        <h2 class="section-title">Get Shotera for your Platform</h2>
+        <p class="section-subtitle" style="text-align: center; margin-bottom: 3rem;">Download the latest v0.5.4 release directly from GitHub.</p>
+        
+        <div class="downloads-grid">
+            <!-- Windows -->
+            <div class="download-card glass-panel fade-in-up">
+                <div class="os-icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M2 3.75 10.4 2.6v9H2v-7.85zM11.6 2.45 22 1v10.6h-10.4V2.45zM2 12.8h8.4v9.1l-8.4-1.15V12.8zm9.6 0H22v10.3l-10.4-1.45V12.8z"/></svg>
+                </div>
+                <h3>Windows</h3>
+                <p>Windows 10 / 11 (64-bit)</p>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" class="btn btn-primary btn-full" target="_blank">Download .msi</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" class="btn btn-outline btn-full" target="_blank">Download .exe</a>
+            </div>
+
+            <!-- macOS -->
+            <div class="download-card glass-panel fade-in-up" style="animation-delay: 0.1s;">
+                <div class="os-icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M16.5 14c-1.35 0-2.5-1.15-2.5-2.5s1.15-2.5 2.5-2.5 2.5 1.15 2.5 2.5-1.15 2.5-2.5 2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 14c-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5 4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5z"/></svg>
+                </div>
+                <h3>macOS</h3>
+                <p>Apple Silicon (M1/M2/M3) & Intel</p>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" class="btn btn-primary btn-full" target="_blank">Download .dmg</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" class="btn btn-outline btn-full" target="_blank">Download .app.tar.gz</a>
+            </div>
+
+            <!-- Linux -->
+            <div class="download-card glass-panel fade-in-up" style="animation-delay: 0.2s;">
+                <div class="os-icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                </div>
+                <h3>Linux</h3>
+                <p>Ubuntu 24.04+ (Debian, AppImage)</p>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" class="btn btn-primary btn-full" target="_blank">Download .deb</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" class="btn btn-outline btn-full" target="_blank">Download AppImage</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="assets/logo.png" alt="Shotera Logo" width="24" height="24">
+                <span>Shotera</span>
+            </div>
+            <p>Open Source Screen Capture Utility.</p>
+            <p>Created by Sahil Rzayev</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
