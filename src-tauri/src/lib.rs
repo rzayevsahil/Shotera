@@ -26,8 +26,11 @@ fn show_app_notification(state: &State<'_, AppState>, title: &str, body: &str, i
         }
     }
     let mut notification = notify_rust::Notification::new();
+    
+    #[cfg(not(target_os = "macos"))]
+    notification.app_id("com.sahil.shotera");
+
     notification
-        .app_id("com.sahil.shotera")
         .appname("Shotera")
         .summary(title)
         .body(body);
@@ -281,7 +284,7 @@ async fn pin_image(
     let label = format!("pinned_{}", timestamp);
 
     // Create the pinned window
-    tauri::WebviewWindowBuilder::new(
+    let builder = tauri::WebviewWindowBuilder::new(
         &app_handle,
         label,
         tauri::WebviewUrl::App("index.html?pin=true".into())
@@ -289,13 +292,21 @@ async fn pin_image(
     .title("Pinned Image")
     .inner_size(width, height)
     .position(x, y)
-    .decorations(false)
-    .transparent(true)
-    .always_on_top(true)
-    .resizable(true)
-    .skip_taskbar(true)
-    .build()
-    .map_err(|e| e.to_string())?;
+    .decorations(false);
+    #[cfg(not(target_os = "macos"))]
+    let builder = builder.transparent(true);
+
+    // On macOS, WebviewWindowBuilder doesn't have the transparent method directly exposed in the same way,
+    // so we set the background color to transparent.
+    #[cfg(target_os = "macos")]
+    let builder = builder.background_color(tauri::utils::config::Color(0, 0, 0, 0));
+
+    builder
+        .always_on_top(true)
+        .resizable(true)
+        .skip_taskbar(true)
+        .build()
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
