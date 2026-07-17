@@ -27,7 +27,7 @@ fn show_app_notification(state: &State<'_, AppState>, title: &str, body: &str, i
     }
     let mut notification = notify_rust::Notification::new();
     
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(target_os = "windows")]
     notification.app_id("com.sahil.shotera");
 
     notification
