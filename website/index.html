@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shotera | Cross-Platform Screenshot Suite</title>
     <link rel="icon" type="image/png" href="assets/logo.png">
-    <meta name="description" content="Shotera is an ultra-lightweight, fast, and privacy-focused screenshot utility running on Windows, macOS, and Linux.">
+    <meta name="description"
+        content="Shotera is an ultra-lightweight, fast, and privacy-focused screenshot utility running on Windows, macOS, and Linux.">
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;700;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <!-- Animated Background -->
     <div class="bg-gradient"></div>
@@ -32,10 +37,17 @@
                 <a href="#features" data-i18n="nav-features">Features</a>
                 <a href="#downloads" data-i18n="nav-download">Download</a>
                 <a href="https://github.com/rzayevsahil/Shotera" target="_blank" class="github-btn">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <path
+                            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                        </path>
+                    </svg>
                     GitHub
                     <span class="star-badge" id="github-stars" style="display: none;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                            <path
+                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
                         <span id="star-count">0</span>
                     </span>
                 </a>
@@ -47,9 +59,11 @@
     <!-- Hero Section -->
     <header class="hero">
         <div class="hero-content fade-in-up">
-            <h1 class="hero-title" data-i18n="hero-title">Capture the web.<br><span class="gradient-text">Beautifully.</span></h1>
-            <p class="hero-subtitle" data-i18n="hero-subtitle">The ultra-lightweight, cross-platform screenshot utility for Windows, macOS, and Linux. Built with Rust and Tauri for maximum performance and privacy.</p>
-            
+            <h1 class="hero-title" data-i18n="hero-title">Capture the web.<br><span
+                    class="gradient-text">Beautifully.</span></h1>
+            <p class="hero-subtitle" data-i18n="hero-subtitle">The ultra-lightweight, cross-platform screenshot utility
+                for Windows, macOS, and Linux. Built with Rust and Tauri for maximum performance and privacy.</p>
+
             <div class="hero-actions">
                 <a href="#downloads" class="btn btn-primary" id="auto-download-btn">
                     <span data-i18n="hero-download-for">Download for</span> <span id="os-name">Windows</span>
@@ -71,69 +85,108 @@
     <section id="features" class="features section">
         <h2 class="section-title" data-i18n="feat-title">Why choose Shotera?</h2>
         <div class="features-grid">
-            
+
             <div class="feature-card glass-panel fade-in-up">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-1-title">Blazing Fast</h3>
-                <p data-i18n="feat-1-desc">Written in Rust, Shotera uses minimal system resources and starts instantly, capturing your screen with zero lag.</p>
+                <p data-i18n="feat-1-desc">Written in Rust, Shotera uses minimal system resources and starts instantly,
+                    capturing your screen with zero lag.</p>
             </div>
 
             <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.1s;">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-2-title">100% Offline & Private</h3>
-                <p data-i18n="feat-2-desc">No telemetry, no tracking. All captures and edits happen completely offline on your own device.</p>
+                <p data-i18n="feat-2-desc">No telemetry, no tracking. All captures and edits happen completely offline
+                    on your own device.</p>
             </div>
 
             <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.2s;">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <path
+                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                        </path>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-3-title">Pin to Screen</h3>
-                <p data-i18n="feat-3-desc">Pin important screenshots above all other windows. Perfect for reference while coding or designing.</p>
+                <p data-i18n="feat-3-desc">Pin important screenshots above all other windows. Perfect for reference
+                    while coding or designing.</p>
             </div>
 
             <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.3s;">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-4-title">Powerful Editor</h3>
-                <p data-i18n="feat-4-desc">Instantly draw arrows, boxes, text, or blur sensitive information before saving or copying.</p>
+                <p data-i18n="feat-4-desc">Instantly draw arrows, boxes, text, or blur sensitive information before
+                    saving or copying.</p>
             </div>
 
             <div class="feature-card glass-panel fade-in-up">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-5-title">Quick Cloud Upload</h3>
-                <p data-i18n="feat-5-desc">Upload screenshots to Imgur with a single click and instantly copy the link to your clipboard.</p>
+                <p data-i18n="feat-5-desc">Upload screenshots to Imgur with a single click and instantly copy the link
+                    to your clipboard.</p>
             </div>
 
             <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.1s;">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        <line x1="11" y1="8" x2="11" y2="14"></line>
+                        <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-6-title">Text Recognition (OCR)</h3>
-                <p data-i18n="feat-6-desc">Extract text from uncopyable areas on your screen with a single click and copy it as text.</p>
+                <p data-i18n="feat-6-desc">Extract text from uncopyable areas on your screen with a single click and
+                    copy it as text.</p>
             </div>
 
             <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.2s;">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-7-title">Step Counter</h3>
-                <p data-i18n="feat-7-desc">Click on the screen to add auto-incrementing numbers (1, 2, 3). Perfect for tutorials.</p>
+                <p data-i18n="feat-7-desc">Click on the screen to add auto-incrementing numbers (1, 2, 3). Perfect for
+                    tutorials.</p>
             </div>
 
             <div class="feature-card glass-panel fade-in-up" style="animation-delay: 0.3s;">
                 <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
                 </div>
                 <h3 data-i18n="feat-8-title">Multi-Format Support</h3>
-                <p data-i18n="feat-8-desc">Save your screenshots in PNG, JPG, or modern WebP formats with adjustable quality settings.</p>
+                <p data-i18n="feat-8-desc">Save your screenshots in PNG, JPG, or modern WebP formats with adjustable
+                    quality settings.</p>
             </div>
 
         </div>
@@ -144,7 +197,9 @@
         <div class="showcase-content">
             <div class="showcase-text fade-in-up">
                 <h2 data-i18n="showcase-title">Designed to be <span class="gradient-text">elegant</span></h2>
-                <p data-i18n="showcase-desc">Shotera provides a modern, customizable Settings interface available in both English and Turkish. Define your own global shortcuts to trigger area or fullscreen captures natively.</p>
+                <p data-i18n="showcase-desc">Shotera provides a modern, customizable Settings interface available in
+                    both English and Turkish. Define your own global shortcuts to trigger area or fullscreen captures
+                    natively.</p>
                 <ul class="feature-list">
                     <li data-i18n="showcase-li-1">✓ Custom Global Shortcuts (e.g., Cmd+Shift+S)</li>
                     <li data-i18n="showcase-li-2">✓ Multi-format support (PNG, JPG, WebP)</li>
@@ -155,7 +210,8 @@
                 <video width="100%" autoplay loop muted playsinline style="display: block; border-radius: 12px;">
                     <source src="assets/settings.mp4" type="video/mp4">
                     <!-- Yedek resim (video desteklenmezse veya yüklenmezse) -->
-                    <img src="assets/settings_en1.png" id="settings-img" alt="Shotera Settings" class="gallery-img active">
+                    <img src="assets/settings_en1.png" id="settings-img" alt="Shotera Settings"
+                        class="gallery-img active">
                 </video>
             </div>
         </div>
@@ -164,40 +220,56 @@
     <!-- Downloads Section -->
     <section id="downloads" class="downloads section">
         <h2 class="section-title" data-i18n="dl-title">Get Shotera for your Platform</h2>
-        <p class="section-subtitle" style="text-align: center; margin-bottom: 3rem;"><span data-i18n="dl-subtitle">Download the latest v0.5.4 release directly from GitHub.</span></p>
-        
+        <p class="section-subtitle" style="text-align: center; margin-bottom: 3rem;"><span
+                data-i18n="dl-subtitle">Download the latest v0.5.4 release directly from GitHub.</span></p>
+
         <div class="downloads-grid">
             <!-- Windows -->
             <div class="download-card glass-panel fade-in-up">
                 <div class="os-icon">
-                    <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M2 3.75 10.4 2.6v9H2v-7.85zM11.6 2.45 22 1v10.6h-10.4V2.45zM2 12.8h8.4v9.1l-8.4-1.15V12.8zm9.6 0H22v10.3l-10.4-1.45V12.8z"/></svg>
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+                        <path
+                            d="M2 3.75 10.4 2.6v9H2v-7.85zM11.6 2.45 22 1v10.6h-10.4V2.45zM2 12.8h8.4v9.1l-8.4-1.15V12.8zm9.6 0H22v10.3l-10.4-1.45V12.8z" />
+                    </svg>
                 </div>
                 <h3>Windows</h3>
                 <p data-i18n="dl-win-desc">Windows 10 / 11 (64-bit)</p>
-                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="win-msi-btn" class="btn btn-primary btn-full"><span data-i18n="btn-download">Download</span> .msi</a>
-                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="win-exe-btn" class="btn btn-outline btn-full"><span data-i18n="btn-download">Download</span> .exe</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="win-msi-btn"
+                    class="btn btn-primary btn-full"><span data-i18n="btn-download">Download</span> .msi</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="win-exe-btn"
+                    class="btn btn-outline btn-full"><span data-i18n="btn-download">Download</span> .exe</a>
             </div>
 
             <!-- macOS -->
             <div class="download-card glass-panel fade-in-up" style="animation-delay: 0.1s;">
                 <div class="os-icon">
-                    <svg viewBox="0 0 384 512" width="48" height="48" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.3 48.6-.7 90.4-82.5 102.7-119.3-65.2-30.7-61.7-90-61.8-91.3zM244 83.8C257.1 67 264.4 44 261.7 14.9c-23.5 1.5-49 14.9-62.2 31.6-11.3 14.3-20.5 38.5-17.1 61.3 25.8 2.1 48.4-8.8 61.6-24z"/></svg>
+                    <svg viewBox="0 0 384 512" width="48" height="48" fill="currentColor">
+                        <path
+                            d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.3 48.6-.7 90.4-82.5 102.7-119.3-65.2-30.7-61.7-90-61.8-91.3zM244 83.8C257.1 67 264.4 44 261.7 14.9c-23.5 1.5-49 14.9-62.2 31.6-11.3 14.3-20.5 38.5-17.1 61.3 25.8 2.1 48.4-8.8 61.6-24z" />
+                    </svg>
                 </div>
                 <h3>macOS</h3>
                 <p data-i18n="dl-mac-desc">Apple Silicon (M1/M2/M3) & Intel</p>
-                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="mac-dmg-btn" class="btn btn-primary btn-full"><span data-i18n="btn-download">Download</span> .dmg</a>
-                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="mac-tar-btn" class="btn btn-outline btn-full"><span data-i18n="btn-download">Download</span> .app.tar.gz</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="mac-dmg-btn"
+                    class="btn btn-primary btn-full"><span data-i18n="btn-download">Download</span> .dmg</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="mac-tar-btn"
+                    class="btn btn-outline btn-full"><span data-i18n="btn-download">Download</span> .app.tar.gz</a>
             </div>
 
             <!-- Linux -->
             <div class="download-card glass-panel fade-in-up" style="animation-delay: 0.2s;">
                 <div class="os-icon">
-                    <svg viewBox="0 0 448 512" width="48" height="48" fill="currentColor"><path d="M220.8 123.3c1 .5 1.8 1.7 3 1.7 1.1 0 2.8-.4 2.9-1.5.2-1.4-1.9-2.3-3.2-2.9-1.7-.7-3.9-1-5.5-.1-.4.2-.8.7-.6 1.1.3 1.3 2.3 1.1 3.4 1.7zm-21.9 1.7c1.2 0 2-1.2 3-1.7 1.1-.6 3.1-.4 3.5-1.7.2-.4-.2-.9-.6-1.1-1.6-.9-3.8-.6-5.5.1-1.3.6-3.4 1.5-3.2 2.9.1 1 1.8 1.5 2.8 1.5zM440.6 329.3c-11.3-46.1-41.9-88-82.6-118-24.5-18.1-51.4-30.7-72.2-43.7 10.3-29.2 25.9-64 12.3-95.2-12.7-29.3-43.2-56-78.4-67.9-12.1-4.1-25.1-5.7-36.9-3.9-16.1 2.4-31.9 9.8-43.8 20.3-21.6 18.9-32.9 48.4-32.5 77.2.3 16.2 3.8 32.5 9 48 3.9 11.5 8.9 22.8 13.9 33.9-19.1 11.7-44.4 23.3-66.9 39.4-40.4 29-71.5 70.8-82.5 116.5-7.3 30.6-2.1 63.3 13.5 90.6 12 21 31.7 39.3 54 48.5 24 9.9 50.7 9.8 76.5 6.4 7.6-1 15-2.9 21.6-6.6 6.8-3.9 12-10 16.2-16.5 5.5-8.5 10.2-17.6 14.8-26.6 22 2.4 44 2.8 66 1.7 5.8 10 11.7 19.8 18.5 29 5.8 7.9 13.3 15 22.4 19 22.3 9.9 48.6 11.7 72.8 4.2 28.5-8.9 53.9-30.8 66-57.8 16.3-36.4 17.5-77.9 7.4-116.6zM136.2 466.8c-1.7 1.5-4.1 2.3-6.4 2.6-26.2 4-53.7 2.1-77.7-9.5-15.6-7.5-30-20-37.5-35.3-7.7-15.6-10.4-33.8-6-50.7 7.7-29.3 26.6-54.8 50-73.6 14.1-11.3 29.8-20.9 46.1-29.3 11 16.7 21 34 33.5 49.9 8.2 10.5 17 20.8 27.6 29-7.3 14.3-13.8 29-21.7 42.7-8.8 15-21 27.5-36 33.6-3.8 1.5-7.9 2-11.9.6zm226.7 0c-3.9 1.4-8 1-11.9-.6-15-6.1-27.2-18.6-36-33.6-7.8-13.7-14.4-28.5-21.7-42.7 10.6-8.2 19.3-18.5 27.6-29 12.5-15.8 22.5-33.1 33.5-49.9 16.4 8.5 32 18 46.1 29.3 23.4 18.8 42.4 44.3 50 73.6 4.3 16.9 1.7 35.1-6 50.7-7.6 15.3-22 27.8-37.5 35.3-24 11.5-51.5 13.5-77.7 9.5-2.2-.3-4.6-1.1-6.4-2.6zM281.3 302.3c-1.3 3.5-5 5.5-8.7 5.1-16-1.5-32.3-1.6-48.4-.5-3.8.3-7.5-1.9-8.7-5.5-5.2-16-9.6-32.4-13.3-49 9.9-1.9 20.1-2.9 30.3-2.9 8.6 0 17 1 25.5 2.5-2.5 7.1-5.1 14.2-7.5 21.2 5.3-6.6 12.2-11.9 20-15.3-6.5 14.8-5.3 30.3-9.2 44.4zm-14.8-82c16.3-2.2 32.5 1 47 8.3 10.6 5.3 20 12.6 28 21.3-4.8 18.2-11.1 35.9-18.9 52.8-4.5-5-9.6-9.4-15.3-13-17-10.6-38.3-13.3-57.8-7-2 4.4-3.5 9.4-4 14.4-3.6-6.6-8.5-12.3-14.4-16.8-17.1-13-39.7-15.2-60.3-6.9-1.1-4.9-1.9-9.8-2.5-14.8-8.1-17.2-14.8-35.1-20.1-53.5 8-8.7 17.4-15.9 28-21.3 14.5-7.3 30.7-10.4 47-8.3 13.2 1.6 25.6 7.4 34.3 17 8.7-9.6 21.1-15.3 34.3-17z"/></svg>
+                    <svg viewBox="0 0 448 512" width="48" height="48" fill="currentColor">
+                        <path
+                            d="M220.8 123.3c1 .5 1.8 1.7 3 1.7 1.1 0 2.8-.4 2.9-1.5.2-1.4-1.9-2.3-3.2-2.9-1.7-.7-3.9-1-5.5-.1-.4.2-.8.7-.6 1.1.3 1.3 2.3 1.1 3.4 1.7zm-21.9 1.7c1.2 0 2-1.2 3-1.7 1.1-.6 3.1-.4 3.5-1.7.2-.4-.2-.9-.6-1.1-1.6-.9-3.8-.6-5.5.1-1.3.6-3.4 1.5-3.2 2.9.1 1 1.8 1.5 2.8 1.5zM440.6 329.3c-11.3-46.1-41.9-88-82.6-118-24.5-18.1-51.4-30.7-72.2-43.7 10.3-29.2 25.9-64 12.3-95.2-12.7-29.3-43.2-56-78.4-67.9-12.1-4.1-25.1-5.7-36.9-3.9-16.1 2.4-31.9 9.8-43.8 20.3-21.6 18.9-32.9 48.4-32.5 77.2.3 16.2 3.8 32.5 9 48 3.9 11.5 8.9 22.8 13.9 33.9-19.1 11.7-44.4 23.3-66.9 39.4-40.4 29-71.5 70.8-82.5 116.5-7.3 30.6-2.1 63.3 13.5 90.6 12 21 31.7 39.3 54 48.5 24 9.9 50.7 9.8 76.5 6.4 7.6-1 15-2.9 21.6-6.6 6.8-3.9 12-10 16.2-16.5 5.5-8.5 10.2-17.6 14.8-26.6 22 2.4 44 2.8 66 1.7 5.8 10 11.7 19.8 18.5 29 5.8 7.9 13.3 15 22.4 19 22.3 9.9 48.6 11.7 72.8 4.2 28.5-8.9 53.9-30.8 66-57.8 16.3-36.4 17.5-77.9 7.4-116.6zM136.2 466.8c-1.7 1.5-4.1 2.3-6.4 2.6-26.2 4-53.7 2.1-77.7-9.5-15.6-7.5-30-20-37.5-35.3-7.7-15.6-10.4-33.8-6-50.7 7.7-29.3 26.6-54.8 50-73.6 14.1-11.3 29.8-20.9 46.1-29.3 11 16.7 21 34 33.5 49.9 8.2 10.5 17 20.8 27.6 29-7.3 14.3-13.8 29-21.7 42.7-8.8 15-21 27.5-36 33.6-3.8 1.5-7.9 2-11.9.6zm226.7 0c-3.9 1.4-8 1-11.9-.6-15-6.1-27.2-18.6-36-33.6-7.8-13.7-14.4-28.5-21.7-42.7 10.6-8.2 19.3-18.5 27.6-29 12.5-15.8 22.5-33.1 33.5-49.9 16.4 8.5 32 18 46.1 29.3 23.4 18.8 42.4 44.3 50 73.6 4.3 16.9 1.7 35.1-6 50.7-7.6 15.3-22 27.8-37.5 35.3-24 11.5-51.5 13.5-77.7 9.5-2.2-.3-4.6-1.1-6.4-2.6zM281.3 302.3c-1.3 3.5-5 5.5-8.7 5.1-16-1.5-32.3-1.6-48.4-.5-3.8.3-7.5-1.9-8.7-5.5-5.2-16-9.6-32.4-13.3-49 9.9-1.9 20.1-2.9 30.3-2.9 8.6 0 17 1 25.5 2.5-2.5 7.1-5.1 14.2-7.5 21.2 5.3-6.6 12.2-11.9 20-15.3-6.5 14.8-5.3 30.3-9.2 44.4zm-14.8-82c16.3-2.2 32.5 1 47 8.3 10.6 5.3 20 12.6 28 21.3-4.8 18.2-11.1 35.9-18.9 52.8-4.5-5-9.6-9.4-15.3-13-17-10.6-38.3-13.3-57.8-7-2 4.4-3.5 9.4-4 14.4-3.6-6.6-8.5-12.3-14.4-16.8-17.1-13-39.7-15.2-60.3-6.9-1.1-4.9-1.9-9.8-2.5-14.8-8.1-17.2-14.8-35.1-20.1-53.5 8-8.7 17.4-15.9 28-21.3 14.5-7.3 30.7-10.4 47-8.3 13.2 1.6 25.6 7.4 34.3 17 8.7-9.6 21.1-15.3 34.3-17z" />
+                    </svg>
                 </div>
                 <h3>Linux</h3>
                 <p data-i18n="dl-linux-desc">Ubuntu 24.04+ (Debian, AppImage)</p>
-                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="linux-deb-btn" class="btn btn-primary btn-full"><span data-i18n="btn-download">Download</span> .deb</a>
-                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="linux-appimage-btn" class="btn btn-outline btn-full"><span data-i18n="btn-download">Download</span> AppImage</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="linux-deb-btn"
+                    class="btn btn-primary btn-full"><span data-i18n="btn-download">Download</span> .deb</a>
+                <a href="https://github.com/rzayevsahil/Shotera/releases/latest" id="linux-appimage-btn"
+                    class="btn btn-outline btn-full"><span data-i18n="btn-download">Download</span> AppImage</a>
             </div>
         </div>
         </div>
@@ -205,11 +277,18 @@
 
     <!-- Star CTA Section -->
     <section class="cta-star section">
-        <div class="glass-panel text-center fade-in-up" style="max-width: 800px; margin: 0 auto; text-align: center; padding: 3rem 2rem;">
+        <div class="glass-panel text-center fade-in-up"
+            style="max-width: 800px; margin: 0 auto; text-align: center; padding: 3rem 2rem;">
             <h2 data-i18n="cta-title" style="font-size: 2rem; margin-bottom: 1rem;">Love using Shotera?</h2>
-            <p data-i18n="cta-desc" style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">Shotera is completely free and open-source. If you find it useful, please consider giving us a star on GitHub to support the development!</p>
-            <a href="https://github.com/rzayevsahil/Shotera" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; margin: 0 auto;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <p data-i18n="cta-desc" style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">Shotera is
+                completely free and open-source. If you find it useful, please consider giving us a star on GitHub to
+                support the development!</p>
+            <a href="https://github.com/rzayevsahil/Shotera" target="_blank" class="btn btn-primary"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; margin: 0 auto;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path
+                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                </svg>
                 <span data-i18n="cta-btn">Star on GitHub</span>
             </a>
         </div>
@@ -223,10 +302,34 @@
                 <span>Shotera</span>
             </div>
             <p data-i18n="footer-desc1">Open Source Screen Capture Utility.</p>
-            <p data-i18n="footer-desc2">Created by <a href="https://www.linkedin.com/in/sahilrzayev/" target="_blank">Sahil Rzayev</a></p>
+            <p data-i18n="footer-desc2">Created by <a href="https://www.linkedin.com/in/sahilrzayev/"
+                    target="_blank">Sahil Rzayev</a></p>
+            <div class="footer-socials">
+                <a href="https://github.com/rzayevsahil" target="_blank" aria-label="GitHub">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <path
+                            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                        </path>
+                    </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/sahilrzayev/" target="_blank" aria-label="LinkedIn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                        <rect x="2" y="9" width="4" height="12"></rect>
+                        <circle cx="4" cy="4" r="2"></circle>
+                    </svg>
+                </a>
+                <a href="mailto:sahilrzayev200d@gmail.com" aria-label="Email">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </a>
+            </div>
         </div>
     </footer>
 
     <script src="script.js"></script>
 </body>
+
 </html>

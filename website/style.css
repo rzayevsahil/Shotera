@@ -478,6 +478,30 @@ footer p {
     margin-bottom: 0.5rem;
 }
 
+.footer-socials {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.footer-socials a {
+    color: var(--text-muted);
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+}
+
+.footer-socials a:hover {
+    color: var(--accent);
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
 .footer-content a {
     color: var(--accent);
     text-decoration: none;
