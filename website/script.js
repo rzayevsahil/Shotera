@@ -35,6 +35,7 @@ const translations = {
         "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
         "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
         "btn-download": "Download",
+        "dl-count": "Downloads:",
         "cta-title": "Love using Shotera?",
         "cta-desc": "Shotera is completely free and open-source. If you find it useful, please consider giving us a star on GitHub to support the development!",
         "cta-btn": "Star on GitHub",
@@ -78,6 +79,7 @@ const translations = {
         "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
         "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
         "btn-download": "İndir",
+        "dl-count": "İndirilme:",
         "cta-title": "Shotera'yı sevdiniz mi?",
         "cta-desc": "Shotera tamamen ücretsiz ve açık kaynaklıdır. Eğer uygulamanın faydalı olduğunu düşünüyorsanız, gelişimi desteklemek için bize GitHub'da yıldız verebilirsiniz!",
         "cta-btn": "GitHub'da Yıldız Ver",
@@ -148,15 +150,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const assets = data.assets;
             
             let msiUrl = "", exeUrl = "", dmgUrl = "", tarUrl = "", debUrl = "", appImageUrl = "";
+            let winCount = 0, macCount = 0, linuxCount = 0;
             
             assets.forEach(asset => {
                 const name = asset.name.toLowerCase();
-                if (name.endsWith('.msi')) msiUrl = asset.browser_download_url;
-                else if (name.endsWith('.exe')) exeUrl = asset.browser_download_url;
-                else if (name.endsWith('.dmg')) dmgUrl = asset.browser_download_url;
-                else if (name.endsWith('app.tar.gz')) tarUrl = asset.browser_download_url;
-                else if (name.endsWith('.deb')) debUrl = asset.browser_download_url;
-                else if (name.endsWith('.appimage')) appImageUrl = asset.browser_download_url;
+                if (name.endsWith('.msi')) {
+                    msiUrl = asset.browser_download_url;
+                    winCount += asset.download_count;
+                }
+                else if (name.endsWith('.exe')) {
+                    exeUrl = asset.browser_download_url;
+                    winCount += asset.download_count;
+                }
+                else if (name.endsWith('.dmg')) {
+                    dmgUrl = asset.browser_download_url;
+                    macCount += asset.download_count;
+                }
+                else if (name.endsWith('app.tar.gz')) {
+                    tarUrl = asset.browser_download_url;
+                    macCount += asset.download_count;
+                }
+                else if (name.endsWith('.deb')) {
+                    debUrl = asset.browser_download_url;
+                    linuxCount += asset.download_count;
+                }
+                else if (name.endsWith('.appimage')) {
+                    appImageUrl = asset.browser_download_url;
+                    linuxCount += asset.download_count;
+                }
             });
 
             // Set hrefs to direct downloads
@@ -166,6 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tarUrl) document.getElementById('mac-tar-btn').href = tarUrl;
             if (debUrl) document.getElementById('linux-deb-btn').href = debUrl;
             if (appImageUrl) document.getElementById('linux-appimage-btn').href = appImageUrl;
+            
+            // Set download counts
+            document.getElementById('win-dl-count').textContent = winCount;
+            document.getElementById('mac-dl-count').textContent = macCount;
+            document.getElementById('linux-dl-count').textContent = linuxCount;
             
             // Set the dynamic hero button download link
             if (osName === "Windows" && msiUrl) autoDownloadBtn.href = msiUrl;
