@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 signer-key*
 DEV_README.md
+plan.md
+premium_features_plan.md
