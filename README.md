@@ -1,5 +1,5 @@
 <p align="center">
-  <!-- LOGO GÖRSELİNİZİ BURAYA EKLEYEBİLİRSİNİZ (Örn: <img src="assets/logo.png" width="128" />) -->
+  <img src="src/assets/logo.png" width="128" alt="Shotera Logo" />
   <h1 align="center">Shotera</h1>
 </p>
 
@@ -16,8 +16,7 @@
 </p>
 
 <p align="center">
-  <!-- UYGULAMANIN GENEL GÖRÜNÜMÜNÜ (SCREENSHOT) BURAYA EKLEYEBİLİRSİNİZ -->
-  <!-- <img src="assets/screenshot1.png" width="600" /> -->
+  <img src="src/assets/screenshot1.png" width="800" alt="Shotera Screenshot" />
 </p>
 
 ### 🌟 Nedir?
@@ -38,8 +37,14 @@
 - 🔢 **Adım Sayacı (Tutorial Modu):** Ekrana tıkladıkça 1, 2, 3 şeklinde otomatik artan numaralar ekleyin. Eğitim ve rehber görselleri hazırlamak için birebir!
 
 <p align="center">
-  <!-- UYGULAMADAN DİĞER GÖRSELLERİ VEYA GIF'LERİ BURAYA EKLEYEBİLİRSİNİZ -->
-  <!-- <img src="assets/settings.png" width="400" /> <img src="assets/pin_feature.gif" width="400" /> -->
+  <img src="src/assets/settings_tr1.png" width="400" alt="Settings General TR" />
+  <img src="src/assets/settings_tr2.png" width="400" alt="Settings Shortcuts TR" />
+  <br />
+  <img src="src/assets/settings_tr3.png" width="400" alt="Settings Export TR" />
+  <img src="src/assets/settings_tr4.png" width="400" alt="Settings About TR" />
+  <br />
+  <br />
+  <img src="src/assets/pin_feature.png" width="600" alt="Pin Feature" />
 </p>
 
 ### 📥 İndirme ve Kurulum
@@ -72,8 +77,7 @@ Bu projenin geliştirme ve build (derleme) adımları ile ilgili talimatlar proj
 </p>
 
 <p align="center">
-  <!-- YOU CAN ADD A GENERAL SCREENSHOT OF THE APP HERE -->
-  <!-- <img src="assets/screenshot1_en.png" width="600" /> -->
+  <img src="src/assets/screenshot1.png" width="800" alt="Shotera Screenshot" />
 </p>
 
 ### 🌟 What is it?
@@ -94,8 +98,14 @@ Bu projenin geliştirme ve build (derleme) adımları ile ilgili talimatlar proj
 - 🔢 **Step Counter (Tutorial Mode):** Click on the screen to add auto-incrementing numbers (1, 2, 3...). Perfect for creating educational and guide images!
 
 <p align="center">
-  <!-- YOU CAN ADD OTHER SCREENSHOTS OR GIFS OF THE APP HERE -->
-  <!-- <img src="assets/settings_en.png" width="400" /> <img src="assets/pin_feature_en.gif" width="400" /> -->
+  <img src="src/assets/settings_en1.png" width="400" alt="Settings General EN" />
+  <img src="src/assets/settings_en2.png" width="400" alt="Settings Shortcuts EN" />
+  <br />
+  <img src="src/assets/settings_en3.png" width="400" alt="Settings Export EN" />
+  <img src="src/assets/settings_en4.png" width="400" alt="Settings About EN" />
+  <br />
+  <br />
+  <img src="src/assets/pin_feature.png" width="600" alt="Pin Feature" />
 </p>
 
 ### 📥 Download & Installation
@@ -122,5 +132,5 @@ Development and build instructions are documented in the internal developer note
 ---
 
 <p align="center">
-  Built with love and <strong>Rust & React</strong> ❤️
+  Built with love ❤️
 </p>
