@@ -242,14 +242,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.getElementById('nav-links');
 
     if (mobileBtn && navLinks) {
+        const navbar = document.querySelector('.navbar');
+        
         mobileBtn.addEventListener('click', () => {
             navLinks.classList.toggle('active');
+            if (navbar) navbar.classList.toggle('menu-open');
         });
 
         // Close menu when clicking a link
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 navLinks.classList.remove('active');
+                if (navbar) navbar.classList.remove('menu-open');
             });
         });
     }

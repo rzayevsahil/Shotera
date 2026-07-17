@@ -118,6 +118,12 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: 1px solid var(--glass-border);
 }
 
+.navbar.menu-open {
+    background: rgba(15, 17, 26, 0.95);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--glass-border);
+}
+
 .nav-container {
     max-width: 1200px;
     margin: 0 auto;
