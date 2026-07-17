@@ -26,7 +26,7 @@ const translations = {
         "feat-8-desc": "Save your screenshots in PNG, JPG, or modern WebP formats with adjustable quality settings.",
         "showcase-title": "Designed to be <span class=\"gradient-text\">elegant</span>",
         "showcase-desc": "Shotera provides a modern, customizable Settings interface available in both English and Turkish. Define your own global shortcuts to trigger area or fullscreen captures natively.",
-        "showcase-li-1": "✓ Custom Global Shortcuts (e.g., Cmd+Shift+S)",
+        "showcase-li-1": "✓ Custom Global Shortcuts (e.g., {mod}+Shift+S)",
         "showcase-li-2": "✓ Multi-format support (PNG, JPG, WebP)",
         "showcase-li-3": "✓ Run in background / system tray",
         "dl-title": "Get Shotera for your Platform",
@@ -66,7 +66,7 @@ const translations = {
         "feat-8-desc": "Ekran görüntülerinizi PNG, JPG veya modern WebP formatlarında, belirlediğiniz kaliteyle kaydedin.",
         "showcase-title": "<span class=\"gradient-text\">Zarif</span> olması için tasarlandı",
         "showcase-desc": "Shotera, hem İngilizce hem Türkçe dil desteğiyle modern ve özelleştirilebilir bir Ayarlar arayüzü sunar. Tam ekran veya bölge seçimi yakalamak için kendi kısayollarınızı tanımlayın.",
-        "showcase-li-1": "✓ Özel Global Kısayollar (Örn: Cmd+Shift+S)",
+        "showcase-li-1": "✓ Özel Global Kısayollar (Örn: {mod}+Shift+S)",
         "showcase-li-2": "✓ Çoklu format desteği (PNG, JPG, WebP)",
         "showcase-li-3": "✓ Arka planda / tepside çalışma",
         "dl-title": "Platformunuz için Shotera'yı İndirin",
@@ -188,11 +188,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update document lang
         document.documentElement.lang = lang;
         
+        // OS Modifier for shortcuts
+        const modifier = osName === "macOS" ? "Cmd" : "Ctrl";
+        
         // Update text nodes
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (translations[lang] && translations[lang][key]) {
-                el.innerHTML = translations[lang][key];
+                let text = translations[lang][key];
+                // dynamically replace the modifier key
+                text = text.replace('{mod}', modifier);
+                el.innerHTML = text;
             }
         });
 
