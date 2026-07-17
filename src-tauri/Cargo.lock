@@ -4318,6 +4318,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
+name = "shotera"
+version = "0.4.8"
+dependencies = [
+ "arboard",
+ "base64 0.22.1",
+ "chrono",
+ "image",
+ "notify-rust",
+ "reqwest 0.12.28",
+ "rfd",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-autostart",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-notification",
+ "tauri-plugin-opener",
+ "tauri-plugin-process",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-updater",
+ "windows-sys 0.59.0",
+ "xcap",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4689,32 +4715,6 @@ dependencies = [
  "webview2-com",
  "window-vibrancy",
  "windows 0.61.3",
-]
-
-[[package]]
-name = "tauri-app"
-version = "0.4.5"
-dependencies = [
- "arboard",
- "base64 0.22.1",
- "chrono",
- "image",
- "notify-rust",
- "reqwest 0.12.28",
- "rfd",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-autostart",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-notification",
- "tauri-plugin-opener",
- "tauri-plugin-process",
- "tauri-plugin-single-instance",
- "tauri-plugin-updater",
- "windows-sys 0.59.0",
- "xcap",
 ]
 
 [[package]]
