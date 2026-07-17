@@ -1,6 +1,6 @@
 [package]
 name = "shotera"
-version = "0.4.9"
+version = "0.5.0"
 description = "Shotera Screen Capture Application"
 authors = ["Sahil Rzayev"]
 edition = "2021"
@@ -31,12 +31,15 @@ xcap = "0.9.6"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
 base64 = "0.22"
 chrono = "0.4"
-windows-sys = { version = "0.59", features = ["Win32_Graphics_Dwm", "Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell"] }
+
 rfd = "0.15"
 reqwest = { version = "0.12", features = ["json", "multipart"] }
 tauri-plugin-autostart = "2.5.1"
 tauri-plugin-single-instance = "2.4.2"
 notify-rust = "4.18.0"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Graphics_Dwm", "Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell"] }
 
 # Optimize all dependencies even in dev/debug mode for maximum performance (e.g. ultra-fast PNG compression)
 [profile.dev.package."*"]

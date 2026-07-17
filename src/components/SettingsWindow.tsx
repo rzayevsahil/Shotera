@@ -54,8 +54,8 @@ function SettingsWindow() {
           sendNotification({
             id: 999,
             title: "Shotera",
-            body: lang === "tr" 
-              ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.` 
+            body: lang === "tr"
+              ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.`
               : `A new update is available (v${update.version})! Visit Settings > About to install it.`
           });
         }
@@ -207,8 +207,10 @@ function SettingsWindow() {
       parts.push(keyName);
       const shortcutStr = parts.join("+");
 
-      if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s") {
-        setWarningMessage(t.shortcutConflictMsg);
+      const isMac = navigator.userAgent.toLowerCase().includes('mac');
+      const ctrlKeyName = isMac ? "Cmd" : "Ctrl";
+      if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s" || shortcutStr.toLowerCase() === "super+c" || shortcutStr.toLowerCase() === "super+s") {
+        setWarningMessage(t.shortcutConflictMsg(ctrlKeyName));
         setRecordingType(null);
         return;
       }
@@ -240,12 +242,10 @@ function SettingsWindow() {
       parts.push("PrintScreen");
       const shortcutStr = parts.join("+");
 
-      if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s") {
-        setWarningMessage(
-          lang === "tr"
-            ? "Ctrl+C ve Ctrl+S kısayolları kopyalama ve kaydetme işlemleri için ayrılmıştır. Lütfen başka bir kombinasyon seçin."
-            : "Ctrl+C and Ctrl+S shortcuts are reserved for copy and save actions. Please select another combination."
-        );
+      const isMac = navigator.userAgent.toLowerCase().includes('mac');
+      const ctrlKeyName = isMac ? "Cmd" : "Ctrl";
+      if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s" || shortcutStr.toLowerCase() === "super+c" || shortcutStr.toLowerCase() === "super+s") {
+        setWarningMessage(t.shortcutConflictMsg(ctrlKeyName));
         setRecordingType(null);
         return;
       }
@@ -349,6 +349,15 @@ function SettingsWindow() {
   };
 
   const t = translations[lang];
+
+  const isMac = navigator.userAgent.toLowerCase().includes('mac');
+  const ctrlKey = isMac ? "Cmd" : "Ctrl";
+
+  const formatShortcut = (shortcut: string) => {
+    let formatted = shortcut.replace(/Ctrl/ig, ctrlKey);
+    formatted = formatted.replace(/Super/ig, isMac ? "Cmd" : "Win");
+    return formatted;
+  };
 
   return (
     <div className="settings-container">
@@ -579,7 +588,7 @@ function SettingsWindow() {
                     outline: "none"
                   }}
                 >
-                  {recordingType === "region" ? t.shortcutPressKeys : regionShortcut}
+                  {recordingType === "region" ? t.shortcutPressKeys : formatShortcut(regionShortcut)}
                 </button>
               </div>
             </div>
@@ -604,7 +613,7 @@ function SettingsWindow() {
                     outline: "none"
                   }}
                 >
-                  {recordingType === "fullscreen" ? t.shortcutPressKeys : fullscreenShortcut}
+                  {recordingType === "fullscreen" ? t.shortcutPressKeys : formatShortcut(fullscreenShortcut)}
                 </button>
               </div>
             </div>
@@ -622,16 +631,16 @@ function SettingsWindow() {
                 alignItems: "center"
               }}>
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorCopy}</span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + C</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>{ctrlKey} + C</span>
 
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorSave}</span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + S</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>{ctrlKey} + S</span>
 
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorClose}</span>
                 <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>ESC</span>
 
                 <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorUndo}</span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>Ctrl + Z</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>{ctrlKey} + Z</span>
               </div>
             </div>
           </div>

@@ -12,7 +12,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest] # Şimdilik sadece Windows
+        include:
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+          - platform: macos-latest
+            target: universal-apple-darwin
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -24,10 +30,16 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install dependencies (Ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libxdo-dev libgtk-3-dev
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-pc-windows-msvc
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.target }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -48,4 +60,4 @@ jobs:
           releaseBody: "TR: Shotera'nın yeni sürümü yayında! Güncellemeyi otomatik olarak kurmak ve yeniden başlatmak için yukarıdaki butona tıklayabilirsiniz. || EN: A new version of Shotera is available! You can automatically install the update and relaunch by clicking the button above."
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.platform == 'windows-latest' && '--target x86_64-pc-windows-msvc' || '' }}
+          args: --target ${{ matrix.target }}
