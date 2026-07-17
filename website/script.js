@@ -168,6 +168,21 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => console.error("Failed to fetch GitHub releases:", err));
 
+    // Fetch GitHub Stars
+    fetch("https://api.github.com/repos/rzayevsahil/Shotera")
+        .then(res => res.json())
+        .then(data => {
+            if (data.stargazers_count !== undefined) {
+                const starBadge = document.getElementById('github-stars');
+                const starCount = document.getElementById('star-count');
+                if (starBadge && starCount) {
+                    starCount.textContent = data.stargazers_count;
+                    starBadge.style.display = "inline-flex";
+                }
+            }
+        })
+        .catch(err => console.error("Failed to fetch repo stars:", err));
+
     // 5. Language Switcher Logic
     const langBtn = document.getElementById('lang-toggle');
     const settingsImg = document.getElementById('settings-img');
