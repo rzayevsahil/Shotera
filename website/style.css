@@ -368,7 +368,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .showcase-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.5fr;
     gap: 4rem;
     align-items: center;
 }
