@@ -1,3 +1,70 @@
+const translations = {
+    en: {
+        "nav-features": "Features",
+        "nav-download": "Download",
+        "hero-title": "Capture the web.<br><span class=\"gradient-text\">Beautifully.</span>",
+        "hero-subtitle": "The ultra-lightweight, cross-platform screenshot utility for Windows, macOS, and Linux. Built with Rust and Tauri for maximum performance and privacy.",
+        "hero-download-for": "Download for",
+        "hero-explore": "Explore Features",
+        "hero-version": "Latest Release:",
+        "feat-title": "Why choose Shotera?",
+        "feat-1-title": "Blazing Fast",
+        "feat-1-desc": "Written in Rust, Shotera uses minimal system resources and starts instantly, capturing your screen with zero lag.",
+        "feat-2-title": "100% Offline & Private",
+        "feat-2-desc": "No telemetry, no tracking. All captures and edits happen completely offline on your own device.",
+        "feat-3-title": "Pin to Screen",
+        "feat-3-desc": "Pin important screenshots above all other windows. Perfect for reference while coding or designing.",
+        "feat-4-title": "Powerful Editor",
+        "feat-4-desc": "Instantly draw arrows, boxes, text, or blur sensitive information before saving or copying.",
+        "showcase-title": "Designed to be <span class=\"gradient-text\">elegant</span>",
+        "showcase-desc": "Shotera provides a modern, customizable Settings interface available in both English and Turkish. Define your own global shortcuts to trigger area or fullscreen captures natively.",
+        "showcase-li-1": "✓ Custom Global Shortcuts (e.g., Cmd+Shift+S)",
+        "showcase-li-2": "✓ Multi-format support (PNG, JPG, WebP)",
+        "showcase-li-3": "✓ Run in background / system tray",
+        "dl-title": "Get Shotera for your Platform",
+        "dl-subtitle": "Download the latest release directly from GitHub.",
+        "dl-win-desc": "Windows 10 / 11 (64-bit)",
+        "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
+        "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
+        "btn-download": "Download",
+        "footer-desc1": "Open Source Screen Capture Utility.",
+        "footer-desc2": "Created by Sahil Rzayev",
+        "settings-img-src": "assets/settings_en1.png"
+    },
+    tr: {
+        "nav-features": "Özellikler",
+        "nav-download": "İndir",
+        "hero-title": "Ekranı yakala.<br><span class=\"gradient-text\">Göz alıcı biçimde.</span>",
+        "hero-subtitle": "Windows, macOS ve Linux için ultra hafif, çapraz platform ekran yakalama aracı. Maksimum performans ve gizlilik için Rust ve Tauri ile geliştirildi.",
+        "hero-download-for": "Şunun için indir:",
+        "hero-explore": "Özellikleri Keşfet",
+        "hero-version": "Son Sürüm:",
+        "feat-title": "Neden Shotera?",
+        "feat-1-title": "Şimşek Hızında",
+        "feat-1-desc": "Rust dili ile yazılmış olan Shotera minimum sistem kaynağı kullanır ve anında başlar. Ekranınızı sıfır gecikme ile yakalayın.",
+        "feat-2-title": "%100 Çevrimdışı ve Gizli",
+        "feat-2-desc": "Veri toplama yok, izleme yok. Tüm ekran görüntüleri ve düzenlemeler tamamen cihazınızda (offline) işlenir.",
+        "feat-3-title": "Ekrana İğnele",
+        "feat-3-desc": "Önemli görüntüleri diğer tüm pencerelerin üzerinde tutun. Kod yazarken veya tasarım yaparken referans almak için birebir.",
+        "feat-4-title": "Güçlü Düzenleyici",
+        "feat-4-desc": "Kaydetmeden veya kopyalamadan önce anında ok, kutu, metin ekleyin veya hassas bilgileri bulanıklaştırın.",
+        "showcase-title": "<span class=\"gradient-text\">Zarif</span> olması için tasarlandı",
+        "showcase-desc": "Shotera, hem İngilizce hem Türkçe dil desteğiyle modern ve özelleştirilebilir bir Ayarlar arayüzü sunar. Tam ekran veya bölge seçimi yakalamak için kendi kısayollarınızı tanımlayın.",
+        "showcase-li-1": "✓ Özel Global Kısayollar (Örn: Cmd+Shift+S)",
+        "showcase-li-2": "✓ Çoklu format desteği (PNG, JPG, WebP)",
+        "showcase-li-3": "✓ Arka planda / tepside çalışma",
+        "dl-title": "Platformunuz için Shotera'yı İndirin",
+        "dl-subtitle": "En son sürümü doğrudan GitHub üzerinden indirin.",
+        "dl-win-desc": "Windows 10 / 11 (64-bit)",
+        "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
+        "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
+        "btn-download": "İndir",
+        "footer-desc1": "Açık Kaynaklı Ekran Yakalama Aracı.",
+        "footer-desc2": "Sahil Rzayev tarafından geliştirildi.",
+        "settings-img-src": "assets/settings_tr1.png"
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Navbar Scroll Effect
     const navbar = document.querySelector('.navbar');
@@ -84,4 +151,46 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (osName === "Linux" && debUrl) autoDownloadBtn.href = debUrl;
         })
         .catch(err => console.error("Failed to fetch GitHub releases:", err));
+
+    // 5. Language Switcher Logic
+    const langBtn = document.getElementById('lang-toggle');
+    const settingsImg = document.getElementById('settings-img');
+    
+    // Detect system language or use saved
+    let currentLang = localStorage.getItem('site_lang');
+    if (!currentLang) {
+        currentLang = navigator.language.toLowerCase().startsWith('tr') ? 'tr' : 'en';
+    }
+
+    const setLanguage = (lang) => {
+        currentLang = lang;
+        localStorage.setItem('site_lang', lang);
+        
+        // Update button text to the OTHER language
+        langBtn.textContent = lang === 'en' ? 'TR' : 'EN';
+        
+        // Update document lang
+        document.documentElement.lang = lang;
+        
+        // Update text nodes
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang] && translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+
+        // Update settings image correctly depending on language
+        if (settingsImg && translations[lang]['settings-img-src']) {
+            settingsImg.src = translations[lang]['settings-img-src'];
+        }
+    };
+
+    // Initialize Language
+    setLanguage(currentLang);
+
+    // Toggle event
+    langBtn.addEventListener('click', () => {
+        setLanguage(currentLang === 'en' ? 'tr' : 'en');
+    });
 });

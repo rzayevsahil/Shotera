@@ -177,6 +177,22 @@ h1, h2, h3, h4, h5, h6 {
     color: white !important;
 }
 
+.lang-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.lang-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--accent);
+}
+
 /* Typography & Utils */
 .gradient-text {
     background: linear-gradient(135deg, var(--accent-alt) 0%, var(--accent) 100%);
