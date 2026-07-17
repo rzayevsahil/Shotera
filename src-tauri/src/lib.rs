@@ -802,8 +802,12 @@ pub fn run() {
                             }
                         }
                         "capture" => {
-                            let state = app_handle_tray.state::<AppState>();
-                            let _ = trigger_screenshot(app_handle_tray, &state);
+                            let app_handle_clone = app_handle_tray.clone();
+                            std::thread::spawn(move || {
+                                std::thread::sleep(std::time::Duration::from_millis(300));
+                                let state = app_handle_clone.state::<AppState>();
+                                let _ = trigger_screenshot(&app_handle_clone, &state);
+                            });
                         }
                         _ => {}
                     }
