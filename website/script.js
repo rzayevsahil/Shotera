@@ -16,6 +16,14 @@ const translations = {
         "feat-3-desc": "Pin important screenshots above all other windows. Perfect for reference while coding or designing.",
         "feat-4-title": "Powerful Editor",
         "feat-4-desc": "Instantly draw arrows, boxes, text, or blur sensitive information before saving or copying.",
+        "feat-5-title": "Quick Cloud Upload",
+        "feat-5-desc": "Upload screenshots to Imgur with a single click and instantly copy the link to your clipboard.",
+        "feat-6-title": "Text Recognition (OCR)",
+        "feat-6-desc": "Extract text from uncopyable areas on your screen with a single click and copy it as text.",
+        "feat-7-title": "Step Counter",
+        "feat-7-desc": "Click on the screen to add auto-incrementing numbers (1, 2, 3). Perfect for tutorials.",
+        "feat-8-title": "Multi-Format Support",
+        "feat-8-desc": "Save your screenshots in PNG, JPG, or modern WebP formats with adjustable quality settings.",
         "showcase-title": "Designed to be <span class=\"gradient-text\">elegant</span>",
         "showcase-desc": "Shotera provides a modern, customizable Settings interface available in both English and Turkish. Define your own global shortcuts to trigger area or fullscreen captures natively.",
         "showcase-li-1": "✓ Custom Global Shortcuts (e.g., Cmd+Shift+S)",
@@ -28,7 +36,7 @@ const translations = {
         "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
         "btn-download": "Download",
         "footer-desc1": "Open Source Screen Capture Utility.",
-        "footer-desc2": "Created by Sahil Rzayev",
+        "footer-desc2": "Created by <a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a>",
         "settings-img-src": "assets/settings_en1.png"
     },
     tr: {
@@ -48,6 +56,14 @@ const translations = {
         "feat-3-desc": "Önemli görüntüleri diğer tüm pencerelerin üzerinde tutun. Kod yazarken veya tasarım yaparken referans almak için birebir.",
         "feat-4-title": "Güçlü Düzenleyici",
         "feat-4-desc": "Kaydetmeden veya kopyalamadan önce anında ok, kutu, metin ekleyin veya hassas bilgileri bulanıklaştırın.",
+        "feat-5-title": "Hızlı Bulut Yükleme",
+        "feat-5-desc": "Ekran görüntülerini tek tıkla Imgur'a yükleyin ve bağlantısını anında panoya kopyalayın.",
+        "feat-6-title": "Metin Tanıma (OCR)",
+        "feat-6-desc": "Ekrandaki kopyalanamayan yazıları tek tıkla okuyun ve metin olarak kopyalayın.",
+        "feat-7-title": "Adım Sayacı",
+        "feat-7-desc": "Ekrana tıkladıkça 1, 2, 3 şeklinde otomatik artan numaralar ekleyin. Eğitimler için birebir.",
+        "feat-8-title": "Çoklu Format Desteği",
+        "feat-8-desc": "Ekran görüntülerinizi PNG, JPG veya modern WebP formatlarında, belirlediğiniz kaliteyle kaydedin.",
         "showcase-title": "<span class=\"gradient-text\">Zarif</span> olması için tasarlandı",
         "showcase-desc": "Shotera, hem İngilizce hem Türkçe dil desteğiyle modern ve özelleştirilebilir bir Ayarlar arayüzü sunar. Tam ekran veya bölge seçimi yakalamak için kendi kısayollarınızı tanımlayın.",
         "showcase-li-1": "✓ Özel Global Kısayollar (Örn: Cmd+Shift+S)",
@@ -60,7 +76,7 @@ const translations = {
         "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
         "btn-download": "İndir",
         "footer-desc1": "Açık Kaynaklı Ekran Yakalama Aracı.",
-        "footer-desc2": "Sahil Rzayev tarafından geliştirildi.",
+        "footer-desc2": "<a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a> tarafından geliştirildi.",
         "settings-img-src": "assets/settings_tr1.png"
     }
 };

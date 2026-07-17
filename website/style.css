@@ -460,6 +460,17 @@ footer p {
     margin-bottom: 0.5rem;
 }
 
+.footer-content a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-content a:hover {
+    color: var(--text-main);
+    text-decoration: underline;
+}
+
 /* Animations */
 .fade-in-up {
     opacity: 0;
