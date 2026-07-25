@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="#türkçe">🇹🇷 Türkçe</a> | <a href="#english">🇬🇧 English</a> | <a href="#azerbaycan">🇦🇿 Azərbaycan dili</a>
+  <a href="#türkçe">🇹🇷 Türkçe</a> | <a href="#english">🇬🇧 English</a> | <a href="#azerbaycan">🇦🇿 Azərbaycan dili</a> | <a href="#russian">🇷🇺 Русский</a>
 </p>
 
 ---
@@ -34,7 +34,7 @@
 - ☁️ **Hızlı Bulut Yükleme:** Ekran görüntülerini tek tıkla Imgur'a yükleyin ve bağlantısını anında panoya (clipboard) kopyalayın.
 - ⚙️ **Özelleştirilebilir Kısayollar:** Global klavye kısayollarını kendi çalışma alışkanlıklarınıza göre kişiselleştirin.
 - 💾 **Çoklu Format Desteği:** Ekran görüntülerinizi PNG, JPG veya modern WebP formatlarında, belirlediğiniz kalite ayarlarıyla kaydedin.
-- 🌍 **Çoklu Dil Desteği:** Türkçe (TR), İngilizce (EN) ve Azərbaycan dili (AZ) dil seçenekleri.
+- 🌍 **Çoklu Dil Desteği:** Türkçe (TR), İngilizce (EN), Azərbaycan dili (AZ) ve Rusça (RU) dil seçenekleri.
 - 🔄 **Otomatik Güncelleme:** Uygulama içinden tek tıkla yeni sürümleri kontrol edin ve yükleyin.
 - 🚀 **Arka Planda Çalışma (Oto-Başlatma):** İşletim sistemiyle birlikte başlar ve sistem tepsisinde sessizce görevini yapmaya hazır bekler.
 - 🔍 **Metin Tanıma (OCR):** Ekrandaki kopyalanamayan yazıları tek tıkla okuyun ve metin olarak panoya kopyalayın (Tesseract WebAssembly ile tamamen internetsiz çalışır).
@@ -93,7 +93,7 @@ Bu projenin geliştirme ve build (derleme) adımları ile ilgili talimatlar proj
 - ☁️ **Quick Cloud Upload:** Upload screenshots to Imgur with a single click and instantly copy the link to your clipboard.
 - ⚙️ **Customizable Shortcuts:** Personalize global keyboard shortcuts to match your workflow.
 - 💾 **Multi-Format Support:** Save your screenshots in PNG, JPG, or modern WebP formats with adjustable quality settings.
-- 🌍 **Multi-Language Support:** Available in English (EN), Turkish (TR), and Azerbaijani (AZ).
+- 🌍 **Multi-Language Support:** Available in English (EN), Turkish (TR), Azerbaijani (AZ), and Russian (RU).
 - 🔄 **Auto-Updater:** Check for and install new updates with one click from within the app.
 - 🚀 **Background Execution (Auto-Start):** Launches automatically with your operating system and waits quietly in the system tray, ready for use.
 - 🔍 **Text Recognition (OCR):** Extract text from uncopyable areas on your screen with a single click and copy it as text (Powered by Tesseract WebAssembly, works completely offline).
@@ -152,7 +152,7 @@ Development and build instructions are documented in the internal developer note
 - ☁️ **Sürətli Bulud Yükləməsi:** Ekran şəkillərini tək kliklə Imgur-a yükləyin və keçidini anında mübadilə buferinə (clipboard) kopyalayın.
 - ⚙️ **Fərdiləşdirilə Bilən Qısayollar:** Qlobal klaviatura qısayollarını öz iş vərdişlərinizə uyğunlaşdırın.
 - 💾 **Çoxlu Format Dəstəyi:** Ekran şəkillərinizi PNG, JPG və ya müasir WebP formatında, təyin etdiyiniz keyfiyyət tənzimləmələri ilə yadda saxlayın.
-- 🌍 **Çoxlu Dil Dəstəyi:** Azərbaycan dili (AZ), Türk dili (TR) və İngilis dili (EN) dəstəyi.
+- 🌍 **Çoxlu Dil Dəstəyi:** Azərbaycan dili (AZ), Rus dili (RU), Türk dili (TR) və İngilis dili (EN) dəstəyi.
 - 🔄 **Avtomatik Yenilənmə:** Tətbiq daxilindən tək kliklə yeni versiyaları yoxlayın və quraşdırın.
 - 🚀 **Arka Fonda Çalışma (Avto-Başlatma):** Əməliyyat sistemi ilə birlikdə başlayır və sistem treyində səssizcə işləməyə hazır gözləyir.
 - 🔍 **Mətn Tanıma (OCR):** Ekrandakı kopyalanmayan yazıları tək kliklə oxuyun və mətn olaraq mübadilə buferinə kopyalayın (Tesseract WebAssembly ilə tamamilə internetsiz çalışır).
@@ -176,6 +176,52 @@ Tətbiqi yükləmək və istifadəyə başlamaq çox asandır:
 ### 🧑‍💻 Tərtibatçılar Üçün
 
 Bu layihənin inkişaf etdirilməsi və derlənmə (build) addımları ilə bağlı təlimatlar layihə daxilindəki tərtibatçı qeydlərində yer alır. Layihəyə töhfə vermək istəyənlər üçün əsas tələblər **Tauri v2, Rust və Node.js**-dir.
+
+---
+
+<h2 id="russian">🇷🇺 Русский</h2>
+
+<p align="center">
+  <strong>Современное, Быстрое и Элегантное Приложение для Снимков Экрана</strong>
+</p>
+
+<p align="center">
+  <img src="src/assets/screenshot1.png" width="800" alt="Shotera Screenshot" />
+</p>
+
+### 🌟 Что Это?
+
+**Shotera** — это инструмент для создания снимков экрана, разработанный с использованием Tauri, React и Rust. Приложение отличается низким потреблением ресурсов и современным дизайном. Оно призвано повысить вашу продуктивность, объединяя стандартный функционал со скриншотами с продвинутыми возможностями (загрузка в облако, закрепление на экране и т.д.).
+
+### ✨ Основные Возможности
+
+- 📸 **Захват Области и Всего Экрана:** Быстро сохраняйте выделенную область или весь экран.
+- 📌 **Закрепление на Экране (Pin):** Закрепляйте снимки поверх всех окон в режиме "всегда наверх". Очень удобно при работе с макетами и референсами.
+- ☁️ **Быстрая Загрузка в Облако:** Загружайте скриншоты в Imgur в один клик и мгновенно копируйте ссылку в буфер обмена.
+- ⚙️ **Настраиваемые Горячие Клавиши:** Настраивайте глобальные сочетания клавиш под свой рабочий процесс.
+- 💾 **Поддержка Разных Форматов:** Сохраняйте снимки в PNG, JPG или WebP с возможностью настройки качества.
+- 🌍 **Многоязычность:** Русский (RU), Азербайджанский (AZ), Турецкий (TR) и Английский (EN).
+- 🔄 **Автообновление:** Проверяйте и устанавливайте обновления прямо из приложения.
+- 🚀 **Работа в Фоновом Режиме:** Автозапуск вместе с системой и сворачивание в системный трей.
+- 🔍 **Распознавание Текста (OCR):** Извлекайте нетекстовую информацию с экрана в буфер обмена (Работает офлайн через Tesseract WebAssembly).
+- 🔢 **Счетчик Шагов (Режим Обучения):** Наносите автонумерованные метки (1, 2, 3...) кликом по экрану. Идеально для создания инструкций!
+
+### 📥 Скачивание и Установка
+
+1. **Официальный Сайт и Скачивание:** Скачайте установочный файл (`.exe`, `.msi`, `.dmg`, `.deb`, `.AppImage`) с **[Официального Сайта Shotera](https://rzayevsahil.github.io/Shotera/)** или из раздела **[GitHub Releases](https://github.com/rzayevsahil/Shotera/releases/latest)**.
+2. Запустите инсталлятор и завершите установку.
+3. Начните делать снимки экрана, нажав на иконку Shotera в системном трее или используя горячие клавиши!
+
+### ⌨️ Горячие Клавиши по Умолчанию
+
+- **Снимок Области:** `Ctrl` + `Shift` + `S`
+- **Снимок Всего Экрана:** `Ctrl` + `Shift` + `F`
+
+*(Вы можете изменить эти сочетания в меню "Настройки" внутри приложения.)*
+
+### 🧑‍💻 Для Разработчиков
+
+Инструкции по сборке и разработке документально описаны во внутренних заметках проекта. Основные требования: **Tauri v2, Rust и Node.js**.
 
 ---
 

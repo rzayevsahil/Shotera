@@ -282,17 +282,112 @@ export const translations = {
     actionPin: "Ekrana Sanc (Həmişə Üstdə)",
     actionOcr: "Mətn Olaraq Kopyala (OCR)",
     actionClose: "Bağla (ESC)",
+  },
+  ru: {
+    sidebarGeneral: "Общие",
+    sidebarCapture: "Захват",
+    sidebarSave: "Сохранение",
+    sidebarAbout: "О программе",
+
+    generalTitle: "Общие Настройки",
+    generalSubtitle: "Настройте поведение приложения и параметры автозапуска.",
+
+    runAtStartup: "Запускать при старте системы",
+    runAtStartupDesc: "Автоматически запускать Shotera при входе в Windows.",
+    startInTray: "Запускать в системном трее",
+    startInTrayDesc: "Сворачивать в трей при запуске, не открывая главное окно.",
+    takeScreenshot: "Сделать Снимок Экрана",
+    takeScreenshotDesc: "Проверьте интерфейс захвата прямо сейчас. Горячая клавиша:",
+    captureNow: "Захватить Сейчас",
+    languageSetting: "Язык / Language",
+    languageSettingDesc: "Выберите язык приложения / Select application language",
+    showNotifications: "Показывать Системные Уведомления",
+    showNotificationsDesc: "Отображать уведомления Windows/macOS после копирования, сохранения и других действий.",
+
+    captureTitle: "Настройки Захвата",
+    captureSubtitle: "Управление горячими клавишами и параметрами снимка.",
+    playShutterSound: "Звук Затвора Камеры",
+    playShutterSoundDesc: "Воспроизводить звук затвора при успешном снимке.",
+    includeCursor: "Включать Курсор Мыши",
+    includeCursorDesc: "Добавлять курсор мыши на создаваемые снимки экрана.",
+    globalShortcut: "Глобальное Сочетание (Выбор Области)",
+    globalShortcutDesc: "Горячие клавиши для выбора области экрана.",
+    globalFullscreenShortcut: "Глобальное Сочетание (Весь Экран)",
+    globalFullscreenShortcutDesc: "Горячие клавиши для сохранения всего экрана в буфер обмена.",
+    editorShortcuts: "Горячие Клавиши Редактора",
+    editorShortcutsDesc: "Быстрые клавиши, доступные в редакторе снимков.",
+    toolLine: "Линия",
+    toolCircle: "Круг",
+    textBold: "Жирный",
+    textItalic: "Курсив",
+    textUnderline: "Подчеркнутый",
+    textStrikethrough: "Зачеркнутый",
+    colorPicker: "Выбор Цвета",
+    shortcutChangeHint: "Нажмите для изменения",
+    shortcutPressKeys: "Нажмите клавиши...",
+    editorCopy: "Копировать:",
+    editorSave: "Сохранить:",
+    editorClose: "Закрыть:",
+    editorUndo: "Отменить:",
+    selectFolder: "Выбрать Папку",
+    formatLossless: "Без потерь",
+    formatCompressed: "Сжатый",
+    formatModern: "Современное Сжатие",
+    invalidShortcut: "Недопустимое Сочетание",
+    shortcutConflictMsg: (mod: string) => `${mod}+C и ${mod}+S зарезервированы для копирования и сохранения. Выберите другую комбинацию.`,
+    checkForUpdates: "Проверить Обновления",
+    checkingUpdates: "Проверка обновлений...",
+    updateAvailable: "Доступно Новое Обновление!",
+    installingUpdate: "Загрузка и установка обновления...",
+    appUpToDate: "У вас последняя версия",
+    updateError: "Ошибка при проверке обновлений.",
+    updateSuccess: "Обновление установлено, перезапуск...",
+    appVersion: "Версия",
+
+    saveTitle: "Сохранение и Файлы",
+    saveSubtitle: "Настройка формата и папки для сохранения файлов.",
+    defaultSaveDir: "Папка Сохранения по Умолчанию",
+    defaultSaveDirDesc: "Папка, куда будут сохраняться снимки экрана.",
+    fileFormat: "Формат Файла",
+    fileFormatDesc: "Формат изображений для сохранения.",
+    imageQuality: "Качество Изображения",
+    imageQualityDesc: "Качество изображения в процентах (для JPG и WebP).",
+
+    aboutTitle: "О Shotera",
+    aboutSubtitle: "Сведения о проекте Shotera и установленной версии.",
+    aboutSubtitleDesc: "Кроссплатформенная Легкая Утилита для Снимков Экрана",
+    aboutDesc: "Shotera — это сверхлегкий, быстрый и безопасный инструмент для создания снимков экрана на Windows, macOS и Linux. Все ваши снимки обрабатываются локально на устройстве.",
+    developer: "Профиль Разработчика",
+    devTitle: "Основатель и Главный Разработчик",
+    devContact: "Контакты",
+    devGitHub: "Профиль GitHub",
+
+    dragToSelect: "Выделите область мышью | ESC для выхода",
+    toolSelect: "Выбор (Перемещение / Размер)",
+    toolPencil: "Карандаш",
+    toolArrow: "Стрелка",
+    toolRect: "Прямоугольник",
+    toolText: "Текст",
+    toolBlur: "Размытие (Blur)",
+    toolClear: "Очистить Всё",
+    actionCopy: "Копировать в Буфер (Enter)",
+    actionSave: "Сохранить в Файл",
+    actionUpload: "Загрузить в Облако (Ссылка)",
+    actionPin: "Закрепить на Экране (Поверх Всех)",
+    actionOcr: "Распознать Текст (OCR)",
+    actionClose: "Закрыть (ESC)",
   }
 };
 
-export type Language = "tr" | "en" | "az";
+export type Language = "tr" | "en" | "az" | "ru";
 
 export function getLanguage(): Language {
   const lang = localStorage.getItem("language");
-  if (lang === "en" || lang === "tr" || lang === "az") return lang;
+  if (lang === "en" || lang === "tr" || lang === "az" || lang === "ru") return lang;
 
   // Detect browser language
   const browserLang = navigator.language.substring(0, 2).toLowerCase();
+  if (browserLang === "ru") return "ru";
   if (browserLang === "az") return "az";
   if (browserLang === "tr") return "tr";
   return "en";

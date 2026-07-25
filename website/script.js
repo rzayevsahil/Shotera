@@ -130,6 +130,51 @@ const translations = {
         "footer-desc1": "Açıq Mənbəli Ekran Yaxalama Tətbiqi.",
         "footer-desc2": "<a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a> tərəfindən yaradılmışdır.",
         "settings-img-src": "assets/settings_tr1.png"
+    },
+    "ru": {
+        "nav-features": "Возможности",
+        "nav-showcase": "Обзор",
+        "nav-download": "Скачать",
+        "hero-title": "Захватывайте экран.<br><span class=\"gradient-text\">Красиво и быстро.</span>",
+        "hero-subtitle": "Сверхлегкий кроссплатформенный инструмент для Windows, macOS и Linux. Разработан на Rust и Tauri для максимальной скорости и конфиденциальности.",
+        "hero-download-for": "Скачать для &nbsp;",
+        "hero-explore": "Обзор возможностей",
+        "hero-version": "Последний релиз:",
+        "feat-title": "Почему Shotera?",
+        "feat-1-title": "Молниеносная скорость",
+        "feat-1-desc": "Написанная на Rust, Shotera использует минимум системных ресурсов и запускается мгновенно. Захватывайте экран без задержек.",
+        "feat-2-title": "100% Офлайн и Приватно",
+        "feat-2-desc": "Никакого сбора данных и слежки. Все снимки экрана и обработка выполняются исключительно локально на вашем устройстве.",
+        "feat-3-title": "Закрепление на Экране",
+        "feat-3-desc": "Закрепляйте важные снимки поверх остальных окон. Идеально подходит для работы с кодом или макетами.",
+        "feat-4-title": "Мощный Редактор",
+        "feat-4-desc": "Добавляйте стрелки, фигуры, текст или размывайте конфиденциальные данные перед сохранением.",
+        "feat-5-title": "Загрузка в Облако",
+        "feat-5-desc": "Загружайте снимки в Imgur одним кликом и мгновенно получайте готовую ссылку в буфер обмена.",
+        "feat-6-title": "Распознавание Текста (OCR)",
+        "feat-6-desc": "Извлекайте нетекстовую информацию с экрана в один клик без подключения к интернету.",
+        "feat-7-title": "Счетчик Шагов",
+        "feat-7-desc": "Добавляйте автонумерованные метки (1, 2, 3...) при клике. Отлично подходит для создания инструкций.",
+        "feat-8-title": "Разные Форматы",
+        "feat-8-desc": "Сохраняйте снимки в PNG, JPG или WebP с возможностью настройки качества.",
+        "showcase-title": "Создан быть <span class=\"gradient-text\">элегантным</span>",
+        "showcase-desc": "Shotera имеет современный интерфейс с поддержкой русского, английского, турецкого и азербайджанского языков.",
+        "showcase-li-1": "✓ Глобальные сочетания клавиш (Например: {mod}+Shift+S)",
+        "showcase-li-2": "✓ Поддержка нескольких форматов (PNG, JPG, WebP)",
+        "showcase-li-3": "✓ Работа в фоновом режиме / системном трее",
+        "dl-title": "Скачать Shotera для вашей платформы",
+        "dl-subtitle": "Скачайте последний релиз непосредственно с GitHub.",
+        "dl-win-desc": "Windows 10 / 11 (64-bit)",
+        "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
+        "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
+        "btn-download": "Скачать",
+        "dl-count": "Загрузок:",
+        "cta-title": "Понравилась Shotera?",
+        "cta-desc": "Shotera полностью бесплатна. Поставьте нам звездочку на GitHub, чтобы поддержать разработку!",
+        "cta-btn": "Поставить звезду на GitHub",
+        "footer-desc1": "Бесплатный инструмент для создания снимков экрана.",
+        "footer-desc2": "Создано <a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a>.",
+        "settings-img-src": "assets/settings_en1.png"
     }
 };
 
@@ -269,7 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const langNames = {
         en: 'English',
         tr: 'Türkçe',
-        az: 'Azərbaycan'
+        az: 'Azərbaycan',
+        ru: 'Русский'
     };
 
     // Detect system language or use saved

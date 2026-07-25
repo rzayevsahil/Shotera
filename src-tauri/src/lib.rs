@@ -246,6 +246,7 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
         state_lang.clone()
     };
     let body = match lang.as_str() {
+        "ru" => "Снимок экрана сохранен и скопирован в буфер обмена!",
         "az" => "Tam ekran şəkli yadda saxlanıldı və mübadilə buferinə kopyalandı!",
         "tr" => "Tam ekran görüntüsü kaydedildi ve panoya kopyalandı!",
         _ => "Full screenshot saved and copied to clipboard!",
@@ -336,6 +337,7 @@ async fn upload_to_imgur(_app_handle: AppHandle, state: State<'_, AppState>, bas
             state_lang.clone()
         };
         let body = match lang.as_str() {
+            "ru" => "Изображение загружено в облако, ссылка скопирована!",
             "az" => "Şəkil buluda yükləndi və link mübadilə buferinə kopyalandı!",
             "tr" => "Görsel buluta yüklendi ve link panoya kopyalandı!",
             _ => "Image uploaded to cloud and link copied to clipboard!",
@@ -556,6 +558,7 @@ fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang:
     }
     if let Some(tray) = app_handle.tray_by_id("main-tray") {
         let (capture_label, settings_label, quit_label) = match lang.as_str() {
+            "ru" => ("Сделать снимок экрана", "Настройки", "Выход"),
             "az" => ("Ekran Şəkli Al", "Tənzimləmələr", "Çıxış"),
             "tr" => ("Ekran Görüntüsü Al", "Ayarlar", "Çıkış"),
             _ => ("Take Screenshot", "Settings", "Quit"),
@@ -658,6 +661,7 @@ fn save_base64_image(
         state_lang.clone()
     };
     let body = match lang.as_str() {
+        "ru" => "Снимок экрана успешно сохранен!",
         "az" => "Ekran şəkli uğurla yadda saxlanıldı!",
         "tr" => "Ekran görüntüsü başarıyla kaydedildi!",
         _ => "Screenshot saved successfully!",
@@ -694,6 +698,7 @@ fn copy_base64_image_to_clipboard(_app_handle: AppHandle, state: State<'_, AppSt
         state_lang.clone()
     };
     let body = match lang.as_str() {
+        "ru" => "Снимок экрана скопирован в буфер обмена!",
         "az" => "Ekran şəkli mübadilə buferinə kopyalandı!",
         "tr" => "Ekran görüntüsü panoya kopyalandı!",
         _ => "Screenshot copied to clipboard!",
