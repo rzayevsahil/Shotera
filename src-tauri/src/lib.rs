@@ -246,6 +246,7 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
         state_lang.clone()
     };
     let body = match lang.as_str() {
+        "de" => "Vollbild-Screenshot gespeichert und in die Zwischenablage kopiert!",
         "ru" => "Снимок экрана сохранен и скопирован в буфер обмена!",
         "az" => "Tam ekran şəkli yadda saxlanıldı və mübadilə buferinə kopyalandı!",
         "tr" => "Tam ekran görüntüsü kaydedildi ve panoya kopyalandı!",
@@ -337,6 +338,7 @@ async fn upload_to_imgur(_app_handle: AppHandle, state: State<'_, AppState>, bas
             state_lang.clone()
         };
         let body = match lang.as_str() {
+            "de" => "Bild in die Cloud hochgeladen, Link kopiert!",
             "ru" => "Изображение загружено в облако, ссылка скопирована!",
             "az" => "Şəkil buluda yükləndi və link mübadilə buferinə kopyalandı!",
             "tr" => "Görsel buluta yüklendi ve link panoya kopyalandı!",
@@ -558,6 +560,7 @@ fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang:
     }
     if let Some(tray) = app_handle.tray_by_id("main-tray") {
         let (capture_label, settings_label, quit_label) = match lang.as_str() {
+            "de" => ("Screenshot erstellen", "Einstellungen", "Beenden"),
             "ru" => ("Сделать снимок экрана", "Настройки", "Выход"),
             "az" => ("Ekran Şəkli Al", "Tənzimləmələr", "Çıxış"),
             "tr" => ("Ekran Görüntüsü Al", "Ayarlar", "Çıkış"),
@@ -661,6 +664,7 @@ fn save_base64_image(
         state_lang.clone()
     };
     let body = match lang.as_str() {
+        "de" => "Screenshot erfolgreich gespeichert!",
         "ru" => "Снимок экрана успешно сохранен!",
         "az" => "Ekran şəkli uğurla yadda saxlanıldı!",
         "tr" => "Ekran görüntüsü başarıyla kaydedildi!",
@@ -698,6 +702,7 @@ fn copy_base64_image_to_clipboard(_app_handle: AppHandle, state: State<'_, AppSt
         state_lang.clone()
     };
     let body = match lang.as_str() {
+        "de" => "Screenshot in die Zwischenablage kopiert!",
         "ru" => "Снимок экрана скопирован в буфер обмена!",
         "az" => "Ekran şəkli mübadilə buferinə kopyalandı!",
         "tr" => "Ekran görüntüsü panoya kopyalandı!",

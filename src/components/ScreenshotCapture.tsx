@@ -1022,7 +1022,7 @@ function ScreenshotCapture() {
         if (showNotif) {
           sendNotification({
             title: "Shotera OCR",
-            body: lang === "ru" ? "Текст распознан и скопирован в буфер обмена!" : lang === "az" ? "Mətn oxundu və mübadilə buferinə kopyalandı!" : lang === "tr" ? "Metin okundu ve panoya kopyalandı!" : "Text recognized and copied to clipboard!"
+            body: lang === "de" ? "Text erkannt und in die Zwischenablage kopiert!" : lang === "ru" ? "Текст распознан и скопирован в буфер обмена!" : lang === "az" ? "Mətn oxundu və mübadilə buferinə kopyalandı!" : lang === "tr" ? "Metin okundu ve panoya kopyalandı!" : "Text recognized and copied to clipboard!"
           });
         }
       } else {
@@ -1030,7 +1030,7 @@ function ScreenshotCapture() {
         if (showNotif) {
           sendNotification({
             title: "Shotera OCR",
-            body: lang === "ru" ? "Распознаваемый текст не найден." : lang === "az" ? "Oxuna bilən mətn tapılmadı." : lang === "tr" ? "Okunabilir bir metin bulunamadı." : "No readable text found."
+            body: lang === "de" ? "Kein lesbarer Text gefunden." : lang === "ru" ? "Распознаваемый текст не найден." : lang === "az" ? "Oxuna bilən mətn tapılmadı." : lang === "tr" ? "Okunabilir bir metin bulunamadı." : "No readable text found."
           });
         }
       }
@@ -1041,7 +1041,7 @@ function ScreenshotCapture() {
       if (showNotif) {
         sendNotification({
           title: "Shotera OCR Error",
-          body: lang === "ru" ? `Ошибка: ${err.message || err}` : lang === "az" ? `Xəta baş verdi: ${err.message || err}` : lang === "tr" ? `İşlem Hatası: ${err.message || err}` : `Error: ${err.message || err}`
+          body: lang === "de" ? `Fehler: ${err.message || err}` : lang === "ru" ? `Ошибка: ${err.message || err}` : lang === "az" ? `Xəta baş verdi: ${err.message || err}` : lang === "tr" ? `İşlem Hatası: ${err.message || err}` : `Error: ${err.message || err}`
         });
       }
     } finally {
@@ -1196,7 +1196,7 @@ function ScreenshotCapture() {
           <button
             className={`toolbar-btn ${activeTool === "step" ? "active" : ""}`}
             onClick={() => setActiveTool("step")}
-            title={lang === "ru" ? "Шаг/Нумерация (Режим Обучения)" : lang === "az" ? "Adım/Nömrə (Dərslik Rejimi)" : lang === "tr" ? "Adım/Numara (Tutorial Modu)" : "Step/Numbering (Tutorial Mode)"}
+            title={lang === "de" ? "Schritt/Nummerierung (Tutorial-Modus)" : lang === "ru" ? "Шаг/Нумерация (Режим Обучения)" : lang === "az" ? "Adım/Nömrə (Dərslik Rejimi)" : lang === "tr" ? "Adım/Numara (Tutorial Modu)" : "Step/Numbering (Tutorial Mode)"}
           >
             <ListOrdered size={16} />
           </button>
@@ -1212,7 +1212,7 @@ function ScreenshotCapture() {
           <button
             className="toolbar-btn"
             onClick={() => setDrawings((prev) => prev.slice(0, -1))}
-            title={lang === "ru" ? "Отменить" : lang === "az" ? "Geri Al" : lang === "tr" ? "Geri Al" : "Undo"}
+            title={lang === "de" ? "Rückgängig" : lang === "ru" ? "Отменить" : lang === "az" ? "Geri Al" : lang === "tr" ? "Geri Al" : "Undo"}
             disabled={drawings.length === 0}
             style={{ opacity: drawings.length === 0 ? 0.3 : 1 }}
           >

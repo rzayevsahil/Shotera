@@ -376,17 +376,112 @@ export const translations = {
     actionPin: "Закрепить на Экране (Поверх Всех)",
     actionOcr: "Распознать Текст (OCR)",
     actionClose: "Закрыть (ESC)",
+  },
+  de: {
+    sidebarGeneral: "Allgemein",
+    sidebarCapture: "Aufnahme",
+    sidebarSave: "Speichern",
+    sidebarAbout: "Über",
+
+    generalTitle: "Allgemeine Einstellungen",
+    generalSubtitle: "Passen Sie das Anwendungsverhalten und die Autostart-Optionen an.",
+
+    runAtStartup: "Bei Systemstart ausführen",
+    runAtStartupDesc: "Shotera beim Start von Windows automatisch ausführen.",
+    startInTray: "Im System-Tray starten",
+    startInTrayDesc: "Beim Start im System-Tray minimieren, ohne das Hauptfenster zu öffnen.",
+    takeScreenshot: "Screenshot Erstellen",
+    takeScreenshotDesc: "Testen Sie die Aufnahmeschnittstelle jetzt. Tastenkombination:",
+    captureNow: "Jetzt Aufnehmen",
+    languageSetting: "Sprache / Language",
+    languageSettingDesc: "Anwendungssprache auswählen / Select application language",
+    showNotifications: "Systembenachrichtigungen Anzeigen",
+    showNotificationsDesc: "Zeige Windows/macOS-Benachrichtigungen nach dem Kopieren, Speichern etc. an.",
+
+    captureTitle: "Aufnahme-Einstellungen",
+    captureSubtitle: "Verwalten Sie Aufnahmemethoden und globale Tastenkombinationen.",
+    playShutterSound: "Kamera-Auslöser-Sound Abspielen",
+    playShutterSoundDesc: "Sound bei erfolgreichem Screenshot abspielen.",
+    includeCursor: "Mauszeiger Einbinden",
+    includeCursorDesc: "Mauszeiger zu erstellten Screenshots hinzufügen.",
+    globalShortcut: "Kombination für Bereichsauswahl",
+    globalShortcutDesc: "Tastenkombination zum Auswählen eines Bildschirmbereichs.",
+    globalFullscreenShortcut: "Kombination für Vollbild",
+    globalFullscreenShortcutDesc: "Tastenkombination zum Speichern des gesamten Bildschirms.",
+    editorShortcuts: "Editor-Tastenkombinationen",
+    editorShortcutsDesc: "Schnelltasten im Screenshot-Editor.",
+    toolLine: "Linie",
+    toolCircle: "Kreis",
+    textBold: "Fett",
+    textItalic: "Kursiv",
+    textUnderline: "Unterstrichen",
+    textStrikethrough: "Durchgestrichen",
+    colorPicker: "Farbauswahl",
+    shortcutChangeHint: "Zum Ändern klicken",
+    shortcutPressKeys: "Tasten drücken...",
+    editorCopy: "Kopieren:",
+    editorSave: "Speichern:",
+    editorClose: "Schließen:",
+    editorUndo: "Rückgängig:",
+    selectFolder: "Ordner Auswählen",
+    formatLossless: "Verlustfrei",
+    formatCompressed: "Komprimiert",
+    formatModern: "Moderne Komprimierung",
+    invalidShortcut: "Ungültige Tastenkombination",
+    shortcutConflictMsg: (mod: string) => `${mod}+C und ${mod}+S sind für Kopieren und Speichern reserviert. Wählen Sie eine andere Kombination.`,
+    checkForUpdates: "Nach Updates Suchen",
+    checkingUpdates: "Updates werden gesucht...",
+    updateAvailable: "Neues Update Verfügbar!",
+    installingUpdate: "Update wird heruntergeladen und installiert...",
+    appUpToDate: "Sie verwenden die neueste Version",
+    updateError: "Fehler beim Suchen nach Updates.",
+    updateSuccess: "Update installiert, wird neu gestartet...",
+    appVersion: "Version",
+
+    saveTitle: "Speichern & Dateien",
+    saveSubtitle: "Dateiformat und Speicherpfad konfigurieren.",
+    defaultSaveDir: "Standard-Speicherordner",
+    defaultSaveDirDesc: "Ordner, in dem Screenshots gespeichert werden.",
+    fileFormat: "Dateiformat",
+    fileFormatDesc: "Bildformat für gespeicherte Dateien.",
+    imageQuality: "Bildqualität",
+    imageQualityDesc: "Bildqualität in Prozent (für JPG und WebP).",
+
+    aboutTitle: "Über Shotera",
+    aboutSubtitle: "Informationen über das Shotera-Projekt und die installierte Version.",
+    aboutSubtitleDesc: "Cross-Platform Leichtgewichtiges Screenshot-Tool",
+    aboutDesc: "Shotera ist ein extrem leichtes, schnelles und sicheres Screenshot-Tool für Windows, macOS und Linux. Alle Screenshots werden lokal auf Ihrem Gerät verarbeitet.",
+    developer: "Entwickler-Profil",
+    devTitle: "Gründer & Hauptentwickler",
+    devContact: "Kontakt",
+    devGitHub: "GitHub-Profil",
+
+    dragToSelect: "Ziehen Sie einen Bereich mit der Maus | ESC zum Beenden",
+    toolSelect: "Auswahl (Verschieben / Ändern)",
+    toolPencil: "Stift",
+    toolArrow: "Pfeil",
+    toolRect: "Rechteck",
+    toolText: "Text",
+    toolBlur: "Weichzeichnen (Blur)",
+    toolClear: "Alles Löschen",
+    actionCopy: "In Zwischenablage Kopieren (Enter)",
+    actionSave: "In Datei Speichern",
+    actionUpload: "In Cloud Hochladen (Link Teilen)",
+    actionPin: "An Bildschirm Anheften (Immer Oben)",
+    actionOcr: "Als Text Kopieren (OCR)",
+    actionClose: "Schließen (ESC)",
   }
 };
 
-export type Language = "tr" | "en" | "az" | "ru";
+export type Language = "tr" | "en" | "az" | "ru" | "de";
 
 export function getLanguage(): Language {
   const lang = localStorage.getItem("language");
-  if (lang === "en" || lang === "tr" || lang === "az" || lang === "ru") return lang;
+  if (lang === "en" || lang === "tr" || lang === "az" || lang === "ru" || lang === "de") return lang;
 
   // Detect browser language
   const browserLang = navigator.language.substring(0, 2).toLowerCase();
+  if (browserLang === "de") return "de";
   if (browserLang === "ru") return "ru";
   if (browserLang === "az") return "az";
   if (browserLang === "tr") return "tr";

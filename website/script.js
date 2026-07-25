@@ -175,6 +175,51 @@ const translations = {
         "footer-desc1": "Бесплатный инструмент для создания снимков экрана.",
         "footer-desc2": "Создано <a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a>.",
         "settings-img-src": "assets/settings_en1.png"
+    },
+    "de": {
+        "nav-features": "Funktionen",
+        "nav-showcase": "Übersicht",
+        "nav-download": "Herunterladen",
+        "hero-title": "Bildschirm erfassen.<br><span class=\"gradient-text\">Schnell und elegant.</span>",
+        "hero-subtitle": "Das extrem leichtgewichtige, plattformübergreifende Screenshot-Tool für Windows, macOS und Linux. Entwickelt mit Rust und Tauri für maximale Leistung und Datenschutz.",
+        "hero-download-for": "Download für &nbsp;",
+        "hero-explore": "Funktionen erkunden",
+        "hero-version": "Neuestes Release:",
+        "feat-title": "Warum Shotera?",
+        "feat-1-title": "Blitzschnell",
+        "feat-1-desc": "Shotera ist in Rust geschrieben, nutzt minimale Systemressourcen und startet sofort. Erfassen Sie Ihren Bildschirm ohne Verzögerung.",
+        "feat-2-title": "100% Offline & Privat",
+        "feat-2-desc": "Keine Datenerfassung, kein Tracking. Alle Screenshots und Bearbeitungen werden vollständig lokal auf Ihrem Gerät durchgeführt.",
+        "feat-3-title": "An Bildschirm Anheften",
+        "feat-3-desc": "Heften Sie wichtige Bilder über allen anderen Fenstern an. Perfekt als Referenz beim Programmieren oder Designen.",
+        "feat-4-title": "Leistungsstarker Editor",
+        "feat-4-desc": "Fügen Sie Pfeile, Formen, Text hinzu oder machen Sie vertrauliche Informationen vor dem Speichern unkenntlich.",
+        "feat-5-title": "Schneller Cloud-Upload",
+        "feat-5-desc": "Laden Sie Screenshots mit einem Klick auf Imgur hoch und kopieren Sie den Link sofort in die Zwischenablage.",
+        "feat-6-title": "Texterkennung (OCR)",
+        "feat-6-desc": "Extrahieren Sie nicht kopierbaren Text aus Bildern mit einem Klick völlig ohne Internetverbindung.",
+        "feat-7-title": "Schrittzähler",
+        "feat-7-desc": "Fügen Sie beim Klicken automatisch aufsteigende Nummern (1, 2, 3...) hinzu. Perfekt für Anleitungen.",
+        "feat-8-title": "Mehrere Formate",
+        "feat-8-desc": "Speichern Sie Screenshots in PNG, JPG oder WebP mit anpassbaren Qualitätseinstellungen.",
+        "showcase-title": "Entworfen für <span class=\"gradient-text\">Eleganz</span>",
+        "showcase-desc": "Shotera bietet eine moderne Benutzeroberfläche mit Unterstützung für Deutsch, Englisch, Türkisch, Aserbaidschanisch und Russisch.",
+        "showcase-li-1": "✓ Globale Tastenkombinationen (z. B. {mod}+Shift+S)",
+        "showcase-li-2": "✓ Unterstützung mehrerer Formate (PNG, JPG, WebP)",
+        "showcase-li-3": "✓ Betrieb im Hintergrund / System-Tray",
+        "dl-title": "Laden Sie Shotera für Ihre Plattform herunter",
+        "dl-subtitle": "Laden Sie die neueste Version direkt von GitHub herunter.",
+        "dl-win-desc": "Windows 10 / 11 (64-bit)",
+        "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
+        "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
+        "btn-download": "Herunterladen",
+        "dl-count": "Downloads:",
+        "cta-title": "Gefällt Ihnen Shotera?",
+        "cta-desc": "Shotera ist komplett kostenlos und Open-Source. Wenn Sie das Tool nützlich finden, geben Sie uns einen Stern auf GitHub!",
+        "cta-btn": "Auf GitHub bewerten",
+        "footer-desc1": "Open-Source Screenshot-Anwendung.",
+        "footer-desc2": "Erstellt von <a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a>.",
+        "settings-img-src": "assets/settings_en1.png"
     }
 };
 
@@ -315,14 +360,17 @@ document.addEventListener('DOMContentLoaded', () => {
         en: 'English',
         tr: 'Türkçe',
         az: 'Azərbaycan',
-        ru: 'Русский'
+        ru: 'Русский',
+        de: 'Deutsch'
     };
 
     // Detect system language or use saved
     let currentLang = localStorage.getItem('site_lang');
     if (!currentLang) {
         const userLang = navigator.language.toLowerCase();
-        if (userLang.startsWith('az')) currentLang = 'az';
+        if (userLang.startsWith('de')) currentLang = 'de';
+        else if (userLang.startsWith('ru')) currentLang = 'ru';
+        else if (userLang.startsWith('az')) currentLang = 'az';
         else if (userLang.startsWith('tr')) currentLang = 'tr';
         else currentLang = 'en';
     }

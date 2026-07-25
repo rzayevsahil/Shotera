@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <strong>🇬🇧 English</strong> | <a href="docs/README_TR.md">🇹🇷 Türkçe</a> | <a href="docs/README_AZ.md">🇦🇿 Azərbaycan dili</a> | <a href="docs/README_RU.md">🇷🇺 Русский</a>
+  <strong>🇬🇧 English</strong> | <a href="docs/README_TR.md">🇹🇷 Türkçe</a> | <a href="docs/README_AZ.md">🇦🇿 Azərbaycan dili</a> | <a href="docs/README_RU.md">🇷🇺 Русский</a> | <a href="docs/README_DE.md">🇩🇪 Deutsch</a>
 </p>
 
 ---

@@ -54,13 +54,15 @@ function SettingsWindow() {
           sendNotification({
             id: 999,
             title: "Shotera",
-            body: lang === "ru"
-              ? `Доступно новое обновление (v${update.version})! Перейдите в Настройки > О программе для установки.`
-              : lang === "az"
-                ? `Yeni bir yenilənmə mövcuddur (v${update.version})! Quraşdırmaq üçün Tənzimləmələr > Haqqında menyusuna keçin.`
-                : lang === "tr"
-                  ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.`
-                  : `A new update is available (v${update.version})! Visit Settings > About to install it.`
+            body: lang === "de"
+              ? `Ein neues Update ist verfügbar (v${update.version})! Gehen Sie zu Einstellungen > Über, um es zu installieren.`
+              : lang === "ru"
+                ? `Доступно новое обновление (v${update.version})! Перейдите в Настройки > О программе для установки.`
+                : lang === "az"
+                  ? `Yeni bir yenilənmə mövcuddur (v${update.version})! Quraşdırmaq üçün Tənzimləmələr > Haqqında menyusuna keçin.`
+                  : lang === "tr"
+                    ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.`
+                    : `A new update is available (v${update.version})! Visit Settings > About to install it.`
           });
         }
       } else {
@@ -437,7 +439,7 @@ function SettingsWindow() {
               borderRadius: "50%",
               backgroundColor: "#f59e0b",
               boxShadow: "0 0 6px #f59e0b",
-            }} title={lang === "ru" ? "Доступно обновление!" : lang === "az" ? "Yeni yenilənmə var!" : lang === "tr" ? "Yeni güncelleme var!" : "Update available!"} />
+            }} title={lang === "de" ? "Update verfügbar!" : lang === "ru" ? "Доступно обновление!" : lang === "az" ? "Yeni yenilənmə var!" : lang === "tr" ? "Yeni güncelleme var!" : "Update available!"} />
           )}
         </div>
       </aside>
@@ -525,6 +527,7 @@ function SettingsWindow() {
                 <option value="tr">Türkçe</option>
                 <option value="az">Azərbaycan dili</option>
                 <option value="ru">Русский</option>
+                <option value="de">Deutsch</option>
                 <option value="en">English</option>
               </select>
             </div>
@@ -866,13 +869,14 @@ function SettingsWindow() {
                     lineHeight: "1.5"
                   }}>
                     <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>
-                      {lang === "ru" ? "Что нового:" : lang === "az" ? "Yeniliklər:" : lang === "tr" ? "Yenilikler:" : "What's New:"}
+                      {lang === "de" ? "Was gibt's Neues:" : lang === "ru" ? "Что нового:" : lang === "az" ? "Yeniliklər:" : lang === "tr" ? "Yenilikler:" : "What's New:"}
                     </strong>
                     {(() => {
                       const body = updateManifest.body;
-                      if (body.includes("RU:") || body.includes("AZ:") || body.includes("TR:") || body.includes("EN:")) {
+                      if (body.includes("DE:") || body.includes("RU:") || body.includes("AZ:") || body.includes("TR:") || body.includes("EN:")) {
                         const parts = body.split("||");
                         for (const part of parts) {
+                          if (lang === "de" && part.trim().startsWith("DE:")) return part.trim().substring(3).trim();
                           if (lang === "ru" && part.trim().startsWith("RU:")) return part.trim().substring(3).trim();
                           if (lang === "az" && part.trim().startsWith("AZ:")) return part.trim().substring(3).trim();
                           if (lang === "tr" && part.trim().startsWith("TR:")) return part.trim().substring(3).trim();
