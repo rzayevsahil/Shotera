@@ -54,15 +54,7 @@ function SettingsWindow() {
           sendNotification({
             id: 999,
             title: "Shotera",
-            body: lang === "de"
-              ? `Ein neues Update ist verfügbar (v${update.version})! Gehen Sie zu Einstellungen > Über, um es zu installieren.`
-              : lang === "ru"
-                ? `Доступно новое обновление (v${update.version})! Перейдите в Настройки > О программе для установки.`
-                : lang === "az"
-                  ? `Yeni bir yenilənmə mövcuddur (v${update.version})! Quraşdırmaq üçün Tənzimləmələr > Haqqında menyusuna keçin.`
-                  : lang === "tr"
-                    ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.`
-                    : `A new update is available (v${update.version})! Visit Settings > About to install it.`
+            body: (t as any).updateNotificationBody(update.version)
           });
         }
       } else {
@@ -439,7 +431,7 @@ function SettingsWindow() {
               borderRadius: "50%",
               backgroundColor: "#f59e0b",
               boxShadow: "0 0 6px #f59e0b",
-            }} title={lang === "de" ? "Update verfügbar!" : lang === "ru" ? "Доступно обновление!" : lang === "az" ? "Yeni yenilənmə var!" : lang === "tr" ? "Yeni güncelleme var!" : "Update available!"} />
+            }} title={(t as any).updateAvailableBadge} />
           )}
         </div>
       </aside>
@@ -869,7 +861,7 @@ function SettingsWindow() {
                     lineHeight: "1.5"
                   }}>
                     <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>
-                      {lang === "de" ? "Was gibt's Neues:" : lang === "ru" ? "Что нового:" : lang === "az" ? "Yeniliklər:" : lang === "tr" ? "Yenilikler:" : "What's New:"}
+                      {(t as any).whatsNew}
                     </strong>
                     {(() => {
                       const body = updateManifest.body;
