@@ -61,7 +61,30 @@
                         <span id="star-count">0</span>
                     </span>
                 </a>
-                <button id="lang-toggle" class="lang-btn">TR</button>
+                <div class="lang-dropdown" id="lang-dropdown">
+                    <button class="lang-btn" id="lang-toggle-btn" aria-haspopup="true" aria-expanded="false">
+                        <svg class="globe-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                        <span id="current-lang-text">English</span>
+                        <svg class="chevron-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="lang-menu" id="lang-menu">
+                        <button class="lang-option" data-lang="en">
+                            <span class="flag">🇺🇸</span> English
+                        </button>
+                        <button class="lang-option" data-lang="tr">
+                            <span class="flag">🇹🇷</span> Türkçe
+                        </button>
+                        <button class="lang-option" data-lang="az">
+                            <span class="flag">🇦🇿</span> Azərbaycan dili
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -80,7 +103,7 @@
                 </a>
                 <a href="#features" class="btn btn-secondary" data-i18n="hero-explore">Explore Features</a>
             </div>
-            <p class="version-info"><span data-i18n="hero-version">Latest Release:</span> v0.5.6</p>
+            <p class="version-info"><span data-i18n="hero-version">Latest Release:</span> v0.5.7</p>
         </div>
 
         <div class="hero-image glass-panel fade-in-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
@@ -231,7 +254,7 @@
     <section id="downloads" class="downloads section">
         <h2 class="section-title" data-i18n="dl-title">Get Shotera for your Platform</h2>
         <p class="section-subtitle" style="text-align: center; margin-bottom: 3rem;"><span
-                data-i18n="dl-subtitle">Download the latest v0.5.6 release directly from GitHub.</span></p>
+                data-i18n="dl-subtitle">Download the latest v0.5.7 release directly from GitHub.</span></p>
 
         <div class="downloads-grid">
             <!-- Windows -->

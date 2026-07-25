@@ -96,7 +96,7 @@ const translations = {
         "hero-explore": "Xüsusiyyətləri Kəşf Et",
         "hero-version": "Son Buraxılış:",
         "feat-title": "Niyə Shotera?",
-        "feat-1-title": "İldırım Hızında",
+        "feat-1-title": "İldırım Sürətində",
         "feat-1-desc": "Rust dilində yazılan Shotera minimal sistem resursu istifadə edir və anında başlayır. Ekranınızı sıfır gecikmə ilə yaxalayın.",
         "feat-2-title": "100% Oflayn və Məxfi",
         "feat-2-desc": "Məlumat toplanılması yoxdur, izləmə yoxdur. Bütün ekran şəkilləri və redaktələr tamamilə öz cihazınızda (oflayn) həyata keçirilir.",
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. OS Detection for Primary Download Button
     const osNameSpan = document.getElementById('os-name');
     const autoDownloadBtn = document.getElementById('auto-download-btn');
-    
+
     let osName = "Windows";
     let downloadLink = "https://github.com/rzayevsahil/Shotera/releases/latest";
 
@@ -192,10 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (!data || !data.assets) return;
             const assets = data.assets;
-            
+
             let msiUrl = "", exeUrl = "", dmgUrl = "", tarUrl = "", debUrl = "", appImageUrl = "";
             let winCount = 0, macCount = 0, linuxCount = 0;
-            
+
             assets.forEach(asset => {
                 const name = asset.name.toLowerCase();
                 if (name.endsWith('.msi')) {
@@ -231,12 +231,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tarUrl) document.getElementById('mac-tar-btn').href = tarUrl;
             if (debUrl) document.getElementById('linux-deb-btn').href = debUrl;
             if (appImageUrl) document.getElementById('linux-appimage-btn').href = appImageUrl;
-            
+
             // Set download counts
             document.getElementById('win-dl-count').textContent = winCount;
             document.getElementById('mac-dl-count').textContent = macCount;
             document.getElementById('linux-dl-count').textContent = linuxCount;
-            
+
             // Set the dynamic hero button download link
             if (osName === "Windows" && msiUrl) autoDownloadBtn.href = msiUrl;
             else if (osName === "macOS" && dmgUrl) autoDownloadBtn.href = dmgUrl;
@@ -259,10 +259,19 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => console.error("Failed to fetch repo stars:", err));
 
-    // 5. Language Switcher Logic
-    const langBtn = document.getElementById('lang-toggle');
+    // 5. Language Switcher Dropdown Logic
+    const langDropdown = document.getElementById('lang-dropdown');
+    const langToggleBtn = document.getElementById('lang-toggle-btn');
+    const currentLangText = document.getElementById('current-lang-text');
+    const langOptions = document.querySelectorAll('.lang-option');
     const settingsImg = document.getElementById('settings-img');
-    
+
+    const langNames = {
+        en: 'English',
+        tr: 'Türkçe',
+        az: 'Azərbaycan'
+    };
+
     // Detect system language or use saved
     let currentLang = localStorage.getItem('site_lang');
     if (!currentLang) {
@@ -276,8 +285,19 @@ document.addEventListener('DOMContentLoaded', () => {
         currentLang = lang;
         localStorage.setItem('site_lang', lang);
         
-        // Display active language code on button
-        langBtn.textContent = lang.toUpperCase();
+        // Display active language text on button
+        if (currentLangText) {
+            currentLangText.textContent = langNames[lang] || 'English';
+        }
+
+        // Highlight active option in dropdown menu
+        langOptions.forEach(opt => {
+            if (opt.getAttribute('data-lang') === lang) {
+                opt.classList.add('active');
+            } else {
+                opt.classList.remove('active');
+            }
+        });
         
         // Update document lang
         document.documentElement.lang = lang;
@@ -302,14 +322,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Toggle Dropdown
+    if (langToggleBtn && langDropdown) {
+        langToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = langDropdown.classList.contains('open');
+            langDropdown.classList.toggle('open');
+            langToggleBtn.setAttribute('aria-expanded', !isOpen);
+        });
+
+        // Click on option
+        langOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const selectedLang = opt.getAttribute('data-lang');
+                if (selectedLang) {
+                    setLanguage(selectedLang);
+                }
+                langDropdown.classList.remove('open');
+                langToggleBtn.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!langDropdown.contains(e.target)) {
+                langDropdown.classList.remove('open');
+                langToggleBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
     // Initialize Language
     setLanguage(currentLang);
-
-    // Toggle event cycling: en -> tr -> az -> en
-    langBtn.addEventListener('click', () => {
-        const nextLang = currentLang === 'en' ? 'tr' : currentLang === 'tr' ? 'az' : 'en';
-        setLanguage(nextLang);
-    });
 
     // 6. Mobile Menu Logic
     const mobileBtn = document.getElementById('mobile-menu-btn');
@@ -317,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (mobileBtn && navLinks) {
         const navbar = document.querySelector('.navbar');
-        
+
         mobileBtn.addEventListener('click', () => {
             navLinks.classList.toggle('active');
             if (navbar) navbar.classList.toggle('menu-open');
