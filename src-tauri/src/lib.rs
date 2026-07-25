@@ -606,6 +606,7 @@ fn show_screenshot_window(app_handle: AppHandle) -> Result<(), String> {
             }
         }
         
+        let _ = window.set_fullscreen(true);
         window.show().map_err(|e| e.to_string())?;
         window.set_focus().map_err(|e| e.to_string())?;
     }
