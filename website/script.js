@@ -86,6 +86,50 @@ const translations = {
         "footer-desc1": "Açık Kaynaklı Ekran Yakalama Aracı.",
         "footer-desc2": "<a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a> tarafından geliştirildi.",
         "settings-img-src": "assets/settings_tr1.png"
+    },
+    az: {
+        "nav-features": "Xüsusiyyətlər",
+        "nav-download": "Yüklə",
+        "hero-title": "Ekranı yaxala.<br><span class=\"gradient-text\">Gözəl görünüşlə.</span>",
+        "hero-subtitle": "Windows, macOS və Linux üçün ultra yüngül, çarpaz platformalı ekran yaxalama aləti. Maksimum performans və məxfilik üçün Rust və Tauri ilə hazırlanıb.",
+        "hero-download-for": "Bunun üçün yüklə &nbsp;",
+        "hero-explore": "Xüsusiyyətləri Kəşf Et",
+        "hero-version": "Son Buraxılış:",
+        "feat-title": "Niyə Shotera?",
+        "feat-1-title": "İldırım Hızında",
+        "feat-1-desc": "Rust dilində yazılan Shotera minimal sistem resursu istifadə edir və anında başlayır. Ekranınızı sıfır gecikmə ilə yaxalayın.",
+        "feat-2-title": "100% Oflayn və Məxfi",
+        "feat-2-desc": "Məlumat toplanılması yoxdur, izləmə yoxdur. Bütün ekran şəkilləri və redaktələr tamamilə öz cihazınızda (oflayn) həyata keçirilir.",
+        "feat-3-title": "Ekrana Sanc",
+        "feat-3-desc": "Vacib şəkilləri digər bütün pəncərələrin üzərində saxlayın. Kod yazarkən və ya dizayn edərkən baxış üçün mükəmməldir.",
+        "feat-4-title": "Güclü Redaktor",
+        "feat-4-desc": "Yadda saxlamazdan və ya kopyalamazdan əvvəl anında ox, qutu, mətn əlavə edin və ya həssas məlumatları bulanıqlaşdırın.",
+        "feat-5-title": "Sürətli Bulud Yükləməsi",
+        "feat-5-desc": "Ekran şəkillərini tək kliklə Imgur-a yükləyin və keçidini anında mübadilə buferinə kopyalayın.",
+        "feat-6-title": "Mətn Tanıma (OCR)",
+        "feat-6-desc": "Ekrandakı kopyalanmayan yazıları tək kliklə oxuyun və mətn olaraq kopyalayın.",
+        "feat-7-title": "Adım Sayğacı",
+        "feat-7-desc": "Ekrana kliklədikcə 1, 2, 3 şəklində avtomatik artan nömrələr əlavə edin. Təlimatlar üçün mükəmməldir.",
+        "feat-8-title": "Çoxlu Format Dəstəyi",
+        "feat-8-desc": "Ekran şəkillərinizi PNG, JPG və ya müasir WebP formatında təyin etdiyiniz keyfiyyətlə yadda saxlayın.",
+        "showcase-title": "<span class=\"gradient-text\">Zərif</span> olması üçün tasarlandı",
+        "showcase-desc": "Shotera İngilis, Türk və Azərbaycan dili dəstəyi ilə müasir və fərdiləşdirilə bilən Tənzimləmələr interfeysi təqdim edir. Sahə və ya tam ekran yaxalamaq üçün öz qısayollarınızı təyin edin.",
+        "showcase-li-1": "✓ Xüsusi Qlobal Qısayollar (Məsələn: {mod}+Shift+S)",
+        "showcase-li-2": "✓ Çoxlu format dəstəyi (PNG, JPG, WebP)",
+        "showcase-li-3": "✓ Arka fonda / treydə işləmə",
+        "dl-title": "Platformanız üçün Shotera-nı Yükləyin",
+        "dl-subtitle": "Ən son buraxılışı birbaşa GitHub-dan yükləyin.",
+        "dl-win-desc": "Windows 10 / 11 (64-bit)",
+        "dl-mac-desc": "Apple Silicon (M1/M2/M3) & Intel",
+        "dl-linux-desc": "Ubuntu 24.04+ (Debian, AppImage)",
+        "btn-download": "Yüklə",
+        "dl-count": "Yüklənmə:",
+        "cta-title": "Shotera-nı bəyəndiniz?",
+        "cta-desc": "Shotera tamamilə pulsuz və açıq mənbəlidir. Əgər tətbiqin faydalı olduğunu düşünürsünüzsə, inkişafı dəstəkləmək üçün bizə GitHub-da ulduz verə bilərsiniz!",
+        "cta-btn": "GitHub-da Ulduz Ver",
+        "footer-desc1": "Açıq Mənbəli Ekran Yaxalama Tətbiqi.",
+        "footer-desc2": "<a href='https://www.linkedin.com/in/sahilrzayev/' target='_blank'>Sahil Rzayev</a> tərəfindən yaradılmışdır.",
+        "settings-img-src": "assets/settings_tr1.png"
     }
 };
 
@@ -222,15 +266,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Detect system language or use saved
     let currentLang = localStorage.getItem('site_lang');
     if (!currentLang) {
-        currentLang = navigator.language.toLowerCase().startsWith('tr') ? 'tr' : 'en';
+        const userLang = navigator.language.toLowerCase();
+        if (userLang.startsWith('az')) currentLang = 'az';
+        else if (userLang.startsWith('tr')) currentLang = 'tr';
+        else currentLang = 'en';
     }
 
     const setLanguage = (lang) => {
         currentLang = lang;
         localStorage.setItem('site_lang', lang);
         
-        // Update button text to the OTHER language
-        langBtn.textContent = lang === 'en' ? 'TR' : 'EN';
+        // Display active language code on button
+        langBtn.textContent = lang.toUpperCase();
         
         // Update document lang
         document.documentElement.lang = lang;
@@ -258,9 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Language
     setLanguage(currentLang);
 
-    // Toggle event
+    // Toggle event cycling: en -> tr -> az -> en
     langBtn.addEventListener('click', () => {
-        setLanguage(currentLang === 'en' ? 'tr' : 'en');
+        const nextLang = currentLang === 'en' ? 'tr' : currentLang === 'tr' ? 'az' : 'en';
+        setLanguage(nextLang);
     });
 
     // 6. Mobile Menu Logic

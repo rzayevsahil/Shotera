@@ -54,9 +54,11 @@ function SettingsWindow() {
           sendNotification({
             id: 999,
             title: "Shotera",
-            body: lang === "tr"
-              ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.`
-              : `A new update is available (v${update.version})! Visit Settings > About to install it.`
+            body: lang === "az"
+              ? `Yeni bir yenilənmə mövcuddur (v${update.version})! Quraşdırmaq üçün Tənzimləmələr > Haqqında menyusuna keçin.`
+              : lang === "tr"
+                ? `Yeni bir güncelleme mevcut (v${update.version})! Yüklemek için Ayarlar > Hakkında menüsünü ziyaret edin.`
+                : `A new update is available (v${update.version})! Visit Settings > About to install it.`
           });
         }
       } else {
@@ -433,7 +435,7 @@ function SettingsWindow() {
               borderRadius: "50%",
               backgroundColor: "#f59e0b",
               boxShadow: "0 0 6px #f59e0b",
-            }} title={lang === "tr" ? "Yeni güncelleme var!" : "Update available!"} />
+            }} title={lang === "az" ? "Yeni yenilənmə var!" : lang === "tr" ? "Yeni güncelleme var!" : "Update available!"} />
           )}
         </div>
       </aside>
@@ -519,6 +521,7 @@ function SettingsWindow() {
                 style={{ width: "240px" }}
               >
                 <option value="tr">Türkçe</option>
+                <option value="az">Azərbaycan dili</option>
                 <option value="en">English</option>
               </select>
             </div>
@@ -822,7 +825,7 @@ function SettingsWindow() {
                         transition: "all 0.2s ease"
                       }}
                     >
-                      {lang === "tr" ? "Şimdi Kur ve Yeniden Başlat" : "Install & Relaunch"}
+                      {lang === "az" ? "İndi Quraşdır və Yenidən Başlat" : lang === "tr" ? "Şimdi Kur ve Yeniden Başlat" : "Install & Relaunch"}
                     </button>
                   ) : (
                     <button
@@ -860,13 +863,14 @@ function SettingsWindow() {
                     lineHeight: "1.5"
                   }}>
                     <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>
-                      {lang === "tr" ? "Yenilikler:" : "What's New:"}
+                      {lang === "az" ? "Yeniliklər:" : lang === "tr" ? "Yenilikler:" : "What's New:"}
                     </strong>
                     {(() => {
                       const body = updateManifest.body;
-                      if (body.includes("TR:") && body.includes("EN:")) {
+                      if (body.includes("AZ:") || body.includes("TR:") || body.includes("EN:")) {
                         const parts = body.split("||");
                         for (const part of parts) {
+                          if (lang === "az" && part.trim().startsWith("AZ:")) return part.trim().substring(3).trim();
                           if (lang === "tr" && part.trim().startsWith("TR:")) return part.trim().substring(3).trim();
                           if (lang === "en" && part.trim().startsWith("EN:")) return part.trim().substring(3).trim();
                         }

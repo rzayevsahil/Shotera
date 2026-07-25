@@ -188,18 +188,114 @@ export const translations = {
     actionPin: "Pin to Screen (Always on Top)",
     actionOcr: "Copy as Text (OCR)",
     actionClose: "Close (ESC)",
+  },
+  az: {
+    sidebarGeneral: "Ümumi",
+    sidebarCapture: "Yaxalama",
+    sidebarSave: "Yadda Saxlama",
+    sidebarAbout: "Haqqında",
+
+    generalTitle: "Ümumi Tənzimləmələr",
+    generalSubtitle: "Tətbiqin ümumi iş rejimini və başlanğıc davranışını fərdiləşdirin.",
+
+    runAtStartup: "Sistem Açılışında Çalışdır",
+    runAtStartupDesc: "Windows açıldıqda Shotera tətbiqini avtomatik olaraq başlat.",
+    startInTray: "Sistem Treydə Başlat",
+    startInTrayDesc: "Tətbiq açıldıqda əsas pəncərəni göstərmə, arxa fonda sistem treydə çalışdır.",
+    takeScreenshot: "Ekran Şəkli Al",
+    takeScreenshotDesc: "Yaxalama interfeysini açmaq üçün dərhal sınaqdan keçirin. Qısayol:",
+    captureNow: "İndi Yaxala",
+    languageSetting: "Dil Tənzimləməsi / Language",
+    languageSettingDesc: "Tətbiq dilini seçin / Select application language",
+    showNotifications: "Sistem Bildirişlərini Göstər",
+    showNotificationsDesc: "Kopyalama, yadda saxlama və s. əməliyyatlardan sonra Windows/macOS bildirişi göstərir (Yenilənmələr istisna olmaqla).",
+
+    captureTitle: "Yaxalama Tənzimləmələri",
+    captureSubtitle: "Ekran şəkli yaxalama üsullarını və qısayolları idarə edin.",
+    playShutterSound: "Kamera Deklanşor Səsini Çal",
+    playShutterSoundDesc: "Uğurla ekran şəkli alındıqda səs effektini səsləndir.",
+    includeCursor: "Sıçrayan Kursoru Daxil Et",
+    includeCursorDesc: "Alınan ekran şəkillərinə sistem kursorunu da əlavə et.",
+    globalShortcut: "Qlobal Qısayol (Bölgə Seçimi)",
+    globalShortcutDesc: "Bölgə seçimi ekran şəklini başladan əsas qısayollar. (Dəyişmək üçün düymə qutusuna klikləyin)",
+    globalFullscreenShortcut: "Qlobal Qısayol (Tam Ekran)",
+    globalFullscreenShortcutDesc: "Ekranın tamamını birbaşa mübadilə buferinə kopyalayan və yadda saxlayan qısayollar. (Dəyişmək üçün düymə qutusuna klikləyin)",
+    editorShortcuts: "Yaxalama Ekranı Qısayolları",
+    editorShortcutsDesc: "Ekran şəkli redaktorunda istifadə edə biləcəyiniz sürətli qısayollar.",
+    toolLine: "Xətt Çək",
+    toolCircle: "Dairə Çək",
+    textBold: "Qalın",
+    textItalic: "Meylli",
+    textUnderline: "Altıxətli",
+    textStrikethrough: "Üstüxətli",
+    colorPicker: "Təkmilləşdirilmiş Rəng Seçici",
+    shortcutChangeHint: "Dəyişmək üçün klikləyin",
+    shortcutPressKeys: "Düymələri sıxın...",
+    editorCopy: "Kopyala:",
+    editorSave: "Yadda saxla:",
+    editorClose: "Bağla:",
+    editorUndo: "Geri Al:",
+    selectFolder: "Qovluq Seç",
+    formatLossless: "İtkisiz",
+    formatCompressed: "Sıxışdırılmış",
+    formatModern: "Müasir Sıxışdırma",
+    invalidShortcut: "Yanlış Qısayol",
+    shortcutConflictMsg: (mod: string) => `${mod}+C və ${mod}+S qısayolları kopyalama və yadda saxlama əməliyyatları üçün ayrılmışdır. Xahiş olunur başqa kombinasiya seçin.`,
+    checkForUpdates: "Yenilənmələri Yoxla",
+    checkingUpdates: "Yenilənmələr yoxlanılır...",
+    updateAvailable: "Yeni Versiya Mövcuddur!",
+    installingUpdate: "Yenilənmə endirilir və quraşdırılır...",
+    appUpToDate: "Tətbiq Yenilənib",
+    updateError: "Yenilənmə yoxlanılarkən xəta baş verdi.",
+    updateSuccess: "Yenilənmə quraşdırıldı, yenidən başladılır...",
+    appVersion: "Versiya",
+
+    saveTitle: "Yadda Saxlama və Fayl Tənzimləmələri",
+    saveSubtitle: "Faylların hara və hansı formatda yadda saxlanılacağını konfiqurasiya edin.",
+    defaultSaveDir: "Defolt Yadda Saxlama Qovluğu",
+    defaultSaveDirDesc: "Ekran şəkillərinin yadda saxlanılacağı qovluq.",
+    fileFormat: "Fayl Formatı",
+    fileFormatDesc: "Ekran şəkillərinin yadda saxlanılacağı fayl formatı.",
+    imageQuality: "Şəkil Keyfiyyəti",
+    imageQualityDesc: "Şəkil keyfiyyəti faizi (JPG və WebP formatları üçün keçərlidir).",
+
+    aboutTitle: "Shotera Haqqında",
+    aboutSubtitle: "Shotera layihəsi və quraşdırılmış versiya təfərrüatları.",
+    aboutSubtitleDesc: "Çarpaz Platformalı Yüngül Ekran Şəkli Tətbiqi",
+    aboutDesc: "Shotera, Windows, macOS və Linux sistemlərində işləyən ultra yüngül, sürətli və məxfilik yönümlü ekran şəkli alma alətidir. Şəkilləriniz cihazınızda lokal (oflayn) olaraq emal edilir.",
+    developer: "Tərtibatçı Profili",
+    devTitle: "Təsisçi & Baş Tərtibatçı",
+    devContact: "Əlaqə",
+    devGitHub: "GitHub Profili",
+
+    dragToSelect: "Sürüşdürərək Sahə Seçin | Çıxış üçün ESC",
+    toolSelect: "Seçim Aləti (Daşı / Ölçünü Dəyiş)",
+    toolPencil: "Sərbəst Qələm",
+    toolArrow: "Ox Əlavə Et",
+    toolRect: "Düzbucaqlı Çək",
+    toolText: "Mətn Yaz",
+    toolBlur: "Bulanıqlaşdır (Blur)",
+    toolClear: "Çəkilənləri Təmizlə",
+    actionCopy: "Mübadilə Buferinə Kopyala (Enter)",
+    actionSave: "Fayla Yadda Saxla",
+    actionUpload: "Buluda Yüklə (Linki Paylaş)",
+    actionPin: "Ekrana Sanc (Həmişə Üstdə)",
+    actionOcr: "Mətn Olaraq Kopyala (OCR)",
+    actionClose: "Bağla (ESC)",
   }
 };
 
-export type Language = "tr" | "en";
+export type Language = "tr" | "en" | "az";
 
 export function getLanguage(): Language {
   const lang = localStorage.getItem("language");
-  if (lang === "en" || lang === "tr") return lang;
+  if (lang === "en" || lang === "tr" || lang === "az") return lang;
 
   // Detect browser language
   const browserLang = navigator.language.substring(0, 2).toLowerCase();
-  return browserLang === "tr" ? "tr" : "en";
+  if (browserLang === "az") return "az";
+  if (browserLang === "tr") return "tr";
+  return "en";
 }
 
 export function setLanguage(lang: Language) {
@@ -209,3 +305,4 @@ export function setLanguage(lang: Language) {
   // Sync language with native system tray menu
   invoke("update_tray_language", { lang }).catch((err) => console.error("Failed to update tray language:", err));
 }
+

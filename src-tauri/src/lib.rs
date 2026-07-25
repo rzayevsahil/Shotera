@@ -245,10 +245,10 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
         let state_lang = state.language.lock().map_err(|e| e.to_string())?;
         state_lang.clone()
     };
-    let body = if lang == "tr" {
-        "Tam ekran görüntüsü kaydedildi ve panoya kopyalandı!"
-    } else {
-        "Full screenshot saved and copied to clipboard!"
+    let body = match lang.as_str() {
+        "az" => "Tam ekran şəkli yadda saxlanıldı və mübadilə buferinə kopyalandı!",
+        "tr" => "Tam ekran görüntüsü kaydedildi ve panoya kopyalandı!",
+        _ => "Full screenshot saved and copied to clipboard!",
     };
     show_app_notification(state, "Shotera", body, None);
     
@@ -335,10 +335,10 @@ async fn upload_to_imgur(_app_handle: AppHandle, state: State<'_, AppState>, bas
             let state_lang = state.language.lock().map_err(|e| e.to_string())?;
             state_lang.clone()
         };
-        let body = if lang == "tr" {
-            "Görsel buluta yüklendi ve link panoya kopyalandı!"
-        } else {
-            "Image uploaded to cloud and link copied to clipboard!"
+        let body = match lang.as_str() {
+            "az" => "Şəkil buluda yükləndi və link mübadilə buferinə kopyalandı!",
+            "tr" => "Görsel buluta yüklendi ve link panoya kopyalandı!",
+            _ => "Image uploaded to cloud and link copied to clipboard!",
         };
         show_app_notification(&state, "Shotera", body, None);
 
@@ -416,10 +416,10 @@ fn copy_to_clipboard(
         let state_lang = state.language.lock().map_err(|e| e.to_string())?;
         state_lang.clone()
     };
-    let body = if lang == "tr" {
-        "Ekran görüntüsü panoya kopyalandı!"
-    } else {
-        "Screenshot copied to clipboard!"
+    let body = match lang.as_str() {
+        "az" => "Ekran şəkli mübadilə buferinə kopyalandı!",
+        "tr" => "Ekran görüntüsü panoya kopyalandı!",
+        _ => "Screenshot copied to clipboard!",
     };
     show_app_notification(&state, "Shotera", body, None);
     
@@ -473,10 +473,10 @@ fn save_to_file(
         let state_lang = state.language.lock().map_err(|e| e.to_string())?;
         state_lang.clone()
     };
-    let body = if lang == "tr" {
-        "Ekran görüntüsü başarıyla kaydedildi!"
-    } else {
-        "Screenshot saved successfully!"
+    let body = match lang.as_str() {
+        "az" => "Ekran şəkli uğurla yadda saxlanıldı!",
+        "tr" => "Ekran görüntüsü başarıyla kaydedildi!",
+        _ => "Screenshot saved successfully!",
     };
     show_app_notification(&state, "Shotera", body, None);
     
@@ -555,10 +555,10 @@ fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang:
         *state_lang = lang.clone();
     }
     if let Some(tray) = app_handle.tray_by_id("main-tray") {
-        let (capture_label, settings_label, quit_label) = if lang == "tr" {
-            ("Ekran Görüntüsü Al", "Ayarlar", "Çıkış")
-        } else {
-            ("Take Screenshot", "Settings", "Quit")
+        let (capture_label, settings_label, quit_label) = match lang.as_str() {
+            "az" => ("Ekran Şəkli Al", "Tənzimləmələr", "Çıxış"),
+            "tr" => ("Ekran Görüntüsü Al", "Ayarlar", "Çıkış"),
+            _ => ("Take Screenshot", "Settings", "Quit"),
         };
         
         if let Ok(quit_i) = MenuItem::with_id(&app_handle, "quit", quit_label, true, None::<&str>) {
@@ -657,10 +657,10 @@ fn save_base64_image(
         let state_lang = state.language.lock().map_err(|e| e.to_string())?;
         state_lang.clone()
     };
-    let body = if lang == "tr" {
-        "Ekran görüntüsü başarıyla kaydedildi!"
-    } else {
-        "Screenshot saved successfully!"
+    let body = match lang.as_str() {
+        "az" => "Ekran şəkli uğurla yadda saxlanıldı!",
+        "tr" => "Ekran görüntüsü başarıyla kaydedildi!",
+        _ => "Screenshot saved successfully!",
     };
     show_app_notification(&state, "Shotera", body, Some(&path.to_string_lossy()));
 
@@ -693,10 +693,10 @@ fn copy_base64_image_to_clipboard(_app_handle: AppHandle, state: State<'_, AppSt
         let state_lang = state.language.lock().map_err(|e| e.to_string())?;
         state_lang.clone()
     };
-    let body = if lang == "tr" {
-        "Ekran görüntüsü panoya kopyalandı!"
-    } else {
-        "Screenshot copied to clipboard!"
+    let body = match lang.as_str() {
+        "az" => "Ekran şəkli mübadilə buferinə kopyalandı!",
+        "tr" => "Ekran görüntüsü panoya kopyalandı!",
+        _ => "Screenshot copied to clipboard!",
     };
     show_app_notification(&state, "Shotera", body, Some(&temp_path.to_string_lossy()));
 
