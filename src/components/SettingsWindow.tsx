@@ -9,7 +9,7 @@ import shutterSoundUrl from "../assets/shutter.mp3";
 import { check as checkUpdate } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
-import { enable, disable } from "@tauri-apps/plugin-autostart";
+import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 type ActiveTab = "general" | "capture" | "save" | "about";
 
@@ -120,6 +120,32 @@ function SettingsWindow() {
     }
   };
 
+  const handleAutostartToggle = async (checked: boolean) => {
+    setStartAtBoot(checked);
+    localStorage.setItem("startAtBoot", String(checked));
+    try {
+      if (checked) {
+        await enable();
+      } else {
+        await disable();
+      }
+    } catch (err) {
+      console.error("Failed to toggle autostart:", err);
+    }
+  };
+
+  // Sync autostart status on mount with OS registry
+  useEffect(() => {
+    isEnabled().then((enabled: boolean) => {
+      const saved = localStorage.getItem("startAtBoot") === "true";
+      if (saved && !enabled) {
+        enable().catch(err => console.error("Failed to repair autostart on mount:", err));
+      } else if (!saved && enabled) {
+        disable().catch(err => console.error("Failed to disable autostart on mount:", err));
+      }
+    }).catch(err => console.error("Failed to check autostart status on mount:", err));
+  }, []);
+
   // Sync settings with localStorage
   useEffect(() => {
     localStorage.setItem("startAtBoot", String(startAtBoot));
@@ -133,13 +159,6 @@ function SettingsWindow() {
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
 
     localStorage.setItem("showNotifications", String(showNotifications));
-
-    // Sync autostart
-    if (startAtBoot) {
-      enable().catch(err => console.error("Failed to enable autostart:", err));
-    } else {
-      disable().catch(err => console.error("Failed to disable autostart:", err));
-    }
   }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, showNotifications]);
 
   // Sync keyboard shortcuts with Rust backend
@@ -465,7 +484,7 @@ function SettingsWindow() {
                 <input
                   type="checkbox"
                   checked={startAtBoot}
-                  onChange={(e) => setStartAtBoot(e.target.checked)}
+                  onChange={(e) => handleAutostartToggle(e.target.checked)}
                 />
                 <span className="slider"></span>
               </label>

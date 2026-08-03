@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
+import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import SettingsWindow from "./components/SettingsWindow";
 import ScreenshotCapture from "./components/ScreenshotCapture";
 import PinnedImage from "./components/PinnedImage";
@@ -20,6 +21,21 @@ function App() {
           win.show();
           win.setFocus();
         }
+
+        // Auto-sync and repair autostart Windows registry key on startup
+        const startAtBootSetting = localStorage.getItem("startAtBoot") === "true";
+        isEnabled().then((enabled) => {
+          if (startAtBootSetting && !enabled) {
+            enable().catch((err) => console.error("Failed to enable autostart on app launch:", err));
+          } else if (!startAtBootSetting && enabled) {
+            disable().catch((err) => console.error("Failed to disable autostart on app launch:", err));
+          }
+        }).catch((err) => {
+          console.error("Failed to check autostart status:", err);
+          if (startAtBootSetting) {
+            enable().catch(() => {});
+          }
+        });
       }
     } catch (e) {
       console.error("Failed to get window label, defaulting to main", e);
