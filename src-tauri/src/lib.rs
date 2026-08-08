@@ -714,6 +714,32 @@ fn copy_base64_image_to_clipboard(_app_handle: AppHandle, state: State<'_, AppSt
 }
 
 
+fn log_app_event(app_handle: &AppHandle, level: &str, msg: &str) {
+    if let Ok(mut log_dir) = app_handle.path().app_log_dir() {
+        let _ = std::fs::create_dir_all(&log_dir);
+        log_dir.push("shotera.log");
+        let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S");
+        let log_entry = format!("[{}] [{}] {}\n", timestamp, level, msg);
+        if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(&log_dir) {
+            use std::io::Write;
+            let _ = file.write_all(log_entry.as_bytes());
+        }
+    }
+}
+
+#[tauri::command]
+fn get_log_file_path(app_handle: AppHandle) -> Result<String, String> {
+    let mut log_dir = app_handle.path().app_log_dir().map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&log_dir).map_err(|e| e.to_string())?;
+    log_dir.push("shotera.log");
+    Ok(log_dir.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+fn write_log_entry(app_handle: AppHandle, level: String, message: String) {
+    log_app_event(&app_handle, &level, &message);
+}
+
 #[cfg(target_os = "windows")]
 fn set_app_user_model_id() {
     use windows_sys::Win32::UI::Shell::SetCurrentProcessExplicitAppUserModelID;
@@ -759,6 +785,16 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec!["--autostart"])))
         .setup(|app| {
+            let handle = app.handle();
+            log_app_event(handle, "INFO", "Shotera starting up...");
+
+            let is_autostart = std::env::args().any(|arg| arg == "--autostart");
+            if is_autostart {
+                log_app_event(handle, "INFO", "App launched in background via autostart flag (--autostart)");
+            } else {
+                log_app_event(handle, "INFO", "App launched manually by user");
+            }
+
             // 1. Setup Global Shortcut Plugin
             let shortcut_plugin = tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(move |app_handle_shortcut, shortcut, event| {
@@ -802,39 +838,60 @@ pub fn run() {
             let _ = app.global_shortcut().register(reg_shortcut);
             let _ = app.global_shortcut().register(fs_shortcut);
 
-            // 2. Setup System Tray
-            let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let settings_i = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
-            let capture_i = MenuItem::with_id(app, "capture", "Take Screenshot", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&capture_i, &settings_i, &quit_i])?;
+            // 2. Setup System Tray with retry mechanism for Windows Fast Startup
+            let create_tray = |app_ref: &tauri::App| -> Result<tauri::tray::TrayIcon, tauri::Error> {
+                let quit_i = MenuItem::with_id(app_ref, "quit", "Quit", true, None::<&str>)?;
+                let settings_i = MenuItem::with_id(app_ref, "settings", "Settings", true, None::<&str>)?;
+                let capture_i = MenuItem::with_id(app_ref, "capture", "Take Screenshot", true, None::<&str>)?;
+                let menu = Menu::with_items(app_ref, &[&capture_i, &settings_i, &quit_i])?;
 
-            let _tray = TrayIconBuilder::with_id("main-tray")
-                .menu(&menu)
-                .tooltip("Shotera")
-                .icon(app.default_window_icon().cloned().unwrap())
-                .on_menu_event(move |app_handle_tray, event| {
-                    match event.id.as_ref() {
-                        "quit" => {
-                            app_handle_tray.exit(0);
-                        }
-                        "settings" => {
-                            if let Some(window) = app_handle_tray.get_webview_window("main") {
-                                let _ = window.show();
-                                let _ = window.set_focus();
+                TrayIconBuilder::with_id("main-tray")
+                    .menu(&menu)
+                    .tooltip("Shotera")
+                    .icon(app_ref.default_window_icon().cloned().unwrap())
+                    .on_menu_event(move |app_handle_tray, event| {
+                        match event.id.as_ref() {
+                            "quit" => {
+                                app_handle_tray.exit(0);
                             }
+                            "settings" => {
+                                if let Some(window) = app_handle_tray.get_webview_window("main") {
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
+                                }
+                            }
+                            "capture" => {
+                                let app_handle_clone = app_handle_tray.clone();
+                                std::thread::spawn(move || {
+                                    std::thread::sleep(std::time::Duration::from_millis(300));
+                                    let state = app_handle_clone.state::<AppState>();
+                                    let _ = trigger_screenshot(&app_handle_clone, &state);
+                                });
+                            }
+                            _ => {}
                         }
-                        "capture" => {
-                            let app_handle_clone = app_handle_tray.clone();
-                            std::thread::spawn(move || {
-                                std::thread::sleep(std::time::Duration::from_millis(300));
-                                let state = app_handle_clone.state::<AppState>();
-                                let _ = trigger_screenshot(&app_handle_clone, &state);
-                            });
-                        }
-                        _ => {}
+                    })
+                    .build(app_ref)
+            };
+
+            let mut tray_res = create_tray(app);
+            if tray_res.is_err() {
+                log_app_event(handle, "WARN", "System tray creation failed on first attempt, starting retry loop for Fast Startup...");
+                for i in 1..=10 {
+                    std::thread::sleep(std::time::Duration::from_millis(500));
+                    tray_res = create_tray(app);
+                    if tray_res.is_ok() {
+                        log_app_event(handle, "INFO", &format!("System tray created successfully on retry attempt {}", i));
+                        break;
                     }
-                })
-                .build(app)?;
+                }
+            } else {
+                log_app_event(handle, "INFO", "System tray created successfully on first attempt.");
+            }
+
+            if let Err(ref err) = tray_res {
+                log_app_event(handle, "ERROR", &format!("Failed to create system tray icon after 10 retries: {}", err));
+            }
 
             // 3. Prevent close on main settings window, hide instead
             if let Some(window) = app.get_webview_window("main") {
@@ -870,7 +927,9 @@ pub fn run() {
             get_pinned_image,
             upload_to_imgur,
             start_drag,
-            close_pinned
+            close_pinned,
+            get_log_file_path,
+            write_log_entry
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

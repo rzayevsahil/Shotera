@@ -25,13 +25,18 @@ function App() {
         // Auto-sync and repair autostart Windows registry key on startup
         const startAtBootSetting = localStorage.getItem("startAtBoot") === "true";
         isEnabled().then((enabled) => {
+          invoke("write_log_entry", { level: "INFO", message: `Autostart setting state: saved=${startAtBootSetting}, registryEnabled=${enabled}` });
           if (startAtBootSetting && !enabled) {
-            enable().catch((err) => console.error("Failed to enable autostart on app launch:", err));
+            enable()
+              .then(() => invoke("write_log_entry", { level: "INFO", message: "Autostart Registry key repaired successfully on boot" }))
+              .catch((err) => invoke("write_log_entry", { level: "ERROR", message: `Failed to enable autostart on launch: ${err}` }));
           } else if (!startAtBootSetting && enabled) {
-            disable().catch((err) => console.error("Failed to disable autostart on app launch:", err));
+            disable()
+              .then(() => invoke("write_log_entry", { level: "INFO", message: "Autostart Registry key disabled successfully on boot" }))
+              .catch((err) => invoke("write_log_entry", { level: "ERROR", message: `Failed to disable autostart on launch: ${err}` }));
           }
         }).catch((err) => {
-          console.error("Failed to check autostart status:", err);
+          invoke("write_log_entry", { level: "ERROR", message: `Failed to check autostart status: ${err}` });
           if (startAtBootSetting) {
             enable().catch(() => {});
           }
