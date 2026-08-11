@@ -24,11 +24,17 @@ function App() {
 
         // Auto-sync and repair autostart Windows registry key on startup
         const startAtBootSetting = localStorage.getItem("startAtBoot") === "true";
+        if (startAtBootSetting) {
+          invoke("unblock_autostart_registry").catch(() => {});
+        }
         isEnabled().then((enabled) => {
           invoke("write_log_entry", { level: "INFO", message: `Autostart setting state: saved=${startAtBootSetting}, registryEnabled=${enabled}` });
           if (startAtBootSetting && !enabled) {
             enable()
-              .then(() => invoke("write_log_entry", { level: "INFO", message: "Autostart Registry key repaired successfully on boot" }))
+              .then(() => {
+                invoke("unblock_autostart_registry").catch(() => {});
+                invoke("write_log_entry", { level: "INFO", message: "Autostart Registry key repaired successfully on boot" });
+              })
               .catch((err) => invoke("write_log_entry", { level: "ERROR", message: `Failed to enable autostart on launch: ${err}` }));
           } else if (!startAtBootSetting && enabled) {
             disable()
@@ -38,7 +44,7 @@ function App() {
         }).catch((err) => {
           invoke("write_log_entry", { level: "ERROR", message: `Failed to check autostart status: ${err}` });
           if (startAtBootSetting) {
-            enable().catch(() => {});
+            enable().then(() => invoke("unblock_autostart_registry").catch(() => {})).catch(() => {});
           }
         });
       }

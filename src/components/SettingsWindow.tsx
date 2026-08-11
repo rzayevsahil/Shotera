@@ -126,6 +126,7 @@ function SettingsWindow() {
     try {
       if (checked) {
         await enable();
+        await invoke("unblock_autostart_registry");
       } else {
         await disable();
       }

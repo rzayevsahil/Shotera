@@ -740,6 +740,27 @@ fn write_log_entry(app_handle: AppHandle, level: String, message: String) {
     log_app_event(&app_handle, &level, &message);
 }
 
+#[tauri::command]
+fn unblock_autostart_registry(app_handle: AppHandle) {
+    #[cfg(target_os = "windows")]
+    {
+        use std::process::Command;
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        
+        let output = Command::new("reg")
+            .args(&["delete", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run", "/v", "Shotera", "/f"])
+            .creation_flags(CREATE_NO_WINDOW)
+            .output();
+
+        if let Ok(out) = output {
+            if out.status.success() {
+                log_app_event(&app_handle, "INFO", "Cleared Windows Task Manager StartupApproved override block for Shotera.");
+            }
+        }
+    }
+}
+
 #[cfg(target_os = "windows")]
 fn set_app_user_model_id() {
     use windows_sys::Win32::UI::Shell::SetCurrentProcessExplicitAppUserModelID;
@@ -787,6 +808,7 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle();
             log_app_event(handle, "INFO", "Shotera starting up...");
+            unblock_autostart_registry(handle.clone());
 
             let is_autostart = std::env::args().any(|arg| arg == "--autostart");
             if is_autostart {
@@ -929,7 +951,8 @@ pub fn run() {
             start_drag,
             close_pinned,
             get_log_file_path,
-            write_log_entry
+            write_log_entry,
+            unblock_autostart_registry
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
