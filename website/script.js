@@ -295,33 +295,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const assets = data.assets;
 
             let msiUrl = "", exeUrl = "", dmgUrl = "", tarUrl = "", debUrl = "", appImageUrl = "";
-            let winCount = 0, macCount = 0, linuxCount = 0;
 
             assets.forEach(asset => {
                 const name = asset.name.toLowerCase();
                 if (name.endsWith('.msi')) {
                     msiUrl = asset.browser_download_url;
-                    winCount += asset.download_count;
                 }
                 else if (name.endsWith('.exe')) {
                     exeUrl = asset.browser_download_url;
-                    winCount += asset.download_count;
                 }
                 else if (name.endsWith('.dmg')) {
                     dmgUrl = asset.browser_download_url;
-                    macCount += asset.download_count;
                 }
                 else if (name.endsWith('app.tar.gz')) {
                     tarUrl = asset.browser_download_url;
-                    macCount += asset.download_count;
                 }
                 else if (name.endsWith('.deb')) {
                     debUrl = asset.browser_download_url;
-                    linuxCount += asset.download_count;
                 }
                 else if (name.endsWith('.appimage')) {
                     appImageUrl = asset.browser_download_url;
-                    linuxCount += asset.download_count;
                 }
             });
 
@@ -332,11 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tarUrl) document.getElementById('mac-tar-btn').href = tarUrl;
             if (debUrl) document.getElementById('linux-deb-btn').href = debUrl;
             if (appImageUrl) document.getElementById('linux-appimage-btn').href = appImageUrl;
-
-            // Set download counts
-            document.getElementById('win-dl-count').textContent = winCount;
-            document.getElementById('mac-dl-count').textContent = macCount;
-            document.getElementById('linux-dl-count').textContent = linuxCount;
 
             // Set the dynamic hero button download link
             if (osName === "Windows" && msiUrl) autoDownloadBtn.href = msiUrl;
