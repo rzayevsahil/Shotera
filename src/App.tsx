@@ -17,10 +17,19 @@ function App() {
 
       if (win.label === "main") {
         const startInTray = localStorage.getItem("startInTray") !== "false"; // default is true
-        if (!startInTray) {
-          win.show();
-          win.setFocus();
-        }
+        invoke<boolean>("is_autostart_launch")
+          .then((isAutostart) => {
+            if (!isAutostart || !startInTray) {
+              win.show();
+              win.setFocus();
+            }
+          })
+          .catch(() => {
+            if (!startInTray) {
+              win.show();
+              win.setFocus();
+            }
+          });
 
         // Auto-sync and repair autostart Windows registry key on startup
         const startAtBootSetting = localStorage.getItem("startAtBoot") === "true";

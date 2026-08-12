@@ -741,6 +741,11 @@ fn write_log_entry(app_handle: AppHandle, level: String, message: String) {
 }
 
 #[tauri::command]
+fn is_autostart_launch() -> bool {
+    std::env::args().any(|arg| arg == "--autostart")
+}
+
+#[tauri::command]
 fn unblock_autostart_registry(app_handle: AppHandle) {
     #[cfg(target_os = "windows")]
     {
@@ -756,6 +761,43 @@ fn unblock_autostart_registry(app_handle: AppHandle) {
         if let Ok(out) = output {
             if out.status.success() {
                 log_app_event(&app_handle, "INFO", "Cleared Windows Task Manager StartupApproved override block for Shotera.");
+            }
+        }
+
+        // Check if Shotera exists in HKCU Run registry
+        let check_run = Command::new("reg")
+            .args(&["query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", "/v", "Shotera"])
+            .creation_flags(CREATE_NO_WINDOW)
+            .output();
+
+        if let Ok(out_check) = check_run {
+            if out_check.status.success() {
+                // Ensure executable path is wrapped in double quotes in HKCU Run registry
+                if let Ok(exe_path) = std::env::current_exe() {
+                    let exe_str = exe_path.to_string_lossy().to_string();
+                    let formatted_val = format!("\"{}\" --autostart", exe_str);
+                    
+                    let output_run = Command::new("reg")
+                        .args(&[
+                            "add",
+                            "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                            "/v",
+                            "Shotera",
+                            "/t",
+                            "REG_SZ",
+                            "/d",
+                            &formatted_val,
+                            "/f",
+                        ])
+                        .creation_flags(CREATE_NO_WINDOW)
+                        .output();
+
+                    if let Ok(out_run) = output_run {
+                        if out_run.status.success() {
+                            log_app_event(&app_handle, "INFO", &format!("Ensured autostart Registry key double-quote formatting: {}", formatted_val));
+                        }
+                    }
+                }
             }
         }
     }
@@ -952,7 +994,8 @@ pub fn run() {
             close_pinned,
             get_log_file_path,
             write_log_entry,
-            unblock_autostart_registry
+            unblock_autostart_registry,
+            is_autostart_launch
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
