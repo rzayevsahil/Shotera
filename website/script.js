@@ -280,7 +280,18 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('https://api.github.com/repos/rzayevsahil/Shotera/releases/latest')
         .then(res => res.json())
         .then(data => {
-            if (!data || !data.assets) return;
+            if (!data) return;
+
+            // Dynamically set the latest version tag from GitHub release
+            if (data.tag_name) {
+                const versionStr = data.tag_name.startsWith('v') ? data.tag_name : `v${data.tag_name}`;
+                const versionBadge = document.getElementById('latest-version-badge');
+                if (versionBadge) {
+                    versionBadge.textContent = versionStr;
+                }
+            }
+
+            if (!data.assets) return;
             const assets = data.assets;
 
             let msiUrl = "", exeUrl = "", dmgUrl = "", tarUrl = "", debUrl = "", appImageUrl = "";
