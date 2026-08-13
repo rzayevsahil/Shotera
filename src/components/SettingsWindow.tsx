@@ -147,6 +147,16 @@ function SettingsWindow() {
     }).catch(err => console.error("Failed to check autostart status on mount:", err));
   }, []);
 
+  const [defaultBlurAmount, setDefaultBlurAmount] = useState(() => Number(localStorage.getItem("defaultBlurAmount") || "8"));
+
+  useEffect(() => {
+    const handleStorage = () => {
+      setDefaultBlurAmount(Number(localStorage.getItem("defaultBlurAmount") || "8"));
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
   // Sync settings with localStorage
   useEffect(() => {
     localStorage.setItem("startAtBoot", String(startAtBoot));
@@ -158,9 +168,11 @@ function SettingsWindow() {
     localStorage.setItem("imageQuality", String(imageQuality));
     localStorage.setItem("regionShortcut", regionShortcut);
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
-
+    localStorage.setItem("defaultBlurAmount", String(defaultBlurAmount));
     localStorage.setItem("showNotifications", String(showNotifications));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, showNotifications]);
+
+    window.dispatchEvent(new Event("storage"));
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -587,6 +599,24 @@ function SettingsWindow() {
                 />
                 <span className="slider"></span>
               </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).blurAmountSetting}</span>
+                <span className="setting-desc">{(t as any).blurAmountDesc}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                <input
+                  type="range"
+                  min="2"
+                  max="30"
+                  value={defaultBlurAmount}
+                  onChange={(e) => setDefaultBlurAmount(Number(e.target.value))}
+                  style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                />
+                <span style={{ minWidth: "45px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{defaultBlurAmount} px</span>
+              </div>
             </div>
 
             <div className="setting-row">

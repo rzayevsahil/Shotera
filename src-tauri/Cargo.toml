@@ -1,6 +1,6 @@
 [package]
 name = "shotera"
-version = "0.6.3"
+version = "0.6.4"
 description = "Shotera Screen Capture Application"
 authors = ["Sahil Rzayev"]
 edition = "2021"

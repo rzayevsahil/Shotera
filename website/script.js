@@ -15,7 +15,7 @@ const translations = {
         "feat-3-title": "Pin to Screen",
         "feat-3-desc": "Pin important screenshots above all other windows. Perfect for reference while coding or designing.",
         "feat-4-title": "Powerful Editor",
-        "feat-4-desc": "Instantly draw arrows, boxes, text, or blur sensitive information before saving or copying.",
+        "feat-4-desc": "Instantly draw arrows, rectangles/squares, circles/ovals, straight lines, custom formatted text, or blur sensitive information with a live slider (2px-30px).",StartLine:17,TargetContent:
         "feat-5-title": "Quick Cloud Upload",
         "feat-5-desc": "Upload screenshots to Imgur with a single click and instantly copy the link to your clipboard.",
         "feat-6-title": "Text Recognition (OCR)",
@@ -59,7 +59,7 @@ const translations = {
         "feat-3-title": "Ekrana İğnele",
         "feat-3-desc": "Önemli görüntüleri diğer tüm pencerelerin üzerinde tutun. Kod yazarken veya tasarım yaparken referans almak için birebir.",
         "feat-4-title": "Güçlü Düzenleyici",
-        "feat-4-desc": "Kaydetmeden veya kopyalamadan önce anında ok, kutu, metin ekleyin veya hassas bilgileri bulanıklaştırın.",
+        "feat-4-desc": "Kaydetmeden önce ok, dikdörtgen/kare, daire/yuvarlak, düz çizgi, özelleştirilebilir metin ekleyin veya ayarlanabilir bulanıklık ölçeği (2px-30px) ile bilgileri sansürleyin.",StartLine:61,TargetContent:
         "feat-5-title": "Hızlı Bulut Yükleme",
         "feat-5-desc": "Ekran görüntülerini tek tıkla Imgur'a yükleyin ve bağlantısını anında panoya kopyalayın.",
         "feat-6-title": "Metin Tanıma (OCR)",
@@ -103,7 +103,7 @@ const translations = {
         "feat-3-title": "Ekrana Sanc",
         "feat-3-desc": "Vacib şəkilləri digər bütün pəncərələrin üzərində saxlayın. Kod yazarkən və ya dizayn edərkən baxış üçün mükəmməldir.",
         "feat-4-title": "Güclü Redaktor",
-        "feat-4-desc": "Yadda saxlamazdan və ya kopyalamazdan əvvəl anında ox, qutu, mətn əlavə edin və ya həssas məlumatları bulanıqlaşdırın.",
+        "feat-4-desc": "Yadda saxlamazdan əvvəl ox, düzbucaqlı/kvadrat, dairə/yuvarlaq, düz xətt, formatlana bilən mətn əlavə edin və ya tənzimlənən bulanıqlıq dərəcəsi (2px-30px) ilə sansurləyin.",StartLine:105,TargetContent:
         "feat-5-title": "Sürətli Bulud Yükləməsi",
         "feat-5-desc": "Ekran şəkillərini tək kliklə Imgur-a yükləyin və keçidini anında mübadilə buferinə kopyalayın.",
         "feat-6-title": "Mətn Tanıma (OCR)",
@@ -148,7 +148,7 @@ const translations = {
         "feat-3-title": "Закрепление на Экране",
         "feat-3-desc": "Закрепляйте важные снимки поверх остальных окон. Идеально подходит для работы с кодом или макетами.",
         "feat-4-title": "Мощный Редактор",
-        "feat-4-desc": "Добавляйте стрелки, фигуры, текст или размывайте конфиденциальные данные перед сохранением.",
+        "feat-4-desc": "Добавляйте стрелки, фигуры, текст или размывайте конфиденциальные данные с помощью регулируемой шкалы размытия (2px-30px) перед сохранением.",StartLine:150,TargetContent:
         "feat-5-title": "Загрузка в Облако",
         "feat-5-desc": "Загружайте снимки в Imgur одним кликом и мгновенно получайте готовую ссылку в буфер обмена.",
         "feat-6-title": "Распознавание Текста (OCR)",
@@ -193,7 +193,7 @@ const translations = {
         "feat-3-title": "An Bildschirm Anheften",
         "feat-3-desc": "Heften Sie wichtige Bilder über allen anderen Fenstern an. Perfekt als Referenz beim Programmieren oder Designen.",
         "feat-4-title": "Leistungsstarker Editor",
-        "feat-4-desc": "Fügen Sie Pfeile, Formen, Text hinzu oder machen Sie vertrauliche Informationen vor dem Speichern unkenntlich.",
+        "feat-4-desc": "Fügen Sie Pfeile, Formen, Text hinzu oder machen Sie vertrauliche Informationen mit einem stufenlosen Unschärferegler (2px-30px) unkenntlich.",StartLine:195,TargetContent:
         "feat-5-title": "Schneller Cloud-Upload",
         "feat-5-desc": "Laden Sie Screenshots mit einem Klick auf Imgur hoch und kopieren Sie den Link sofort in die Zwischenablage.",
         "feat-6-title": "Texterkennung (OCR)",

@@ -36,6 +36,8 @@
 - 🔄 **Otomatik Güncelleme:** Uygulama içinden tek tıkla yeni sürümleri kontrol edin ve yükleyin.
 - 🚀 **Arka Planda Çalışma (Oto-Başlatma):** İşletim sistemiyle birlikte başlar ve sistem tepsisinde sessizce görevini yapmaya hazır bekler.
 - 🔍 **Metin Tanıma (OCR):** Ekrandaki kopyalanamayan yazıları tek tıkla okuyun ve metin olarak panoya kopyalayın (Tesseract WebAssembly ile tamamen internetsiz çalışır).
+- 🎨 **Zengin Çizim Araçları:** Serbest çizim kalemi, düz çizgi, yön okları, dikdörtgen/kare kutuları, daire/yuvarlak çizimleri ve biçimlendirilebilir metinler (Kalın, İtalik, Altı Çizili, Üstü Çizili) ile ekran üzerinde anında çizim yapın.
+- 💧 **Ayarlanabilir Bulanıklık Yoğunluğu:** Hassas ölçek çizgisi (2px - 30px) ile bulanıklık seviyesini canlı olarak ayarlayın ve homojen kenar yumuşatmanın keyfini çıkarın.
 - 🔢 **Adım Sayacı (Tutorial Modu):** Ekrana tıkladıkça 1, 2, 3 şeklinde otomatik artan numaralar ekleyin. Eğitim ve rehber görselleri hazırlamak için birebir!
 
 <p align="center">

@@ -36,6 +36,8 @@
 - 🔄 **Auto-Updater:** Check for and install new updates with one click from within the app.
 - 🚀 **Background Execution (Auto-Start):** Launches automatically with your operating system and waits quietly in the system tray, ready for use.
 - 🔍 **Text Recognition (OCR):** Extract text from uncopyable areas on your screen with a single click and copy it as text (Powered by Tesseract WebAssembly, works completely offline).
+- 🎨 **Rich Annotation Suite:** Draw freehand pencil lines, straight lines, pointing arrows, rectangles/squares, circles/ovals, and custom formatted text (Bold, Italic, Underline, Strikethrough) with a custom color palette.
+- 💧 **Adjustable Blur Intensity:** Fine-tune region blur level with a live range slider (2px - 30px) and uniform edge-to-edge padding.
 - 🔢 **Step Counter (Tutorial Mode):** Click on the screen to add auto-incrementing numbers (1, 2, 3...). Perfect for creating educational and guide images!
 
 <p align="center">

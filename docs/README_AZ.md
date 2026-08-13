@@ -36,6 +36,8 @@
 - 🔄 **Avtomatik Yenilənmə:** Tətbiq daxilindən tək kliklə yeni versiyaları yoxlayın və quraşdırın.
 - 🚀 **Arka Fonda Çalışma (Avto-Başlatma):** Əməliyyat sistemi ilə birlikdə başlayır və sistem treyində səssizcə işləməyə hazır gözləyir.
 - 🔍 **Mətn Tanıma (OCR):** Ekrandakı kopyalanmayan yazıları tək kliklə oxuyun və mətn olaraq mübadilə buferinə kopyalayın (Tesseract WebAssembly ilə tamamilə internetsiz çalışır).
+- 🎨 **Zəngin Çəkim Alətləri:** Sərbəst çəkim qələmi, düz xətt, ox işarələri, düzbucaqlı/kvadrat qutuları, dairə/yuvarlaq çəkimləri və formatlana bilən mətnlər (Qalın, İtaliq, Altı Xəttli, Üstü Xəttli) ilə ekran üzərində anında redaktə edin.
+- 💧 **Tənzimlənə Bilən Bulanıqlıq Dərəcəsi:** Dəqiq miqyas xətti (2px - 30px) ilə bulanıqlıq səviyyəsini canlı olaraq tənzimləyin və homojen kənar yumşaltmadan həzz alın.
 - 🔢 **Adım Sayğacı (Dərslik Rejimi):** Ekrana kliklədikcə 1, 2, 3 şəklində avtomatik artan nömrələr əlavə edin. Təlimat və bələdçi şəkilləri hazırlamaq üçün mükəmməldir!
 
 ### 📥 Yükləmə və Quraşdırma

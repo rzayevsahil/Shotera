@@ -34,6 +34,7 @@ interface DrawingAction {
   underline?: boolean;
   strikethrough?: boolean;
   stepNumber?: number;
+  blurAmount?: number;
 }
 
 // Helpers for selection resizing and cursor changes
@@ -97,7 +98,7 @@ function ScreenshotCapture() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
-  
+
   // Selection state
   const [selection, setSelection] = useState<SelectionRect | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -120,10 +121,28 @@ function ScreenshotCapture() {
   // Text tool state
   const [textInput, setTextInput] = useState({ visible: false, x: 0, y: 0, val: "" });
   const textInputRef = useRef<HTMLInputElement | null>(null);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
   const [textBold, setTextBold] = useState(true);
   const [textItalic, setTextItalic] = useState(false);
   const [textUnderline, setTextUnderline] = useState(false);
   const [textStrikethrough, setTextStrikethrough] = useState(false);
+
+  // Blur intensity / sharpness state (default 8px)
+  const [blurAmount, setBlurAmount] = useState<number>(() => Number(localStorage.getItem("defaultBlurAmount") || "8"));
+
+  const handleBlurAmountChange = (val: number) => {
+    setBlurAmount(val);
+    localStorage.setItem("defaultBlurAmount", String(val));
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  useEffect(() => {
+    const handleStorage = () => {
+      setBlurAmount(Number(localStorage.getItem("defaultBlurAmount") || "8"));
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   // Load screenshot from Rust backend
   const loadScreenshot = async () => {
@@ -326,19 +345,37 @@ function ScreenshotCapture() {
           const bw = Math.abs(act.end.x - act.start.x);
           const bh = Math.abs(act.end.y - act.start.y);
 
-          ctx.beginPath();
-          ctx.rect(bx, by, bw, bh);
-          ctx.clip();
+          if (bw > 0 && bh > 0) {
+            ctx.beginPath();
+            ctx.rect(bx, by, bw, bh);
+            ctx.clip();
 
-          ctx.filter = "blur(8px)";
-          ctx.drawImage(
-            imgElement,
-            (bx * imgElement.naturalWidth) / w,
-            (by * imgElement.naturalHeight) / h,
-            (bw * imgElement.naturalWidth) / w,
-            (bh * imgElement.naturalHeight) / h,
-            bx, by, bw, bh
-          );
+            const currentBlur = act.blurAmount ?? blurAmount ?? 8;
+            const pad = Math.ceil(currentBlur * 2);
+
+            const sx = Math.max(0, bx - pad);
+            const sy = Math.max(0, by - pad);
+            const sw = Math.min(w - sx, bw + (bx - sx) + pad);
+            const sh = Math.min(h - sy, bh + (by - sy) + pad);
+
+            const dx = sx;
+            const dy = sy;
+            const dw = sw;
+            const dh = sh;
+
+            const scaleX = imgElement.naturalWidth / w;
+            const scaleY = imgElement.naturalHeight / h;
+
+            ctx.filter = `blur(${currentBlur}px)`;
+            ctx.drawImage(
+              imgElement,
+              sx * scaleX,
+              sy * scaleY,
+              sw * scaleX,
+              sh * scaleY,
+              dx, dy, dw, dh
+            );
+          }
           ctx.restore();
         } else if (act.type === "step" && act.start && act.stepNumber) {
           const radius = 14;
@@ -346,7 +383,7 @@ function ScreenshotCapture() {
           ctx.arc(act.start.x, act.start.y, radius, 0, 2 * Math.PI);
           ctx.fillStyle = act.color;
           ctx.fill();
-          
+
           ctx.fillStyle = "#ffffff";
           ctx.font = "bold 16px Inter, Arial, sans-serif";
           ctx.textAlign = "center";
@@ -433,13 +470,14 @@ function ScreenshotCapture() {
             end: drawingEnd,
             color: drawColor, // not used
             width: 3,
+            blurAmount: blurAmount,
           });
         }
       }
 
       ctx.restore();
     }
-  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough]);
+  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough, blurAmount]);
 
   useEffect(() => {
     if (textInput.visible && textInputRef.current) {
@@ -661,7 +699,7 @@ function ScreenshotCapture() {
       setInitialSelection(null);
     } else if (isDrawing) {
       setIsDrawing(false);
-      
+
       if (activeTool === "pencil" && currentPencilPoints.length > 0) {
         setDrawings((prev) => [
           ...prev,
@@ -725,10 +763,11 @@ function ScreenshotCapture() {
             end: drawingEnd,
             color: drawColor,
             width: 3,
+            blurAmount: blurAmount,
           },
         ]);
       }
-      
+
       setCurrentPencilPoints([]);
       setDrawingStart(null);
       setDrawingEnd(null);
@@ -861,37 +900,58 @@ function ScreenshotCapture() {
         const bw = Math.abs(act.end.x - act.start.x);
         const bh = Math.abs(act.end.y - act.start.y);
 
-        tempCtx.beginPath();
-        tempCtx.rect(bx, by, bw, bh);
-        tempCtx.clip();
-
-        tempCtx.filter = "blur(8px)";
-        tempCtx.drawImage(
-          imgElement,
-          (bx * imgElement.naturalWidth) / window.innerWidth,
-          (by * imgElement.naturalHeight) / window.innerHeight,
-          (bw * imgElement.naturalWidth) / window.innerWidth,
-          (bh * imgElement.naturalHeight) / window.innerHeight,
-          bx, by, bw, bh
-        );
-        tempCtx.restore();
-        } else if (act.type === "step" && act.start && act.stepNumber) {
-          const radius = 14;
+        if (bw > 0 && bh > 0) {
           tempCtx.beginPath();
-          tempCtx.arc(act.start.x, act.start.y, radius, 0, 2 * Math.PI);
-          tempCtx.fillStyle = act.color;
-          tempCtx.fill();
-          
-          tempCtx.fillStyle = "#ffffff";
-          tempCtx.font = "bold 16px Inter, Arial, sans-serif";
-          tempCtx.textAlign = "center";
-          tempCtx.textBaseline = "middle";
-          tempCtx.fillText(act.stepNumber.toString(), act.start.x, act.start.y + 1);
-        } else if (act.type === "text" && act.start && act.text) {
-          tempCtx.textAlign = "left";
-          tempCtx.textBaseline = "top";
-          const fontStyle = act.italic ? "italic" : "normal";
-          const fontWeight = act.bold ? "bold" : "normal";
+          tempCtx.rect(bx, by, bw, bh);
+          tempCtx.clip();
+
+          const currentBlur = act.blurAmount ?? blurAmount ?? 8;
+          const pad = Math.ceil(currentBlur * 2);
+
+          const screenW = window.innerWidth;
+          const screenH = window.innerHeight;
+
+          const sx = Math.max(0, bx - pad);
+          const sy = Math.max(0, by - pad);
+          const sw = Math.min(screenW - sx, bw + (bx - sx) + pad);
+          const sh = Math.min(screenH - sy, bh + (by - sy) + pad);
+
+          const dx = sx;
+          const dy = sy;
+          const dw = sw;
+          const dh = sh;
+
+          const scaleX = imgElement.naturalWidth / screenW;
+          const scaleY = imgElement.naturalHeight / screenH;
+
+          tempCtx.filter = `blur(${currentBlur}px)`;
+          tempCtx.drawImage(
+            imgElement,
+            sx * scaleX,
+            sy * scaleY,
+            sw * scaleX,
+            sh * scaleY,
+            dx, dy, dw, dh
+          );
+        }
+        tempCtx.restore();
+      } else if (act.type === "step" && act.start && act.stepNumber) {
+        const radius = 14;
+        tempCtx.beginPath();
+        tempCtx.arc(act.start.x, act.start.y, radius, 0, 2 * Math.PI);
+        tempCtx.fillStyle = act.color;
+        tempCtx.fill();
+
+        tempCtx.fillStyle = "#ffffff";
+        tempCtx.font = "bold 16px Inter, Arial, sans-serif";
+        tempCtx.textAlign = "center";
+        tempCtx.textBaseline = "middle";
+        tempCtx.fillText(act.stepNumber.toString(), act.start.x, act.start.y + 1);
+      } else if (act.type === "text" && act.start && act.text) {
+        tempCtx.textAlign = "left";
+        tempCtx.textBaseline = "top";
+        const fontStyle = act.italic ? "italic" : "normal";
+        const fontWeight = act.bold ? "bold" : "normal";
         tempCtx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
         tempCtx.fillText(act.text, act.start.x, act.start.y);
 
@@ -986,12 +1046,12 @@ function ScreenshotCapture() {
   const handlePin = async () => {
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
-    
+
     const w = selection ? selection.w : window.innerWidth;
     const h = selection ? selection.h : window.innerHeight;
     const x = selection ? selection.x : 0;
     const y = selection ? selection.y : 0;
-    
+
     try {
       playShutterSoundIfEnabled();
       await invoke("pin_image", { base64Str: base64, width: w + 4, height: h + 4, x: x - 2, y: y - 2 });
@@ -1013,7 +1073,7 @@ function ScreenshotCapture() {
       await worker.terminate();
 
       const textClean = text.trim();
-      
+
       if (textClean) {
         // Use browser clipboard API since it's just text
         await navigator.clipboard.writeText(textClean);
@@ -1053,7 +1113,15 @@ function ScreenshotCapture() {
     if (!selection) return {};
     const margin = 12;
     const toolbarHeight = 44;
-    const toolbarWidth = 950; // Increased to accommodate new tools like OCR and text formatting
+
+    // Dynamically estimate width based on active tool extra panels
+    let estimatedWidth = 960;
+    if (activeTool === "text") estimatedWidth = 1080;
+    else if (activeTool === "blur") estimatedWidth = 1180;
+
+    const measuredWidth = toolbarRef.current?.offsetWidth || 0;
+    const toolbarWidth = Math.max(estimatedWidth, measuredWidth);
+
     const screenH = window.innerHeight;
     const screenW = window.innerWidth;
 
@@ -1062,9 +1130,12 @@ function ScreenshotCapture() {
       top = Math.max(margin, selection.y - toolbarHeight - margin);
     }
 
-    const left = Math.min(
-      screenW - toolbarWidth - margin,
-      Math.max(margin, selection.x + selection.w - toolbarWidth)
+    const left = Math.max(
+      margin,
+      Math.min(
+        screenW - toolbarWidth - margin,
+        selection.x + selection.w - toolbarWidth
+      )
     );
     return { top, left };
   };
@@ -1132,7 +1203,7 @@ function ScreenshotCapture() {
       )}
 
       {selection && !isSelecting && (
-        <div className="capture-toolbar" style={getToolbarStyle()}>
+        <div className="capture-toolbar" ref={toolbarRef} style={getToolbarStyle()}>
           <button
             className={`toolbar-btn ${activeTool === "select" ? "active" : ""}`}
             onClick={() => setActiveTool("select")}
@@ -1142,7 +1213,7 @@ function ScreenshotCapture() {
               <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
             </svg>
           </button>
-          
+
           <button
             className={`toolbar-btn ${activeTool === "pencil" ? "active" : ""}`}
             onClick={() => setActiveTool("pencil")}
@@ -1269,6 +1340,29 @@ function ScreenshotCapture() {
             </>
           )}
 
+          {activeTool === "blur" && (
+            <>
+              <div className="toolbar-divider" />
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                  {(t as any).blurSharpness || "Bulanıklık Yoğunluğu:"}
+                </span>
+                <input
+                  type="range"
+                  min="2"
+                  max="30"
+                  value={blurAmount}
+                  onChange={(e) => handleBlurAmountChange(Number(e.target.value))}
+                  style={{ width: "90px", accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                  title={`${blurAmount}px`}
+                />
+                <span style={{ fontSize: "0.75rem", color: "var(--accent-cyan)", fontFamily: "monospace", minWidth: "32px", textAlign: "center" }}>
+                  {blurAmount}px
+                </span>
+              </div>
+            </>
+          )}
+
           <div className="toolbar-divider" />
 
           <div style={{ display: "flex", gap: "6px", alignItems: "center", margin: "0 4px" }}>
@@ -1280,11 +1374,11 @@ function ScreenshotCapture() {
                 onClick={() => setDrawColor(c)}
               />
             ))}
-            
+
             {/* Custom Color Picker Dot */}
-            <div 
+            <div
               className="color-option"
-              style={{ 
+              style={{
                 position: "relative",
                 backgroundColor: drawColor,
                 display: "flex",
