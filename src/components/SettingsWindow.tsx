@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor, Timer } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor, Timer, Volume2 } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
+import { playTimerSound } from "../utils/audio";
 import { listen } from "@tauri-apps/api/event";
 import shutterSoundUrl from "../assets/shutter.mp3";
 import { check as checkUpdate } from "@tauri-apps/plugin-updater";
@@ -42,6 +43,7 @@ function SettingsWindow() {
   const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
   const [timerBgStyle, setTimerBgStyle] = useState<string>(() => localStorage.getItem("timerBgStyle") || "dark-slate");
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
+  const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
@@ -185,11 +187,12 @@ function SettingsWindow() {
     localStorage.setItem("timerRingColor", timerRingColor);
     localStorage.setItem("timerBgStyle", timerBgStyle);
     localStorage.setItem("timerFontStyle", timerFontStyle);
+    localStorage.setItem("timerSoundPreset", timerSoundPreset);
     localStorage.setItem("defaultBlurAmount", String(defaultBlurAmount));
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -1181,6 +1184,41 @@ function SettingsWindow() {
                   <option value="heading">{(t as any).timerFontHeading}</option>
                   <option value="mono">{(t as any).timerFontMono}</option>
                 </select>
+              </div>
+
+              {/* Sound Ringtone Preset Section */}
+              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "18px", marginTop: "6px" }}>
+                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).timerSoundTitle}</span>
+                    <span className="setting-desc">{(t as any).timerSoundDesc}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <select
+                      className="premium-input"
+                      value={timerSoundPreset}
+                      onChange={(e) => {
+                        setTimerSoundPreset(e.target.value);
+                        playTimerSound(e.target.value);
+                      }}
+                      style={{ width: "170px" }}
+                    >
+                      <option value="chime">{(t as any).timerSoundChime}</option>
+                      <option value="digital">{(t as any).timerSoundDigital}</option>
+                      <option value="bell">{(t as any).timerSoundBell}</option>
+                      <option value="classic">{(t as any).timerSoundClassic}</option>
+                    </select>
+                    <button
+                      className="premium-button"
+                      onClick={() => playTimerSound(timerSoundPreset)}
+                      style={{ padding: "6px 12px", fontSize: "0.85rem", whiteSpace: "nowrap" }}
+                      title="Seçilen zil sesini test et"
+                    >
+                      <Volume2 size={14} />
+                      {(t as any).timerTestSound || "Sesi Dinle"}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

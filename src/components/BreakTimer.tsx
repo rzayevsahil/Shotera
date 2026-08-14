@@ -5,6 +5,8 @@ import { listen } from "@tauri-apps/api/event";
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
 
+import { playTimerSound } from "../utils/audio";
+
 export default function BreakTimer() {
   const [lang, setLang] = useState<Language>(getLanguage());
   const [totalSeconds, setTotalSeconds] = useState<number>(() => {
@@ -21,6 +23,7 @@ export default function BreakTimer() {
   const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
   const [timerBgStyle, setTimerBgStyle] = useState<string>(() => localStorage.getItem("timerBgStyle") || "dark-slate");
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
+  const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
 
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
@@ -50,6 +53,7 @@ export default function BreakTimer() {
       setTimerRingColor(localStorage.getItem("timerRingColor") || "#38bdf8");
       setTimerBgStyle(localStorage.getItem("timerBgStyle") || "dark-slate");
       setTimerFontStyle(localStorage.getItem("timerFontStyle") || "sans");
+      setTimerSoundPreset(localStorage.getItem("timerSoundPreset") || "chime");
 
       if (isTriggerEvent) {
         if (mode === "reset") {
@@ -95,29 +99,7 @@ export default function BreakTimer() {
   // Play audio chime when timer finishes
   const playAlarm = () => {
     if (!soundEnabled) return;
-    try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const playBeep = (freq: number, start: number, duration: number) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime + start);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + start + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(audioCtx.currentTime + start);
-        osc.stop(audioCtx.currentTime + start + duration);
-      };
-
-      // Play chime sequence: C5, E5, G5, C6
-      playBeep(523.25, 0, 0.3);
-      playBeep(659.25, 0.25, 0.3);
-      playBeep(783.99, 0.5, 0.3);
-      playBeep(1046.50, 0.75, 0.8);
-    } catch (e) {
-      console.error("Failed to play timer alarm:", e);
-    }
+    playTimerSound(timerSoundPreset);
   };
 
   // Tick timer every second based on direction
