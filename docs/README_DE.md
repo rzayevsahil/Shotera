@@ -29,10 +29,12 @@
 
 - 📸 **Bereichs- & Vollbild-Aufnahme:** Erfassen Sie schnell einen bestimmten Bereich oder den gesamten Bildschirm.
 - 📌 **Am Bildschirm Anheften (Pin):** Heften Sie Screenshots an einer beliebigen Stelle als "immer im Vordergrund" stehende Fenster an. Sehr nützlich bei der Arbeit mit Referenzbildern oder Code-Snippets.
+- 🔎 **Bildschirmlupe & ZoomIt-Tool (`Ctrl` + `1`):** Bildschirm einfrieren und vergrößern (1.0x - 5.0x), Freihandzeichnen, gerade Linien (`Shift`), Rechtecke (`Ctrl`), Ovale (`Alt`), Pfeile (`Shift`+`Ctrl`), Text hinzufügen (`T`) und zu Whiteboard (`W`) / Blackboard (`K`) mit Farbtasten (`R`, `G`, `B`, `Y`, `O`, `P`) wechseln.
+- ⌛ **Vollbild-Pausentimer (`Ctrl` + `3`):** Vollbild-Timer für Präsentationen und Pausen (1-99 Minuten) mit Echtzeit-Countdown, Fortschrittsbalken, Pause/Start und akustischem Signal.
 - ☁️ **Schneller Cloud-Upload:** Laden Sie Screenshots mit einem Klick auf Imgur hoch und kopieren Sie den Link sofort in die Zwischenablage.
 - ⚙️ **Anpassbare Tastenkombinationen:** Personalisieren Sie globale Tastenkombinationen für Ihren Arbeitsablauf.
 - 💾 **Unterstützung mehrerer Formate:** Speichern Sie Ihre Screenshots in den Formaten PNG, JPG oder modernem WebP mit anpassbaren Qualitätseinstellungen.
-- 🌍 **Mehrsprachigkeit:** Verfügbar in Deutsch (DE), Englisch (EN), Türkisch (TR), Aserbaidschanisch (AZ) und Russisch (RU).
+- 🌍 **Mehrsprachigkeit (5 Sprachen):** Verfügbar in Deutsch (DE), Englisch (EN), Türkisch (TR), Aserbaidschanisch (AZ) und Russisch (RU).
 - 🔄 **Auto-Updater:** Suchen Sie direkt in der App nach Updates und installieren Sie diese mit einem Klick.
 - 🚀 **Hintergrundausführung (Autostart):** Startet automatisch mit dem Betriebssystem und wartet leise im System-Tray.
 - 🔍 **Texterkennung (OCR):** Extrahieren Sie nicht kopierbaren Text aus Bildern mit einem Klick völlig ohne Internetverbindung (Funktioniert über Tesseract WebAssembly).
@@ -48,6 +50,9 @@
 
 - **Bereichsaufnahme:** `Ctrl` + `Shift` + `S`
 - **Vollbildaufnahme:** `Ctrl` + `Shift` + `F`
+- **Bildschirmlupe (ZoomIt):** `Ctrl` + `1`
+- **Pausentimer:** `Ctrl` + `3`
+
 
 *(Sie können diese Tastenkombinationen einfach im Menü "Einstellungen" in der Anwendung ändern.)*
 

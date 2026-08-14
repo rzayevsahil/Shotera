@@ -29,10 +29,12 @@
 
 - 📸 **Bölgesel ve Tam Ekran Yakalama:** Ekranın istediğiniz bir bölümünü veya tamamını hızlıca kaydedin.
 - 📌 **Ekrana Sabitleme (Pin):** Aldığınız ekran görüntülerini ekranın herhangi bir yerinde, diğer pencerelerin üzerinde "her zaman üstte" (always-on-top) kalacak şekilde sabitleyin. Referans görsellerle çalışırken çok kullanışlıdır.
+- 🔎 **Ekran Büyüteci ve ZoomIt Aracı (`Ctrl` + `1`):** Ekranı dondurup istediğiniz bölgeyi yakınlaştırın (1.0x - 5.0x), serbest kalem, düz çizgi (`Shift`), dikdörtgen (`Ctrl`), daire (`Alt`), yön oku (`Shift`+`Ctrl`) çizin, metin yazın (`T`), ve tek tuşla renk kısayolları (`R`, `G`, `B`, `Y`, `O`, `P`) ile beyaz tahta (`W`) / siyah tahta (`K`) modlarına geçin.
+- ⌛ **Tam Ekran Mola & Odak Zamanlayıcısı (`Ctrl` + `3`):** Sunum ve molalarınız için canlı geri sayım halkası, ilerleme çubuğu, duraklat/başlat, +1dk/-1dk kontrolleri ve sesli/bildirimli uyarı içeren tam ekran zamanlayıcı (1-99 dakika).
 - ☁️ **Hızlı Bulut Yükleme:** Ekran görüntülerini tek tıkla Imgur'a yükleyin ve bağlantısını anında panoya (clipboard) kopyalayın.
 - ⚙️ **Özelleştirilebilir Kısayollar:** Global klavye kısayollarını kendi çalışma alışkanlıklarınıza göre kişiselleştirin.
 - 💾 **Çoklu Format Desteği:** Ekran görüntülerinizi PNG, JPG veya modern WebP formatlarında, belirlediğiniz kalite ayarlarıyla kaydedin.
-- 🌍 **Çoklu Dil Desteği:** Türkçe (TR), İngilizce (EN), Azərbaycan dili (AZ) ve Rusça (RU) dil seçenekleri.
+- 🌍 **Çoklu Dil Desteği (5 Dil):** Türkçe (TR), İngilizce (EN), Azərbaycan dili (AZ), Rusça (RU) ve Almanca (DE) dil seçenekleri.
 - 🔄 **Otomatik Güncelleme:** Uygulama içinden tek tıkla yeni sürümleri kontrol edin ve yükleyin.
 - 🚀 **Arka Planda Çalışma (Oto-Başlatma):** İşletim sistemiyle birlikte başlar ve sistem tepsisinde sessizce görevini yapmaya hazır bekler.
 - 🔍 **Metin Tanıma (OCR):** Ekrandaki kopyalanamayan yazıları tek tıkla okuyun ve metin olarak panoya kopyalayın (Tesseract WebAssembly ile tamamen internetsiz çalışır).
@@ -63,6 +65,9 @@ Uygulamayı indirmek ve kullanmaya başlamak çok kolaydır:
 
 - **Bölgesel Ekran Görüntüsü:** `Ctrl` + `Shift` + `S`
 - **Tam Ekran Görüntüsü:** `Ctrl` + `Shift` + `F`
+- **Ekran Büyüteci ve ZoomIt:** `Ctrl` + `1`
+- **Mola Zamanlayıcısı:** `Ctrl` + `3`
+
 
 *(Bu kısayolları uygulamanın "Ayarlar" menüsünden dilediğiniz gibi değiştirebilirsiniz.)*
 

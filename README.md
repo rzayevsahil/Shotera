@@ -29,10 +29,12 @@
 
 - 📸 **Region & Full-Screen Capture:** Quickly record a specific region or the entire screen.
 - 📌 **Screen Pinning:** Pin your screenshots anywhere on your screen as "always-on-top" windows. Highly useful when working with reference images or code snippets.
+- 🔎 **Screen Zoom & Magnifier (ZoomIt Tool - `Ctrl` + `1`):** Freeze and magnify any part of your screen (1.0x - 5.0x), draw freehand, straight lines (`Shift`), rectangles (`Ctrl`), ovals (`Alt`), arrows (`Shift`+`Ctrl`), type bold text (`T`), and switch to instant whiteboard (`W`) or blackboard (`K`) modes with single-key color palette (`R`, `G`, `B`, `Y`, `O`, `P`).
+- ⌛ **Break & Focus Timer (`Ctrl` + `3`):** Fullscreen presentation timer (1-99 minutes) with real-time countdown, animated progress ring/bar, play/pause controls, +1m/-1m time adjustments, and expiration audio alerts.
 - ☁️ **Quick Cloud Upload:** Upload screenshots to Imgur with a single click and instantly copy the link to your clipboard.
 - ⚙️ **Customizable Shortcuts:** Personalize global keyboard shortcuts to match your workflow.
 - 💾 **Multi-Format Support:** Save your screenshots in PNG, JPG, or modern WebP formats with adjustable quality settings.
-- 🌍 **Multi-Language Support:** Available in English (EN), Turkish (TR), Azerbaijani (AZ), and Russian (RU).
+- 🌍 **Multi-Language Support (5 Locales):** Available in English (EN), Turkish (TR), Azerbaijani (AZ), Russian (RU), and German (DE).
 - 🔄 **Auto-Updater:** Check for and install new updates with one click from within the app.
 - 🚀 **Background Execution (Auto-Start):** Launches automatically with your operating system and waits quietly in the system tray, ready for use.
 - 🔍 **Text Recognition (OCR):** Extract text from uncopyable areas on your screen with a single click and copy it as text (Powered by Tesseract WebAssembly, works completely offline).
@@ -63,6 +65,9 @@ Getting started is extremely simple:
 
 - **Region Capture:** `Ctrl` + `Shift` + `S`
 - **Full-Screen Capture:** `Ctrl` + `Shift` + `F`
+- **Screen Zoom & Magnifier (ZoomIt):** `Ctrl` + `1`
+- **Break & Focus Timer:** `Ctrl` + `3`
+
 
 *(You can easily modify these shortcuts from the "Settings" menu inside the application.)*
 

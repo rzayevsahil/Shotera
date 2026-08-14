@@ -28,11 +28,13 @@
 ### ✨ Əsas Xüsusiyyətlər
 
 - 📸 **Bölmə və Tam Ekran Yaxalama:** Ekranın istədiyiniz bir hissəsini və ya tamamını sürətlə yaxalayın.
-- 📌 **Ekrana Sancma (Pin):** Aldığınız ekran şəkillərini ekranın hər hansı bir yerində, digər pəncərələrin üzərində "həmişə üstdə" (always-on-top) qalacaq şəkildə sancın. Kod yazarkən və ya dizayn edərkən baxış üçün mükəmməldir.
+- 📌 **Ekrana Sancma (Pin):** Aldığınız ekran şəkillərini ekranın hər hansı bir yerində, digər pencerələrin üzərində "həmişə üstdə" (always-on-top) qalacaq şəkildə sancın. Kod yazarkən və ya dizayn edərkən baxış üçün mükəmməldir.
+- 🔎 **Ekran Böyüdücüsü və ZoomIt Aləti (`Ctrl` + `1`):** Ekranı dondurub istədiyiniz hissəni yaxınlaşdırın (1.0x - 5.0x), sərbəst qələm, düz xətt (`Shift`), düzbucaqlı (`Ctrl`), dairə (`Alt`), ox işarəsi (`Shift`+`Ctrl`) çəkin, mətn yazın (`T`), və tək düyməli rəng düymələri (`R`, `G`, `B`, `Y`, `O`, `P`) ilə ağ lövhə (`W`) / qara lövhə (`K`) rejimlərinə keçin.
+- ⌛ **Tam Ekran Fasilə Taymeri (`Ctrl` + `3`):** Təqdimat və fasilələriniz üçün canlı geri sayım halqası, tərəqqi çubuğu, pauza/başlat, +1dəq/-1dəq idarəetmələri və səsli xəbərdarlıq ehtiva edən tam ekran taymer (1-99 dəqiqə).
 - ☁️ **Sürətli Bulud Yükləməsi:** Ekran şəkillərini tək kliklə Imgur-a yükləyin və keçidini anında mübadilə buferinə (clipboard) kopyalayın.
 - ⚙️ **Fərdiləşdirilə Bilən Qısayollar:** Qlobal klaviatura qısayollarını öz iş vərdişlərinizə uyğunlaşdırın.
 - 💾 **Çoxlu Format Dəstəyi:** Ekran şəkillərinizi PNG, JPG və ya müasir WebP formatında, təyin etdiyiniz keyfiyyət tənzimləmələri ilə yadda saxlayın.
-- 🌍 **Çoxlu Dil Dəstəyi:** Azərbaycan dili (AZ), Rus dili (RU), Türk dili (TR) və İngilis dili (EN) dəstəyi.
+- 🌍 **Çoxlu Dil Dəstəyi (5 Dil):** Azərbaycan dili (AZ), Türk dili (TR), İngilis dili (EN), Rus dili (RU) və Alman dili (DE) dəstəyi.
 - 🔄 **Avtomatik Yenilənmə:** Tətbiq daxilindən tək kliklə yeni versiyaları yoxlayın və quraşdırın.
 - 🚀 **Arka Fonda Çalışma (Avto-Başlatma):** Əməliyyat sistemi ilə birlikdə başlayır və sistem treyində səssizcə işləməyə hazır gözləyir.
 - 🔍 **Mətn Tanıma (OCR):** Ekrandakı kopyalanmayan yazıları tək kliklə oxuyun və mətn olaraq mübadilə buferinə kopyalayın (Tesseract WebAssembly ilə tamamilə internetsiz çalışır).
@@ -52,6 +54,9 @@ Tətbiqi yükləmək və istifadəyə başlamaq çox asandır:
 
 - **Bölmə Ekran Şəkli:** `Ctrl` + `Shift` + `S`
 - **Tam Ekran Şəkli:** `Ctrl` + `Shift` + `F`
+- **Ekran Böyüdücüsü (ZoomIt):** `Ctrl` + `1`
+- **Fasilə Taymeri:** `Ctrl` + `3`
+
 
 *(Bu qısayolları tətbiqin "Tənzimləmələr" menyusundan istədiyiniz kimi dəyişə bilərsiniz.)*
 
