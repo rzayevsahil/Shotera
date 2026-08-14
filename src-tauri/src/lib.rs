@@ -15,9 +15,12 @@ struct AppState {
     include_cursor: Mutex<bool>,
     region_shortcut: Mutex<String>,
     fullscreen_shortcut: Mutex<String>,
+    break_timer_shortcut: Mutex<String>,
+    zoom_shortcut: Mutex<String>,
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
 }
+
 
 fn show_app_notification(state: &State<'_, AppState>, title: &str, body: &str, image_path: Option<&str>) {
     if let Ok(show) = state.show_notifications.lock() {
@@ -113,8 +116,8 @@ fn draw_cursor(img: &mut image::RgbaImage, start_x: i32, start_y: i32) {
     }
 }
 
-// Function to trigger screenshot and notify the screenshot window
-fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+fn capture_screen_to_state(_app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+
     // 1. Capture screen
     let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
     if monitors.is_empty() {
@@ -149,15 +152,20 @@ fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Re
     // Store in state
     let mut last_ss = state.last_screenshot.lock().map_err(|e| e.to_string())?;
     *last_ss = Some(image);
-    
-    // 2. Notify the screenshot window to load the new image
+    Ok(())
+}
+
+// Function to trigger screenshot and notify the screenshot window
+fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+    capture_screen_to_state(app_handle, state)?;
+    // Notify the screenshot window to load the new image
     if let Some(window) = app_handle.get_webview_window("screenshot") {
         // Emit event to tell frontend that a new screenshot is captured
         window.emit("screenshot-captured", ()).map_err(|e| e.to_string())?;
     }
-    
     Ok(())
 }
+
 
 fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
     // 1. Capture screen
@@ -512,6 +520,31 @@ fn update_notification_setting(state: State<'_, AppState>, show: bool) {
     }
 }
 
+fn register_all_shortcuts_helper(
+    app_handle: &AppHandle,
+    reg_shortcut_str: &str,
+    fs_shortcut_str: &str,
+    timer_shortcut_str: &str,
+    zoom_shortcut_str: &str,
+) -> Result<(), String> {
+    use std::str::FromStr;
+    let _ = app_handle.global_shortcut().unregister_all();
+
+    if let Ok(sc) = Shortcut::from_str(&reg_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
+    if let Ok(sc) = Shortcut::from_str(&fs_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
+    if let Ok(sc) = Shortcut::from_str(&timer_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
+    if let Ok(sc) = Shortcut::from_str(&zoom_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
+    Ok(())
+}
+
 #[tauri::command]
 fn update_shortcuts(
     app_handle: AppHandle,
@@ -519,24 +552,17 @@ fn update_shortcuts(
     region_shortcut: String,
     fullscreen_shortcut: String,
 ) -> Result<(), String> {
-    use std::str::FromStr;
+    let timer_str = state.break_timer_shortcut.lock().unwrap().clone();
+    let zoom_str = state.zoom_shortcut.lock().unwrap().clone();
 
-    // 1. Validate shortcut format by parsing
-    let reg_shortcut = Shortcut::from_str(&region_shortcut.to_lowercase())
-        .map_err(|e| format!("Invalid region shortcut: {}", e))?;
-    let fs_shortcut = Shortcut::from_str(&fullscreen_shortcut.to_lowercase())
-        .map_err(|e| format!("Invalid fullscreen shortcut: {}", e))?;
+    register_all_shortcuts_helper(
+        &app_handle,
+        &region_shortcut,
+        &fullscreen_shortcut,
+        &timer_str,
+        &zoom_str,
+    )?;
 
-    // 2. Unregister ALL old shortcuts first
-    let _ = app_handle.global_shortcut().unregister_all();
-
-    // 3. Register the new customizable ones
-    app_handle.global_shortcut().register(reg_shortcut)
-        .map_err(|e| format!("Failed to register region shortcut: {}", e))?;
-    app_handle.global_shortcut().register(fs_shortcut)
-        .map_err(|e| format!("Failed to register fullscreen shortcut: {}", e))?;
-
-    // 4. Update the state
     if let Ok(mut reg_state) = state.region_shortcut.lock() {
         *reg_state = region_shortcut.to_lowercase();
     }
@@ -546,6 +572,7 @@ fn update_shortcuts(
 
     Ok(())
 }
+
 
 #[tauri::command]
 fn unregister_global_shortcuts(app_handle: AppHandle) -> Result<(), String> {
@@ -628,6 +655,46 @@ fn show_settings_window(app_handle: AppHandle) -> Result<(), String> {
     }
     Ok(())
 }
+
+#[tauri::command]
+fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("timer") {
+        let _ = window.set_fullscreen(true);
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn open_zoom_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    capture_screen_to_state(&app_handle, &state)?;
+    if let Some(window) = app_handle.get_webview_window("zoom") {
+        let _ = window.emit("zoom-captured", ());
+        let _ = window.set_fullscreen(true);
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn hide_timer_window(app_handle: AppHandle) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("timer") {
+        let _ = window.hide();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn hide_zoom_window(app_handle: AppHandle) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("zoom") {
+        let _ = window.hide();
+    }
+    Ok(())
+}
+
+
 
 #[tauri::command]
 fn trigger_capture_command(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
@@ -833,7 +900,10 @@ pub fn run() {
             include_cursor: Mutex::new(false),
             region_shortcut: Mutex::new("ctrl+shift+s".to_string()),
             fullscreen_shortcut: Mutex::new("ctrl+shift+f".to_string()),
+            break_timer_shortcut: Mutex::new("ctrl+3".to_string()),
+            zoom_shortcut: Mutex::new("ctrl+1".to_string()),
             pinned_image: Mutex::new(None),
+
             show_notifications: Mutex::new(true),
         })
         .plugin(tauri_plugin_opener::init())
@@ -867,7 +937,24 @@ pub fn run() {
                         
                         let reg_shortcut_str = state.region_shortcut.lock().unwrap().clone();
                         let fs_shortcut_str = state.fullscreen_shortcut.lock().unwrap().clone();
+                        let timer_shortcut_str = state.break_timer_shortcut.lock().unwrap().clone();
+                        let zoom_shortcut_str = state.zoom_shortcut.lock().unwrap().clone();
                         
+                        if let Ok(timer_sc) = timer_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &timer_sc {
+                                let _ = open_break_timer(app_handle_shortcut.clone());
+                                return;
+                            }
+                        }
+
+                        if let Ok(zoom_sc) = zoom_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &zoom_sc {
+                                let _ = open_zoom_view(app_handle_shortcut.clone(), state.clone());
+                                return;
+                            }
+                        }
+
+
                         let matches_fs = if let Ok(fs_shortcut) = fs_shortcut_str.parse::<Shortcut>() {
                             shortcut == &fs_shortcut
                         } else {
@@ -894,20 +981,27 @@ pub fn run() {
                 .build();
             app.handle().plugin(shortcut_plugin)?;
 
-            // Register Region and Fullscreen Shortcuts using default values on initial startup
+            // Register Region, Fullscreen, Zoom, and Break Timer Shortcuts using default values on initial startup
             use std::str::FromStr;
             let reg_shortcut = Shortcut::from_str("ctrl+shift+s").unwrap();
             let fs_shortcut = Shortcut::from_str("ctrl+shift+f").unwrap();
+            let timer_shortcut = Shortcut::from_str("ctrl+3").unwrap();
+            let zoom_shortcut = Shortcut::from_str("ctrl+1").unwrap();
             
             let _ = app.global_shortcut().register(reg_shortcut);
             let _ = app.global_shortcut().register(fs_shortcut);
+            let _ = app.global_shortcut().register(timer_shortcut);
+            let _ = app.global_shortcut().register(zoom_shortcut);
 
             // 2. Setup System Tray with retry mechanism for Windows Fast Startup
             let create_tray = |app_ref: &tauri::App| -> Result<tauri::tray::TrayIcon, tauri::Error> {
                 let quit_i = MenuItem::with_id(app_ref, "quit", "Quit", true, None::<&str>)?;
                 let settings_i = MenuItem::with_id(app_ref, "settings", "Settings", true, None::<&str>)?;
                 let capture_i = MenuItem::with_id(app_ref, "capture", "Take Screenshot", true, None::<&str>)?;
-                let menu = Menu::with_items(app_ref, &[&capture_i, &settings_i, &quit_i])?;
+                let timer_i = MenuItem::with_id(app_ref, "timer", "Break Timer (Ctrl+3)", true, None::<&str>)?;
+                let zoom_i = MenuItem::with_id(app_ref, "zoom", "Screen Zoom (Ctrl+1)", true, None::<&str>)?;
+                let menu = Menu::with_items(app_ref, &[&capture_i, &zoom_i, &timer_i, &settings_i, &quit_i])?;
+
 
                 TrayIconBuilder::with_id("main-tray")
                     .menu(&menu)
@@ -932,6 +1026,14 @@ pub fn run() {
                                     let _ = trigger_screenshot(&app_handle_clone, &state);
                                 });
                             }
+                            "timer" => {
+                                let _ = open_break_timer(app_handle_tray.clone());
+                            }
+                            "zoom" => {
+                                let state = app_handle_tray.state::<AppState>();
+                                let _ = open_zoom_view(app_handle_tray.clone(), state);
+                            }
+
                             _ => {}
                         }
                     })
@@ -977,6 +1079,10 @@ pub fn run() {
             hide_screenshot_window,
             show_screenshot_window,
             show_settings_window,
+            open_break_timer,
+            open_zoom_view,
+            hide_timer_window,
+            hide_zoom_window,
             trigger_capture_command,
             trigger_fullscreen_capture_command,
             save_base64_image,
@@ -997,6 +1103,7 @@ pub fn run() {
             unblock_autostart_registry,
             is_autostart_launch
         ])
+
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

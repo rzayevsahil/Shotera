@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -11,7 +11,8 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-type ActiveTab = "general" | "capture" | "save" | "about";
+type ActiveTab = "general" | "capture" | "save" | "zoomit" | "about";
+
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
@@ -430,6 +431,14 @@ function SettingsWindow() {
               <span>{t.sidebarSave}</span>
             </div>
             <div
+              className={`nav-item ${activeTab === "zoomit" ? "active" : ""}`}
+              onClick={() => setActiveTab("zoomit")}
+            >
+              <ZoomIn className="nav-icon" />
+              <span>{(t as any).sidebarZoomIt}</span>
+            </div>
+
+            <div
               className={`nav-item ${activeTab === "about" ? "active" : ""}`}
               onClick={() => setActiveTab("about")}
               style={{ position: "relative" }}
@@ -475,14 +484,17 @@ function SettingsWindow() {
             {activeTab === "general" && t.generalTitle}
             {activeTab === "capture" && t.captureTitle}
             {activeTab === "save" && t.saveTitle}
+            {activeTab === "zoomit" && (t as any).zoomItTitle}
             {activeTab === "about" && t.aboutTitle}
           </h2>
           <p className="section-subtitle">
             {activeTab === "general" && t.generalSubtitle}
             {activeTab === "capture" && t.captureSubtitle}
             {activeTab === "save" && t.saveSubtitle}
+            {activeTab === "zoomit" && (t as any).zoomItSubtitle}
             {activeTab === "about" && t.aboutSubtitle}
           </p>
+
         </div>
 
         {/* Tab contents */}
@@ -792,7 +804,88 @@ function SettingsWindow() {
           </div>
         )}
 
+        {activeTab === "zoomit" && (
+          <div className="settings-card">
+            {/* Screen Zoom Row */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).shortcutZoom}</span>
+                <span className="setting-desc">{(t as any).shortcutZoomDesc}</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <span className="shortcut-badge" style={{ minWidth: "90px", textAlign: "center", fontWeight: 600 }}>
+                  Ctrl + 1
+                </span>
+                <button
+                  className="premium-button"
+                  onClick={() => invoke("open_zoom_view").catch(console.error)}
+                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                >
+                  <Monitor size={14} />
+                  Test Zoom
+                </button>
+              </div>
+            </div>
+
+            {/* Break Timer Row */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).shortcutBreakTimer}</span>
+                <span className="setting-desc">{(t as any).shortcutBreakTimerDesc}</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <span className="shortcut-badge" style={{ minWidth: "90px", textAlign: "center", fontWeight: 600 }}>
+                  Ctrl + 3
+                </span>
+                <button
+                  className="premium-button"
+                  onClick={() => invoke("open_break_timer").catch(console.error)}
+                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                >
+                  <Play size={14} />
+                  Test Timer
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Draw Shortcuts Card */}
+            <div className="setting-row" style={{ borderTop: "none", paddingTop: "16px", flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).drawModeShortcutsTitle}</span>
+                <span className="setting-desc">Çizim veya Yakalama modundayken hızlı erişim kısayolları:</span>
+              </div>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(255, 255, 255, 0.03)",
+                padding: "16px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>🎨 Renk Değiştirme</span>
+                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).drawModeColorKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📋 Tahta Modları & Metin</span>
+                  <span style={{ fontSize: "0.82rem", color: "#a855f7", fontFamily: "monospace" }}>{(t as any).drawModeBoardKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📐 Şekil Modifikatörleri</span>
+                  <span style={{ fontSize: "0.82rem", color: "#10b981", fontFamily: "monospace" }}>{(t as any).drawModeShapeKeys}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "about" && (
+
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Shotera Info Card */}
             <div className="settings-card" style={{ gap: "20px" }}>

@@ -112,7 +112,9 @@ function ScreenshotCapture() {
   // Drawing state
   const [activeTool, setActiveTool] = useState<Tool>("select");
   const [drawColor, setDrawColor] = useState("#ef4444"); // Red by default
+  const [boardMode, setBoardMode] = useState<"normal" | "white" | "black">("normal");
   const [drawings, setDrawings] = useState<DrawingAction[]>([]);
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPencilPoints, setCurrentPencilPoints] = useState<Point[]>([]);
   const [drawingStart, setDrawingStart] = useState<Point | null>(null);
@@ -192,8 +194,21 @@ function ScreenshotCapture() {
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
         setDrawings((prev) => prev.slice(0, -1));
+      } else if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+        const k = e.key.toLowerCase();
+        if (k === "r") setDrawColor("#ef4444"); // Red
+        else if (k === "g") setDrawColor("#22c55e"); // Green
+        else if (k === "b") setDrawColor("#3b82f6"); // Blue
+        else if (k === "y") setDrawColor("#eab308"); // Yellow
+        else if (k === "o") setDrawColor("#f97316"); // Orange
+        else if (k === "p") setDrawColor("#ec4899"); // Pink
+        else if (k === "w") setBoardMode((prev) => (prev === "white" ? "normal" : "white"));
+        else if (k === "k") setBoardMode((prev) => (prev === "black" ? "normal" : "black"));
+        else if (k === "t") setActiveTool("text");
+        else if (k === "e") setDrawings([]);
       }
     };
+
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -231,19 +246,28 @@ function ScreenshotCapture() {
     ctx.fillRect(0, 0, w, h);
 
     if (selection) {
-      // 3. Clear selection area to show original screenshot in full colors
+      // 3. Clear selection area to show original screenshot or whiteboard/blackboard
       ctx.clearRect(selection.x, selection.y, selection.w, selection.h);
-      ctx.drawImage(
-        imgElement,
-        (selection.x * imgElement.naturalWidth) / w,
-        (selection.y * imgElement.naturalHeight) / h,
-        (selection.w * imgElement.naturalWidth) / w,
-        (selection.h * imgElement.naturalHeight) / h,
-        selection.x,
-        selection.y,
-        selection.w,
-        selection.h
-      );
+      if (boardMode === "white") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
+      } else if (boardMode === "black") {
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
+      } else {
+        ctx.drawImage(
+          imgElement,
+          (selection.x * imgElement.naturalWidth) / w,
+          (selection.y * imgElement.naturalHeight) / h,
+          (selection.w * imgElement.naturalWidth) / w,
+          (selection.h * imgElement.naturalHeight) / h,
+          selection.x,
+          selection.y,
+          selection.w,
+          selection.h
+        );
+      }
+
 
       // 4. Draw selection border
       ctx.strokeStyle = "rgba(0, 242, 254, 0.9)";
@@ -820,17 +844,26 @@ function ScreenshotCapture() {
 
     const w = window.innerWidth;
     const h = window.innerHeight;
-    tempCtx.drawImage(
-      imgElement,
-      (selection.x * imgElement.naturalWidth) / w,
-      (selection.y * imgElement.naturalHeight) / h,
-      (selection.w * imgElement.naturalWidth) / w,
-      (selection.h * imgElement.naturalHeight) / h,
-      0,
-      0,
-      selection.w,
-      selection.h
-    );
+    if (boardMode === "white") {
+      tempCtx.fillStyle = "#ffffff";
+      tempCtx.fillRect(0, 0, selection.w, selection.h);
+    } else if (boardMode === "black") {
+      tempCtx.fillStyle = "#000000";
+      tempCtx.fillRect(0, 0, selection.w, selection.h);
+    } else {
+      tempCtx.drawImage(
+        imgElement,
+        (selection.x * imgElement.naturalWidth) / w,
+        (selection.y * imgElement.naturalHeight) / h,
+        (selection.w * imgElement.naturalWidth) / w,
+        (selection.h * imgElement.naturalHeight) / h,
+        0,
+        0,
+        selection.w,
+        selection.h
+      );
+    }
+
 
     tempCtx.save();
     tempCtx.translate(-selection.x, -selection.y);

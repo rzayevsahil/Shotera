@@ -5,7 +5,10 @@ import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import SettingsWindow from "./components/SettingsWindow";
 import ScreenshotCapture from "./components/ScreenshotCapture";
 import PinnedImage from "./components/PinnedImage";
+import BreakTimer from "./components/BreakTimer";
+import ZoomCanvas from "./components/ZoomCanvas";
 import "./App.css";
+
 
 function App() {
   const [label, setLabel] = useState<string>("");
@@ -79,11 +82,21 @@ function App() {
     return <ScreenshotCapture />;
   }
 
+
+  if (label === "timer") {
+    return <BreakTimer />;
+  }
+
+  if (label === "zoom") {
+    return <ZoomCanvas />;
+  }
+
   if (label.startsWith("pinned_")) {
     return <PinnedImage />;
   }
 
   return <SettingsWindow />;
 }
+
 
 export default App;

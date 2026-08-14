@@ -29,7 +29,30 @@
         "visible": false,
         "alwaysOnTop": true,
         "skipTaskbar": true
+      },
+      {
+        "label": "timer",
+        "title": "Shotera Break Timer",
+        "fullscreen": true,
+        "resizable": false,
+        "transparent": true,
+        "decorations": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
+      },
+      {
+        "label": "zoom",
+        "title": "Shotera Zoom",
+        "fullscreen": true,
+        "resizable": false,
+        "transparent": false,
+        "decorations": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
       }
+
     ],
     "security": {
       "csp": null
