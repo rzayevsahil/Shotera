@@ -551,9 +551,11 @@ fn update_shortcuts(
     state: State<'_, AppState>,
     region_shortcut: String,
     fullscreen_shortcut: String,
+    zoom_shortcut: Option<String>,
+    timer_shortcut: Option<String>,
 ) -> Result<(), String> {
-    let timer_str = state.break_timer_shortcut.lock().unwrap().clone();
-    let zoom_str = state.zoom_shortcut.lock().unwrap().clone();
+    let timer_str = timer_shortcut.unwrap_or_else(|| state.break_timer_shortcut.lock().unwrap().clone());
+    let zoom_str = zoom_shortcut.unwrap_or_else(|| state.zoom_shortcut.lock().unwrap().clone());
 
     register_all_shortcuts_helper(
         &app_handle,
@@ -568,6 +570,12 @@ fn update_shortcuts(
     }
     if let Ok(mut fs_state) = state.fullscreen_shortcut.lock() {
         *fs_state = fullscreen_shortcut.to_lowercase();
+    }
+    if let Ok(mut timer_state) = state.break_timer_shortcut.lock() {
+        *timer_state = timer_str.to_lowercase();
+    }
+    if let Ok(mut zoom_state) = state.zoom_shortcut.lock() {
+        *zoom_state = zoom_str.to_lowercase();
     }
 
     Ok(())

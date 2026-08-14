@@ -34,7 +34,9 @@ function SettingsWindow() {
   const [imageQuality, setImageQuality] = useState(() => Number(localStorage.getItem("imageQuality") || "100"));
   const [regionShortcut, setRegionShortcut] = useState(() => localStorage.getItem("regionShortcut") || "Ctrl+Shift+S");
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
-  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | null>(null);
+  const [zoomShortcut, setZoomShortcut] = useState(() => localStorage.getItem("zoomShortcut") || "Ctrl+1");
+  const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
+  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   // Updater state
@@ -169,21 +171,25 @@ function SettingsWindow() {
     localStorage.setItem("imageQuality", String(imageQuality));
     localStorage.setItem("regionShortcut", regionShortcut);
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
+    localStorage.setItem("zoomShortcut", zoomShortcut);
+    localStorage.setItem("timerShortcut", timerShortcut);
     localStorage.setItem("defaultBlurAmount", String(defaultBlurAmount));
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
     invoke("update_shortcuts", {
       regionShortcut: regionShortcut,
-      fullscreenShortcut: fullscreenShortcut
+      fullscreenShortcut: fullscreenShortcut,
+      zoomShortcut: zoomShortcut,
+      timerShortcut: timerShortcut,
     }).catch((e) => {
       console.error("Failed to sync shortcuts with Rust backend:", e);
     });
-  }, [regionShortcut, fullscreenShortcut]);
+  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut]);
 
   // Handle global shortcut recording
   useEffect(() => {
@@ -249,9 +255,15 @@ function SettingsWindow() {
       if (recordingType === "region") {
         setRegionShortcut(shortcutStr);
         localStorage.setItem("regionShortcut", shortcutStr);
-      } else {
+      } else if (recordingType === "fullscreen") {
         setFullscreenShortcut(shortcutStr);
         localStorage.setItem("fullscreenShortcut", shortcutStr);
+      } else if (recordingType === "zoom") {
+        setZoomShortcut(shortcutStr);
+        localStorage.setItem("zoomShortcut", shortcutStr);
+      } else if (recordingType === "timer") {
+        setTimerShortcut(shortcutStr);
+        localStorage.setItem("timerShortcut", shortcutStr);
       }
 
       setRecordingType(null);
@@ -284,9 +296,15 @@ function SettingsWindow() {
       if (recordingType === "region") {
         setRegionShortcut(shortcutStr);
         localStorage.setItem("regionShortcut", shortcutStr);
-      } else {
+      } else if (recordingType === "fullscreen") {
         setFullscreenShortcut(shortcutStr);
         localStorage.setItem("fullscreenShortcut", shortcutStr);
+      } else if (recordingType === "zoom") {
+        setZoomShortcut(shortcutStr);
+        localStorage.setItem("zoomShortcut", shortcutStr);
+      } else if (recordingType === "timer") {
+        setTimerShortcut(shortcutStr);
+        localStorage.setItem("timerShortcut", shortcutStr);
       }
 
       setRecordingType(null);
@@ -312,9 +330,13 @@ function SettingsWindow() {
       // 2. Re-register and sync shortcuts from localStorage on exit/cleanup
       const regShortcut = localStorage.getItem("regionShortcut") || "Ctrl+Shift+S";
       const fsShortcut = localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F";
+      const zmShortcut = localStorage.getItem("zoomShortcut") || "Ctrl+1";
+      const tmShortcut = localStorage.getItem("timerShortcut") || "Ctrl+3";
       invoke("update_shortcuts", {
         regionShortcut: regShortcut,
-        fullscreenShortcut: fsShortcut
+        fullscreenShortcut: fsShortcut,
+        zoomShortcut: zmShortcut,
+        timerShortcut: tmShortcut,
       }).catch((err) => console.error(err));
     };
   }, [recordingType]);
@@ -813,9 +835,24 @@ function SettingsWindow() {
                 <span className="setting-desc">{(t as any).shortcutZoomDesc}</span>
               </div>
               <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <span className="shortcut-badge" style={{ minWidth: "90px", textAlign: "center", fontWeight: 600 }}>
-                  Ctrl + 1
-                </span>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "zoom" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "zoom" ? null : "zoom")}
+                  title={t.shortcutChangeHint}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "zoom" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "zoom" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "zoom" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "zoom" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none",
+                    minWidth: "100px",
+                    textAlign: "center"
+                  }}
+                >
+                  {recordingType === "zoom" ? t.shortcutPressKeys : formatShortcut(zoomShortcut)}
+                </button>
                 <button
                   className="premium-button"
                   onClick={() => invoke("open_zoom_view").catch(console.error)}
@@ -834,9 +871,24 @@ function SettingsWindow() {
                 <span className="setting-desc">{(t as any).shortcutBreakTimerDesc}</span>
               </div>
               <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <span className="shortcut-badge" style={{ minWidth: "90px", textAlign: "center", fontWeight: 600 }}>
-                  Ctrl + 3
-                </span>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "timer" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "timer" ? null : "timer")}
+                  title={t.shortcutChangeHint}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "timer" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "timer" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "timer" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "timer" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none",
+                    minWidth: "100px",
+                    textAlign: "center"
+                  }}
+                >
+                  {recordingType === "timer" ? t.shortcutPressKeys : formatShortcut(timerShortcut)}
+                </button>
                 <button
                   className="premium-button"
                   onClick={() => invoke("open_break_timer").catch(console.error)}
