@@ -22,8 +22,8 @@ export default function ZoomCanvas() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [lang, setLang] = useState<Language>(getLanguage());
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
+
 
   // Zoom & Pan State
   const [zoomLevel, setZoomLevel] = useState<number>(2.0); // Default 2x magnification
@@ -94,11 +94,16 @@ export default function ZoomCanvas() {
 
   const t = translations[lang] || translations.tr;
 
-  // Load latest screenshot
+  // Load latest screenshot atomically to prevent showing previous stale screenshot
   const loadScreenshot = async () => {
     try {
       const base64Data = await invoke<string>("get_last_screenshot");
-      setImageSrc(`data:image/png;base64,${base64Data}`);
+      const src = `data:image/png;base64,${base64Data}`;
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        setImgElement(img);
+      };
     } catch (e) {
       console.error("Failed to load screenshot for Zoom Canvas:", e);
     }
@@ -109,6 +114,8 @@ export default function ZoomCanvas() {
     setLang(getLanguage());
 
     const unlisten = listen("zoom-captured", () => {
+      // Clear previous screenshot state instantly to prevent flickering old page
+      setImgElement(null);
       setZoomLevel(2.0);
       setPanPos({ x: 0.5, y: 0.5 });
       setIsDrawMode(false);
@@ -126,16 +133,9 @@ export default function ZoomCanvas() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!imageSrc) return;
-    const img = new Image();
-    img.src = imageSrc;
-    img.onload = () => {
-      setImgElement(img);
-    };
-  }, [imageSrc]);
-
   const handleClose = async () => {
+    setImgElement(null);
+
     try {
       await invoke("hide_zoom_window");
     } catch (e) {
