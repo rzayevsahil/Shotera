@@ -659,6 +659,10 @@ fn show_settings_window(app_handle: AppHandle) -> Result<(), String> {
 #[tauri::command]
 fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("timer") {
+        if window.is_visible().unwrap_or(false) {
+            let _ = window.hide();
+            return Ok(());
+        }
         let _ = window.set_fullscreen(true);
         let _ = window.show();
         let _ = window.set_focus();
@@ -668,6 +672,13 @@ fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 fn open_zoom_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("zoom") {
+        if window.is_visible().unwrap_or(false) {
+            let _ = window.hide();
+            return Ok(());
+        }
+    }
+
     capture_screen_to_state(&app_handle, &state)?;
     if let Some(window) = app_handle.get_webview_window("zoom") {
         let _ = window.emit("zoom-captured", ());
