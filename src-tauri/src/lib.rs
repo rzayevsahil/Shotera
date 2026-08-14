@@ -670,6 +670,12 @@ fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[derive(Clone, serde::Serialize)]
+struct ZoomPayload {
+    cursor_x: f32,
+    cursor_y: f32,
+}
+
 #[tauri::command]
 fn open_zoom_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("zoom") {
@@ -680,8 +686,28 @@ fn open_zoom_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(
     }
 
     capture_screen_to_state(&app_handle, &state)?;
+
+    let monitors = xcap::Monitor::all().unwrap_or_default();
+    let (cursor_x, cursor_y) = if !monitors.is_empty() {
+        let monitor = &monitors[0];
+        if let Some((cx, cy)) = get_cursor_position() {
+            let mx = monitor.x().unwrap_or(0);
+            let my = monitor.y().unwrap_or(0);
+            let mw = monitor.width().unwrap_or(1920) as f32;
+            let mh = monitor.height().unwrap_or(1080) as f32;
+            (
+                ((cx - mx) as f32 / mw).clamp(0.0, 1.0),
+                ((cy - my) as f32 / mh).clamp(0.0, 1.0),
+            )
+        } else {
+            (0.5, 0.5)
+        }
+    } else {
+        (0.5, 0.5)
+    };
+
     if let Some(window) = app_handle.get_webview_window("zoom") {
-        let _ = window.emit("zoom-captured", ());
+        let _ = window.emit("zoom-captured", ZoomPayload { cursor_x, cursor_y });
         let _ = window.set_fullscreen(true);
         let _ = window.show();
         let _ = window.set_focus();

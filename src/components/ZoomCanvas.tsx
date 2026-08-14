@@ -113,11 +113,17 @@ export default function ZoomCanvas() {
     loadScreenshot();
     setLang(getLanguage());
 
-    const unlisten = listen("zoom-captured", () => {
+    let animId: number | null = null;
+
+    const unlisten = listen<{ cursor_x?: number; cursor_y?: number }>("zoom-captured", (event) => {
       // Clear previous screenshot state instantly to prevent flickering old page
       setImgElement(null);
-      setZoomLevel(2.0);
-      setPanPos({ x: 0.5, y: 0.5 });
+
+      const startX = event.payload?.cursor_x ?? 0.5;
+      const startY = event.payload?.cursor_y ?? 0.5;
+
+      setPanPos({ x: startX, y: startY });
+      setZoomLevel(1.0);
       setIsDrawMode(false);
       setActiveTool("pen");
       setBoardMode("normal");
@@ -126,10 +132,32 @@ export default function ZoomCanvas() {
       setTextInput(null);
       setLang(getLanguage());
       loadScreenshot();
+
+      // Smooth zoom-in animation (ZoomIt style) from 1.0x to 2.0x over ~180ms
+      const startTime = performance.now();
+      const duration = 180;
+      const startZoom = 1.0;
+      const targetZoom = 2.0;
+
+      const step = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentZoom = startZoom + (targetZoom - startZoom) * easeOut;
+
+        setZoomLevel(Number(currentZoom.toFixed(3)));
+
+        if (progress < 1) {
+          animId = requestAnimationFrame(step);
+        }
+      };
+
+      animId = requestAnimationFrame(step);
     });
 
     return () => {
       unlisten.then((fn) => fn());
+      if (animId) cancelAnimationFrame(animId);
     };
   }, []);
 
@@ -214,10 +242,24 @@ export default function ZoomCanvas() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const dpr = window.devicePixelRatio || 1;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    canvas.width = w;
-    canvas.height = h;
+
+    // Buffer dimensions match physical display pixels for crisp High-DPI rendering
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    // Disable bilinear interpolation smoothing for ZoomIt-style pixel-perfect crispness
+    ctx.imageSmoothingEnabled = false;
+    (ctx as any).webkitImageSmoothingEnabled = false;
+    (ctx as any).mozImageSmoothingEnabled = false;
+    (ctx as any).msImageSmoothingEnabled = false;
 
     ctx.clearRect(0, 0, w, h);
 
@@ -229,11 +271,12 @@ export default function ZoomCanvas() {
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, w, h);
     } else if (imgElement) {
-      const cropWidth = imgElement.naturalWidth / zoomLevel;
-      const cropHeight = imgElement.naturalHeight / zoomLevel;
+      // Round crop coordinates to exact integer pixels to prevent sub-pixel sampling blur
+      const cropWidth = Math.floor(imgElement.naturalWidth / zoomLevel);
+      const cropHeight = Math.floor(imgElement.naturalHeight / zoomLevel);
 
-      let cropX = panPos.x * imgElement.naturalWidth - cropWidth / 2;
-      let cropY = panPos.y * imgElement.naturalHeight - cropHeight / 2;
+      let cropX = Math.floor(panPos.x * imgElement.naturalWidth - cropWidth / 2);
+      let cropY = Math.floor(panPos.y * imgElement.naturalHeight - cropHeight / 2);
 
       cropX = Math.max(0, Math.min(imgElement.naturalWidth - cropWidth, cropX));
       cropY = Math.max(0, Math.min(imgElement.naturalHeight - cropHeight, cropY));
@@ -297,7 +340,6 @@ export default function ZoomCanvas() {
     const textMetrics = ctx.measureText(badgeText);
     const badgeWidth = textMetrics.width + (isDrawMode ? 54 : 36);
 
-    ctx.save();
     ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
     ctx.beginPath();
     ctx.roundRect(16, 16, badgeWidth, 36, 18);
@@ -316,6 +358,7 @@ export default function ZoomCanvas() {
 
     ctx.fillStyle = isDrawMode ? "#ffffff" : "#38bdf8";
     ctx.fillText(badgeText, isDrawMode ? 52 : 32, 34);
+
     ctx.restore();
   }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, activeTool, currentColor, lang]);
 
@@ -573,7 +616,15 @@ export default function ZoomCanvas() {
         userSelect: "none",
       }}
     >
-      <canvas ref={canvasRef} style={{ display: "block" }} />
+      <canvas
+        ref={canvasRef}
+        style={{
+          display: "block",
+          width: "100vw",
+          height: "100vh",
+          imageRendering: "pixelated",
+        }}
+      />
 
       {/* Floating Text Input Box when typing */}
       {textInput && (
