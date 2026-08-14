@@ -959,7 +959,7 @@ function SettingsWindow() {
                 <span className="setting-label">{(t as any).timerDefaultDuration}</span>
                 <span className="setting-desc">{(t as any).timerDefaultDurationDesc}</span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ width: "240px", display: "flex", alignItems: "center", gap: "12px" }}>
                 <input
                   type="number"
                   min={1}
@@ -971,9 +971,9 @@ function SettingsWindow() {
                     const mins = val <= 0 ? 1 : Math.min(360, val);
                     setTimerDefaultDuration(mins * 60);
                   }}
-                  style={{ width: "160px", textAlign: "center", fontWeight: 600 }}
+                  style={{ flex: 1, minWidth: 0, textAlign: "center", fontWeight: 600, padding: "8px 12px" }}
                 />
-                <span style={{ color: "var(--text-muted)", fontSize: "0.9rem", fontWeight: 500 }}>
+                <span style={{ color: "var(--text-muted)", fontSize: "0.9rem", fontWeight: 500, whiteSpace: "nowrap" }}>
                   {(t as any).minuteUnit || "Dakika"}
                 </span>
               </div>
