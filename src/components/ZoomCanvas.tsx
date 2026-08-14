@@ -94,35 +94,14 @@ export default function ZoomCanvas() {
 
   const t = translations[lang] || translations.tr;
 
-  // Load latest screenshot atomically to prevent showing previous stale screenshot
-  const loadScreenshot = async () => {
-    try {
-      const base64Data = await invoke<string>("get_last_screenshot");
-      const src = `data:image/png;base64,${base64Data}`;
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        setImgElement(img);
-      };
-    } catch (e) {
-      console.error("Failed to load screenshot for Zoom Canvas:", e);
-    }
-  };
-
   useEffect(() => {
-    loadScreenshot();
     setLang(getLanguage());
 
     let animId: number | null = null;
 
-    const unlisten = listen<{ cursor_x?: number; cursor_y?: number }>("zoom-captured", (event) => {
-      // Clear previous screenshot state instantly to prevent flickering old page
-      setImgElement(null);
-
-      const startX = event.payload?.cursor_x ?? 0.5;
-      const startY = event.payload?.cursor_y ?? 0.5;
-
-      setPanPos({ x: startX, y: startY });
+    const startZoomAnimation = (targetX: number, targetY: number, img: HTMLImageElement) => {
+      setImgElement(img);
+      setPanPos({ x: targetX, y: targetY });
       setZoomLevel(1.0);
       setIsDrawMode(false);
       setActiveTool("pen");
@@ -131,11 +110,11 @@ export default function ZoomCanvas() {
       setCurrentShape(null);
       setTextInput(null);
       setLang(getLanguage());
-      loadScreenshot();
 
-      // Smooth zoom-in animation (ZoomIt style) from 1.0x to 2.0x over ~180ms
+      if (animId) cancelAnimationFrame(animId);
+
       const startTime = performance.now();
-      const duration = 180;
+      const duration = 220; // 220ms smooth ease-out transition
       const startZoom = 1.0;
       const targetZoom = 2.0;
 
@@ -153,6 +132,30 @@ export default function ZoomCanvas() {
       };
 
       animId = requestAnimationFrame(step);
+    };
+
+    const fetchAndAnimate = async (cursorX: number, cursorY: number) => {
+      try {
+        const base64Data = await invoke<string>("get_last_screenshot");
+        const src = `data:image/png;base64,${base64Data}`;
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          startZoomAnimation(cursorX, cursorY, img);
+          invoke("show_zoom_window").catch(console.error);
+        };
+      } catch (e) {
+        console.error("Failed to load screenshot for Zoom Canvas:", e);
+      }
+    };
+
+    // Initial mount load
+    fetchAndAnimate(0.5, 0.5);
+
+    const unlisten = listen<{ cursor_x?: number; cursor_y?: number }>("zoom-captured", (event) => {
+      const startX = event.payload?.cursor_x ?? 0.5;
+      const startY = event.payload?.cursor_y ?? 0.5;
+      fetchAndAnimate(startX, startY);
     });
 
     return () => {
@@ -609,7 +612,7 @@ export default function ZoomCanvas() {
       style={{
         width: "100vw",
         height: "100vh",
-        background: "#000000",
+        background: "transparent",
         overflow: "hidden",
         position: "relative",
         cursor: isDrawMode ? (activeTool === "text" ? "text" : "crosshair") : "default",

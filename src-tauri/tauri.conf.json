@@ -46,7 +46,7 @@
         "title": "Shotera Zoom",
         "fullscreen": true,
         "resizable": false,
-        "transparent": false,
+        "transparent": true,
         "decorations": false,
         "visible": false,
         "alwaysOnTop": true,

@@ -708,6 +708,13 @@ fn open_zoom_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(
 
     if let Some(window) = app_handle.get_webview_window("zoom") {
         let _ = window.emit("zoom-captured", ZoomPayload { cursor_x, cursor_y });
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn show_zoom_window(app_handle: AppHandle) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("zoom") {
         let _ = window.set_fullscreen(true);
         let _ = window.show();
         let _ = window.set_focus();
@@ -1118,6 +1125,7 @@ pub fn run() {
             show_settings_window,
             open_break_timer,
             open_zoom_view,
+            show_zoom_window,
             hide_timer_window,
             hide_zoom_window,
             trigger_capture_command,
