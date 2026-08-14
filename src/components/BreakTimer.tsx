@@ -136,6 +136,11 @@ export default function BreakTimer() {
     };
   }, [isRunning, isFinished, timerDirection, totalSeconds, soundEnabled]);
 
+  const timerDirectionRef = useRef(timerDirection);
+  timerDirectionRef.current = timerDirection;
+  const totalSecondsRef = useRef(totalSeconds);
+  totalSecondsRef.current = totalSeconds;
+
   // Handle Keyboard & Scroll adjustments
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -143,31 +148,26 @@ export default function BreakTimer() {
         handleClose();
       } else if (e.key === " ") {
         e.preventDefault();
+        e.stopPropagation();
         setIsRunning((prev) => !prev);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        const addSecs = e.shiftKey ? 300 : 60;
-        setTotalSeconds((prev) => {
-          const next = prev + addSecs;
-          if (timerDirection === "down") {
-            setCurrentSeconds((cur) => cur + addSecs);
-          }
-          return next;
-        });
+        e.stopPropagation();
+        const step = e.shiftKey ? 300 : 60;
+        setTotalSeconds((prev) => prev + step);
+        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? cur + step : cur));
         setIsFinished(false);
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
-        const subSecs = e.shiftKey ? 300 : 60;
-        setTotalSeconds((prev) => {
-          const next = Math.max(60, prev - subSecs);
-          if (timerDirection === "down") {
-            setCurrentSeconds((cur) => Math.max(0, cur - subSecs));
-          }
-          return next;
-        });
+        e.stopPropagation();
+        const step = e.shiftKey ? 300 : 60;
+        setTotalSeconds((prev) => Math.max(60, prev - step));
+        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? Math.max(0, cur - step) : cur));
         setIsFinished(false);
       } else if (e.key.toLowerCase() === "r") {
-        setCurrentSeconds(timerDirection === "down" ? totalSeconds : 0);
+        e.preventDefault();
+        e.stopPropagation();
+        setCurrentSeconds(timerDirectionRef.current === "down" ? totalSecondsRef.current : 0);
         setIsRunning(true);
         setIsFinished(false);
       }
@@ -176,33 +176,22 @@ export default function BreakTimer() {
     const handleWheel = (e: WheelEvent) => {
       const step = e.shiftKey ? 300 : 60;
       if (e.deltaY < 0) {
-        setTotalSeconds((prev) => {
-          const next = prev + step;
-          if (timerDirection === "down") {
-            setCurrentSeconds((cur) => cur + step);
-          }
-          return next;
-        });
+        setTotalSeconds((prev) => prev + step);
+        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? cur + step : cur));
       } else if (e.deltaY > 0) {
-        setTotalSeconds((prev) => {
-          const next = Math.max(60, prev - step);
-          if (timerDirection === "down") {
-            setCurrentSeconds((cur) => Math.max(0, cur - step));
-          }
-          return next;
-        });
+        setTotalSeconds((prev) => Math.max(60, prev - step));
+        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? Math.max(0, cur - step) : cur));
       }
       setIsFinished(false);
     };
 
-    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("wheel", handleWheel);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("wheel", handleWheel);
     };
-
-  }, [totalSeconds, timerDirection]);
+  }, []);
 
   const minutes = Math.floor(currentSeconds / 60);
   const seconds = currentSeconds % 60;
