@@ -7,8 +7,17 @@ import { translations, getLanguage, Language } from "../i18n";
 
 export default function BreakTimer() {
   const [lang, setLang] = useState<Language>(getLanguage());
-  const [totalSeconds, setTotalSeconds] = useState<number>(600); // 10 minutes default
-  const [timeLeft, setTimeLeft] = useState<number>(600);
+  const [totalSeconds, setTotalSeconds] = useState<number>(() => {
+    return Number(localStorage.getItem("timerDefaultDuration") || "600");
+  });
+  const [timerDirection, setTimerDirection] = useState<"down" | "up">(() => {
+    return (localStorage.getItem("timerCountDirection") as "down" | "up") || "down";
+  });
+  const [currentSeconds, setCurrentSeconds] = useState<number>(() => {
+    const dir = (localStorage.getItem("timerCountDirection") as "down" | "up") || "down";
+    const total = Number(localStorage.getItem("timerDefaultDuration") || "600");
+    return dir === "down" ? total : 0;
+  });
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [isFinished, setIsFinished] = useState<boolean>(false);
@@ -25,22 +34,41 @@ export default function BreakTimer() {
     };
   }, []);
 
-  // Listen for timer window trigger/open event from shortcut or button
+  // Sync settings when storage updates or window is opened
   useEffect(() => {
-    const handleTrigger = () => {
+    const applySettings = (isTriggerEvent: boolean) => {
       const mode = localStorage.getItem("timerResetMode") || "reset";
-      if (mode === "reset") {
-        setTimeLeft(totalSeconds);
-        setIsRunning(true);
-        setIsFinished(false);
+      const defaultDuration = Number(localStorage.getItem("timerDefaultDuration") || "600");
+      const dir = (localStorage.getItem("timerCountDirection") as "down" | "up") || "down";
+
+      setTotalSeconds(defaultDuration);
+      setTimerDirection(dir);
+
+      if (isTriggerEvent) {
+        if (mode === "reset") {
+          setCurrentSeconds(dir === "down" ? defaultDuration : 0);
+          setIsRunning(true);
+          setIsFinished(false);
+        }
       }
     };
 
+    const handleTrigger = () => {
+      applySettings(true);
+    };
+
+    const handleStorage = () => {
+      applySettings(false);
+    };
+
     const unlistenPromise = listen("timer-opened", handleTrigger);
+    window.addEventListener("storage", handleStorage);
+
     return () => {
       unlistenPromise.then((unlisten) => unlisten());
+      window.removeEventListener("storage", handleStorage);
     };
-  }, [totalSeconds]);
+  }, []);
 
   const t = translations[lang] || translations.tr;
 
@@ -57,9 +85,7 @@ export default function BreakTimer() {
     }
   };
 
-
-
-  // Play audio chime when timer reaches 0
+  // Play audio chime when timer finishes
   const playAlarm = () => {
     if (!soundEnabled) return;
     try {
@@ -87,17 +113,29 @@ export default function BreakTimer() {
     }
   };
 
+  // Tick timer every second based on direction
   useEffect(() => {
-    if (isRunning && timeLeft > 0) {
+    if (isRunning && !isFinished) {
       timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            setIsFinished(true);
-            playAlarm();
-            return 0;
+        setCurrentSeconds((prev) => {
+          if (timerDirection === "down") {
+            if (prev <= 1) {
+              setIsRunning(false);
+              setIsFinished(true);
+              playAlarm();
+              return 0;
+            }
+            return prev - 1;
+          } else {
+            // Count UP mode (0 -> totalSeconds)
+            if (prev >= totalSeconds - 1) {
+              setIsRunning(false);
+              setIsFinished(true);
+              playAlarm();
+              return totalSeconds;
+            }
+            return prev + 1;
           }
-          return prev - 1;
         });
       }, 1000);
     } else {
@@ -107,7 +145,7 @@ export default function BreakTimer() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isRunning, timeLeft, soundEnabled]);
+  }, [isRunning, isFinished, timerDirection, totalSeconds, soundEnabled]);
 
   // Handle Keyboard & Scroll adjustments
   useEffect(() => {
@@ -122,7 +160,9 @@ export default function BreakTimer() {
         const addSecs = e.shiftKey ? 300 : 60;
         setTotalSeconds((prev) => {
           const next = prev + addSecs;
-          setTimeLeft(next);
+          if (timerDirection === "down") {
+            setCurrentSeconds((cur) => cur + addSecs);
+          }
           return next;
         });
         setIsFinished(false);
@@ -131,12 +171,14 @@ export default function BreakTimer() {
         const subSecs = e.shiftKey ? 300 : 60;
         setTotalSeconds((prev) => {
           const next = Math.max(60, prev - subSecs);
-          setTimeLeft(next);
+          if (timerDirection === "down") {
+            setCurrentSeconds((cur) => Math.max(0, cur - subSecs));
+          }
           return next;
         });
         setIsFinished(false);
       } else if (e.key.toLowerCase() === "r") {
-        setTimeLeft(totalSeconds);
+        setCurrentSeconds(timerDirection === "down" ? totalSeconds : 0);
         setIsRunning(true);
         setIsFinished(false);
       }
@@ -147,13 +189,17 @@ export default function BreakTimer() {
       if (e.deltaY < 0) {
         setTotalSeconds((prev) => {
           const next = prev + step;
-          setTimeLeft(next);
+          if (timerDirection === "down") {
+            setCurrentSeconds((cur) => cur + step);
+          }
           return next;
         });
       } else if (e.deltaY > 0) {
         setTotalSeconds((prev) => {
           const next = Math.max(60, prev - step);
-          setTimeLeft(next);
+          if (timerDirection === "down") {
+            setCurrentSeconds((cur) => Math.max(0, cur - step));
+          }
           return next;
         });
       }
@@ -167,14 +213,24 @@ export default function BreakTimer() {
       window.removeEventListener("wheel", handleWheel);
     };
 
-  }, [totalSeconds]);
+  }, [totalSeconds, timerDirection]);
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  const minutes = Math.floor(currentSeconds / 60);
+  const seconds = currentSeconds % 60;
   const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-  const progress = totalSeconds > 0 ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0;
+  const progress = totalSeconds > 0
+    ? (timerDirection === "down"
+        ? ((totalSeconds - currentSeconds) / totalSeconds) * 100
+        : (currentSeconds / totalSeconds) * 100)
+    : 0;
   const strokeDashoffset = 880 - (880 * progress) / 100;
+
+  const handleReset = () => {
+    setCurrentSeconds(timerDirection === "down" ? totalSeconds : 0);
+    setIsRunning(true);
+    setIsFinished(false);
+  };
 
   return (
     <div
@@ -218,11 +274,10 @@ export default function BreakTimer() {
             justifyContent: "center",
             cursor: "pointer",
             backdropFilter: "blur(12px)",
-            transition: "all 0.2s ease",
           }}
-          title="Ses Aç/Kapat"
+          title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
         >
-          {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} color="#f87171" />}
+          {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
         </button>
 
         <button
@@ -230,7 +285,7 @@ export default function BreakTimer() {
           style={{
             background: "rgba(239, 68, 68, 0.2)",
             border: "1px solid rgba(239, 68, 68, 0.4)",
-            color: "#fca5a5",
+            color: "#f87171",
             borderRadius: "50%",
             width: "44px",
             height: "44px",
@@ -239,11 +294,10 @@ export default function BreakTimer() {
             justifyContent: "center",
             cursor: "pointer",
             backdropFilter: "blur(12px)",
-            transition: "all 0.2s ease",
           }}
           title="Kapat (ESC)"
         >
-          <X size={22} />
+          <X size={20} />
         </button>
       </div>
 
@@ -309,7 +363,7 @@ export default function BreakTimer() {
             {isFinished
               ? (t.breakTimerFinished || "Süre Bitti!")
               : isRunning
-              ? (t.shortcutBreakTimer || "Mola Devam Ediyor")
+              ? (timerDirection === "up" ? "0'dan İleriye Sayılıyor" : (t.shortcutBreakTimer || "Mola Devam Ediyor"))
               : "Duraklatıldı"}
           </span>
         </div>
@@ -346,11 +400,7 @@ export default function BreakTimer() {
         </button>
 
         <button
-          onClick={() => {
-            setTimeLeft(totalSeconds);
-            setIsRunning(true);
-            setIsFinished(false);
-          }}
+          onClick={handleReset}
           style={{
             background: "rgba(255, 255, 255, 0.08)",
             border: "1px solid rgba(255, 255, 255, 0.15)",

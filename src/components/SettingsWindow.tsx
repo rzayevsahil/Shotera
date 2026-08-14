@@ -37,6 +37,8 @@ function SettingsWindow() {
   const [zoomShortcut, setZoomShortcut] = useState(() => localStorage.getItem("zoomShortcut") || "Ctrl+1");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
   const [timerResetMode, setTimerResetMode] = useState<"reset" | "continue">(() => (localStorage.getItem("timerResetMode") as "reset" | "continue") || "reset");
+  const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
+  const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
@@ -175,11 +177,13 @@ function SettingsWindow() {
     localStorage.setItem("zoomShortcut", zoomShortcut);
     localStorage.setItem("timerShortcut", timerShortcut);
     localStorage.setItem("timerResetMode", timerResetMode);
+    localStorage.setItem("timerDefaultDuration", String(timerDefaultDuration));
+    localStorage.setItem("timerCountDirection", timerCountDirection);
     localStorage.setItem("defaultBlurAmount", String(defaultBlurAmount));
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, timerDefaultDuration, timerCountDirection, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -947,6 +951,49 @@ function SettingsWindow() {
                   Test Timer
                 </button>
               </div>
+            </div>
+
+            {/* Default Break Duration Row */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).timerDefaultDuration}</span>
+                <span className="setting-desc">{(t as any).timerDefaultDurationDesc}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <input
+                  type="number"
+                  min={1}
+                  max={360}
+                  className="premium-input"
+                  value={Math.round(timerDefaultDuration / 60)}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    const mins = val <= 0 ? 1 : Math.min(360, val);
+                    setTimerDefaultDuration(mins * 60);
+                  }}
+                  style={{ width: "160px", textAlign: "center", fontWeight: 600 }}
+                />
+                <span style={{ color: "var(--text-muted)", fontSize: "0.9rem", fontWeight: 500 }}>
+                  {(t as any).minuteUnit || "Dakika"}
+                </span>
+              </div>
+            </div>
+
+            {/* Count Direction Row */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).timerCountDirection}</span>
+                <span className="setting-desc">{(t as any).timerCountDirectionDesc}</span>
+              </div>
+              <select
+                className="premium-input"
+                value={timerCountDirection}
+                onChange={(e) => setTimerCountDirection(e.target.value as "down" | "up")}
+                style={{ width: "240px" }}
+              >
+                <option value="down">{(t as any).timerCountDirectionDown}</option>
+                <option value="up">{(t as any).timerCountDirectionUp}</option>
+              </select>
             </div>
 
             {/* Break Timer Reset Mode Row */}
