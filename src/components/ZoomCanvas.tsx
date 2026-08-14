@@ -31,6 +31,7 @@ export default function ZoomCanvas() {
 
   // Drawing & Board State
   const [isDrawMode, setIsDrawMode] = useState<boolean>(false);
+  const [activeTool, setActiveTool] = useState<"pen" | "text">("pen");
   const [boardMode, setBoardMode] = useState<"normal" | "white" | "black">("normal");
   const [currentColor, setCurrentColor] = useState<string>("#ef4444"); // Red by default
   const [strokeWidth] = useState<number>(4);
@@ -39,8 +40,46 @@ export default function ZoomCanvas() {
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
 
-  // Text Input State
+  // Text Input State & Time Tracker
   const [textInput, setTextInput] = useState<{ x: number; y: number; text: string } | null>(null);
+  const textInputRef = useRef(textInput);
+  const textInputTimeRef = useRef<number>(0);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    textInputRef.current = textInput;
+  }, [textInput]);
+
+  const activeToolRef = useRef(activeTool);
+  useEffect(() => {
+    activeToolRef.current = activeTool;
+  }, [activeTool]);
+
+  const currentColorRef = useRef(currentColor);
+  useEffect(() => {
+    currentColorRef.current = currentColor;
+  }, [currentColor]);
+
+  // Focus input automatically whenever textInput opens
+  useEffect(() => {
+    if (textInput && inputRef.current) {
+      inputRef.current.focus();
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 30);
+      return () => clearTimeout(timer);
+    }
+  }, [textInput]);
+
+  const shapesRef = useRef(shapes);
+  useEffect(() => {
+    shapesRef.current = shapes;
+  }, [shapes]);
+
+  const isDrawModeRef = useRef(isDrawMode);
+  useEffect(() => {
+    isDrawModeRef.current = isDrawMode;
+  }, [isDrawMode]);
 
   // Load language dynamically when window focuses or storage updates
   useEffect(() => {
@@ -73,6 +112,7 @@ export default function ZoomCanvas() {
       setZoomLevel(2.0);
       setPanPos({ x: 0.5, y: 0.5 });
       setIsDrawMode(false);
+      setActiveTool("pen");
       setBoardMode("normal");
       setShapes([]);
       setCurrentShape(null);
@@ -106,6 +146,25 @@ export default function ZoomCanvas() {
         console.error(err);
       }
     }
+  };
+
+  const handleTextSubmit = () => {
+    const current = textInputRef.current;
+    if (current && current.text.trim()) {
+      setShapes((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          type: "text",
+          x1: current.x,
+          y1: current.y,
+          text: current.text.trim(),
+          color: currentColorRef.current,
+          width: strokeWidth,
+        },
+      ]);
+    }
+    setTextInput(null);
   };
 
   // Helper to draw an arrow
@@ -226,7 +285,9 @@ export default function ZoomCanvas() {
 
     // 3. Render Status Badge (Top Left Corner)
     const badgeText = isDrawMode
-      ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
+      ? activeTool === "text"
+        ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeTextMode || "🔤 Metin Modu"}`
+        : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
       : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeStart}`;
 
     ctx.font = "bold 13px Inter, sans-serif";
@@ -256,12 +317,20 @@ export default function ZoomCanvas() {
     ctx.fillStyle = isDrawMode ? "#ffffff" : "#38bdf8";
     ctx.fillText(badgeText, isDrawMode ? 52 : 32, 34);
     ctx.restore();
-  }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, currentColor, lang]);
+  }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, activeTool, currentColor, lang]);
 
 
   // Keyboard Event Handler (Colors, Board Modes, Undo, Clear, ESC)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Do not process global shortcuts if typing in text input
+      if (textInputRef.current !== null || (e.target as HTMLElement)?.tagName === "INPUT") {
+        if (e.key === "Escape") {
+          setTextInput(null);
+        }
+        return;
+      }
+
       const key = e.key.toLowerCase();
 
       // Undo (Ctrl + Z)
@@ -274,21 +343,27 @@ export default function ZoomCanvas() {
       // Color Shortcuts: R, G, B, Y, O, P
       if (key === "r") {
         setCurrentColor("#ef4444"); // Red
+        setActiveTool("pen");
         setIsDrawMode(true);
       } else if (key === "g") {
         setCurrentColor("#22c55e"); // Green
+        setActiveTool("pen");
         setIsDrawMode(true);
       } else if (key === "b") {
         setCurrentColor("#3b82f6"); // Blue
+        setActiveTool("pen");
         setIsDrawMode(true);
       } else if (key === "y") {
         setCurrentColor("#eab308"); // Yellow
+        setActiveTool("pen");
         setIsDrawMode(true);
       } else if (key === "o") {
         setCurrentColor("#f97316"); // Orange
+        setActiveTool("pen");
         setIsDrawMode(true);
       } else if (key === "p") {
         setCurrentColor("#ec4899"); // Pink
+        setActiveTool("pen");
         setIsDrawMode(true);
       } else if (key === "w") {
         // Whiteboard
@@ -303,17 +378,30 @@ export default function ZoomCanvas() {
         setShapes([]);
         setBoardMode("normal");
       } else if (key === "t") {
-        // Text mode
+        // Text mode: Change cursor to text I-beam, DO NOT open text input box until user left clicks!
+        setActiveTool("text");
         setIsDrawMode(true);
+        setTextInput(null);
       } else if (e.key === "Escape") {
         e.preventDefault();
-        handleClose();
+        if (textInputRef.current !== null) {
+          // 1. If text input box is active, close it without committing
+          setTextInput(null);
+        } else if (isDrawModeRef.current || shapesRef.current.length > 0) {
+          // 2. Clear all drawings & exit draw mode back to Zoom/Pan mode in one step
+          setShapes([]);
+          setIsDrawMode(false);
+          setActiveTool("pen");
+        } else {
+          // 3. If already in Zoom/Pan mode with no drawings, close Zoom window
+          handleClose();
+        }
       }
     };
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      if (!isDrawMode) {
+      if (!isDrawModeRef.current) {
         if (e.deltaY < 0) {
           setZoomLevel((prev) => Math.min(5.0, Number((prev + 0.25).toFixed(2))));
         } else if (e.deltaY > 0) {
@@ -324,20 +412,27 @@ export default function ZoomCanvas() {
 
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
-      handleClose();
+      if (textInputRef.current !== null) {
+        setTextInput(null);
+      } else if (isDrawModeRef.current || shapesRef.current.length > 0) {
+        setShapes([]);
+        setIsDrawMode(false);
+        setActiveTool("pen");
+      } else {
+        handleClose();
+      }
     };
 
-
-    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("contextmenu", handleContextMenu);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("contextmenu", handleContextMenu);
     };
-  }, [isDrawMode, boardMode, shapes]);
+  }, []);
 
   // Mouse Motion Handler for Panning (when not drawing)
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -348,7 +443,7 @@ export default function ZoomCanvas() {
       return;
     }
 
-    if (!isMouseDown || !startPoint) return;
+    if (!isMouseDown || !startPoint || activeTool === "text") return;
     const curX = e.clientX;
     const curY = e.clientY;
 
@@ -424,23 +519,26 @@ export default function ZoomCanvas() {
       return;
     }
 
-    // Check if Text Input is active
-    if (textInput) {
-      if (textInput.text.trim()) {
-        setShapes((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            type: "text",
-            x1: textInput.x,
-            y1: textInput.y,
-            text: textInput.text,
-            color: currentColor,
-            width: strokeWidth,
-          },
-        ]);
+    // Check if Text Input is active: submit existing text first!
+    if (textInputRef.current !== null) {
+      // Only process click outside if input was created > 200ms ago
+      if (Date.now() - textInputTimeRef.current > 200) {
+        handleTextSubmit();
+        if (activeToolRef.current === "text") {
+          const clickX = e.clientX;
+          const clickY = e.clientY;
+          setTimeout(() => {
+            textInputTimeRef.current = Date.now();
+            setTextInput({ x: clickX, y: clickY, text: "" });
+          }, 30);
+        }
       }
-      setTextInput(null);
+      return;
+    }
+
+    if (activeToolRef.current === "text") {
+      textInputTimeRef.current = Date.now();
+      setTextInput({ x: e.clientX, y: e.clientY, text: "" });
       return;
     }
 
@@ -471,7 +569,7 @@ export default function ZoomCanvas() {
         background: "#000000",
         overflow: "hidden",
         position: "relative",
-        cursor: isDrawMode ? "crosshair" : "default",
+        cursor: isDrawMode ? (activeTool === "text" ? "text" : "crosshair") : "default",
         userSelect: "none",
       }}
     >
@@ -480,44 +578,48 @@ export default function ZoomCanvas() {
       {/* Floating Text Input Box when typing */}
       {textInput && (
         <input
+          ref={inputRef}
           autoFocus
           type="text"
           value={textInput.text}
           onChange={(e) => setTextInput({ ...textInput, text: e.target.value })}
+          onBlur={() => {
+            // Ignore blur events that fire immediately upon mount (< 300ms)
+            if (Date.now() - textInputTimeRef.current < 300) return;
+            handleTextSubmit();
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseUp={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          onMouseMove={(e) => e.stopPropagation()}
           onKeyDown={(e) => {
+            e.stopPropagation();
             if (e.key === "Enter") {
-              if (textInput.text.trim()) {
-                setShapes((prev) => [
-                  ...prev,
-                  {
-                    id: Date.now().toString(),
-                    type: "text",
-                    x1: textInput.x,
-                    y1: textInput.y,
-                    text: textInput.text,
-                    color: currentColor,
-                    width: strokeWidth,
-                  },
-                ]);
-              }
-              setTextInput(null);
+              e.preventDefault();
+              handleTextSubmit();
             } else if (e.key === "Escape") {
+              e.preventDefault();
               setTextInput(null);
             }
           }}
+          placeholder="Yazı yazın..."
           style={{
             position: "absolute",
             left: `${textInput.x}px`,
-            top: `${textInput.y}px`,
-            background: "rgba(15, 23, 42, 0.9)",
+            top: `${textInput.y - 4}px`,
+            background: "rgba(15, 23, 42, 0.95)",
             color: currentColor,
-            border: `2px solid ${currentColor}`,
-            borderRadius: "4px",
+            border: `2px solid #38bdf8`,
+            borderRadius: "6px",
             padding: "4px 8px",
-            fontSize: "20px",
+            fontSize: "24px",
             fontWeight: "bold",
             outline: "none",
-            zIndex: 100,
+            zIndex: 9999,
+            minWidth: "160px",
+            fontFamily: "Inter, sans-serif",
+            caretColor: currentColor,
+            boxShadow: "0 0 14px rgba(56, 189, 248, 0.8)",
           }}
         />
       )}

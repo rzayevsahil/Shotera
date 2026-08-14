@@ -117,7 +117,9 @@ export const translations = {
     drawModeBoardKeys: "W (Beyaz Tahta), K (Siyah Tahta), T (Metin Modu), E (Ekranı Temizle)",
     drawModeShapeKeys: "Shift (Düz Çizgi), Ctrl (Kutu), Tab (Daire), Shift+Ctrl (Ok)",
     zoomBadgeDrawMode: "✏️ Çizim Modu [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Çık]",
+    zoomBadgeTextMode: "🔤 Metin Modu [Tıkla & Yaz | Enter: Tamamla | ESC: Çık]",
     zoomBadgeStart: "🖱️ Sol Tık: Çizim Modunu Başlat",
+
     breakTimerTitle: "Mola Zamanlayıcısı",
     breakTimerTimeRemaining: "Kalan Süre",
     breakTimerFinished: "Mola Süresi Doldu!",
@@ -240,7 +242,9 @@ export const translations = {
     drawModeBoardKeys: "W (Whiteboard), K (Blackboard), T (Text Mode), E (Clear Screen)",
     drawModeShapeKeys: "Shift (Straight Line), Ctrl (Box), Tab (Circle), Shift+Ctrl (Arrow)",
     zoomBadgeDrawMode: "✏️ Draw Mode [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Exit]",
+    zoomBadgeTextMode: "🔤 Text Mode [Click & Type | Enter: Commit | ESC: Exit]",
     zoomBadgeStart: "🖱️ Left Click: Start Drawing Mode",
+
     breakTimerTitle: "Break Timer",
     breakTimerTimeRemaining: "Time Remaining",
     breakTimerFinished: "Break Time Up!",
@@ -363,7 +367,9 @@ export const translations = {
     drawModeBoardKeys: "W (Ağ Lövhə), K (Qara Lövhə), T (Mətn Rejimi), E (Təmizlə)",
     drawModeShapeKeys: "Shift (Xətt), Ctrl (Qutu), Tab (Dairə), Shift+Ctrl (Ox)",
     zoomBadgeDrawMode: "✏️ Çəkim Rejimi [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Çıx]",
+    zoomBadgeTextMode: "🔤 Mətn Rejimi [Kliklə & Yaz | Enter: Tamamla | ESC: Çıx]",
     zoomBadgeStart: "🖱️ Sol Klik: Çəkim Rejimini Başlat",
+
     breakTimerTitle: "Fasilə Taymeri",
     breakTimerTimeRemaining: "Qalan Vaxt",
     breakTimerFinished: "Fasilə Vaxtı Bitdi!",
@@ -485,7 +491,9 @@ export const translations = {
     drawModeBoardKeys: "W (Белая доска), K (Черная доска), T (Режим текста), E (Очистить)",
     drawModeShapeKeys: "Shift (Линия), Ctrl (Прямоугольник), Tab (Круг), Shift+Ctrl (Стрелка)",
     zoomBadgeDrawMode: "✏️ Режим рисования [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Выход]",
+    zoomBadgeTextMode: "🔤 Режим текста [Кликните и пишите | Enter: Готово | ESC: Выход]",
     zoomBadgeStart: "🖱️ ЛКМ: Начать режим рисования",
+
     breakTimerTitle: "Таймер Перерыва",
     breakTimerTimeRemaining: "Оставшееся время",
     breakTimerFinished: "Время перерыва истекло!",
@@ -607,7 +615,9 @@ export const translations = {
     drawModeBoardKeys: "W (Weißwand), K (Tafel), T (Textmodus), E (Löschen)",
     drawModeShapeKeys: "Shift (Linie), Ctrl (Rechteck), Tab (Kreis), Shift+Ctrl (Pfeil)",
     zoomBadgeDrawMode: "✏️ Zeichenmodus [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Beenden]",
+    zoomBadgeTextMode: "🔤 Textmodus [Klicken & Schreiben | Enter: Fertig | ESC: Beenden]",
     zoomBadgeStart: "🖱️ Linksklick: Zeichenmodus starten",
+
     breakTimerTitle: "Pausen-Timer",
     breakTimerTimeRemaining: "Verbleibende Zeit",
     breakTimerFinished: "Pause beendet!",
