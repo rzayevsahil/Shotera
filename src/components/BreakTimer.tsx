@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
 
@@ -23,6 +24,23 @@ export default function BreakTimer() {
       window.removeEventListener("focus", updateLang);
     };
   }, []);
+
+  // Listen for timer window trigger/open event from shortcut or button
+  useEffect(() => {
+    const handleTrigger = () => {
+      const mode = localStorage.getItem("timerResetMode") || "reset";
+      if (mode === "reset") {
+        setTimeLeft(totalSeconds);
+        setIsRunning(true);
+        setIsFinished(false);
+      }
+    };
+
+    const unlistenPromise = listen("timer-opened", handleTrigger);
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, [totalSeconds]);
 
   const t = translations[lang] || translations.tr;
 

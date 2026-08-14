@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor, Timer } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -11,7 +11,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-type ActiveTab = "general" | "capture" | "save" | "zoomit" | "about";
+type ActiveTab = "general" | "capture" | "save" | "zoom" | "timer" | "about";
 
 
 function SettingsWindow() {
@@ -36,6 +36,7 @@ function SettingsWindow() {
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
   const [zoomShortcut, setZoomShortcut] = useState(() => localStorage.getItem("zoomShortcut") || "Ctrl+1");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
+  const [timerResetMode, setTimerResetMode] = useState<"reset" | "continue">(() => (localStorage.getItem("timerResetMode") as "reset" | "continue") || "reset");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
@@ -173,11 +174,12 @@ function SettingsWindow() {
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
     localStorage.setItem("zoomShortcut", zoomShortcut);
     localStorage.setItem("timerShortcut", timerShortcut);
+    localStorage.setItem("timerResetMode", timerResetMode);
     localStorage.setItem("defaultBlurAmount", String(defaultBlurAmount));
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -453,11 +455,18 @@ function SettingsWindow() {
               <span>{t.sidebarSave}</span>
             </div>
             <div
-              className={`nav-item ${activeTab === "zoomit" ? "active" : ""}`}
-              onClick={() => setActiveTab("zoomit")}
+              className={`nav-item ${activeTab === "zoom" ? "active" : ""}`}
+              onClick={() => setActiveTab("zoom")}
             >
               <ZoomIn className="nav-icon" />
-              <span>{(t as any).sidebarZoomIt}</span>
+              <span>{(t as any).sidebarZoom}</span>
+            </div>
+            <div
+              className={`nav-item ${activeTab === "timer" ? "active" : ""}`}
+              onClick={() => setActiveTab("timer")}
+            >
+              <Timer className="nav-icon" />
+              <span>{(t as any).sidebarTimer}</span>
             </div>
 
             <div
@@ -506,14 +515,16 @@ function SettingsWindow() {
             {activeTab === "general" && t.generalTitle}
             {activeTab === "capture" && t.captureTitle}
             {activeTab === "save" && t.saveTitle}
-            {activeTab === "zoomit" && (t as any).zoomItTitle}
+            {activeTab === "zoom" && (t as any).zoomTitle}
+            {activeTab === "timer" && (t as any).timerTitle}
             {activeTab === "about" && t.aboutTitle}
           </h2>
           <p className="section-subtitle">
             {activeTab === "general" && t.generalSubtitle}
             {activeTab === "capture" && t.captureSubtitle}
             {activeTab === "save" && t.saveSubtitle}
-            {activeTab === "zoomit" && (t as any).zoomItSubtitle}
+            {activeTab === "zoom" && (t as any).zoomSubtitle}
+            {activeTab === "timer" && (t as any).timerSubtitle}
             {activeTab === "about" && t.aboutSubtitle}
           </p>
 
@@ -826,7 +837,7 @@ function SettingsWindow() {
           </div>
         )}
 
-        {activeTab === "zoomit" && (
+        {activeTab === "zoom" && (
           <div className="settings-card">
             {/* Screen Zoom Row */}
             <div className="setting-row">
@@ -864,6 +875,44 @@ function SettingsWindow() {
               </div>
             </div>
 
+            {/* Quick Draw Shortcuts Card */}
+            <div className="setting-row" style={{ borderTop: "none", paddingTop: "16px", flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).drawModeShortcutsTitle}</span>
+                <span className="setting-desc">Çizim veya Yakalama modundayken hızlı erişim kısayolları:</span>
+              </div>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(255, 255, 255, 0.03)",
+                padding: "16px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>🎨 Renk Değiştirme</span>
+                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).drawModeColorKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📋 Tahta Modları & Metin</span>
+                  <span style={{ fontSize: "0.82rem", color: "#a855f7", fontFamily: "monospace" }}>{(t as any).drawModeBoardKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📐 Şekil Modifikatörleri</span>
+                  <span style={{ fontSize: "0.82rem", color: "#10b981", fontFamily: "monospace" }}>{(t as any).drawModeShapeKeys}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "timer" && (
+          <div className="settings-card">
             {/* Break Timer Row */}
             <div className="setting-row">
               <div className="setting-info">
@@ -900,38 +949,21 @@ function SettingsWindow() {
               </div>
             </div>
 
-            {/* Quick Draw Shortcuts Card */}
-            <div className="setting-row" style={{ borderTop: "none", paddingTop: "16px", flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
+            {/* Break Timer Reset Mode Row */}
+            <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">{(t as any).drawModeShortcutsTitle}</span>
-                <span className="setting-desc">Çizim veya Yakalama modundayken hızlı erişim kısayolları:</span>
+                <span className="setting-label">{(t as any).timerResetOnTrigger}</span>
+                <span className="setting-desc">{(t as any).timerResetOnTriggerDesc}</span>
               </div>
-
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: "10px",
-                width: "100%",
-                background: "rgba(255, 255, 255, 0.03)",
-                padding: "16px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)"
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>🎨 Renk Değiştirme</span>
-                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).drawModeColorKeys}</span>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📋 Tahta Modları & Metin</span>
-                  <span style={{ fontSize: "0.82rem", color: "#a855f7", fontFamily: "monospace" }}>{(t as any).drawModeBoardKeys}</span>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📐 Şekil Modifikatörleri</span>
-                  <span style={{ fontSize: "0.82rem", color: "#10b981", fontFamily: "monospace" }}>{(t as any).drawModeShapeKeys}</span>
-                </div>
-              </div>
+              <select
+                className="premium-input"
+                value={timerResetMode}
+                onChange={(e) => setTimerResetMode(e.target.value as "reset" | "continue")}
+                style={{ width: "240px" }}
+              >
+                <option value="reset">{(t as any).timerResetOptionReset}</option>
+                <option value="continue">{(t as any).timerResetOptionContinue}</option>
+              </select>
             </div>
           </div>
         )}

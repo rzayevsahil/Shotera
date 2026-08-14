@@ -674,6 +674,7 @@ fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
         let _ = window.set_fullscreen(true);
         let _ = window.show();
         let _ = window.set_focus();
+        let _ = window.emit("timer-opened", ());
     }
     Ok(())
 }
