@@ -39,6 +39,9 @@ function SettingsWindow() {
   const [timerResetMode, setTimerResetMode] = useState<"reset" | "continue">(() => (localStorage.getItem("timerResetMode") as "reset" | "continue") || "reset");
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
   const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
+  const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
+  const [timerBgStyle, setTimerBgStyle] = useState<string>(() => localStorage.getItem("timerBgStyle") || "dark-slate");
+  const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
@@ -179,11 +182,14 @@ function SettingsWindow() {
     localStorage.setItem("timerResetMode", timerResetMode);
     localStorage.setItem("timerDefaultDuration", String(timerDefaultDuration));
     localStorage.setItem("timerCountDirection", timerCountDirection);
+    localStorage.setItem("timerRingColor", timerRingColor);
+    localStorage.setItem("timerBgStyle", timerBgStyle);
+    localStorage.setItem("timerFontStyle", timerFontStyle);
     localStorage.setItem("defaultBlurAmount", String(defaultBlurAmount));
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, timerDefaultDuration, timerCountDirection, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -1011,6 +1017,171 @@ function SettingsWindow() {
                 <option value="reset">{(t as any).timerResetOptionReset}</option>
                 <option value="continue">{(t as any).timerResetOptionContinue}</option>
               </select>
+            </div>
+
+            {/* Theme & Design Customization Section */}
+            <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).timerThemeTitle}</span>
+                <span className="setting-desc">{(t as any).timerThemeDesc}</span>
+              </div>
+
+              {/* Live Preview Box */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "170px",
+                  borderRadius: "14px",
+                  border: "1px solid var(--border-color)",
+                  position: "relative",
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background:
+                    timerBgStyle === "oled-black"
+                      ? "#000000"
+                      : timerBgStyle === "frosted-dark"
+                      ? "rgba(15, 23, 42, 0.95)"
+                      : timerBgStyle === "pomodoro-red"
+                      ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+                      : "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
+                }}
+              >
+                {/* Live Preview Badge */}
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    left: "14px",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    color: "rgba(255, 255, 255, 0.4)",
+                    background: "rgba(0, 0, 0, 0.3)",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                    border: "1px solid rgba(255, 255, 255, 0.08)"
+                  }}
+                >
+                  {(t as any).timerLivePreview}
+                </span>
+
+                {/* Mini Circle SVG */}
+                <div style={{ position: "relative", width: "120px", height: "120px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="120" height="120" style={{ transform: "rotate(-90deg)" }}>
+                    <circle cx="60" cy="60" r="48" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="6" fill="transparent" />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="48"
+                      stroke={timerRingColor}
+                      strokeWidth="6"
+                      fill="transparent"
+                      strokeDasharray="301"
+                      strokeDashoffset="75"
+                      strokeLinecap="round"
+                      style={{ transition: "stroke 0.3s ease" }}
+                    />
+                  </svg>
+                  <span
+                    style={{
+                      position: "absolute",
+                      fontSize: "24px",
+                      fontWeight: 800,
+                      color: "#ffffff",
+                      fontFamily:
+                        timerFontStyle === "heading"
+                          ? "'Outfit', sans-serif"
+                          : timerFontStyle === "mono"
+                          ? "monospace"
+                          : "'Inter', sans-serif",
+                      textShadow: `0 0 16px ${timerRingColor}80`
+                    }}
+                  >
+                    14:57
+                  </span>
+                </div>
+              </div>
+
+              {/* Ring Color Preset Selection */}
+              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                <div className="setting-info">
+                  <span className="setting-label">{(t as any).timerRingColorLabel}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {["#38bdf8", "#10b981", "#a855f7", "#f97316", "#ef4444", "#ec4899"].map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setTimerRingColor(color)}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: color,
+                        border: timerRingColor === color ? "2px solid #ffffff" : "1px solid rgba(255,255,255,0.2)",
+                        boxShadow: timerRingColor === color ? `0 0 10px ${color}` : "none",
+                        cursor: "pointer",
+                        transform: timerRingColor === color ? "scale(1.15)" : "scale(1)",
+                        transition: "all 0.2s ease"
+                      }}
+                      title={color}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={timerRingColor}
+                    onChange={(e) => setTimerRingColor(e.target.value)}
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer"
+                    }}
+                    title="Özel Renk Seç"
+                  />
+                </div>
+              </div>
+
+              {/* Background Style Row */}
+              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                <div className="setting-info">
+                  <span className="setting-label">{(t as any).timerBgStyleLabel}</span>
+                </div>
+                <select
+                  className="premium-input"
+                  value={timerBgStyle}
+                  onChange={(e) => setTimerBgStyle(e.target.value)}
+                  style={{ width: "240px" }}
+                >
+                  <option value="dark-slate">{(t as any).timerBgSlate}</option>
+                  <option value="oled-black">{(t as any).timerBgOled}</option>
+                  <option value="frosted-dark">{(t as any).timerBgGlass}</option>
+                  <option value="pomodoro-red">{(t as any).timerBgPomodoro}</option>
+                </select>
+              </div>
+
+              {/* Clock Font Style Row */}
+              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                <div className="setting-info">
+                  <span className="setting-label">{(t as any).timerFontStyleLabel}</span>
+                </div>
+                <select
+                  className="premium-input"
+                  value={timerFontStyle}
+                  onChange={(e) => setTimerFontStyle(e.target.value)}
+                  style={{ width: "240px" }}
+                >
+                  <option value="sans">{(t as any).timerFontSans}</option>
+                  <option value="heading">{(t as any).timerFontHeading}</option>
+                  <option value="mono">{(t as any).timerFontMono}</option>
+                </select>
+              </div>
             </div>
           </div>
         )}

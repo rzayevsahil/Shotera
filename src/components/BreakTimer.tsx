@@ -18,6 +18,10 @@ export default function BreakTimer() {
     const total = Number(localStorage.getItem("timerDefaultDuration") || "600");
     return dir === "down" ? total : 0;
   });
+  const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
+  const [timerBgStyle, setTimerBgStyle] = useState<string>(() => localStorage.getItem("timerBgStyle") || "dark-slate");
+  const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
+
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [isFinished, setIsFinished] = useState<boolean>(false);
@@ -43,6 +47,9 @@ export default function BreakTimer() {
 
       setTotalSeconds(defaultDuration);
       setTimerDirection(dir);
+      setTimerRingColor(localStorage.getItem("timerRingColor") || "#38bdf8");
+      setTimerBgStyle(localStorage.getItem("timerBgStyle") || "dark-slate");
+      setTimerFontStyle(localStorage.getItem("timerFontStyle") || "sans");
 
       if (isTriggerEvent) {
         if (mode === "reset") {
@@ -232,18 +239,34 @@ export default function BreakTimer() {
     setIsFinished(false);
   };
 
+  const backgroundStyleCSS =
+    timerBgStyle === "oled-black"
+      ? "#000000"
+      : timerBgStyle === "frosted-dark"
+      ? "rgba(15, 23, 42, 0.95)"
+      : timerBgStyle === "pomodoro-red"
+      ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+      : "radial-gradient(circle at center, #0f172a 0%, #020617 100%)";
+
+  const fontFamilyCSS =
+    timerFontStyle === "heading"
+      ? "'Outfit', -apple-system, sans-serif"
+      : timerFontStyle === "mono"
+      ? "monospace"
+      : "'Inter', -apple-system, sans-serif";
+
   return (
     <div
       style={{
         width: "100vw",
         height: "100vh",
-        background: "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
+        background: backgroundStyleCSS,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         color: "#ffffff",
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: fontFamilyCSS,
         userSelect: "none",
         position: "relative",
         overflow: "hidden",
@@ -318,7 +341,7 @@ export default function BreakTimer() {
             cx="170"
             cy="170"
             r="140"
-            stroke={isFinished ? "#f87171" : "#38bdf8"}
+            stroke={isFinished ? "#f87171" : timerRingColor}
             strokeWidth="12"
             fill="transparent"
             strokeDasharray="880"
@@ -344,10 +367,11 @@ export default function BreakTimer() {
               fontWeight: 800,
               letterSpacing: "2px",
               fontVariantNumeric: "tabular-nums",
+              fontFamily: fontFamilyCSS,
               color: isFinished ? "#f87171" : "#ffffff",
               textShadow: isFinished
                 ? "0 0 30px rgba(248, 113, 113, 0.6)"
-                : "0 0 30px rgba(56, 189, 248, 0.4)",
+                : `0 0 30px ${timerRingColor}80`,
             }}
           >
             {formattedTime}
