@@ -876,7 +876,7 @@ function SettingsWindow() {
             </div>
 
             {/* Quick Draw Shortcuts Card */}
-            <div className="setting-row" style={{ borderTop: "none", paddingTop: "16px", flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
+            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).drawModeShortcutsTitle}</span>
                 <span className="setting-desc">Çizim veya Yakalama modundayken hızlı erişim kısayolları:</span>
