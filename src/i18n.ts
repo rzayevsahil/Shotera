@@ -116,7 +116,13 @@ export const translations = {
     drawModeColorKeys: "R (Kırmızı), G (Yeşil), B (Mavi), Y (Sarı), O (Turuncu), P (Pembe)",
     drawModeBoardKeys: "W (Beyaz Tahta), K (Siyah Tahta), T (Metin Modu), E (Ekranı Temizle)",
     drawModeShapeKeys: "Shift (Düz Çizgi), Ctrl (Kutu), Tab (Daire), Shift+Ctrl (Ok)",
+    zoomBadgeDrawMode: "✏️ Çizim Modu [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Çık]",
+    zoomBadgeStart: "🖱️ Sol Tık: Çizim Modunu Başlat",
+    breakTimerTitle: "Mola Zamanlayıcısı",
+    breakTimerTimeRemaining: "Kalan Süre",
+    breakTimerFinished: "Mola Süresi Doldu!",
   },
+
 
   en: {
     sidebarGeneral: "General",
@@ -233,7 +239,13 @@ export const translations = {
     drawModeColorKeys: "R (Red), G (Green), B (Blue), Y (Yellow), O (Orange), P (Pink)",
     drawModeBoardKeys: "W (Whiteboard), K (Blackboard), T (Text Mode), E (Clear Screen)",
     drawModeShapeKeys: "Shift (Straight Line), Ctrl (Box), Tab (Circle), Shift+Ctrl (Arrow)",
+    zoomBadgeDrawMode: "✏️ Draw Mode [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Exit]",
+    zoomBadgeStart: "🖱️ Left Click: Start Drawing Mode",
+    breakTimerTitle: "Break Timer",
+    breakTimerTimeRemaining: "Time Remaining",
+    breakTimerFinished: "Break Time Up!",
   },
+
 
   az: {
     sidebarGeneral: "Ümumi",
@@ -339,7 +351,24 @@ export const translations = {
     ocrError: (err: string) => `Xəta baş verdi: ${err}`,
     tooltipStepMode: "Adım/Nömrə (Dərslik Rejimi)",
     tooltipUndo: "Geri Al",
+    sidebarZoomIt: "ZoomIt Alətləri",
+    zoomItTitle: "Microsoft ZoomIt Xüsusiyyətləri",
+    zoomItSubtitle: "Ekran böyütmə, canlı böyütmə, çəkim qısayolları və fasilə taymerini idarə edin.",
+    shortcutBreakTimer: "Fasilə Taymeri Qısayolu",
+    shortcutBreakTimerDesc: "Tam ekran fasilə taymerini başladan qısayol.",
+    shortcutZoom: "Ekran Böyüdücü Qısayolu",
+    shortcutZoomDesc: "Ekranı dondurub böyütmə və sürüşdürmə rejimini açan qısayol.",
+    drawModeShortcutsTitle: "Sürətli Çəkim və Lövhə Qısayolları",
+    drawModeColorKeys: "R (Qırmızı), G (Yaşıl), B (Mavi), Y (Sarı), O (Narıncı), P (Çəhrayı)",
+    drawModeBoardKeys: "W (Ağ Lövhə), K (Qara Lövhə), T (Mətn Rejimi), E (Təmizlə)",
+    drawModeShapeKeys: "Shift (Xətt), Ctrl (Qutu), Tab (Dairə), Shift+Ctrl (Ox)",
+    zoomBadgeDrawMode: "✏️ Çəkim Rejimi [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Çıx]",
+    zoomBadgeStart: "🖱️ Sol Klik: Çəkim Rejimini Başlat",
+    breakTimerTitle: "Fasilə Taymeri",
+    breakTimerTimeRemaining: "Qalan Vaxt",
+    breakTimerFinished: "Fasilə Vaxtı Bitdi!",
   },
+
   ru: {
     sidebarGeneral: "Общие",
     sidebarCapture: "Захват",
@@ -444,7 +473,24 @@ export const translations = {
     ocrError: (err: string) => `Ошибка: ${err}`,
     tooltipStepMode: "Шаг/Нумерация (Режим Обучения)",
     tooltipUndo: "Отменить",
+    sidebarZoomIt: "Инструменты ZoomIt",
+    zoomItTitle: "Возможности Microsoft ZoomIt",
+    zoomItSubtitle: "Управление увеличением экрана, быстрым рисованием и таймером перерыва.",
+    shortcutBreakTimer: "Горячая клавиша таймера",
+    shortcutBreakTimerDesc: "Сочетание клавиш для запуска полноэкранного таймера перерыва.",
+    shortcutZoom: "Горячая клавиша лупы",
+    shortcutZoomDesc: "Сочетание клавиш для заморозки экрана и включения режима лупы.",
+    drawModeShortcutsTitle: "Быстрые клавиши рисования и доски",
+    drawModeColorKeys: "R (Красный), G (Зеленый), B (Синий), Y (Желтый), O (Оранжевый), P (Розовый)",
+    drawModeBoardKeys: "W (Белая доска), K (Черная доска), T (Режим текста), E (Очистить)",
+    drawModeShapeKeys: "Shift (Линия), Ctrl (Прямоугольник), Tab (Круг), Shift+Ctrl (Стрелка)",
+    zoomBadgeDrawMode: "✏️ Режим рисования [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Выход]",
+    zoomBadgeStart: "🖱️ ЛКМ: Начать режим рисования",
+    breakTimerTitle: "Таймер Перерыва",
+    breakTimerTimeRemaining: "Оставшееся время",
+    breakTimerFinished: "Время перерыва истекло!",
   },
+
   de: {
     sidebarGeneral: "Allgemein",
     sidebarCapture: "Aufnahme",
@@ -549,8 +595,25 @@ export const translations = {
     ocrError: (err: string) => `Fehler: ${err}`,
     tooltipStepMode: "Schritt/Nummerierung (Tutorial-Modus)",
     tooltipUndo: "Rückgängig",
+    sidebarZoomIt: "ZoomIt-Werkzeuge",
+    zoomItTitle: "Microsoft ZoomIt Funktionen",
+    zoomItSubtitle: "Verwalten Sie Bildschirmvergrößerung, Schnellzeichnen und Pausen-Timer.",
+    shortcutBreakTimer: "Pausen-Timer Tastenkombination",
+    shortcutBreakTimerDesc: "Tastenkombination zum Starten des Pausen-Timers.",
+    shortcutZoom: "Lupe Tastenkombination",
+    shortcutZoomDesc: "Tastenkombination zum Einfrieren des Bildschirms und Starten der Lupe.",
+    drawModeShortcutsTitle: "Zeichen- und Tafel-Tastenkombinationen",
+    drawModeColorKeys: "R (Rot), G (Grün), B (Blau), Y (Gelb), O (Orange), P (Rosa)",
+    drawModeBoardKeys: "W (Weißwand), K (Tafel), T (Textmodus), E (Löschen)",
+    drawModeShapeKeys: "Shift (Linie), Ctrl (Rechteck), Tab (Kreis), Shift+Ctrl (Pfeil)",
+    zoomBadgeDrawMode: "✏️ Zeichenmodus [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Beenden]",
+    zoomBadgeStart: "🖱️ Linksklick: Zeichenmodus starten",
+    breakTimerTitle: "Pausen-Timer",
+    breakTimerTimeRemaining: "Verbleibende Zeit",
+    breakTimerFinished: "Pause beendet!",
   }
 };
+
 
 export type Language = "tr" | "en" | "az" | "ru" | "de";
 

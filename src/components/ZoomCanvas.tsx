@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
+import { translations, getLanguage, Language } from "../i18n";
 
 interface Shape {
   id: string;
@@ -20,6 +21,7 @@ export default function ZoomCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const [lang, setLang] = useState<Language>(getLanguage());
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
 
@@ -40,6 +42,19 @@ export default function ZoomCanvas() {
   // Text Input State
   const [textInput, setTextInput] = useState<{ x: number; y: number; text: string } | null>(null);
 
+  // Load language dynamically when window focuses or storage updates
+  useEffect(() => {
+    const updateLang = () => setLang(getLanguage());
+    window.addEventListener("storage", updateLang);
+    window.addEventListener("focus", updateLang);
+    return () => {
+      window.removeEventListener("storage", updateLang);
+      window.removeEventListener("focus", updateLang);
+    };
+  }, []);
+
+  const t = translations[lang] || translations.tr;
+
   // Load latest screenshot
   const loadScreenshot = async () => {
     try {
@@ -52,6 +67,7 @@ export default function ZoomCanvas() {
 
   useEffect(() => {
     loadScreenshot();
+    setLang(getLanguage());
 
     const unlisten = listen("zoom-captured", () => {
       setZoomLevel(2.0);
@@ -61,6 +77,7 @@ export default function ZoomCanvas() {
       setShapes([]);
       setCurrentShape(null);
       setTextInput(null);
+      setLang(getLanguage());
       loadScreenshot();
     });
 
@@ -208,10 +225,21 @@ export default function ZoomCanvas() {
     }
 
     // 3. Render Status Badge (Top Left Corner)
+    const badgeText = isDrawMode
+      ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
+      : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeStart}`;
+
+    ctx.font = "bold 13px Inter, sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    const textMetrics = ctx.measureText(badgeText);
+    const badgeWidth = textMetrics.width + (isDrawMode ? 54 : 36);
+
     ctx.save();
     ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
     ctx.beginPath();
-    ctx.roundRect(16, 16, isDrawMode ? 420 : 250, 36, 18);
+    ctx.roundRect(16, 16, badgeWidth, 36, 18);
     ctx.fill();
     ctx.strokeStyle = isDrawMode ? currentColor : "rgba(56, 189, 248, 0.5)";
     ctx.lineWidth = 1.5;
@@ -226,17 +254,10 @@ export default function ZoomCanvas() {
     }
 
     ctx.fillStyle = isDrawMode ? "#ffffff" : "#38bdf8";
-    ctx.font = "bold 13px Inter, sans-serif";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-
-    const badgeText = isDrawMode
-      ? `Zoom: ${zoomLevel.toFixed(1)}x | ✏️ Çizim Modu [R,G,B,Y | Shift/Ctrl/Tab/W/K | ESC: Çık]`
-      : `Zoom: ${zoomLevel.toFixed(1)}x | 🖱️ Sol Tık: Çizim Modunu Başlat`;
-
     ctx.fillText(badgeText, isDrawMode ? 52 : 32, 34);
     ctx.restore();
-  }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, currentColor]);
+  }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, currentColor, lang]);
+
 
   // Keyboard Event Handler (Colors, Board Modes, Undo, Clear, ESC)
   useEffect(() => {

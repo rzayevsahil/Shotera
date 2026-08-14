@@ -2,8 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX } from "lucide-react";
+import { translations, getLanguage, Language } from "../i18n";
 
 export default function BreakTimer() {
+  const [lang, setLang] = useState<Language>(getLanguage());
   const [totalSeconds, setTotalSeconds] = useState<number>(600); // 10 minutes default
   const [timeLeft, setTimeLeft] = useState<number>(600);
   const [isRunning, setIsRunning] = useState<boolean>(true);
@@ -11,6 +13,18 @@ export default function BreakTimer() {
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const updateLang = () => setLang(getLanguage());
+    window.addEventListener("storage", updateLang);
+    window.addEventListener("focus", updateLang);
+    return () => {
+      window.removeEventListener("storage", updateLang);
+      window.removeEventListener("focus", updateLang);
+    };
+  }, []);
+
+  const t = translations[lang] || translations.tr;
 
   const handleClose = async () => {
     try {
@@ -24,6 +38,7 @@ export default function BreakTimer() {
       }
     }
   };
+
 
 
   // Play audio chime when timer reaches 0
@@ -273,7 +288,11 @@ export default function BreakTimer() {
               marginTop: "4px",
             }}
           >
-            {isFinished ? "Süre Bitti!" : isRunning ? "Mola Devam Ediyor" : "Duraklatıldı"}
+            {isFinished
+              ? (t.breakTimerFinished || "Süre Bitti!")
+              : isRunning
+              ? (t.shortcutBreakTimer || "Mola Devam Ediyor")
+              : "Duraklatıldı"}
           </span>
         </div>
       </div>
@@ -305,7 +324,7 @@ export default function BreakTimer() {
           }}
         >
           {isRunning ? <Pause size={18} /> : <Play size={18} />}
-          {isRunning ? "Duraklat (Uzay)" : "Başlat"}
+          {isRunning ? "Duraklat (Space)" : "Başlat"}
         </button>
 
         <button
@@ -346,8 +365,9 @@ export default function BreakTimer() {
       >
         <span>💡 <b>Fare Tekerleği / Ok Tuşları:</b> Süre Ayarla (+/- 1 dk)</span>
         <span><b>Shift + Ok:</b> (+/- 5 dk)</span>
-        <span><b>ESC:</b> Kapat</span>
+        <span><b>ESC:</b> {t.actionClose || "Kapat (ESC)"}</span>
       </div>
+
     </div>
   );
 }
