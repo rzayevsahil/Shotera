@@ -44,7 +44,6 @@ export default function BreakTimer() {
   // Sync settings when storage updates or window is opened
   useEffect(() => {
     const applySettings = (isTriggerEvent: boolean) => {
-      const mode = localStorage.getItem("timerResetMode") || "reset";
       const defaultDuration = Number(localStorage.getItem("timerDefaultDuration") || "600");
       const dir = (localStorage.getItem("timerCountDirection") as "down" | "up") || "down";
 
@@ -56,11 +55,9 @@ export default function BreakTimer() {
       setTimerSoundPreset(localStorage.getItem("timerSoundPreset") || "chime");
 
       if (isTriggerEvent) {
-        if (mode === "reset") {
-          setCurrentSeconds(dir === "down" ? defaultDuration : 0);
-          setIsRunning(true);
-          setIsFinished(false);
-        }
+        setCurrentSeconds(dir === "down" ? defaultDuration : 0);
+        setIsRunning(true);
+        setIsFinished(false);
       }
     };
 
@@ -84,6 +81,7 @@ export default function BreakTimer() {
   const t = translations[lang] || translations.tr;
 
   const handleClose = async () => {
+    setIsRunning(false);
     try {
       await invoke("hide_timer_window");
     } catch (e) {
