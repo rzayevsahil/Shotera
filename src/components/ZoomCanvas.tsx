@@ -433,6 +433,17 @@ export default function ZoomCanvas() {
 
       const key = e.key.toLowerCase();
 
+      // Arrow Up (Zoom In) & Arrow Down (Zoom Out)
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setZoomLevel((prev) => Math.min(5.0, Number((prev + 0.25).toFixed(2))));
+        return;
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setZoomLevel((prev) => Math.max(1.0, Number((prev - 0.25).toFixed(2))));
+        return;
+      }
+
       // Undo (Ctrl + Z)
       if (e.ctrlKey && key === "z") {
         e.preventDefault();
@@ -501,12 +512,10 @@ export default function ZoomCanvas() {
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      if (!isDrawModeRef.current) {
-        if (e.deltaY < 0) {
-          setZoomLevel((prev) => Math.min(5.0, Number((prev + 0.25).toFixed(2))));
-        } else if (e.deltaY > 0) {
-          setZoomLevel((prev) => Math.max(1.0, Number((prev - 0.25).toFixed(2))));
-        }
+      if (e.deltaY < 0) {
+        setZoomLevel((prev) => Math.min(5.0, Number((prev + 0.25).toFixed(2))));
+      } else if (e.deltaY > 0) {
+        setZoomLevel((prev) => Math.max(1.0, Number((prev - 0.25).toFixed(2))));
       }
     };
 
