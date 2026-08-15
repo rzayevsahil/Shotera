@@ -46,6 +46,19 @@ export default function ZoomCanvas() {
   const textInputTimeRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // Auto-Hiding Status Badge State
+  const [badgeVisible, setBadgeVisible] = useState<boolean>(true);
+  const [badgeOpacity, setBadgeOpacity] = useState<number>(1.0);
+  const badgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showBadgeTemporarily = (durationMs: number = 2200) => {
+    setBadgeVisible(true);
+    if (badgeTimerRef.current) clearTimeout(badgeTimerRef.current);
+    badgeTimerRef.current = setTimeout(() => {
+      setBadgeVisible(false);
+    }, durationMs);
+  };
+
   useEffect(() => {
     textInputRef.current = textInput;
   }, [textInput]);
@@ -92,6 +105,34 @@ export default function ZoomCanvas() {
     };
   }, []);
 
+  // Smooth fade-in / fade-out animation for badge
+  useEffect(() => {
+    let animId: number;
+    const startTime = performance.now();
+    const startOpacity = badgeOpacity;
+    const targetOpacity = badgeVisible ? 1.0 : 0.0;
+    const duration = 300;
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const current = startOpacity + (targetOpacity - startOpacity) * progress;
+      setBadgeOpacity(current);
+
+      if (progress < 1) {
+        animId = requestAnimationFrame(animate);
+      }
+    };
+
+    animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, [badgeVisible]);
+
+  // Show badge temporarily when zoom level, mode, or color changes
+  useEffect(() => {
+    showBadgeTemporarily(2200);
+  }, [zoomLevel, isDrawMode, activeTool, currentColor, boardMode]);
+
   const t = translations[lang] || translations.tr;
 
   useEffect(() => {
@@ -110,6 +151,7 @@ export default function ZoomCanvas() {
       setCurrentShape(null);
       setTextInput(null);
       setLang(getLanguage());
+      showBadgeTemporarily(2500);
 
       if (animId) cancelAnimationFrame(animId);
 
@@ -329,41 +371,48 @@ export default function ZoomCanvas() {
       }
     }
 
-    // 3. Render Status Badge (Top Left Corner)
-    const badgeText = isDrawMode
-      ? activeTool === "text"
-        ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeTextMode || "🔤 Metin Modu"}`
-        : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
-      : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeStart}`;
+    // 3. Render Status Badge (Top Left Corner) - Auto-Hiding
+    if (badgeOpacity > 0.01) {
+      ctx.save();
+      ctx.globalAlpha = badgeOpacity;
 
-    ctx.font = "bold 13px Inter, sans-serif";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
+      const badgeText = isDrawMode
+        ? activeTool === "text"
+          ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeTextMode || "🔤 Metin Modu"}`
+          : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
+        : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeStart}`;
 
-    const textMetrics = ctx.measureText(badgeText);
-    const badgeWidth = textMetrics.width + (isDrawMode ? 54 : 36);
+      ctx.font = "bold 13px Inter, sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
 
-    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-    ctx.beginPath();
-    ctx.roundRect(16, 16, badgeWidth, 36, 18);
-    ctx.fill();
-    ctx.strokeStyle = isDrawMode ? currentColor : "rgba(56, 189, 248, 0.5)";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+      const textMetrics = ctx.measureText(badgeText);
+      const badgeWidth = textMetrics.width + (isDrawMode ? 54 : 36);
 
-    // Color Indicator Circle (If in Draw Mode)
-    if (isDrawMode) {
-      ctx.fillStyle = currentColor;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
       ctx.beginPath();
-      ctx.arc(36, 34, 7, 0, 2 * Math.PI);
+      ctx.roundRect(16, 16, badgeWidth, 36, 18);
       ctx.fill();
+      ctx.strokeStyle = isDrawMode ? currentColor : "rgba(56, 189, 248, 0.5)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Color Indicator Circle (If in Draw Mode)
+      if (isDrawMode) {
+        ctx.fillStyle = currentColor;
+        ctx.beginPath();
+        ctx.arc(36, 34, 7, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = isDrawMode ? "#ffffff" : "#38bdf8";
+      ctx.fillText(badgeText, isDrawMode ? 52 : 32, 34);
+
+      ctx.restore();
     }
 
-    ctx.fillStyle = isDrawMode ? "#ffffff" : "#38bdf8";
-    ctx.fillText(badgeText, isDrawMode ? 52 : 32, 34);
-
     ctx.restore();
-  }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, activeTool, currentColor, lang]);
+  }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, activeTool, currentColor, lang, badgeOpacity]);
 
 
   // Keyboard Event Handler (Colors, Board Modes, Undo, Clear, ESC)
@@ -482,6 +531,11 @@ export default function ZoomCanvas() {
 
   // Mouse Motion Handler for Panning (when not drawing)
   const handleMouseMove = (e: React.MouseEvent) => {
+    // Show badge temporarily if mouse moves close to top-left corner
+    if (e.clientX < 340 && e.clientY < 70) {
+      showBadgeTemporarily(2000);
+    }
+
     if (!isDrawMode) {
       const normX = e.clientX / window.innerWidth;
       const normY = e.clientY / window.innerHeight;
