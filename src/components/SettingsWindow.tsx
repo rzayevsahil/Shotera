@@ -921,41 +921,29 @@ function SettingsWindow() {
             </div>
 
             {/* Zoom Navigation & Exit Shortcuts Card */}
-            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).zoomNavShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).zoomNavShortcutsDesc}</span>
               </div>
-
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: "10px",
-                width: "100%",
-                background: "rgba(255, 255, 255, 0.03)",
-                padding: "16px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)"
+                gridTemplateColumns: "auto auto",
+                columnGap: "16px",
+                rowGap: "8px",
+                alignItems: "center"
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomInKeyLabel}</span>
-                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).zoomInKeys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).zoomInKeyLabel}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomInKeys}</span>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomDrawLockLabel}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#3b82f6", fontFamily: "monospace" }}>{(t as any).zoomDrawLockKeys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).zoomDrawLockLabel}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomDrawLockKeys}</span>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomUndoLabel}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#eab308", fontFamily: "monospace" }}>{(t as any).zoomUndoKeys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).zoomUndoLabel}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomUndoKeys}</span>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomExitLabel}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#ef4444", fontFamily: "monospace" }}>{(t as any).zoomExitKeys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).zoomExitLabel}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomExitKeys}</span>
               </div>
             </div>
           </div>
@@ -1267,46 +1255,32 @@ function SettingsWindow() {
             </div>
 
             {/* Break Timer Quick Shortcuts Card */}
-            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).timerShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
               </div>
-
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: "10px",
-                width: "100%",
-                background: "rgba(255, 255, 255, 0.03)",
-                padding: "16px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)"
+                gridTemplateColumns: "auto auto",
+                columnGap: "16px",
+                rowGap: "8px",
+                alignItems: "center"
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerToggleLabel}</span>
-                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).timerToggleKeys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).timerToggleLabel}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerToggleKeys}</span>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerAdjust1Label}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#10b981", fontFamily: "monospace" }}>{(t as any).timerAdjust1Keys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).timerAdjust1Label}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerAdjust1Keys}</span>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerAdjust5Label}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#a855f7", fontFamily: "monospace" }}>{(t as any).timerAdjust5Keys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).timerAdjust5Label}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerAdjust5Keys}</span>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerResetKeyLabel}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#eab308", fontFamily: "monospace" }}>{(t as any).timerResetKeys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).timerResetKeyLabel}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerResetKeys}</span>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerExitLabel}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#ef4444", fontFamily: "monospace" }}>{(t as any).timerExitKeys}</span>
-                </div>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{(t as any).timerExitLabel}</span>
+                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerExitKeys}</span>
               </div>
             </div>
           </div>
