@@ -185,11 +185,18 @@ export default function BreakTimer() {
       setIsFinished(false);
     };
 
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      handleClose();
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("wheel", handleWheel);
+    window.addEventListener("contextmenu", handleContextMenu);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("contextmenu", handleContextMenu);
     };
   }, []);
 
