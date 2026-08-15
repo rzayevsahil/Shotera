@@ -37,7 +37,6 @@ function SettingsWindow() {
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
   const [zoomShortcut, setZoomShortcut] = useState(() => localStorage.getItem("zoomShortcut") || "Ctrl+1");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
-  const [timerResetMode, setTimerResetMode] = useState<"reset" | "continue">(() => (localStorage.getItem("timerResetMode") as "reset" | "continue") || "reset");
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
   const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
   const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
@@ -181,7 +180,6 @@ function SettingsWindow() {
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
     localStorage.setItem("zoomShortcut", zoomShortcut);
     localStorage.setItem("timerShortcut", timerShortcut);
-    localStorage.setItem("timerResetMode", timerResetMode);
     localStorage.setItem("timerDefaultDuration", String(timerDefaultDuration));
     localStorage.setItem("timerCountDirection", timerCountDirection);
     localStorage.setItem("timerRingColor", timerRingColor);
@@ -192,7 +190,7 @@ function SettingsWindow() {
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerResetMode, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -921,6 +919,45 @@ function SettingsWindow() {
                 </div>
               </div>
             </div>
+
+            {/* Zoom Navigation & Exit Shortcuts Card */}
+            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).zoomNavShortcutsTitle}</span>
+                <span className="setting-desc">{(t as any).zoomNavShortcutsDesc}</span>
+              </div>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(255, 255, 255, 0.03)",
+                padding: "16px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomInKeyLabel}</span>
+                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).zoomInKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomDrawLockLabel}</span>
+                  <span style={{ fontSize: "0.82rem", color: "#3b82f6", fontFamily: "monospace" }}>{(t as any).zoomDrawLockKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomUndoLabel}</span>
+                  <span style={{ fontSize: "0.82rem", color: "#eab308", fontFamily: "monospace" }}>{(t as any).zoomUndoKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).zoomExitLabel}</span>
+                  <span style={{ fontSize: "0.82rem", color: "#ef4444", fontFamily: "monospace" }}>{(t as any).zoomExitKeys}</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -968,7 +1005,7 @@ function SettingsWindow() {
                 <span className="setting-label">{(t as any).timerDefaultDuration}</span>
                 <span className="setting-desc">{(t as any).timerDefaultDurationDesc}</span>
               </div>
-              <div style={{ width: "240px", display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ width: "240px", display: "flex", alignItems: "center", gap: "10px" }}>
                 <input
                   type="number"
                   min={1}
@@ -978,12 +1015,15 @@ function SettingsWindow() {
                   onChange={(e) => {
                     const val = Number(e.target.value);
                     const mins = val <= 0 ? 1 : Math.min(360, val);
-                    setTimerDefaultDuration(mins * 60);
+                    const secs = mins * 60;
+                    setTimerDefaultDuration(secs);
+                    localStorage.setItem("timerDefaultDuration", String(secs));
+                    window.dispatchEvent(new Event("storage"));
                   }}
-                  style={{ flex: 1, minWidth: 0, textAlign: "center", fontWeight: 600, padding: "8px 12px" }}
+                  style={{ flex: 1, minWidth: 0, padding: "8px 12px" }}
                 />
-                <span style={{ color: "var(--text-muted)", fontSize: "0.9rem", fontWeight: 500, whiteSpace: "nowrap" }}>
-                  {(t as any).minuteUnit || "Dakika"}
+                <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: 500, whiteSpace: "nowrap" }}>
+                  {(t as any).timerUnitMinutes || "Dakika"}
                 </span>
               </div>
             </div>
@@ -997,7 +1037,12 @@ function SettingsWindow() {
               <select
                 className="premium-input"
                 value={timerCountDirection}
-                onChange={(e) => setTimerCountDirection(e.target.value as "down" | "up")}
+                onChange={(e) => {
+                  const dir = e.target.value as "down" | "up";
+                  setTimerCountDirection(dir);
+                  localStorage.setItem("timerCountDirection", dir);
+                  window.dispatchEvent(new Event("storage"));
+                }}
                 style={{ width: "240px" }}
               >
                 <option value="down">{(t as any).timerCountDirectionDown}</option>
@@ -1005,26 +1050,9 @@ function SettingsWindow() {
               </select>
             </div>
 
-            {/* Break Timer Reset Mode Row */}
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).timerResetOnTrigger}</span>
-                <span className="setting-desc">{(t as any).timerResetOnTriggerDesc}</span>
-              </div>
-              <select
-                className="premium-input"
-                value={timerResetMode}
-                onChange={(e) => setTimerResetMode(e.target.value as "reset" | "continue")}
-                style={{ width: "240px" }}
-              >
-                <option value="reset">{(t as any).timerResetOptionReset}</option>
-                <option value="continue">{(t as any).timerResetOptionContinue}</option>
-              </select>
-            </div>
-
-            {/* Theme & Design Customization Section */}
-            <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div className="setting-info">
+            {/* Theme & Ring Color Selection Section */}
+            <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "18px", marginTop: "6px" }}>
+              <div className="setting-info" style={{ marginBottom: "14px" }}>
                 <span className="setting-label">{(t as any).timerThemeTitle}</span>
                 <span className="setting-desc">{(t as any).timerThemeDesc}</span>
               </div>
@@ -1042,6 +1070,7 @@ function SettingsWindow() {
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
+                  marginBottom: "20px",
                   background:
                     timerBgStyle === "oled-black"
                       ? "#000000"
@@ -1070,7 +1099,7 @@ function SettingsWindow() {
                     border: "1px solid rgba(255, 255, 255, 0.08)"
                   }}
                 >
-                  {(t as any).timerLivePreview}
+                  {(t as any).timerLivePreview || "Canlı Önizleme"}
                 </span>
 
                 {/* Mini Circle SVG */}
@@ -1110,34 +1139,40 @@ function SettingsWindow() {
                 </div>
               </div>
 
-              {/* Ring Color Preset Selection */}
-              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+              {/* Ring Color Preset Row */}
+              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
                 <div className="setting-info">
                   <span className="setting-label">{(t as any).timerRingColorLabel}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  {["#38bdf8", "#10b981", "#a855f7", "#f97316", "#ef4444", "#ec4899"].map((color) => (
+                  {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].map((color) => (
                     <button
                       key={color}
-                      onClick={() => setTimerRingColor(color)}
+                      onClick={() => {
+                        setTimerRingColor(color);
+                        localStorage.setItem("timerRingColor", color);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
                       style={{
                         width: "28px",
                         height: "28px",
                         borderRadius: "50%",
                         background: color,
-                        border: timerRingColor === color ? "2px solid #ffffff" : "1px solid rgba(255,255,255,0.2)",
-                        boxShadow: timerRingColor === color ? `0 0 10px ${color}` : "none",
+                        border: timerRingColor === color ? "2px solid #ffffff" : "2px solid transparent",
                         cursor: "pointer",
-                        transform: timerRingColor === color ? "scale(1.15)" : "scale(1)",
+                        boxShadow: timerRingColor === color ? `0 0 10px ${color}` : "none",
                         transition: "all 0.2s ease"
                       }}
-                      title={color}
                     />
                   ))}
                   <input
                     type="color"
                     value={timerRingColor}
-                    onChange={(e) => setTimerRingColor(e.target.value)}
+                    onChange={(e) => {
+                      setTimerRingColor(e.target.value);
+                      localStorage.setItem("timerRingColor", e.target.value);
+                      window.dispatchEvent(new Event("storage"));
+                    }}
                     style={{
                       width: "32px",
                       height: "32px",
@@ -1146,20 +1181,23 @@ function SettingsWindow() {
                       background: "transparent",
                       cursor: "pointer"
                     }}
-                    title={(t as any).timerPickCustomColor || "Özel Renk Seç"}
                   />
                 </div>
               </div>
 
               {/* Background Style Row */}
-              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
                 <div className="setting-info">
                   <span className="setting-label">{(t as any).timerBgStyleLabel}</span>
                 </div>
                 <select
                   className="premium-input"
                   value={timerBgStyle}
-                  onChange={(e) => setTimerBgStyle(e.target.value)}
+                  onChange={(e) => {
+                    setTimerBgStyle(e.target.value);
+                    localStorage.setItem("timerBgStyle", e.target.value);
+                    window.dispatchEvent(new Event("storage"));
+                  }}
                   style={{ width: "240px" }}
                 >
                   <option value="dark-slate">{(t as any).timerBgSlate}</option>
@@ -1170,14 +1208,18 @@ function SettingsWindow() {
               </div>
 
               {/* Clock Font Style Row */}
-              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
                 <div className="setting-info">
                   <span className="setting-label">{(t as any).timerFontStyleLabel}</span>
                 </div>
                 <select
                   className="premium-input"
                   value={timerFontStyle}
-                  onChange={(e) => setTimerFontStyle(e.target.value)}
+                  onChange={(e) => {
+                    setTimerFontStyle(e.target.value);
+                    localStorage.setItem("timerFontStyle", e.target.value);
+                    window.dispatchEvent(new Event("storage"));
+                  }}
                   style={{ width: "240px" }}
                 >
                   <option value="sans">{(t as any).timerFontSans}</option>
@@ -1199,6 +1241,8 @@ function SettingsWindow() {
                       value={timerSoundPreset}
                       onChange={(e) => {
                         setTimerSoundPreset(e.target.value);
+                        localStorage.setItem("timerSoundPreset", e.target.value);
+                        window.dispatchEvent(new Event("storage"));
                         playTimerSound(e.target.value);
                       }}
                       style={{ width: "170px" }}
@@ -1218,6 +1262,50 @@ function SettingsWindow() {
                       {(t as any).timerTestSound || "Sesi Dinle"}
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Break Timer Quick Shortcuts Card */}
+            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).timerShortcutsTitle}</span>
+                <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
+              </div>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(255, 255, 255, 0.03)",
+                padding: "16px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerToggleLabel}</span>
+                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).timerToggleKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerAdjust1Label}</span>
+                  <span style={{ fontSize: "0.82rem", color: "#10b981", fontFamily: "monospace" }}>{(t as any).timerAdjust1Keys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerAdjust5Label}</span>
+                  <span style={{ fontSize: "0.82rem", color: "#a855f7", fontFamily: "monospace" }}>{(t as any).timerAdjust5Keys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerResetKeyLabel}</span>
+                  <span style={{ fontSize: "0.82rem", color: "#eab308", fontFamily: "monospace" }}>{(t as any).timerResetKeys}</span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).timerExitLabel}</span>
+                  <span style={{ fontSize: "0.82rem", color: "#ef4444", fontFamily: "monospace" }}>{(t as any).timerExitKeys}</span>
                 </div>
               </div>
             </div>
