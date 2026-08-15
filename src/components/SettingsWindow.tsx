@@ -892,7 +892,7 @@ function SettingsWindow() {
             <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).drawModeShortcutsTitle}</span>
-                <span className="setting-desc">Çizim veya Yakalama modundayken hızlı erişim kısayolları:</span>
+                <span className="setting-desc">{(t as any).drawModeShortcutsDesc}</span>
               </div>
 
               <div style={{
@@ -906,17 +906,17 @@ function SettingsWindow() {
                 border: "1px solid var(--border-color)"
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>🎨 Renk Değiştirme</span>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).drawModeColorChange}</span>
                   <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).drawModeColorKeys}</span>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📋 Tahta Modları & Metin</span>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).drawModeBoardModes}</span>
                   <span style={{ fontSize: "0.82rem", color: "#a855f7", fontFamily: "monospace" }}>{(t as any).drawModeBoardKeys}</span>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>📐 Şekil Modifikatörleri</span>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500 }}>{(t as any).drawModeShapes}</span>
                   <span style={{ fontSize: "0.82rem", color: "#10b981", fontFamily: "monospace" }}>{(t as any).drawModeShapeKeys}</span>
                 </div>
               </div>
