@@ -715,7 +715,7 @@ export default function ZoomCanvas() {
               setTextInput(null);
             }
           }}
-          placeholder="Yazı yazın..."
+          placeholder={(t as any).textInputPlaceholder || "Yazı yazın..."}
           style={{
             position: "absolute",
             left: `${textInput.x}px`,

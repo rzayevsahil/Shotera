@@ -269,7 +269,7 @@ export default function BreakTimer() {
             cursor: "pointer",
             backdropFilter: "blur(12px)",
           }}
-          title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
+          title={soundEnabled ? ((t as any).timerMute || "Sesi Kapat") : ((t as any).timerUnmute || "Sesi Aç")}
         >
           {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
         </button>
@@ -289,7 +289,7 @@ export default function BreakTimer() {
             cursor: "pointer",
             backdropFilter: "blur(12px)",
           }}
-          title="Kapat (ESC)"
+          title={t.actionClose || "Kapat (ESC)"}
         >
           <X size={20} />
         </button>
@@ -358,8 +358,8 @@ export default function BreakTimer() {
             {isFinished
               ? (t.breakTimerFinished || "Süre Bitti!")
               : isRunning
-              ? (timerDirection === "up" ? "0'dan İleriye Sayılıyor" : (t.shortcutBreakTimer || "Mola Devam Ediyor"))
-              : "Duraklatıldı"}
+              ? (timerDirection === "up" ? ((t as any).timerCountingUp || "0'dan İleriye Sayılıyor") : (t.shortcutBreakTimer || "Mola Devam Ediyor"))
+              : ((t as any).timerPaused || "Duraklatıldı")}
           </span>
         </div>
       </div>
@@ -391,7 +391,7 @@ export default function BreakTimer() {
           }}
         >
           {isRunning ? <Pause size={18} /> : <Play size={18} />}
-          {isRunning ? "Duraklat (Space)" : "Başlat"}
+          {isRunning ? ((t as any).timerPauseBtn || "Duraklat (Space)") : ((t as any).timerStartBtn || "Başlat")}
         </button>
 
         <button
@@ -411,7 +411,7 @@ export default function BreakTimer() {
           }}
         >
           <RotateCcw size={18} />
-          Sıfırla
+          {(t as any).timerResetBtn || "Sıfırla"}
         </button>
       </div>
 
@@ -426,8 +426,8 @@ export default function BreakTimer() {
           gap: "16px",
         }}
       >
-        <span>💡 <b>Fare Tekerleği / Ok Tuşları:</b> Süre Ayarla (+/- 1 dk)</span>
-        <span><b>Shift + Ok:</b> (+/- 5 dk)</span>
+        <span>💡 <b>{(t as any).timerHintWheel || "Fare Tekerleği / Ok Tuşları:"}</b> {(t as any).timerHintAdjust1 || "Süre Ayarla (+/- 1 dk)"}</span>
+        <span><b>{(t as any).timerHintShiftOk || "Shift + Ok:"}</b> {(t as any).timerHintAdjust5 || "(+/- 5 dk)"}</span>
         <span><b>ESC:</b> {t.actionClose || "Kapat (ESC)"}</span>
       </div>
 

@@ -1146,7 +1146,7 @@ function SettingsWindow() {
                       background: "transparent",
                       cursor: "pointer"
                     }}
-                    title="Özel Renk Seç"
+                    title={(t as any).timerPickCustomColor || "Özel Renk Seç"}
                   />
                 </div>
               </div>
@@ -1212,7 +1212,7 @@ function SettingsWindow() {
                       className="premium-button"
                       onClick={() => playTimerSound(timerSoundPreset)}
                       style={{ padding: "6px 12px", fontSize: "0.85rem", whiteSpace: "nowrap" }}
-                      title="Seçilen zil sesini test et"
+                      title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
                     >
                       <Volume2 size={14} />
                       {(t as any).timerTestSound || "Sesi Dinle"}
@@ -1306,7 +1306,7 @@ function SettingsWindow() {
                         transition: "all 0.2s ease"
                       }}
                     >
-                      {lang === "az" ? "İndi Quraşdır və Yenidən Başlat" : lang === "tr" ? "Şimdi Kur ve Yeniden Başlat" : "Install & Relaunch"}
+                      {((t as any).updaterInstallAndRelaunch || "Şimdi Kur ve Yeniden Başlat")}
                     </button>
                   ) : (
                     <button
