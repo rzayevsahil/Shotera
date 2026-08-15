@@ -17,6 +17,11 @@ interface Shape {
   width: number;
 }
 
+const getPencilCursor = (color: string) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/><circle cx="2" cy="22" r="1.5" fill="${color}"/></svg>`;
+  return `url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}') 2 22, crosshair`;
+};
+
 export default function ZoomCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -669,7 +674,7 @@ export default function ZoomCanvas() {
         background: "transparent",
         overflow: "hidden",
         position: "relative",
-        cursor: isDrawMode ? (activeTool === "text" ? "text" : "crosshair") : "default",
+        cursor: isDrawMode ? (activeTool === "text" ? "text" : getPencilCursor(currentColor)) : "default",
         userSelect: "none",
       }}
     >
