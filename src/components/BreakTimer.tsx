@@ -239,12 +239,8 @@ export default function BreakTimer() {
       ? "'Share Tech Mono', monospace"
       : timerFontStyle === "rajdhani"
       ? "'Rajdhani', sans-serif"
-      : timerFontStyle === "dseg-classic"
-      ? "'DSEG7-Classic', 'DSEG7 Classic', monospace"
-      : timerFontStyle === "dseg-modern"
-      ? "'DSEG7-Modern', 'DSEG7 Modern', monospace"
-      : timerFontStyle === "ds-digital"
-      ? "'DS-Digital', 'Digital-7', 'DSEG7-Modern', 'DSEG7 Classic', monospace"
+      : timerFontStyle === "dseg"
+      ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
       : "'Inter', -apple-system, sans-serif";
 
   const fontWeightCSS =
@@ -252,7 +248,7 @@ export default function BreakTimer() {
       ? 300
       : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
       ? 700
-      : timerFontStyle === "dseg-classic" || timerFontStyle === "dseg-modern" || timerFontStyle === "ds-digital" || timerFontStyle === "share-tech"
+      : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
       ? 400
       : 800;
 

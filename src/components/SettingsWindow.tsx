@@ -1122,7 +1122,7 @@ function SettingsWindow() {
                           ? 300
                           : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
                           ? 700
-                          : timerFontStyle === "dseg-classic" || timerFontStyle === "dseg-modern" || timerFontStyle === "ds-digital" || timerFontStyle === "share-tech"
+                          : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
                           ? 400
                           : 800,
                       color: "#ffffff",
@@ -1141,12 +1141,8 @@ function SettingsWindow() {
                           ? "'Share Tech Mono', monospace"
                           : timerFontStyle === "rajdhani"
                           ? "'Rajdhani', sans-serif"
-                          : timerFontStyle === "dseg-classic"
-                          ? "'DSEG7-Classic', 'DSEG7 Classic', monospace"
-                          : timerFontStyle === "dseg-modern"
-                          ? "'DSEG7-Modern', 'DSEG7 Modern', monospace"
-                          : timerFontStyle === "ds-digital"
-                          ? "'DS-Digital', 'Digital-7', 'DSEG7-Modern', 'DSEG7 Classic', monospace"
+                          : timerFontStyle === "dseg"
+                          ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
                           : "'Inter', sans-serif",
                       textShadow: `0 0 16px ${timerRingColor}80`
                     }}
@@ -1319,9 +1315,7 @@ function SettingsWindow() {
                   <option value="chakra">{(t as any).timerFontChakra}</option>
                   <option value="share-tech">{(t as any).timerFontShareTech}</option>
                   <option value="rajdhani">{(t as any).timerFontRajdhani}</option>
-                  <option value="dseg-classic">{(t as any).timerFontDsegClassic}</option>
-                  <option value="dseg-modern">{(t as any).timerFontDsegModern}</option>
-                  <option value="ds-digital">{(t as any).timerFontDsDigital}</option>
+                  <option value="dseg">{(t as any).timerFontDseg}</option>
                   <option value="mono">{(t as any).timerFontMono}</option>
                 </select>
               </div>
