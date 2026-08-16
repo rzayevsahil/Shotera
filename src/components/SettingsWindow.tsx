@@ -1153,21 +1153,73 @@ function SettingsWindow() {
                       }}
                     />
                   ))}
+                  {/* Circular Custom Color Picker Swatch */}
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: timerRingColor,
+                      border: timerRingColor && !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                        ? "2px solid #ffffff"
+                        : "2px solid transparent",
+                      boxShadow: timerRingColor && !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                        ? `0 0 10px ${timerRingColor}`
+                        : "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease"
+                    }}
+                    title="Özel Renk Seç"
+                  >
+                    <input
+                      type="color"
+                      value={timerRingColor.startsWith("#") && timerRingColor.length === 7 ? timerRingColor : "#38bdf8"}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setTimerRingColor(val);
+                        localStorage.setItem("timerRingColor", val);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        opacity: 0,
+                        cursor: "pointer"
+                      }}
+                    />
+                    {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor) && (
+                      <span style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.8)", fontWeight: "bold", pointerEvents: "none", lineHeight: 1 }}>+</span>
+                    )}
+                  </div>
+
+                  {/* Hex Color Text Input */}
                   <input
-                    type="color"
+                    type="text"
+                    className="premium-input"
                     value={timerRingColor}
                     onChange={(e) => {
-                      setTimerRingColor(e.target.value);
-                      localStorage.setItem("timerRingColor", e.target.value);
-                      window.dispatchEvent(new Event("storage"));
+                      const val = e.target.value;
+                      setTimerRingColor(val);
+                      if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                        localStorage.setItem("timerRingColor", val);
+                        window.dispatchEvent(new Event("storage"));
+                      }
                     }}
+                    placeholder="#38BDF8"
                     style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "6px",
-                      border: "none",
-                      background: "transparent",
-                      cursor: "pointer"
+                      width: "88px",
+                      padding: "5px 8px",
+                      fontSize: "0.82rem",
+                      fontFamily: "monospace",
+                      textTransform: "uppercase",
+                      textAlign: "center"
                     }}
                   />
                 </div>
