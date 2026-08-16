@@ -1024,8 +1024,8 @@ function SettingsWindow() {
                       <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>T</kbd>
                       {(t as any).badgeTextMode || "Metin Modu"}
                     </span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#f87171", border: "1px solid rgba(248, 113, 113, 0.25)", background: "rgba(248, 113, 113, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <kbd style={{ background: "rgba(248, 113, 113, 0.25)", border: "1px solid rgba(248, 113, 113, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>E</kbd>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>E</kbd>
                       {(t as any).badgeClear || "Temizle"}
                     </span>
                   </div>
@@ -1095,7 +1095,7 @@ function SettingsWindow() {
                     <Pencil size={15} color="#10b981" />
                     {(t as any).zoomDrawLockLabel}
                   </span>
-                  <kbd style={{ background: "rgba(16, 185, 129, 0.18)", border: "1px solid rgba(16, 185, 129, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#10b981" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
                 </div>
 
                 {/* 3. Undo Last Drawing */}
@@ -1118,9 +1118,9 @@ function SettingsWindow() {
                     {(t as any).zoomExitLabel}
                   </span>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>ESC</kbd>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>ESC</kbd>
                     <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
-                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
                   </div>
                 </div>
               </div>
@@ -1167,8 +1167,8 @@ function SettingsWindow() {
             </div>
 
             {/* Live Zoom Navigation & Exit Shortcuts Card */}
-            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
-              <div className="setting-info" style={{ marginBottom: "12px" }}>
+            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start" }}>
+              <div className="setting-info">
                 <span className="setting-label">{(t as any).liveZoomNavShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).liveZoomNavShortcutsDesc}</span>
               </div>
@@ -1183,48 +1183,22 @@ function SettingsWindow() {
                 borderRadius: "10px",
                 border: "1px solid var(--border-color)"
               }}>
-                {/* 1. Zoom In/Out */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <ZoomIn size={15} color="#38bdf8" />
-                    {(t as any).zoomInKeyLabel}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
-                  </div>
-                </div>
-
-                {/* 2. Cursor Panning */}
+                {/* 1. Cursor Panning */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                   <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                     <Zap size={15} color="#a855f7" />
                     {(t as any).liveZoomPanLabel}
                   </span>
-                  <kbd style={{ background: "rgba(168, 85, 247, 0.18)", border: "1px solid rgba(168, 85, 247, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#a855f7" }}>{(t as any).badgeMouseTrack}</kbd>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeMouseTrack}</kbd>
                 </div>
 
-                {/* 3. Freeze & Draw */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <Pencil size={15} color="#10b981" />
-                    {(t as any).liveZoomDrawLockLabel}
-                  </span>
-                  <kbd style={{ background: "rgba(16, 185, 129, 0.18)", border: "1px solid rgba(16, 185, 129, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#10b981" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
-                </div>
-
-                {/* 4. Exit Live Zoom */}
+                {/* 2. Exit Live Zoom */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                   <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                     <LogOut size={15} color="#f87171" />
-                    {(t as any).zoomExitLabel}
+                    {(t as any).liveZoomExitLabel || "Çıkış"}
                   </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>ESC</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
-                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>{formatShortcut(liveZoomShortcut)}</kbd>
-                  </div>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{formatShortcut(liveZoomShortcut)}</kbd>
                 </div>
               </div>
             </div>
@@ -1824,7 +1798,7 @@ function SettingsWindow() {
                     <RotateCcw size={15} color="#a855f7" />
                     {(t as any).timerResetKeyLabel}
                   </span>
-                  <kbd style={{ background: "rgba(168, 85, 247, 0.18)", border: "1px solid rgba(168, 85, 247, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#a855f7" }}>R</kbd>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>R</kbd>
                 </div>
 
                 {/* 5. Exit Timer (Spans full row or stays neat) */}
@@ -1834,9 +1808,9 @@ function SettingsWindow() {
                     {(t as any).timerExitLabel}
                   </span>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>ESC</kbd>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>ESC</kbd>
                     <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
-                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
                   </div>
                 </div>
               </div>
