@@ -916,12 +916,30 @@ function SettingsWindow() {
                     {(t as any).drawModeColorChange}
                   </span>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "flex-end" }}>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#f87171", border: "1px solid rgba(248, 113, 113, 0.25)", background: "rgba(248, 113, 113, 0.08)" }}>{(t as any).badgeRed || "R Kırmızı"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#4ade80", border: "1px solid rgba(74, 222, 128, 0.25)", background: "rgba(74, 222, 128, 0.08)" }}>{(t as any).badgeGreen || "G Yeşil"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#60a5fa", border: "1px solid rgba(96, 165, 250, 0.25)", background: "rgba(96, 165, 250, 0.08)" }}>{(t as any).badgeBlue || "B Mavi"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#facc15", border: "1px solid rgba(250, 204, 21, 0.25)", background: "rgba(250, 204, 21, 0.08)" }}>{(t as any).badgeYellow || "Y Sarı"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#fb923c", border: "1px solid rgba(251, 146, 60, 0.25)", background: "rgba(251, 146, 60, 0.08)" }}>{(t as any).badgeOrange || "O Turuncu"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#f472b6", border: "1px solid rgba(244, 114, 182, 0.25)", background: "rgba(244, 114, 182, 0.08)" }}>{(t as any).badgePink || "P Pembe"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#f87171", border: "1px solid rgba(248, 113, 113, 0.25)", background: "rgba(248, 113, 113, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(248, 113, 113, 0.25)", border: "1px solid rgba(248, 113, 113, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>R</kbd>
+                      {(t as any).badgeRed || "Kırmızı"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#4ade80", border: "1px solid rgba(74, 222, 128, 0.25)", background: "rgba(74, 222, 128, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(74, 222, 128, 0.25)", border: "1px solid rgba(74, 222, 128, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>G</kbd>
+                      {(t as any).badgeGreen || "Yeşil"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#60a5fa", border: "1px solid rgba(96, 165, 250, 0.25)", background: "rgba(96, 165, 250, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(96, 165, 250, 0.25)", border: "1px solid rgba(96, 165, 250, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>B</kbd>
+                      {(t as any).badgeBlue || "Mavi"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#facc15", border: "1px solid rgba(250, 204, 21, 0.25)", background: "rgba(250, 204, 21, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(250, 204, 21, 0.25)", border: "1px solid rgba(250, 204, 21, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>Y</kbd>
+                      {(t as any).badgeYellow || "Sarı"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#fb923c", border: "1px solid rgba(251, 146, 60, 0.25)", background: "rgba(251, 146, 60, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(251, 146, 60, 0.25)", border: "1px solid rgba(251, 146, 60, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>O</kbd>
+                      {(t as any).badgeOrange || "Turuncu"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#f472b6", border: "1px solid rgba(244, 114, 182, 0.25)", background: "rgba(244, 114, 182, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(244, 114, 182, 0.25)", border: "1px solid rgba(244, 114, 182, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>P</kbd>
+                      {(t as any).badgePink || "Pembe"}
+                    </span>
                   </div>
                 </div>
 
@@ -932,10 +950,22 @@ function SettingsWindow() {
                     {(t as any).drawModeBoardModes}
                   </span>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "flex-end" }}>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeWhiteboard || "W Beyaz Tahta"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeBlackboard || "K Siyah Tahta"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeTextMode || "T Metin Modu"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#f87171", border: "1px solid rgba(248, 113, 113, 0.25)", background: "rgba(248, 113, 113, 0.08)" }}>{(t as any).badgeClear || "E Temizle"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>W</kbd>
+                      {(t as any).badgeWhiteboard || "Beyaz Tahta"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>K</kbd>
+                      {(t as any).badgeBlackboard || "Siyah Tahta"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>T</kbd>
+                      {(t as any).badgeTextMode || "Metin Modu"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", color: "#f87171", border: "1px solid rgba(248, 113, 113, 0.25)", background: "rgba(248, 113, 113, 0.08)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(248, 113, 113, 0.25)", border: "1px solid rgba(248, 113, 113, 0.5)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>E</kbd>
+                      {(t as any).badgeClear || "Temizle"}
+                    </span>
                   </div>
                 </div>
 
@@ -946,10 +976,22 @@ function SettingsWindow() {
                     {(t as any).drawModeShapes}
                   </span>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "flex-end" }}>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeLine || "Shift Çizgi"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeBox || "Ctrl Kutu"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeCircle || "Tab Daire"}</span>
-                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeArrow || "Shift+Ctrl Ok"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>Shift</kbd>
+                      {(t as any).badgeLine || "Düz Çizgi"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                      {(t as any).badgeBox || "Kutu"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>Tab</kbd>
+                      {(t as any).badgeCircle || "Daire"}
+                    </span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>Shift+Ctrl</kbd>
+                      {(t as any).badgeArrow || "Ok"}
+                    </span>
                   </div>
                 </div>
               </div>
