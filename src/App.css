@@ -190,23 +190,23 @@ h6 {
 
 /* Settings Panels Content */
 .settings-content {
-  padding: 40px;
+  padding: 32px 36px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px;
 }
 
 .section-title {
-  font-size: 1.8rem;
+  font-size: 1.65rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .section-subtitle {
   color: var(--text-muted);
-  font-size: 0.95rem;
-  margin-bottom: 24px;
+  font-size: 0.9rem;
+  margin-bottom: 0;
 }
 
 .settings-card {
