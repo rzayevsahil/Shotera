@@ -492,18 +492,18 @@ function SettingsWindow() {
               <span>{(t as any).sidebarZoom}</span>
             </div>
             <div
-              className={`nav-item ${activeTab === "live_zoom" ? "active" : ""}`}
-              onClick={() => setActiveTab("live_zoom")}
-            >
-              <Video className="nav-icon" />
-              <span>{(t as any).sidebarLiveZoom}</span>
-            </div>
-            <div
               className={`nav-item ${activeTab === "timer" ? "active" : ""}`}
               onClick={() => setActiveTab("timer")}
             >
               <Timer className="nav-icon" />
               <span>{(t as any).sidebarTimer}</span>
+            </div>
+            <div
+              className={`nav-item ${activeTab === "live_zoom" ? "active" : ""}`}
+              onClick={() => setActiveTab("live_zoom")}
+            >
+              <Video className="nav-icon" />
+              <span>{(t as any).sidebarLiveZoom}</span>
             </div>
 
             <div
