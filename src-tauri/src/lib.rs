@@ -626,6 +626,11 @@ fn hide_screenshot_window(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("screenshot") {
         window.hide().map_err(|e| e.to_string())?;
     }
+    if let Some(zoom_window) = app_handle.get_webview_window("zoom") {
+        if zoom_window.is_visible().unwrap_or(false) {
+            let _ = zoom_window.set_focus();
+        }
+    }
     Ok(())
 }
 

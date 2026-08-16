@@ -532,14 +532,22 @@ export default function ZoomCanvas() {
       }
     };
 
+    const ensureFocus = () => {
+      getCurrentWindow().setFocus().catch(() => {});
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("contextmenu", handleContextMenu);
+    window.addEventListener("focus", ensureFocus);
+    window.addEventListener("mouseenter", ensureFocus);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("focus", ensureFocus);
+      window.removeEventListener("mouseenter", ensureFocus);
     };
   }, []);
 
