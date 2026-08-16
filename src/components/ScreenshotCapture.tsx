@@ -149,6 +149,14 @@ function ScreenshotCapture() {
   // Load screenshot from Rust backend
   const loadScreenshot = async () => {
     try {
+      setImgElement(null);
+      setImageSrc(null);
+      setSelection(null);
+      setDrawings([]);
+      setActiveTool("select");
+      setBoardMode("normal");
+      setTextInput({ visible: false, x: 0, y: 0, val: "" });
+
       const base64Data = await invoke<string>("get_last_screenshot");
       setImageSrc(`data:image/png;base64,${base64Data}`);
     } catch (e) {
@@ -160,9 +168,13 @@ function ScreenshotCapture() {
     loadScreenshot();
 
     const unlisten = listen("screenshot-captured", () => {
+      setImgElement(null);
+      setImageSrc(null);
       setSelection(null);
       setDrawings([]);
       setActiveTool("select");
+      setBoardMode("normal");
+      setTextInput({ visible: false, x: 0, y: 0, val: "" });
       loadScreenshot();
     });
 
@@ -222,7 +234,12 @@ function ScreenshotCapture() {
     img.src = imageSrc;
     img.onload = () => {
       setImgElement(img);
-      invoke("show_screenshot_window").catch(console.error);
+      // Wait for React to render the new image onto the canvas BEFORE displaying the window
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          invoke("show_screenshot_window").catch(console.error);
+        });
+      });
     };
   }, [imageSrc]);
 
@@ -528,8 +545,21 @@ function ScreenshotCapture() {
 
   const handleClose = async () => {
     try {
+      // Synchronously clear the canvas DOM context to prevent old frame buffer flash on next show
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
       setImageSrc(null);
       setImgElement(null);
+      setSelection(null);
+      setDrawings([]);
+      setActiveTool("select");
+      setBoardMode("normal");
+      setTextInput({ visible: false, x: 0, y: 0, val: "" });
       await invoke("hide_screenshot_window");
     } catch (e) {
       console.error(e);

@@ -183,6 +183,7 @@ export default function ZoomCanvas() {
 
     const fetchAndAnimate = async (cursorX: number, cursorY: number) => {
       try {
+        setImgElement(null);
         const base64Data = await invoke<string>("get_last_screenshot");
         const src = `data:image/png;base64,${base64Data}`;
         const img = new Image();
@@ -199,20 +200,43 @@ export default function ZoomCanvas() {
     // Initial mount load
     fetchAndAnimate(0.5, 0.5);
 
-    const unlisten = listen<{ cursor_x?: number; cursor_y?: number }>("zoom-captured", (event) => {
+    const unlistenZoom = listen<{ cursor_x?: number; cursor_y?: number }>("zoom-captured", (event) => {
+      setImgElement(null);
       const startX = event.payload?.cursor_x ?? 0.5;
       const startY = event.payload?.cursor_y ?? 0.5;
       fetchAndAnimate(startX, startY);
     });
 
+    const unlistenSnapshot = listen("request-zoom-snapshot", async () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      try {
+        const dataUrl = canvas.toDataURL("image/png");
+        const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
+        await invoke("save_zoom_snapshot", { base64Data });
+      } catch (e) {
+        console.error("Failed to save zoom snapshot:", e);
+      }
+    });
+
     return () => {
-      unlisten.then((fn) => fn());
+      unlistenZoom.then((fn) => fn());
+      unlistenSnapshot.then((fn) => fn());
       if (animId) cancelAnimationFrame(animId);
     };
   }, []);
 
   const handleClose = async () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
     setImgElement(null);
+    setShapes([]);
+    setBoardMode("normal");
 
     try {
       await invoke("hide_zoom_window");

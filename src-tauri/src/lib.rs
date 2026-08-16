@@ -117,7 +117,6 @@ fn draw_cursor(img: &mut image::RgbaImage, start_x: i32, start_y: i32) {
 }
 
 fn capture_screen_to_state(_app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
-
     // 1. Capture screen
     let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
     if monitors.is_empty() {
@@ -155,8 +154,35 @@ fn capture_screen_to_state(_app_handle: &AppHandle, state: &State<'_, AppState>)
     Ok(())
 }
 
+#[tauri::command]
+fn save_zoom_snapshot(
+    app_handle: AppHandle,
+    state: State<'_, AppState>,
+    base64_data: String,
+) -> Result<(), String> {
+    let bytes = BASE64_STANDARD.decode(&base64_data).map_err(|e| e.to_string())?;
+    let img = image::load_from_memory(&bytes).map_err(|e| e.to_string())?.to_rgba8();
+    
+    {
+        let mut last_ss = state.last_screenshot.lock().map_err(|e| e.to_string())?;
+        *last_ss = Some(img);
+    }
+    
+    if let Some(window) = app_handle.get_webview_window("screenshot") {
+        window.emit("screenshot-captured", ()).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 // Function to trigger screenshot and notify the screenshot window
 fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+    if let Some(zoom_window) = app_handle.get_webview_window("zoom") {
+        if zoom_window.is_visible().unwrap_or(false) {
+            let _ = zoom_window.emit("request-zoom-snapshot", ());
+            return Ok(());
+        }
+    }
+
     capture_screen_to_state(app_handle, state)?;
     // Notify the screenshot window to load the new image
     if let Some(window) = app_handle.get_webview_window("screenshot") {
@@ -1160,7 +1186,8 @@ pub fn run() {
             get_log_file_path,
             write_log_entry,
             unblock_autostart_registry,
-            is_autostart_launch
+            is_autostart_launch,
+            save_zoom_snapshot
         ])
 
         .run(tauri::generate_context!())
