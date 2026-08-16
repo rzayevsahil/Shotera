@@ -40,6 +40,12 @@ function SettingsWindow() {
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
   const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
   const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
+  const [customTimerRingColor, setCustomTimerRingColor] = useState<string>(() => {
+    const savedCustom = localStorage.getItem("customTimerRingColor");
+    if (savedCustom) return savedCustom;
+    const current = localStorage.getItem("timerRingColor") || "#06b6d4";
+    return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(current) ? "#06b6d4" : current;
+  });
   const [timerBgStyle, setTimerBgStyle] = useState<string>(() => localStorage.getItem("timerBgStyle") || "dark-slate");
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
@@ -1155,16 +1161,27 @@ function SettingsWindow() {
                   ))}
                   {/* Circular Custom Color Picker Swatch */}
                   <div
+                    onClick={() => {
+                      const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor);
+                      if (isPreset) {
+                        const activeCustom = customTimerRingColor || "#06b6d4";
+                        setTimerRingColor(activeCustom);
+                        localStorage.setItem("timerRingColor", activeCustom);
+                        window.dispatchEvent(new Event("storage"));
+                      }
+                    }}
                     style={{
                       position: "relative",
                       width: "28px",
                       height: "28px",
                       borderRadius: "50%",
-                      background: timerRingColor,
-                      border: timerRingColor && !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                      background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                        ? customTimerRingColor
+                        : timerRingColor,
+                      border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
                         ? "2px solid #ffffff"
                         : "2px solid transparent",
-                      boxShadow: timerRingColor && !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                      boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
                         ? `0 0 10px ${timerRingColor}`
                         : "none",
                       display: "flex",
@@ -1177,10 +1194,18 @@ function SettingsWindow() {
                   >
                     <input
                       type="color"
-                      value={timerRingColor.startsWith("#") && timerRingColor.length === 7 ? timerRingColor : "#38bdf8"}
+                      value={customTimerRingColor.startsWith("#") && customTimerRingColor.length === 7 ? customTimerRingColor : "#06b6d4"}
+                      onClick={() => {
+                        const activeCustom = customTimerRingColor || "#06b6d4";
+                        setTimerRingColor(activeCustom);
+                        localStorage.setItem("timerRingColor", activeCustom);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
                       onChange={(e) => {
                         const val = e.target.value;
+                        setCustomTimerRingColor(val);
                         setTimerRingColor(val);
+                        localStorage.setItem("customTimerRingColor", val);
                         localStorage.setItem("timerRingColor", val);
                         window.dispatchEvent(new Event("storage"));
                       }}
@@ -1206,6 +1231,10 @@ function SettingsWindow() {
                       const val = e.target.value;
                       setTimerRingColor(val);
                       if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                        if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(val)) {
+                          setCustomTimerRingColor(val);
+                          localStorage.setItem("customTimerRingColor", val);
+                        }
                         localStorage.setItem("timerRingColor", val);
                         window.dispatchEvent(new Event("storage"));
                       }
