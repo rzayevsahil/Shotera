@@ -1264,7 +1264,7 @@ function SettingsWindow() {
                     localStorage.setItem("timerDefaultDuration", String(secs));
                     window.dispatchEvent(new Event("storage"));
                   }}
-                  style={{ flex: 1, minWidth: 0, padding: "8px 12px" }}
+                  style={{ flex: 1, minWidth: 0, padding: "8px 12px", textAlign: "center" }}
                 />
                 <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: 500, whiteSpace: "nowrap" }}>
                   {(t as any).timerUnitMinutes || "Dakika"}
