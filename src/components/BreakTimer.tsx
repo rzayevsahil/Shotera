@@ -235,13 +235,25 @@ export default function BreakTimer() {
       ? "'Orbitron', sans-serif"
       : timerFontStyle === "chakra"
       ? "'Chakra Petch', sans-serif"
+      : timerFontStyle === "share-tech"
+      ? "'Share Tech Mono', monospace"
+      : timerFontStyle === "rajdhani"
+      ? "'Rajdhani', sans-serif"
+      : timerFontStyle === "dseg-classic"
+      ? "'DSEG7-Classic', 'DSEG7 Classic', monospace"
+      : timerFontStyle === "dseg-modern"
+      ? "'DSEG7-Modern', 'DSEG7 Modern', monospace"
+      : timerFontStyle === "ds-digital"
+      ? "'DS-Digital', 'Digital-7', 'DSEG7-Modern', 'DSEG7 Classic', monospace"
       : "'Inter', -apple-system, sans-serif";
 
   const fontWeightCSS =
     timerFontStyle === "segoe-light"
       ? 300
-      : timerFontStyle === "orbitron" || timerFontStyle === "chakra"
+      : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
       ? 700
+      : timerFontStyle === "dseg-classic" || timerFontStyle === "dseg-modern" || timerFontStyle === "ds-digital" || timerFontStyle === "share-tech"
+      ? 400
       : 800;
 
   return (

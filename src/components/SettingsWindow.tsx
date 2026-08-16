@@ -1120,8 +1120,10 @@ function SettingsWindow() {
                       fontWeight:
                         timerFontStyle === "segoe-light"
                           ? 300
-                          : timerFontStyle === "orbitron" || timerFontStyle === "chakra"
+                          : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
                           ? 700
+                          : timerFontStyle === "dseg-classic" || timerFontStyle === "dseg-modern" || timerFontStyle === "ds-digital" || timerFontStyle === "share-tech"
+                          ? 400
                           : 800,
                       color: "#ffffff",
                       fontFamily:
@@ -1135,6 +1137,16 @@ function SettingsWindow() {
                           ? "'Orbitron', sans-serif"
                           : timerFontStyle === "chakra"
                           ? "'Chakra Petch', sans-serif"
+                          : timerFontStyle === "share-tech"
+                          ? "'Share Tech Mono', monospace"
+                          : timerFontStyle === "rajdhani"
+                          ? "'Rajdhani', sans-serif"
+                          : timerFontStyle === "dseg-classic"
+                          ? "'DSEG7-Classic', 'DSEG7 Classic', monospace"
+                          : timerFontStyle === "dseg-modern"
+                          ? "'DSEG7-Modern', 'DSEG7 Modern', monospace"
+                          : timerFontStyle === "ds-digital"
+                          ? "'DS-Digital', 'Digital-7', 'DSEG7-Modern', 'DSEG7 Classic', monospace"
                           : "'Inter', sans-serif",
                       textShadow: `0 0 16px ${timerRingColor}80`
                     }}
@@ -1305,6 +1317,11 @@ function SettingsWindow() {
                   <option value="heading">{(t as any).timerFontHeading}</option>
                   <option value="orbitron">{(t as any).timerFontOrbitron}</option>
                   <option value="chakra">{(t as any).timerFontChakra}</option>
+                  <option value="share-tech">{(t as any).timerFontShareTech}</option>
+                  <option value="rajdhani">{(t as any).timerFontRajdhani}</option>
+                  <option value="dseg-classic">{(t as any).timerFontDsegClassic}</option>
+                  <option value="dseg-modern">{(t as any).timerFontDsegModern}</option>
+                  <option value="ds-digital">{(t as any).timerFontDsDigital}</option>
                   <option value="mono">{(t as any).timerFontMono}</option>
                 </select>
               </div>
