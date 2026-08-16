@@ -229,7 +229,20 @@ export default function BreakTimer() {
       ? "'Outfit', -apple-system, sans-serif"
       : timerFontStyle === "mono"
       ? "monospace"
+      : timerFontStyle === "segoe-light"
+      ? "'Segoe UI Light', 'Segoe UI', -apple-system, sans-serif"
+      : timerFontStyle === "orbitron"
+      ? "'Orbitron', sans-serif"
+      : timerFontStyle === "chakra"
+      ? "'Chakra Petch', sans-serif"
       : "'Inter', -apple-system, sans-serif";
+
+  const fontWeightCSS =
+    timerFontStyle === "segoe-light"
+      ? 300
+      : timerFontStyle === "orbitron" || timerFontStyle === "chakra"
+      ? 700
+      : 800;
 
   return (
     <div
@@ -340,7 +353,7 @@ export default function BreakTimer() {
           <span
             style={{
               fontSize: "72px",
-              fontWeight: 800,
+              fontWeight: fontWeightCSS,
               letterSpacing: "2px",
               fontVariantNumeric: "tabular-nums",
               fontFamily: fontFamilyCSS,

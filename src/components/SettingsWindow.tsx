@@ -1069,10 +1069,10 @@ function SettingsWindow() {
                     timerBgStyle === "oled-black"
                       ? "#000000"
                       : timerBgStyle === "frosted-dark"
-                      ? "rgba(15, 23, 42, 0.95)"
-                      : timerBgStyle === "pomodoro-red"
-                      ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-                      : "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
+                        ? "rgba(15, 23, 42, 0.95)"
+                        : timerBgStyle === "pomodoro-red"
+                          ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+                          : "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
                 }}
               >
@@ -1117,13 +1117,24 @@ function SettingsWindow() {
                     style={{
                       position: "absolute",
                       fontSize: "24px",
-                      fontWeight: 800,
+                      fontWeight:
+                        timerFontStyle === "segoe-light"
+                          ? 300
+                          : timerFontStyle === "orbitron" || timerFontStyle === "chakra"
+                          ? 700
+                          : 800,
                       color: "#ffffff",
                       fontFamily:
                         timerFontStyle === "heading"
                           ? "'Outfit', sans-serif"
                           : timerFontStyle === "mono"
                           ? "monospace"
+                          : timerFontStyle === "segoe-light"
+                          ? "'Segoe UI Light', 'Segoe UI', sans-serif"
+                          : timerFontStyle === "orbitron"
+                          ? "'Orbitron', sans-serif"
+                          : timerFontStyle === "chakra"
+                          ? "'Chakra Petch', sans-serif"
                           : "'Inter', sans-serif",
                       textShadow: `0 0 16px ${timerRingColor}80`
                     }}
@@ -1290,7 +1301,10 @@ function SettingsWindow() {
                   style={{ width: "240px" }}
                 >
                   <option value="sans">{(t as any).timerFontSans}</option>
+                  <option value="segoe-light">{(t as any).timerFontSegoeLight}</option>
                   <option value="heading">{(t as any).timerFontHeading}</option>
+                  <option value="orbitron">{(t as any).timerFontOrbitron}</option>
+                  <option value="chakra">{(t as any).timerFontChakra}</option>
                   <option value="mono">{(t as any).timerFontMono}</option>
                 </select>
               </div>
