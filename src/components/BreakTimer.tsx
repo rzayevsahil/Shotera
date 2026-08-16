@@ -26,7 +26,7 @@ export default function BreakTimer() {
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
 
-  const [isRunning, setIsRunning] = useState<boolean>(true);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
@@ -84,6 +84,7 @@ export default function BreakTimer() {
 
   const handleClose = async () => {
     setIsRunning(false);
+    setIsFinished(false);
     try {
       await invoke("hide_timer_window");
     } catch (e) {
@@ -96,10 +97,18 @@ export default function BreakTimer() {
     }
   };
 
-  // Play audio chime when timer finishes
-  const playAlarm = () => {
+  // Play audio chime when timer finishes (only if window is currently visible and sound enabled)
+  const playAlarm = async () => {
     if (!soundEnabled) return;
-    playTimerSound(timerSoundPreset);
+    try {
+      const win = getCurrentWindow();
+      const isVis = await win.isVisible();
+      if (isVis) {
+        playTimerSound(timerSoundPreset);
+      }
+    } catch {
+      playTimerSound(timerSoundPreset);
+    }
   };
 
   // Tick timer every second based on direction
