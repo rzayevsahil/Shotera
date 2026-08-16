@@ -999,40 +999,68 @@ function SettingsWindow() {
 
             {/* Zoom Navigation & Exit Shortcuts Card */}
             <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
-              <div className="setting-info">
+              <div className="setting-info" style={{ marginBottom: "12px" }}>
                 <span className="setting-label">{(t as any).zoomNavShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).zoomNavShortcutsDesc}</span>
               </div>
+
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "auto auto",
-                columnGap: "16px",
-                rowGap: "8px",
-                alignItems: "center"
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(255, 255, 255, 0.025)",
+                padding: "14px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)"
               }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <ZoomIn size={15} color="#38bdf8" />
-                  {(t as any).zoomInKeyLabel}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomInKeys}</span>
+                {/* 1. Zoom In/Out */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <ZoomIn size={15} color="#38bdf8" />
+                    {(t as any).zoomInKeyLabel}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+                  </div>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <Pencil size={15} color="#10b981" />
-                  {(t as any).zoomDrawLockLabel}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomDrawLockKeys}</span>
+                {/* 2. Start Drawing */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Pencil size={15} color="#10b981" />
+                    {(t as any).zoomDrawLockLabel}
+                  </span>
+                  <kbd style={{ background: "rgba(16, 185, 129, 0.18)", border: "1px solid rgba(16, 185, 129, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#10b981" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <Undo2 size={15} color="#a855f7" />
-                  {(t as any).zoomUndoLabel}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomUndoKeys}</span>
+                {/* 3. Undo Last Drawing */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Undo2 size={15} color="#a855f7" />
+                    {(t as any).zoomUndoLabel}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Z</kbd>
+                  </div>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <LogOut size={15} color="#f87171" />
-                  {(t as any).zoomExitLabel}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).zoomExitKeys}</span>
+                {/* 4. Exit & Clear */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <LogOut size={15} color="#f87171" />
+                    {(t as any).zoomExitLabel}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>ESC</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1443,46 +1471,77 @@ function SettingsWindow() {
 
             {/* Break Timer Quick Shortcuts Card */}
             <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
-              <div className="setting-info">
+              <div className="setting-info" style={{ marginBottom: "12px" }}>
                 <span className="setting-label">{(t as any).timerShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
               </div>
+
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "auto auto",
-                columnGap: "16px",
-                rowGap: "8px",
-                alignItems: "center"
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(255, 255, 255, 0.025)",
+                padding: "14px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)"
               }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <Play size={15} color="#38bdf8" />
-                  {(t as any).timerToggleLabel}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerToggleKeys}</span>
+                {/* 1. Toggle Pause/Play */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Play size={15} color="#38bdf8" />
+                    {(t as any).timerToggleLabel}
+                  </span>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeSpace || "Boşluk"}</kbd>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <Clock size={15} color="#10b981" />
-                  {(t as any).timerAdjust1Label}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerAdjust1Keys}</span>
+                {/* 2. Adjust +/- 1 min */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Clock size={15} color="#10b981" />
+                    {(t as any).timerAdjust1Label}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+                  </div>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <Zap size={15} color="#eab308" />
-                  {(t as any).timerAdjust5Label}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerAdjust5Keys}</span>
+                {/* 3. Adjust +/- 5 min */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Zap size={15} color="#eab308" />
+                    {(t as any).timerAdjust5Label}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Shift</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+                  </div>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <RotateCcw size={15} color="#a855f7" />
-                  {(t as any).timerResetKeyLabel}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerResetKeys}</span>
+                {/* 4. Reset Timer */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <RotateCcw size={15} color="#a855f7" />
+                    {(t as any).timerResetKeyLabel}
+                  </span>
+                  <kbd style={{ background: "rgba(168, 85, 247, 0.18)", border: "1px solid rgba(168, 85, 247, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#a855f7" }}>R</kbd>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <LogOut size={15} color="#f87171" />
-                  {(t as any).timerExitLabel}
-                </span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "110px", textAlign: "center" }}>{(t as any).timerExitKeys}</span>
+                {/* 5. Exit Timer (Spans full row or stays neat) */}
+                <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", borderTop: "1px dashed rgba(255, 255, 255, 0.08)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <LogOut size={15} color="#f87171" />
+                    {(t as any).timerExitLabel}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>ESC</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
