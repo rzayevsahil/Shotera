@@ -22,6 +22,7 @@ export default function BreakTimer() {
   });
   const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
   const [timerBgStyle, setTimerBgStyle] = useState<string>(() => localStorage.getItem("timerBgStyle") || "dark-slate");
+  const [timerBgColor, setTimerBgColor] = useState<string>(() => localStorage.getItem("timerBgColor") || "#0f172a");
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
 
@@ -51,6 +52,7 @@ export default function BreakTimer() {
       setTimerDirection(dir);
       setTimerRingColor(localStorage.getItem("timerRingColor") || "#38bdf8");
       setTimerBgStyle(localStorage.getItem("timerBgStyle") || "dark-slate");
+      setTimerBgColor(localStorage.getItem("timerBgColor") || "#0f172a");
       setTimerFontStyle(localStorage.getItem("timerFontStyle") || "sans");
       setTimerSoundPreset(localStorage.getItem("timerSoundPreset") || "chime");
 
@@ -216,13 +218,15 @@ export default function BreakTimer() {
   };
 
   const backgroundStyleCSS =
-    timerBgStyle === "oled-black"
+    timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate")
+      ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
+      : timerBgStyle === "oled-black"
       ? "#000000"
       : timerBgStyle === "frosted-dark"
       ? "rgba(15, 23, 42, 0.95)"
       : timerBgStyle === "pomodoro-red"
       ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-      : "radial-gradient(circle at center, #0f172a 0%, #020617 100%)";
+      : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`;
 
   const fontFamilyCSS =
     timerFontStyle === "heading"

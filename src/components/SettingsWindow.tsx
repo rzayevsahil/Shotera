@@ -47,6 +47,13 @@ function SettingsWindow() {
     return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(current) ? "#06b6d4" : current;
   });
   const [timerBgStyle, setTimerBgStyle] = useState<string>(() => localStorage.getItem("timerBgStyle") || "dark-slate");
+  const [timerBgColor, setTimerBgColor] = useState<string>(() => localStorage.getItem("timerBgColor") || "#0f172a");
+  const [customTimerBgColor, setCustomTimerBgColor] = useState<string>(() => {
+    const savedCustom = localStorage.getItem("customTimerBgColor");
+    if (savedCustom) return savedCustom;
+    const current = localStorage.getItem("timerBgColor") || "#1e1b4b";
+    return ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(current) ? "#1e1b4b" : current;
+  });
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "timer" | null>(null);
@@ -1217,13 +1224,15 @@ function SettingsWindow() {
                   justifyContent: "center",
                   marginBottom: "20px",
                   background:
-                    timerBgStyle === "oled-black"
-                      ? "#000000"
-                      : timerBgStyle === "frosted-dark"
-                        ? "rgba(15, 23, 42, 0.95)"
-                        : timerBgStyle === "pomodoro-red"
-                          ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-                          : "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
+                    timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate")
+                      ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
+                      : timerBgStyle === "oled-black"
+                        ? "#000000"
+                        : timerBgStyle === "frosted-dark"
+                          ? "rgba(15, 23, 42, 0.95)"
+                          : timerBgStyle === "pomodoro-red"
+                            ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+                            : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`,
                   boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
                 }}
               >
@@ -1410,6 +1419,136 @@ function SettingsWindow() {
                       }
                     }}
                     placeholder="#38BDF8"
+                    style={{
+                      width: "110px",
+                      padding: "10px 12px",
+                      fontSize: "0.9rem",
+                      fontFamily: "monospace",
+                      textTransform: "uppercase",
+                      textAlign: "center"
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Background Color Swatches Row */}
+              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
+                <div className="setting-info">
+                  <span className="setting-label">{(t as any).timerBgColorLabel || "Arka Plan Rengi"}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setTimerBgColor(color);
+                        localStorage.setItem("timerBgColor", color);
+                        localStorage.setItem("timerBgStyle", "custom");
+                        setTimerBgStyle("custom");
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      title={color}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: color,
+                        border: timerBgColor === color ? "2px solid #ffffff" : "2px solid transparent",
+                        cursor: "pointer",
+                        boxShadow: timerBgColor === color ? `0 0 10px ${color}` : "none",
+                        transition: "all 0.2s ease"
+                      }}
+                    />
+                  ))}
+                  {/* Circular Custom Background Color Picker Swatch */}
+                  <div
+                    onClick={() => {
+                      const isPreset = ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor);
+                      if (isPreset) {
+                        const activeCustom = customTimerBgColor || "#1e1b4b";
+                        setTimerBgColor(activeCustom);
+                        setTimerBgStyle("custom");
+                        localStorage.setItem("timerBgColor", activeCustom);
+                        localStorage.setItem("timerBgStyle", "custom");
+                        window.dispatchEvent(new Event("storage"));
+                      }
+                    }}
+                    style={{
+                      position: "relative",
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
+                        ? customTimerBgColor
+                        : timerBgColor,
+                      border: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
+                        ? "2px solid #ffffff"
+                        : "2px solid transparent",
+                      boxShadow: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
+                        ? `0 0 10px ${timerBgColor}`
+                        : "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease"
+                    }}
+                    title={(t as any).timerPickCustomBgColor || "Özel Arka Plan Rengi Seç"}
+                  >
+                    <input
+                      type="color"
+                      value={customTimerBgColor.startsWith("#") && customTimerBgColor.length === 7 ? customTimerBgColor : "#1e1b4b"}
+                      onClick={() => {
+                        const activeCustom = customTimerBgColor || "#1e1b4b";
+                        setTimerBgColor(activeCustom);
+                        setTimerBgStyle("custom");
+                        localStorage.setItem("timerBgColor", activeCustom);
+                        localStorage.setItem("timerBgStyle", "custom");
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomTimerBgColor(val);
+                        setTimerBgColor(val);
+                        setTimerBgStyle("custom");
+                        localStorage.setItem("customTimerBgColor", val);
+                        localStorage.setItem("timerBgColor", val);
+                        localStorage.setItem("timerBgStyle", "custom");
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        opacity: 0,
+                        cursor: "pointer"
+                      }}
+                    />
+                    <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                  </div>
+
+                  {/* Hex Color Text Input for Background */}
+                  <input
+                    type="text"
+                    className="premium-input"
+                    value={timerBgColor}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setTimerBgColor(val);
+                      setTimerBgStyle("custom");
+                      if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                        if (!["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(val)) {
+                          setCustomTimerBgColor(val);
+                          localStorage.setItem("customTimerBgColor", val);
+                        }
+                        localStorage.setItem("timerBgColor", val);
+                        localStorage.setItem("timerBgStyle", "custom");
+                        window.dispatchEvent(new Event("storage"));
+                      }
+                    }}
+                    placeholder="#0F172A"
                     style={{
                       width: "110px",
                       padding: "10px 12px",
