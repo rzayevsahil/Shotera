@@ -1194,9 +1194,7 @@ function SettingsWindow() {
                         cursor: "pointer"
                       }}
                     />
-                    {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor) && (
-                      <span style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.8)", fontWeight: "bold", pointerEvents: "none", lineHeight: 1 }}>+</span>
-                    )}
+                    <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
                   </div>
 
                   {/* Hex Color Text Input */}
