@@ -496,7 +496,7 @@ function SettingsWindow() {
               onClick={() => setActiveTab("live_zoom")}
             >
               <Video className="nav-icon" />
-              <span>{(t as any).sidebarLiveZoom || "Canlı Zoom (Ctrl + 4)"}</span>
+              <span>{(t as any).sidebarLiveZoom}</span>
             </div>
             <div
               className={`nav-item ${activeTab === "timer" ? "active" : ""}`}
@@ -553,6 +553,7 @@ function SettingsWindow() {
             {activeTab === "capture" && t.captureTitle}
             {activeTab === "save" && t.saveTitle}
             {activeTab === "zoom" && (t as any).zoomTitle}
+            {activeTab === "live_zoom" && (t as any).liveZoomTitle}
             {activeTab === "timer" && (t as any).timerTitle}
             {activeTab === "about" && t.aboutTitle}
           </h2>
@@ -561,6 +562,7 @@ function SettingsWindow() {
             {activeTab === "capture" && t.captureSubtitle}
             {activeTab === "save" && t.saveSubtitle}
             {activeTab === "zoom" && (t as any).zoomSubtitle}
+            {activeTab === "live_zoom" && (t as any).liveZoomSubtitle}
             {activeTab === "timer" && (t as any).timerSubtitle}
             {activeTab === "about" && t.aboutSubtitle}
           </p>
@@ -1164,40 +1166,65 @@ function SettingsWindow() {
               </div>
             </div>
 
-            {/* Live Zoom Info Box */}
-            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", borderBottom: "none" }}>
-              <div className="setting-info">
-                <span className="setting-label">Canlı Zoom Özellikleri & Kullanım İpuçları</span>
-                <span className="setting-desc">Canlı büyüteç modu tamamen bağımsız yüksek çözünürlüklü tuval motoru ile çalışır.</span>
+            {/* Live Zoom Navigation & Exit Shortcuts Card */}
+            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+              <div className="setting-info" style={{ marginBottom: "12px" }}>
+                <span className="setting-label">{(t as any).liveZoomNavShortcutsTitle}</span>
+                <span className="setting-desc">{(t as any).liveZoomNavShortcutsDesc}</span>
               </div>
 
               <div style={{
-                display: "flex",
-                flexDirection: "column",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
                 gap: "10px",
                 width: "100%",
-                background: "rgba(56, 189, 248, 0.05)",
-                padding: "16px",
+                background: "rgba(255, 255, 255, 0.025)",
+                padding: "14px",
                 borderRadius: "10px",
-                border: "1px solid rgba(56, 189, 248, 0.2)"
+                border: "1px solid var(--border-color)"
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#38bdf8", fontWeight: 600, fontSize: "0.9rem" }}>
-                  <Zap size={16} />
-                  <span>1:1 Kristal Netlik ve Bağımsız Tuval</span>
+                {/* 1. Zoom In/Out */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <ZoomIn size={15} color="#38bdf8" />
+                    {(t as any).zoomInKeyLabel}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+                  </div>
                 </div>
-                <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                  Canlı zoom, statik çizim modundan tamamen bağımsız bir High-DPI tuval (`LiveZoomCanvas`) ile görüntülenir. Çizim araçları devre dışıdır ve ekran takılmadan canlı pürüzsüz netlikte büyütülür.
-                </p>
-                <div style={{ display: "flex", gap: "12px", marginTop: "4px", flexWrap: "wrap" }}>
-                  <span className="shortcut-badge" style={{ fontSize: "0.8rem", background: "rgba(255, 255, 255, 0.08)" }}>
-                    💡 Fare Tekerleği: Yakınlaştır / Uzaklaştır
+
+                {/* 2. Cursor Panning */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Zap size={15} color="#a855f7" />
+                    {(t as any).liveZoomPanLabel}
                   </span>
-                  <span className="shortcut-badge" style={{ fontSize: "0.8rem", background: "rgba(255, 255, 255, 0.08)" }}>
-                    ⌨️ Yön Tuşları: Zoom Seviyesini Değiştir
+                  <kbd style={{ background: "rgba(168, 85, 247, 0.18)", border: "1px solid rgba(168, 85, 247, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#a855f7" }}>{(t as any).badgeMouseTrack}</kbd>
+                </div>
+
+                {/* 3. Freeze & Draw */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Pencil size={15} color="#10b981" />
+                    {(t as any).liveZoomDrawLockLabel}
                   </span>
-                  <span className="shortcut-badge" style={{ fontSize: "0.8rem", background: "rgba(255, 255, 255, 0.08)" }}>
-                    ❌ ESC veya Ctrl+4: Canlı Zoom'dan Çık
+                  <kbd style={{ background: "rgba(16, 185, 129, 0.18)", border: "1px solid rgba(16, 185, 129, 0.4)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#10b981" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
+                </div>
+
+                {/* 4. Exit Live Zoom */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <LogOut size={15} color="#f87171" />
+                    {(t as any).zoomExitLabel}
                   </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>ESC</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                    <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>{formatShortcut(liveZoomShortcut)}</kbd>
+                  </div>
                 </div>
               </div>
             </div>
