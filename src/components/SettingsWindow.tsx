@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -731,29 +731,69 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row" style={{ borderTop: "none", paddingTop: "16px" }}>
-              <div className="setting-info">
+            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+              <div className="setting-info" style={{ marginBottom: "12px" }}>
                 <span className="setting-label">{t.editorShortcuts}</span>
                 <span className="setting-desc">{t.editorShortcutsDesc}</span>
               </div>
+
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "auto auto",
-                columnGap: "16px",
-                rowGap: "8px",
-                alignItems: "center"
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(255, 255, 255, 0.025)",
+                padding: "14px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)"
               }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorCopy}</span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>{ctrlKey} + C</span>
+                {/* 1. Kopyala */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Copy size={15} color="#38bdf8" />
+                    {t.editorCopy}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>C</kbd>
+                  </div>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorSave}</span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>{ctrlKey} + S</span>
+                {/* 2. Kaydet */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Save size={15} color="#10b981" />
+                    {t.editorSave}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>S</kbd>
+                  </div>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorClose}</span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>ESC</span>
+                {/* 3. Geri Al */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Undo2 size={15} color="#a855f7" />
+                    {t.editorUndo}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Z</kbd>
+                  </div>
+                </div>
 
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", justifySelf: "start" }}>{t.editorUndo}</span>
-                <span className="shortcut-badge" style={{ justifySelf: "start", minWidth: "90px", textAlign: "center" }}>{ctrlKey} + Z</span>
+                {/* 4. Kapat */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <LogOut size={15} color="#f87171" />
+                    {t.editorClose}
+                  </span>
+                  <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>ESC</kbd>
+                </div>
               </div>
             </div>
           </div>
