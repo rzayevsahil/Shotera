@@ -1411,9 +1411,9 @@ function SettingsWindow() {
                     }}
                     placeholder="#38BDF8"
                     style={{
-                      width: "88px",
-                      padding: "5px 8px",
-                      fontSize: "0.82rem",
+                      width: "110px",
+                      padding: "10px 12px",
+                      fontSize: "0.9rem",
                       fontFamily: "monospace",
                       textTransform: "uppercase",
                       textAlign: "center"
