@@ -1196,7 +1196,7 @@ function SettingsWindow() {
             </div>
 
             {/* Theme & Ring Color Selection Section */}
-            <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "18px", marginTop: "6px" }}>
+            <div>
               <div className="setting-info" style={{ marginBottom: "14px" }}>
                 <span className="setting-label">{(t as any).timerThemeTitle}</span>
                 <span className="setting-desc">{(t as any).timerThemeDesc}</span>
@@ -1272,29 +1272,29 @@ function SettingsWindow() {
                         timerFontStyle === "segoe-light"
                           ? 300
                           : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
-                          ? 700
-                          : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
-                          ? 400
-                          : 800,
+                            ? 700
+                            : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
+                              ? 400
+                              : 800,
                       color: "#ffffff",
                       fontFamily:
                         timerFontStyle === "heading"
                           ? "'Outfit', sans-serif"
                           : timerFontStyle === "mono"
-                          ? "monospace"
-                          : timerFontStyle === "segoe-light"
-                          ? "'Segoe UI Light', 'Segoe UI', sans-serif"
-                          : timerFontStyle === "orbitron"
-                          ? "'Orbitron', sans-serif"
-                          : timerFontStyle === "chakra"
-                          ? "'Chakra Petch', sans-serif"
-                          : timerFontStyle === "share-tech"
-                          ? "'Share Tech Mono', monospace"
-                          : timerFontStyle === "rajdhani"
-                          ? "'Rajdhani', sans-serif"
-                          : timerFontStyle === "dseg"
-                          ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
-                          : "'Inter', sans-serif",
+                            ? "monospace"
+                            : timerFontStyle === "segoe-light"
+                              ? "'Segoe UI Light', 'Segoe UI', sans-serif"
+                              : timerFontStyle === "orbitron"
+                                ? "'Orbitron', sans-serif"
+                                : timerFontStyle === "chakra"
+                                  ? "'Chakra Petch', sans-serif"
+                                  : timerFontStyle === "share-tech"
+                                    ? "'Share Tech Mono', monospace"
+                                    : timerFontStyle === "rajdhani"
+                                      ? "'Rajdhani', sans-serif"
+                                      : timerFontStyle === "dseg"
+                                        ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
+                                        : "'Inter', sans-serif",
                       textShadow: `0 0 16px ${timerRingColor}80`
                     }}
                   >
