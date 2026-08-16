@@ -900,37 +900,57 @@ function SettingsWindow() {
               </div>
 
               <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: "10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
                 width: "100%",
-                background: "rgba(255, 255, 255, 0.03)",
+                background: "rgba(255, 255, 255, 0.025)",
                 padding: "16px",
                 borderRadius: "10px",
                 border: "1px solid var(--border-color)"
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                {/* Color Selection Row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                     <Palette size={15} color="#38bdf8" />
                     {(t as any).drawModeColorChange}
                   </span>
-                  <span style={{ fontSize: "0.82rem", color: "var(--accent-cyan)", fontFamily: "monospace" }}>{(t as any).drawModeColorKeys}</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "flex-end" }}>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#f87171", border: "1px solid rgba(248, 113, 113, 0.25)", background: "rgba(248, 113, 113, 0.08)" }}>{(t as any).badgeRed || "R Kırmızı"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#4ade80", border: "1px solid rgba(74, 222, 128, 0.25)", background: "rgba(74, 222, 128, 0.08)" }}>{(t as any).badgeGreen || "G Yeşil"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#60a5fa", border: "1px solid rgba(96, 165, 250, 0.25)", background: "rgba(96, 165, 250, 0.08)" }}>{(t as any).badgeBlue || "B Mavi"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#facc15", border: "1px solid rgba(250, 204, 21, 0.25)", background: "rgba(250, 204, 21, 0.08)" }}>{(t as any).badgeYellow || "Y Sarı"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#fb923c", border: "1px solid rgba(251, 146, 60, 0.25)", background: "rgba(251, 146, 60, 0.08)" }}>{(t as any).badgeOrange || "O Turuncu"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#f472b6", border: "1px solid rgba(244, 114, 182, 0.25)", background: "rgba(244, 114, 182, 0.08)" }}>{(t as any).badgePink || "P Pembe"}</span>
+                  </div>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                {/* Board Modes Row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "10px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                     <LayoutTemplate size={15} color="#a855f7" />
                     {(t as any).drawModeBoardModes}
                   </span>
-                  <span style={{ fontSize: "0.82rem", color: "#a855f7", fontFamily: "monospace" }}>{(t as any).drawModeBoardKeys}</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "flex-end" }}>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeWhiteboard || "W Beyaz Tahta"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeBlackboard || "K Siyah Tahta"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeTextMode || "T Metin Modu"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px", color: "#f87171", border: "1px solid rgba(248, 113, 113, 0.25)", background: "rgba(248, 113, 113, 0.08)" }}>{(t as any).badgeClear || "E Temizle"}</span>
+                  </div>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "8px" }}>
-                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                {/* Shape Modifiers Row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", borderTop: "1px dashed rgba(255, 255, 255, 0.08)", paddingTop: "10px" }}>
+                  <span style={{ fontSize: "0.88rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                     <Shapes size={15} color="#10b981" />
                     {(t as any).drawModeShapes}
                   </span>
-                  <span style={{ fontSize: "0.82rem", color: "#10b981", fontFamily: "monospace" }}>{(t as any).drawModeShapeKeys}</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "flex-end" }}>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeLine || "Shift Çizgi"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeBox || "Ctrl Kutu"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeCircle || "Tab Daire"}</span>
+                    <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px" }}>{(t as any).badgeArrow || "Shift+Ctrl Ok"}</span>
+                  </div>
                 </div>
               </div>
             </div>
