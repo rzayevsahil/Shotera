@@ -17,6 +17,7 @@ struct AppState {
     fullscreen_shortcut: Mutex<String>,
     break_timer_shortcut: Mutex<String>,
     zoom_shortcut: Mutex<String>,
+    live_zoom_shortcut: Mutex<String>,
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
 }
@@ -552,6 +553,7 @@ fn register_all_shortcuts_helper(
     fs_shortcut_str: &str,
     timer_shortcut_str: &str,
     zoom_shortcut_str: &str,
+    live_zoom_shortcut_str: &str,
 ) -> Result<(), String> {
     use std::str::FromStr;
     let _ = app_handle.global_shortcut().unregister_all();
@@ -568,6 +570,9 @@ fn register_all_shortcuts_helper(
     if let Ok(sc) = Shortcut::from_str(&zoom_shortcut_str.to_lowercase()) {
         let _ = app_handle.global_shortcut().register(sc);
     }
+    if let Ok(sc) = Shortcut::from_str(&live_zoom_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
     Ok(())
 }
 
@@ -579,9 +584,11 @@ fn update_shortcuts(
     fullscreen_shortcut: String,
     zoom_shortcut: Option<String>,
     timer_shortcut: Option<String>,
+    live_zoom_shortcut: Option<String>,
 ) -> Result<(), String> {
     let timer_str = timer_shortcut.unwrap_or_else(|| state.break_timer_shortcut.lock().unwrap().clone());
     let zoom_str = zoom_shortcut.unwrap_or_else(|| state.zoom_shortcut.lock().unwrap().clone());
+    let live_zoom_str = live_zoom_shortcut.unwrap_or_else(|| state.live_zoom_shortcut.lock().unwrap().clone());
 
     register_all_shortcuts_helper(
         &app_handle,
@@ -589,6 +596,7 @@ fn update_shortcuts(
         &fullscreen_shortcut,
         &timer_str,
         &zoom_str,
+        &live_zoom_str,
     )?;
 
     if let Ok(mut reg_state) = state.region_shortcut.lock() {
@@ -602,6 +610,9 @@ fn update_shortcuts(
     }
     if let Ok(mut zoom_state) = state.zoom_shortcut.lock() {
         *zoom_state = zoom_str.to_lowercase();
+    }
+    if let Ok(mut live_zoom_state) = state.live_zoom_shortcut.lock() {
+        *live_zoom_state = live_zoom_str.to_lowercase();
     }
 
     Ok(())
@@ -714,6 +725,7 @@ fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
 struct ZoomPayload {
     cursor_x: f32,
     cursor_y: f32,
+    is_live: bool,
 }
 
 #[tauri::command]
@@ -747,7 +759,110 @@ fn open_zoom_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(
     };
 
     if let Some(window) = app_handle.get_webview_window("zoom") {
-        let _ = window.emit("zoom-captured", ZoomPayload { cursor_x, cursor_y });
+        let _ = window.emit("zoom-captured", ZoomPayload { cursor_x, cursor_y, is_live: false });
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+mod live_zoom {
+    use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+    use std::thread;
+    use std::time::Duration;
+    use windows_sys::Win32::Foundation::POINT;
+    use windows_sys::Win32::UI::HiDpi::{SetProcessDpiAwarenessContext, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{GetPhysicalCursorPos, GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN};
+
+    #[link(name = "magnification")]
+    extern "system" {
+        pub fn MagInitialize() -> windows_sys::Win32::Foundation::BOOL;
+        pub fn MagUninitialize() -> windows_sys::Win32::Foundation::BOOL;
+        pub fn MagSetFullscreenTransform(magLevel: f32, xOffset: i32, yOffset: i32) -> windows_sys::Win32::Foundation::BOOL;
+    }
+
+    static LIVE_ZOOM_ACTIVE: AtomicBool = AtomicBool::new(false);
+    static ZOOM_LEVEL_BITS: AtomicU32 = AtomicU32::new(2.0f32.to_bits());
+
+    pub fn toggle_live_zoom() -> bool {
+        if LIVE_ZOOM_ACTIVE.load(Ordering::SeqCst) {
+            stop_live_zoom();
+            false
+        } else {
+            start_live_zoom();
+            true
+        }
+    }
+
+    pub fn start_live_zoom() {
+        if LIVE_ZOOM_ACTIVE.load(Ordering::SeqCst) {
+            return;
+        }
+        LIVE_ZOOM_ACTIVE.store(true, Ordering::SeqCst);
+
+        thread::spawn(|| {
+            unsafe {
+                SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+                if MagInitialize() == 0 {
+                    LIVE_ZOOM_ACTIVE.store(false, Ordering::SeqCst);
+                    return;
+                }
+            }
+
+            let (screen_w, screen_h) = unsafe {
+                let w = GetSystemMetrics(SM_CXSCREEN);
+                let h = GetSystemMetrics(SM_CYSCREEN);
+                if w > 0 && h > 0 { (w as f32, h as f32) } else { (1920.0, 1080.0) }
+            };
+
+            while LIVE_ZOOM_ACTIVE.load(Ordering::SeqCst) {
+                let mag = f32::from_bits(ZOOM_LEVEL_BITS.load(Ordering::SeqCst));
+                let mut pt = POINT { x: 0, y: 0 };
+                unsafe {
+                    GetPhysicalCursorPos(&mut pt);
+                }
+
+                let view_w = screen_w / mag;
+                let view_h = screen_h / mag;
+
+                let max_x = screen_w - view_w;
+                let max_y = screen_h - view_h;
+
+                // Round offsets to whole integer pixel boundaries to prevent DWM subpixel blurring
+                let x_offset = (pt.x as f32 - view_w / 2.0).clamp(0.0, max_x).round() as i32;
+                let y_offset = (pt.y as f32 - view_h / 2.0).clamp(0.0, max_y).round() as i32;
+
+                unsafe {
+                    MagSetFullscreenTransform(mag, x_offset, y_offset);
+                }
+
+                thread::sleep(Duration::from_millis(16)); // ~60 FPS smooth real-time live desktop update
+            }
+
+            unsafe {
+                MagSetFullscreenTransform(1.0, 0, 0);
+                MagUninitialize();
+            }
+        });
+    }
+
+    pub fn stop_live_zoom() {
+        LIVE_ZOOM_ACTIVE.store(false, Ordering::SeqCst);
+    }
+}
+
+#[tauri::command]
+fn open_live_zoom_view(app_handle: AppHandle, _state: State<'_, AppState>) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("zoom") {
+        let _ = window.hide();
+    }
+    if let Some(window) = app_handle.get_webview_window("live_zoom") {
+        let _ = window.hide();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        live_zoom::toggle_live_zoom();
     }
     Ok(())
 }
@@ -986,6 +1101,7 @@ pub fn run() {
             fullscreen_shortcut: Mutex::new("ctrl+shift+f".to_string()),
             break_timer_shortcut: Mutex::new("ctrl+3".to_string()),
             zoom_shortcut: Mutex::new("ctrl+1".to_string()),
+            live_zoom_shortcut: Mutex::new("ctrl+4".to_string()),
             pinned_image: Mutex::new(None),
 
             show_notifications: Mutex::new(true),
@@ -1023,6 +1139,7 @@ pub fn run() {
                         let fs_shortcut_str = state.fullscreen_shortcut.lock().unwrap().clone();
                         let timer_shortcut_str = state.break_timer_shortcut.lock().unwrap().clone();
                         let zoom_shortcut_str = state.zoom_shortcut.lock().unwrap().clone();
+                        let live_zoom_shortcut_str = state.live_zoom_shortcut.lock().unwrap().clone();
                         
                         if let Ok(timer_sc) = timer_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &timer_sc {
@@ -1034,6 +1151,13 @@ pub fn run() {
                         if let Ok(zoom_sc) = zoom_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &zoom_sc {
                                 let _ = open_zoom_view(app_handle_shortcut.clone(), state.clone());
+                                return;
+                            }
+                        }
+
+                        if let Ok(live_zoom_sc) = live_zoom_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &live_zoom_sc {
+                                let _ = open_live_zoom_view(app_handle_shortcut.clone(), state.clone());
                                 return;
                             }
                         }
@@ -1071,11 +1195,13 @@ pub fn run() {
             let fs_shortcut = Shortcut::from_str("ctrl+shift+f").unwrap();
             let timer_shortcut = Shortcut::from_str("ctrl+3").unwrap();
             let zoom_shortcut = Shortcut::from_str("ctrl+1").unwrap();
+            let live_zoom_shortcut = Shortcut::from_str("ctrl+4").unwrap();
             
             let _ = app.global_shortcut().register(reg_shortcut);
             let _ = app.global_shortcut().register(fs_shortcut);
             let _ = app.global_shortcut().register(timer_shortcut);
             let _ = app.global_shortcut().register(zoom_shortcut);
+            let _ = app.global_shortcut().register(live_zoom_shortcut);
 
             // 2. Setup System Tray with retry mechanism for Windows Fast Startup
             let create_tray = |app_ref: &tauri::App| -> Result<tauri::tray::TrayIcon, tauri::Error> {
@@ -1084,7 +1210,8 @@ pub fn run() {
                 let capture_i = MenuItem::with_id(app_ref, "capture", "Take Screenshot", true, None::<&str>)?;
                 let timer_i = MenuItem::with_id(app_ref, "timer", "Break Timer (Ctrl+3)", true, None::<&str>)?;
                 let zoom_i = MenuItem::with_id(app_ref, "zoom", "Screen Zoom (Ctrl+1)", true, None::<&str>)?;
-                let menu = Menu::with_items(app_ref, &[&capture_i, &zoom_i, &timer_i, &settings_i, &quit_i])?;
+                let live_zoom_i = MenuItem::with_id(app_ref, "live_zoom", "Live Zoom (Ctrl+4)", true, None::<&str>)?;
+                let menu = Menu::with_items(app_ref, &[&capture_i, &zoom_i, &live_zoom_i, &timer_i, &settings_i, &quit_i])?;
 
 
                 TrayIconBuilder::with_id("main-tray")
@@ -1116,6 +1243,10 @@ pub fn run() {
                             "zoom" => {
                                 let state = app_handle_tray.state::<AppState>();
                                 let _ = open_zoom_view(app_handle_tray.clone(), state);
+                            }
+                            "live_zoom" => {
+                                let state = app_handle_tray.state::<AppState>();
+                                let _ = open_live_zoom_view(app_handle_tray.clone(), state);
                             }
 
                             _ => {}
@@ -1165,6 +1296,7 @@ pub fn run() {
             show_settings_window,
             open_break_timer,
             open_zoom_view,
+            open_live_zoom_view,
             show_zoom_window,
             hide_timer_window,
             hide_zoom_window,

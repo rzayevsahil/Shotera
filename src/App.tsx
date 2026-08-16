@@ -7,6 +7,7 @@ import ScreenshotCapture from "./components/ScreenshotCapture";
 import PinnedImage from "./components/PinnedImage";
 import BreakTimer from "./components/BreakTimer";
 import ZoomCanvas from "./components/ZoomCanvas";
+import LiveZoomCanvas from "./components/LiveZoomCanvas";
 import "./App.css";
 
 
@@ -89,6 +90,10 @@ function App() {
 
   if (label === "zoom") {
     return <ZoomCanvas />;
+  }
+
+  if (label === "live_zoom") {
+    return <LiveZoomCanvas />;
   }
 
   if (label.startsWith("pinned_")) {

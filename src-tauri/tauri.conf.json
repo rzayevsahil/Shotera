@@ -51,6 +51,17 @@
         "visible": false,
         "alwaysOnTop": true,
         "skipTaskbar": true
+      },
+      {
+        "label": "live_zoom",
+        "title": "Shotera Live Zoom",
+        "fullscreen": true,
+        "resizable": false,
+        "transparent": true,
+        "decorations": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
       }
     ],
     "security": {

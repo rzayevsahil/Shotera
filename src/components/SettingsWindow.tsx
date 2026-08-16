@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -12,7 +12,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-type ActiveTab = "general" | "capture" | "save" | "zoom" | "timer" | "about";
+type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "about";
 
 
 function SettingsWindow() {
@@ -36,6 +36,7 @@ function SettingsWindow() {
   const [regionShortcut, setRegionShortcut] = useState(() => localStorage.getItem("regionShortcut") || "Ctrl+Shift+S");
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
   const [zoomShortcut, setZoomShortcut] = useState(() => localStorage.getItem("zoomShortcut") || "Ctrl+1");
+  const [liveZoomShortcut, setLiveZoomShortcut] = useState(() => localStorage.getItem("liveZoomShortcut") || "Ctrl+4");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
   const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
@@ -56,7 +57,7 @@ function SettingsWindow() {
   });
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
-  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "timer" | null>(null);
+  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   // Updater state
@@ -192,6 +193,7 @@ function SettingsWindow() {
     localStorage.setItem("regionShortcut", regionShortcut);
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
     localStorage.setItem("zoomShortcut", zoomShortcut);
+    localStorage.setItem("liveZoomShortcut", liveZoomShortcut);
     localStorage.setItem("timerShortcut", timerShortcut);
     localStorage.setItem("timerDefaultDuration", String(timerDefaultDuration));
     localStorage.setItem("timerCountDirection", timerCountDirection);
@@ -203,7 +205,7 @@ function SettingsWindow() {
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -212,10 +214,11 @@ function SettingsWindow() {
       fullscreenShortcut: fullscreenShortcut,
       zoomShortcut: zoomShortcut,
       timerShortcut: timerShortcut,
+      liveZoomShortcut: liveZoomShortcut,
     }).catch((e) => {
       console.error("Failed to sync shortcuts with Rust backend:", e);
     });
-  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut]);
+  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, liveZoomShortcut]);
 
   // Handle global shortcut recording
   useEffect(() => {
@@ -287,6 +290,9 @@ function SettingsWindow() {
       } else if (recordingType === "zoom") {
         setZoomShortcut(shortcutStr);
         localStorage.setItem("zoomShortcut", shortcutStr);
+      } else if (recordingType === "live_zoom") {
+        setLiveZoomShortcut(shortcutStr);
+        localStorage.setItem("liveZoomShortcut", shortcutStr);
       } else if (recordingType === "timer") {
         setTimerShortcut(shortcutStr);
         localStorage.setItem("timerShortcut", shortcutStr);
@@ -484,6 +490,13 @@ function SettingsWindow() {
             >
               <ZoomIn className="nav-icon" />
               <span>{(t as any).sidebarZoom}</span>
+            </div>
+            <div
+              className={`nav-item ${activeTab === "live_zoom" ? "active" : ""}`}
+              onClick={() => setActiveTab("live_zoom")}
+            >
+              <Video className="nav-icon" />
+              <span>{(t as any).sidebarLiveZoom || "Canlı Zoom (Ctrl + 4)"}</span>
             </div>
             <div
               className={`nav-item ${activeTab === "timer" ? "active" : ""}`}
@@ -1107,6 +1120,84 @@ function SettingsWindow() {
                     <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
                     <kbd style={{ background: "rgba(248, 113, 113, 0.18)", border: "1px solid rgba(248, 113, 113, 0.4)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#f87171" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "live_zoom" && (
+          <div className="settings-card">
+            {/* Live Screen Zoom Row */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).shortcutLiveZoom || "Canlı Zoom Kısayolu"}</span>
+                <span className="setting-desc">{(t as any).shortcutLiveZoomDesc || "Ekranı canlı takip eden yüksek kaliteli büyüteç modunu başlatan kısayol."}</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "live_zoom" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "live_zoom" ? null : "live_zoom")}
+                  title={t.shortcutChangeHint}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "live_zoom" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "live_zoom" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "live_zoom" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "live_zoom" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none",
+                    minWidth: "100px",
+                    textAlign: "center"
+                  }}
+                >
+                  {recordingType === "live_zoom" ? t.shortcutPressKeys : formatShortcut(liveZoomShortcut)}
+                </button>
+                <button
+                  className="premium-button"
+                  onClick={() => invoke("open_live_zoom_view").catch(console.error)}
+                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                >
+                  <Video size={14} />
+                  Test Live Zoom
+                </button>
+              </div>
+            </div>
+
+            {/* Live Zoom Info Box */}
+            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", borderBottom: "none" }}>
+              <div className="setting-info">
+                <span className="setting-label">Canlı Zoom Özellikleri & Kullanım İpuçları</span>
+                <span className="setting-desc">Canlı büyüteç modu tamamen bağımsız yüksek çözünürlüklü tuval motoru ile çalışır.</span>
+              </div>
+
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                width: "100%",
+                background: "rgba(56, 189, 248, 0.05)",
+                padding: "16px",
+                borderRadius: "10px",
+                border: "1px solid rgba(56, 189, 248, 0.2)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#38bdf8", fontWeight: 600, fontSize: "0.9rem" }}>
+                  <Zap size={16} />
+                  <span>1:1 Kristal Netlik ve Bağımsız Tuval</span>
+                </div>
+                <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  Canlı zoom, statik çizim modundan tamamen bağımsız bir High-DPI tuval (`LiveZoomCanvas`) ile görüntülenir. Çizim araçları devre dışıdır ve ekran takılmadan canlı pürüzsüz netlikte büyütülür.
+                </p>
+                <div style={{ display: "flex", gap: "12px", marginTop: "4px", flexWrap: "wrap" }}>
+                  <span className="shortcut-badge" style={{ fontSize: "0.8rem", background: "rgba(255, 255, 255, 0.08)" }}>
+                    💡 Fare Tekerleği: Yakınlaştır / Uzaklaştır
+                  </span>
+                  <span className="shortcut-badge" style={{ fontSize: "0.8rem", background: "rgba(255, 255, 255, 0.08)" }}>
+                    ⌨️ Yön Tuşları: Zoom Seviyesini Değiştir
+                  </span>
+                  <span className="shortcut-badge" style={{ fontSize: "0.8rem", background: "rgba(255, 255, 255, 0.08)" }}>
+                    ❌ ESC veya Ctrl+4: Canlı Zoom'dan Çık
+                  </span>
                 </div>
               </div>
             </div>

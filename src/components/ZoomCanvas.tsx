@@ -33,6 +33,7 @@ export default function ZoomCanvas() {
   // Zoom & Pan State
   const [zoomLevel, setZoomLevel] = useState<number>(2.0); // Default 2x magnification
   const [panPos, setPanPos] = useState<{ x: number; y: number }>({ x: 0.5, y: 0.5 }); // Normalized (0 to 1)
+  const [isLiveMode, setIsLiveMode] = useState<boolean>(false);
 
   // Drawing & Board State
   const [isDrawMode, setIsDrawMode] = useState<boolean>(false);
@@ -200,10 +201,12 @@ export default function ZoomCanvas() {
     // Initial mount load
     fetchAndAnimate(0.5, 0.5);
 
-    const unlistenZoom = listen<{ cursor_x?: number; cursor_y?: number }>("zoom-captured", (event) => {
+    const unlistenZoom = listen<{ cursor_x?: number; cursor_y?: number; is_live?: boolean }>("zoom-captured", (event) => {
       setImgElement(null);
       const startX = event.payload?.cursor_x ?? 0.5;
       const startY = event.payload?.cursor_y ?? 0.5;
+      const isLive = event.payload?.is_live ?? false;
+      setIsLiveMode(isLive);
       fetchAndAnimate(startX, startY);
     });
 
@@ -405,11 +408,13 @@ export default function ZoomCanvas() {
       ctx.save();
       ctx.globalAlpha = badgeOpacity;
 
-      const badgeText = isDrawMode
-        ? activeTool === "text"
-          ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeTextMode || "🔤 Metin Modu"}`
-          : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
-        : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeStart}`;
+      const badgeText = isLiveMode && !isDrawMode
+        ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeLiveMode || "Canlı Zoom Modu [Fareyi Takip Eder | Sol Tık: Dondur & Çiz | ESC: Çık]"}`
+        : isDrawMode
+          ? activeTool === "text"
+            ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeTextMode || "🔤 Metin Modu"}`
+            : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
+          : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeStart}`;
 
       ctx.font = "bold 13px Inter, sans-serif";
       ctx.textAlign = "left";
@@ -456,6 +461,21 @@ export default function ZoomCanvas() {
       }
 
       const key = e.key.toLowerCase();
+
+      // In Live Zoom mode, disable all drawing shortcuts and only handle Zooming & Exit
+      if (isLiveMode) {
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setZoomLevel((prev) => Math.min(5.0, Number((prev + 0.25).toFixed(2))));
+        } else if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setZoomLevel((prev) => Math.max(1.0, Number((prev - 0.25).toFixed(2))));
+        } else if (e.key === "Escape" || (e.ctrlKey && e.key === "4")) {
+          e.preventDefault();
+          handleClose();
+        }
+        return;
+      }
 
       // Arrow Up (Zoom In) & Arrow Down (Zoom Out)
       if (e.key === "ArrowUp") {
@@ -517,7 +537,7 @@ export default function ZoomCanvas() {
         setActiveTool("text");
         setIsDrawMode(true);
         setTextInput(null);
-      } else if (e.key === "Escape") {
+      } else if (e.key === "Escape" || (e.ctrlKey && e.key === "4")) {
         e.preventDefault();
         if (textInputRef.current !== null) {
           // 1. If text input box is active, close it without committing
@@ -557,7 +577,7 @@ export default function ZoomCanvas() {
     };
 
     const ensureFocus = () => {
-      getCurrentWindow().setFocus().catch(() => {});
+      getCurrentWindow().setFocus().catch(() => { });
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -657,6 +677,7 @@ export default function ZoomCanvas() {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isLiveMode) return; // Live Zoom is strictly for viewing/magnifying, drawing is disabled!
     if (e.button !== 0) return; // Only left click
 
     if (!isDrawMode) {
