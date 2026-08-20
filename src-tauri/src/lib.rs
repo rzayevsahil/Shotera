@@ -166,6 +166,13 @@ async fn start_native_recording(
 }
 
 #[tauri::command]
+fn hide_recorder_window(app_handle: AppHandle) {
+    if let Some(window) = app_handle.get_webview_window("recorder") {
+        let _ = window.hide();
+    }
+}
+
+#[tauri::command]
 fn stop_native_recording(app_handle: AppHandle, state: State<'_, AppState>) -> Result<String, String> {
     println!("Stopping native hardware-accelerated recording.");
     
@@ -1558,7 +1565,8 @@ pub fn run() {
             get_capture_sources,
             start_native_recording,
             stop_native_recording,
-            resize_recorder_window
+            resize_recorder_window,
+            hide_recorder_window
         ])
 
         .run(tauri::generate_context!())

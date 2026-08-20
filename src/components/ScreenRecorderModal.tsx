@@ -76,8 +76,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             setIsRecording(false);
             if (isStandalone) {
                 await invoke("resize_recorder_window", { compact: false }).catch(console.error);
+                await invoke("hide_recorder_window").catch(console.error);
+            } else {
+                onClose();
             }
-            onClose();
         }
     };
 
@@ -107,11 +109,17 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const windows = sources.filter(s => s.source_type === "window");
 
     return (
-        <div className="recorder-modal-overlay">
+        <div className={`recorder-modal-overlay ${isStandalone ? 'standalone' : ''}`}>
             <div className="recorder-modal">
                 <div className="recorder-modal-header">
                     <h3>Select Source for Screen Recording</h3>
-                    <button className="close-btn" onClick={onClose} disabled={isRecording}>
+                    <button className="close-btn" onClick={() => {
+                        if (isStandalone) {
+                            invoke("hide_recorder_window").catch(console.error);
+                        } else {
+                            onClose();
+                        }
+                    }} disabled={isRecording}>
                         <X size={18} />
                     </button>
                 </div>

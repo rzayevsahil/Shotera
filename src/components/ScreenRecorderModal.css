@@ -13,6 +13,12 @@
     animation: fadeIn 0.2s ease-out;
 }
 
+.recorder-modal-overlay.standalone {
+    background: transparent;
+    backdrop-filter: none;
+    padding: 0;
+}
+
 .recorder-modal {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -24,6 +30,16 @@
     flex-direction: column;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     overflow: hidden;
+}
+
+.recorder-modal-overlay.standalone .recorder-modal {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+    background: #16181e;
 }
 
 .recorder-modal-header {
