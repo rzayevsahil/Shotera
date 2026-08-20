@@ -90,9 +90,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             <div className="compact-recorder-bar" style={{ 
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
                 padding: '12px 20px', background: 'rgba(20, 20, 20, 0.95)', 
-                borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.5)', 
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(239, 68, 68, 0.2)',
-                height: '100vh', boxSizing: 'border-box' 
+                border: '1px solid rgba(239, 68, 68, 0.5)', 
+                height: '100vh', boxSizing: 'border-box',
+                borderRadius: '0'
             }} data-tauri-drag-region>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
                     <div className="recording-indicator" style={{ width: '14px', height: '14px', margin: 0, animation: 'pulse-recording 1s infinite' }}></div>
