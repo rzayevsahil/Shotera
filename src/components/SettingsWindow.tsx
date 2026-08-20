@@ -683,54 +683,6 @@ function SettingsWindow() {
           <div className="settings-card">
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">{t.playShutterSound}</span>
-                <span className="setting-desc">{t.playShutterSoundDesc}</span>
-              </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={playAudio}
-                  onChange={(e) => setPlayAudio(e.target.checked)}
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{t.includeCursor}</span>
-                <span className="setting-desc">{t.includeCursorDesc}</span>
-              </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={includeCursor}
-                  onChange={(e) => setIncludeCursor(e.target.checked)}
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).blurAmountSetting}</span>
-                <span className="setting-desc">{(t as any).blurAmountDesc}</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
-                <input
-                  type="range"
-                  min="2"
-                  max="30"
-                  value={defaultBlurAmount}
-                  onChange={(e) => setDefaultBlurAmount(Number(e.target.value))}
-                  style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
-                />
-                <span style={{ minWidth: "45px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{defaultBlurAmount} px</span>
-              </div>
-            </div>
-
-            <div className="setting-row">
-              <div className="setting-info">
                 <span className="setting-label">{t.globalShortcut}</span>
                 <span className="setting-desc">{t.globalShortcutDesc}</span>
               </div>
@@ -794,6 +746,54 @@ function SettingsWindow() {
                   <Camera size={14} />
                   {t.captureNow}
                 </button>
+              </div>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{t.playShutterSound}</span>
+                <span className="setting-desc">{t.playShutterSoundDesc}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={playAudio}
+                  onChange={(e) => setPlayAudio(e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{t.includeCursor}</span>
+                <span className="setting-desc">{t.includeCursorDesc}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={includeCursor}
+                  onChange={(e) => setIncludeCursor(e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).blurAmountSetting}</span>
+                <span className="setting-desc">{(t as any).blurAmountDesc}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                <input
+                  type="range"
+                  min="2"
+                  max="30"
+                  value={defaultBlurAmount}
+                  onChange={(e) => setDefaultBlurAmount(Number(e.target.value))}
+                  style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                />
+                <span style={{ minWidth: "45px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{defaultBlurAmount} px</span>
               </div>
             </div>
 
