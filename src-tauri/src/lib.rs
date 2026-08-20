@@ -50,9 +50,19 @@ fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
                 }
             }
             
+            let mut name = m.name().unwrap_or_else(|_| format!("Monitor {}", i + 1));
+            if name.starts_with("\\\\.\\DISPLAY") {
+                let num_str = name.replace("\\\\.\\DISPLAY", "");
+                if let Ok(num) = num_str.parse::<u32>() {
+                    name = format!("Monitor {}", num);
+                } else {
+                    name = format!("Monitor {}", i + 1);
+                }
+            }
+            
             sources.push(CaptureSource {
                 id: format!("monitor_{}", i),
-                name: m.name().unwrap_or_else(|_| format!("Monitor {}", i + 1)),
+                name,
                 source_type: "monitor".to_string(),
                 thumbnail: thumb,
             });
