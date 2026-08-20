@@ -525,7 +525,7 @@ function SettingsWindow() {
               onClick={() => setActiveTab("record")}
             >
               <Play className="nav-icon" />
-              <span>{(t as any).sidebarRecord || "Screen Record"}</span>
+              <span>{(t as any).sidebarRecord}</span>
             </div>
 
             <div
@@ -576,7 +576,7 @@ function SettingsWindow() {
             {activeTab === "save" && t.saveTitle}
             {activeTab === "zoom" && (t as any).zoomTitle}
             {activeTab === "live_zoom" && (t as any).liveZoomTitle}
-            {activeTab === "record" && ((t as any).recordTitle || "Screen Recording (Beta)")}
+            {activeTab === "record" && (t as any).recordTitle}
             {activeTab === "timer" && (t as any).timerTitle}
             {activeTab === "about" && t.aboutTitle}
           </h2>
@@ -586,7 +586,7 @@ function SettingsWindow() {
             {activeTab === "save" && t.saveSubtitle}
             {activeTab === "zoom" && (t as any).zoomSubtitle}
             {activeTab === "live_zoom" && (t as any).liveZoomSubtitle}
-            {activeTab === "record" && ((t as any).recordSubtitle || "Hardware-accelerated native screen recording settings.")}
+            {activeTab === "record" && (t as any).recordSubtitle}
             {activeTab === "timer" && (t as any).timerSubtitle}
             {activeTab === "about" && t.aboutSubtitle}
           </p>
@@ -1846,8 +1846,8 @@ function SettingsWindow() {
           <div className="settings-card">
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Native Screen Recording</span>
-                <span className="setting-desc">Record high-quality video using hardware encoder (NVENC/QSV). Pick any screen or window directly.</span>
+                <span className="setting-label">{(t as any).recordNativeTitle}</span>
+                <span className="setting-desc">{(t as any).recordNativeDesc}</span>
               </div>
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <button
@@ -1868,15 +1868,15 @@ function SettingsWindow() {
                 </button>
                 <button className="premium-button" onClick={() => invoke("open_recorder_view")} style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
                   <Video size={16} />
-                  Open Recorder
+                  {(t as any).recordOpenBtn}
                 </button>
               </div>
             </div>
-            
-            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+
+            <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">Performance Mode</span>
-                <span className="setting-desc">Currently defaults to Windows Graphics Capture (WGC) for best modern API support.</span>
+                <span className="setting-label">{(t as any).recordPerfMode}</span>
+                <span className="setting-desc">{(t as any).recordPerfModeDesc}</span>
               </div>
               <div className="shortcut-badge" style={{ cursor: "default" }}>
                 WGC / DXGI
@@ -2137,9 +2137,9 @@ function SettingsWindow() {
         )}
       </main>
 
-      <ScreenRecorderModal 
-        isOpen={isRecorderModalOpen} 
-        onClose={() => setIsRecorderModalOpen(false)} 
+      <ScreenRecorderModal
+        isOpen={isRecorderModalOpen}
+        onClose={() => setIsRecorderModalOpen(false)}
       />
 
       {warningMessage && (

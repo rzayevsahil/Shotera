@@ -233,6 +233,14 @@ export const translations = {
     timerResetKeys: "R Tuşu",
     timerExitLabel: "Pencereyi Kapat",
     timerExitKeys: "ESC / Sağ Tık",
+    sidebarRecord: "Ekran Kaydı",
+    recordTitle: "Ekran Kaydı (Beta)",
+    recordSubtitle: "Donanım hızlandırmalı yerel ekran kaydı ayarları.",
+    recordNativeTitle: "Yerel Ekran Kaydı",
+    recordNativeDesc: "Donanım kodlayıcı (NVENC/QSV) kullanarak yüksek kaliteli video kaydedin. Herhangi bir ekranı veya pencereyi doğrudan seçin.",
+    recordOpenBtn: "Kaydediciyi Aç",
+    recordPerfMode: "Performans Modu",
+    recordPerfModeDesc: "En iyi modern API desteği için varsayılan olarak Windows Grafik Yakalama (WGC) kullanılır.",
   },
 
 
@@ -470,6 +478,14 @@ export const translations = {
     timerResetKeys: "R Key",
     timerExitLabel: "Close / Exit Timer",
     timerExitKeys: "ESC / Right Click",
+    sidebarRecord: "Screen Record",
+    recordTitle: "Screen Recording (Beta)",
+    recordSubtitle: "Hardware-accelerated native screen recording settings.",
+    recordNativeTitle: "Native Screen Recording",
+    recordNativeDesc: "Record high-quality video using hardware encoder (NVENC/QSV). Pick any screen or window directly.",
+    recordOpenBtn: "Open Recorder",
+    recordPerfMode: "Performance Mode",
+    recordPerfModeDesc: "Currently defaults to Windows Graphics Capture (WGC) for best modern API support.",
   },
 
 
@@ -707,6 +723,14 @@ export const translations = {
     timerResetKeys: "R Düyməsi",
     timerExitLabel: "❌ Pəncərəni Bağla",
     timerExitKeys: "ESC / Sağ Klik",
+    sidebarRecord: "Ekran Qeydi",
+    recordTitle: "Ekran Qeydi (Beta)",
+    recordSubtitle: "Aparat sürətləndirməli yerli ekran qeydi tənzimləmələri.",
+    recordNativeTitle: "Yerli Ekran Qeydi",
+    recordNativeDesc: "Aparat kodlayıcısı (NVENC/QSV) istifadə edərək yüksək keyfiyyətli video qeyd edin. İstənilən ekranı və ya pəncərəni birbaşa seçin.",
+    recordOpenBtn: "Qeydedicini Aç",
+    recordPerfMode: "Performans Rejimi",
+    recordPerfModeDesc: "Ən yaxşı müasir API dəstəyi üçün varsayılan olaraq Windows Qrafik Yaxalama (WGC) istifadə olunur.",
   },
 
   ru: {
@@ -946,6 +970,14 @@ export const translations = {
     timerResetKeys: "Клавиша R",
     timerExitLabel: "❌ Закрыть таймер",
     timerExitKeys: "ESC / Правый клик",
+    sidebarRecord: "Запись Экрана",
+    recordTitle: "Запись Экрана (Бета)",
+    recordSubtitle: "Настройки локальной записи экрана с аппаратным ускорением.",
+    recordNativeTitle: "Локальная Запись Экрана",
+    recordNativeDesc: "Записывайте высококачественное видео с помощью аппаратного кодировщика (NVENC/QSV). Выберите любой экран или окно напрямую.",
+    recordOpenBtn: "Открыть рекордер",
+    recordPerfMode: "Режим Производительности",
+    recordPerfModeDesc: "По умолчанию используется Windows Graphics Capture (WGC) для лучшей поддержки современных API.",
   },
 
   de: {
@@ -1182,6 +1214,14 @@ export const translations = {
     timerResetKeys: "Taste R",
     timerExitLabel: "❌ Timer schließen",
     timerExitKeys: "ESC / Rechtsklick",
+    sidebarRecord: "Bildschirmaufnahme",
+    recordTitle: "Bildschirmaufnahme (Beta)",
+    recordSubtitle: "Einstellungen für die hardwarebeschleunigte native Bildschirmaufnahme.",
+    recordNativeTitle: "Native Bildschirmaufnahme",
+    recordNativeDesc: "Nehmen Sie hochwertige Videos mit Hardware-Encoder (NVENC/QSV) auf. Wählen Sie direkt einen beliebigen Bildschirm oder ein Fenster aus.",
+    recordOpenBtn: "Rekorder öffnen",
+    recordPerfMode: "Leistungsmodus",
+    recordPerfModeDesc: "Verwendet standardmäßig Windows Graphics Capture (WGC) für die beste moderne API-Unterstützung.",
   }
 };
 
