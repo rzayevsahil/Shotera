@@ -1849,7 +1849,7 @@ function SettingsWindow() {
                 <span className="setting-label">{(t as any).recordNativeTitle}</span>
                 <span className="setting-desc">{(t as any).recordNativeDesc}</span>
               </div>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 <button
                   className={`shortcut-badge customizable ${recordingType === "record" ? "recording" : ""}`}
                   onClick={() => setRecordingType(recordingType === "record" ? null : "record")}
@@ -1861,13 +1861,19 @@ function SettingsWindow() {
                     color: recordingType === "record" ? "var(--accent-cyan)" : "white",
                     fontWeight: 600,
                     animation: recordingType === "record" ? "pulse-border 1.5s infinite" : "none",
-                    outline: "none"
+                    outline: "none",
+                    minWidth: "100px",
+                    textAlign: "center"
                   }}
                 >
                   {recordingType === "record" ? t.shortcutPressKeys : formatShortcut(recordShortcut)}
                 </button>
-                <button className="premium-button" onClick={() => invoke("open_recorder_view")} style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
-                  <Video size={16} />
+                <button 
+                  className="premium-button" 
+                  onClick={() => invoke("open_recorder_view")}
+                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                >
+                  <Video size={14} />
                   {(t as any).recordOpenBtn}
                 </button>
               </div>
