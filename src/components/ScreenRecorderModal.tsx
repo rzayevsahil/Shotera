@@ -21,6 +21,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [loading, setLoading] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
+    const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
 
     useEffect(() => {
         if (isOpen) {
@@ -140,47 +141,64 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                         <div className="loading-state">Loading sources...</div>
                     ) : (
                         <div className="sources-container">
-                            {monitors.length > 0 && (
-                                <div className="source-group">
-                                    <h4><Monitor size={14} /> Monitors</h4>
-                                    <div className="source-grid">
-                                        {monitors.map(m => (
-                                            <div 
-                                                key={m.id} 
-                                                className={`source-card ${selectedId === m.id ? "selected" : ""}`}
-                                                onClick={() => setSelectedId(m.id)}
-                                            >
-                                                <div className="source-preview">
-                                                    {m.thumbnail ? (
-                                                        <img src={`data:image/png;base64,${m.thumbnail}`} alt={m.name} />
-                                                    ) : (
-                                                        <div className="placeholder"><Monitor size={24} /></div>
-                                                    )}
-                                                </div>
-                                                <div className="source-name" title={m.name}>{m.name}</div>
-                                                {selectedId === m.id && <div className="selected-badge"><Check size={12} /></div>}
+                            <div className="source-tabs" style={{ display: "flex", gap: "10px", marginBottom: "15px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", paddingBottom: "10px" }}>
+                                <button 
+                                    className={`source-tab ${activeTab === "monitors" ? "active" : ""}`} 
+                                    onClick={() => setActiveTab("monitors")}
+                                    style={{ background: activeTab === "monitors" ? "rgba(0, 242, 254, 0.15)" : "transparent", border: activeTab === "monitors" ? "1px solid var(--accent-cyan)" : "1px solid transparent", color: activeTab === "monitors" ? "var(--accent-cyan)" : "#a1a1aa", padding: "6px 12px", borderRadius: "6px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: 500 }}
+                                >
+                                    <Monitor size={14} /> Monitors
+                                </button>
+                                <button 
+                                    className={`source-tab ${activeTab === "windows" ? "active" : ""}`} 
+                                    onClick={() => setActiveTab("windows")}
+                                    style={{ background: activeTab === "windows" ? "rgba(0, 242, 254, 0.15)" : "transparent", border: activeTab === "windows" ? "1px solid var(--accent-cyan)" : "1px solid transparent", color: activeTab === "windows" ? "var(--accent-cyan)" : "#a1a1aa", padding: "6px 12px", borderRadius: "6px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: 500 }}
+                                >
+                                    <AppWindow size={14} /> Windows
+                                </button>
+                            </div>
+
+                            {activeTab === "monitors" && monitors.length > 0 && (
+                                <div className="source-grid">
+                                    {monitors.map(m => (
+                                        <div 
+                                            key={m.id} 
+                                            className={`source-card ${selectedId === m.id ? "selected" : ""}`}
+                                            onClick={() => setSelectedId(m.id)}
+                                        >
+                                            <div className="source-preview">
+                                                {m.thumbnail ? (
+                                                    <img src={`data:image/png;base64,${m.thumbnail}`} alt={m.name} />
+                                                ) : (
+                                                    <div className="placeholder"><Monitor size={24} /></div>
+                                                )}
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="source-name" title={m.name}>{m.name}</div>
+                                            {selectedId === m.id && <div className="selected-badge"><Check size={12} /></div>}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
 
-                            {windows.length > 0 && (
-                                <div className="source-group">
-                                    <h4><AppWindow size={14} /> Windows</h4>
-                                    <div className="source-list">
-                                        {windows.map(w => (
-                                            <div 
-                                                key={w.id} 
-                                                className={`source-list-item ${selectedId === w.id ? "selected" : ""}`}
-                                                onClick={() => setSelectedId(w.id)}
-                                            >
-                                                <AppWindow size={16} className="window-icon" />
-                                                <span className="source-name">{w.name}</span>
-                                                {selectedId === w.id && <Check size={14} className="check-icon" />}
+                            {activeTab === "windows" && windows.length > 0 && (
+                                <div className="source-grid">
+                                    {windows.map(w => (
+                                        <div 
+                                            key={w.id} 
+                                            className={`source-card ${selectedId === w.id ? "selected" : ""}`}
+                                            onClick={() => setSelectedId(w.id)}
+                                        >
+                                            <div className="source-preview">
+                                                {w.thumbnail ? (
+                                                    <img src={`data:image/png;base64,${w.thumbnail}`} alt={w.name} />
+                                                ) : (
+                                                    <div className="placeholder"><AppWindow size={24} /></div>
+                                                )}
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="source-name" title={w.name}>{w.name}</div>
+                                            {selectedId === w.id && <div className="selected-badge"><Check size={12} /></div>}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
