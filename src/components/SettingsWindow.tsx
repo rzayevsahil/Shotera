@@ -64,6 +64,7 @@ function SettingsWindow() {
   const [isRecorderModalOpen, setIsRecorderModalOpen] = useState(false);
   const [recordFps, setRecordFps] = useState<number>(() => Number(localStorage.getItem("recordFps") || "30"));
   const [recordAudio, setRecordAudio] = useState<boolean>(() => localStorage.getItem("recordAudio") !== "false");
+  const [recordMic, setRecordMic] = useState<boolean>(() => localStorage.getItem("recordMic") === "true");
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -1924,6 +1925,25 @@ function SettingsWindow() {
                     const checked = e.target.checked;
                     setRecordAudio(checked);
                     localStorage.setItem("recordAudio", checked.toString());
+                  }}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).recordMicLabel || "Mikrofonu Kaydet"}</span>
+                <span className="setting-desc">{(t as any).recordMicDesc || "Kendi sesinizi (mikrofon) video kaydına dahil edin."}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={recordMic}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setRecordMic(checked);
+                    localStorage.setItem("recordMic", checked.toString());
                   }}
                 />
                 <span className="slider"></span>

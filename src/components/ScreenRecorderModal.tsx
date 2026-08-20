@@ -75,7 +75,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
             const fps = Number(localStorage.getItem("recordFps")) || 30;
             const recordAudio = localStorage.getItem("recordAudio") !== "false";
-            await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio });
+            const recordMic = localStorage.getItem("recordMic") === "true";
+            await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio, recordMic });
         } catch (error) {
             console.error("Failed to start recording:", error);
             setIsRecording(false);

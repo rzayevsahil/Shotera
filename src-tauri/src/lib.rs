@@ -137,13 +137,14 @@ async fn start_native_recording(
     state: State<'_, AppState>,
     source_id: String,
     fps: u32,
-    record_audio: bool
+    record_audio: bool,
+    record_mic: bool
 ) -> Result<String, String> {
     use win_native_media::{Pipeline, PipelineConfig, VideoConfig, RecordConfig, CaptureTarget};
     use chrono::Local;
     use tauri::Manager;
 
-    println!("Starting native hardware-accelerated recording for source: {}, fps: {}, audio: {}", source_id, fps, record_audio);
+    println!("Starting native hardware-accelerated recording for source: {}, fps: {}, audio: {}, mic: {}", source_id, fps, record_audio, record_mic);
 
     let mut target = CaptureTarget::Monitor(0);
     let mut target_width = 1920;
@@ -196,11 +197,11 @@ async fn start_native_recording(
             keyframe_interval: 2,
         },
         record: Some(RecordConfig { output_path: path.clone().into() }),
-        audio: if record_audio {
+        audio: if record_audio || record_mic {
             Some(win_native_media::AudioConfig {
                 bitrate: 192_000,
-                loopback: true,
-                microphone: false, // You can set this to true if microphone capture is also desired
+                loopback: record_audio,
+                microphone: record_mic,
             })
         } else {
             None
