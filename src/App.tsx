@@ -8,6 +8,7 @@ import PinnedImage from "./components/PinnedImage";
 import BreakTimer from "./components/BreakTimer";
 import ZoomCanvas from "./components/ZoomCanvas";
 import LiveZoomCanvas from "./components/LiveZoomCanvas";
+import ScreenRecorderModal from "./components/ScreenRecorderModal";
 import "./App.css";
 
 
@@ -98,6 +99,10 @@ function App() {
 
   if (label.startsWith("pinned_")) {
     return <PinnedImage />;
+  }
+
+  if (label === "recorder") {
+    return <ScreenRecorderModal isOpen={true} onClose={() => getCurrentWindow().hide()} isStandalone={true} />;
   }
 
   return <SettingsWindow />;

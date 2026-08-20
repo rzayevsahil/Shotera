@@ -18,10 +18,224 @@ struct AppState {
     break_timer_shortcut: Mutex<String>,
     zoom_shortcut: Mutex<String>,
     live_zoom_shortcut: Mutex<String>,
+    record_shortcut: Mutex<String>,
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
+    recorder_stop_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
 }
 
+#[derive(serde::Serialize)]
+struct CaptureSource {
+    id: String,
+    name: String,
+    source_type: String, // "monitor" or "window"
+    thumbnail: Option<String>,
+}
+
+#[tauri::command]
+fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
+    let mut sources = Vec::new();
+    
+    // Monitors
+    if let Ok(monitors) = xcap::Monitor::all() {
+        for (i, m) in monitors.iter().enumerate() {
+            let mut thumb = None;
+            // Optionally capture a small thumbnail
+            if let Ok(image) = m.capture_image() {
+                // Resize for thumbnail to be fast
+                let resized = image::imageops::thumbnail(&image, 320, 180);
+                let mut png_bytes = std::io::Cursor::new(Vec::new());
+                if resized.write_to(&mut png_bytes, image::ImageFormat::Png).is_ok() {
+                    thumb = Some(base64::prelude::BASE64_STANDARD.encode(png_bytes.get_ref()));
+                }
+            }
+            
+            sources.push(CaptureSource {
+                id: format!("monitor_{}", i),
+                name: m.name().unwrap_or_else(|_| format!("Monitor {}", i + 1)),
+                source_type: "monitor".to_string(),
+                thumbnail: thumb,
+            });
+        }
+    }
+    
+    // Windows
+    if let Ok(windows) = xcap::Window::all() {
+        for w in windows {
+            if let Ok(title) = w.title() {
+                // Ignore empty titles or basic system windows
+                if !title.is_empty() && title != "Program Manager" && title != "Settings" && title != "Shotera" {
+                    sources.push(CaptureSource {
+                        id: format!("window_{}", w.id().unwrap_or(0)),
+                        name: title,
+                        source_type: "window".to_string(),
+                        thumbnail: None,
+                    });
+                }
+            }
+        }
+    }
+    
+    Ok(sources)
+}
+
+#[tauri::command]
+async fn start_native_recording(
+    app_handle: AppHandle,
+    state: State<'_, AppState>,
+    source_id: String
+) -> Result<String, String> {
+    use win_native_media::{Pipeline, PipelineConfig, VideoConfig, RecordConfig, CaptureTarget};
+    use chrono::Local;
+    use tauri::Manager;
+
+    println!("Starting native hardware-accelerated recording for source: {}", source_id);
+
+    let mut target = CaptureTarget::Monitor(0);
+    let mut target_width = 1920;
+    let mut target_height = 1080;
+
+    if source_id.starts_with("monitor_") {
+        if let Ok(idx) = source_id.replace("monitor_", "").parse::<usize>() {
+            target = CaptureTarget::Monitor(idx);
+            if let Ok(monitors) = xcap::Monitor::all() {
+                if let Some(m) = monitors.get(idx) {
+                    target_width = m.width().unwrap_or(1920);
+                    target_height = m.height().unwrap_or(1080);
+                }
+            }
+        }
+    } else if source_id.starts_with("window_") {
+        if let Ok(hwnd) = source_id.replace("window_", "").parse::<isize>() {
+            target = CaptureTarget::Window(hwnd);
+            if let Ok(windows) = xcap::Window::all() {
+                if let Some(w) = windows.iter().find(|w| w.id().unwrap_or(0) as isize == hwnd) {
+                    target_width = w.width().unwrap_or(1920);
+                    target_height = w.height().unwrap_or(1080);
+                }
+            }
+        }
+    }
+
+    // Ensure dimensions are even numbers (required by many hardware encoders)
+    target_width = target_width - (target_width % 2);
+    target_height = target_height - (target_height % 2);
+
+    let now = Local::now();
+    let filename = now.format("Recording_%Y%m%d_%H%M%S.mp4").to_string();
+    
+    // Resolve output path (Videos folder)
+    let mut path = app_handle.path().video_dir().unwrap_or_else(|_| std::path::PathBuf::from("C:\\"));
+    path.push("Shotera");
+    let _ = std::fs::create_dir_all(&path);
+    path.push(&filename);
+
+    let output_path_str = path.to_string_lossy().to_string();
+
+    let config = PipelineConfig {
+        capture_target: target,
+        video: VideoConfig { 
+            width: target_width, 
+            height: target_height, 
+            fps: 60, 
+            bitrate: 15_000_000,
+            keyframe_interval: 2,
+        },
+        record: Some(RecordConfig { output_path: path.clone().into() }),
+        audio: None,
+        capture_cursor: true,
+        stream: None,
+    };
+
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    
+    tauri::async_runtime::spawn(async move {
+        if let Ok(mut pipeline) = Pipeline::new(config) {
+            if pipeline.start().await.is_ok() {
+                let _ = rx.await; // wait for stop signal
+                let _ = pipeline.stop().await;
+            }
+        }
+    });
+
+    if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
+        *stop_tx = Some(tx);
+    }
+
+    Ok(output_path_str)
+}
+
+#[tauri::command]
+fn stop_native_recording(app_handle: AppHandle, state: State<'_, AppState>) -> Result<String, String> {
+    println!("Stopping native hardware-accelerated recording.");
+    
+    if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
+        if let Some(tx) = stop_tx.take() {
+            let _ = tx.send(());
+        }
+    }
+    
+    // Send notification
+    let body = "Screen recording saved successfully!";
+    show_app_notification(&state, "Shotera", body, None);
+
+    Ok("Recording stopped and saved to MP4.".into())
+}
+
+
+#[tauri::command]
+fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), String> {
+    use tauri::Manager;
+    if let Some(window) = app_handle.get_webview_window("recorder") {
+        if compact {
+            let _ = window.set_size(tauri::LogicalSize::new(280.0, 80.0));
+            if let Ok(Some(monitor)) = window.current_monitor() {
+                let size = monitor.size();
+                let scale_factor = monitor.scale_factor();
+                let x = (size.width as f64 - (300.0 * scale_factor)) as i32;
+                let y = (size.height as f64 - (120.0 * scale_factor)) as i32;
+                let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+            }
+        } else {
+            let _ = window.set_size(tauri::LogicalSize::new(620.0, 500.0));
+            let _ = window.center();
+        }
+    }
+    Ok(())
+}
+
+fn open_recorder_view(app_handle: AppHandle) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("recorder") {
+        if window.is_visible().unwrap_or(false) {
+            let _ = window.hide();
+            return Ok(());
+        }
+    }
+
+    if let Some(window) = app_handle.get_webview_window("recorder") {
+        let _ = window.show();
+        let _ = window.set_focus();
+        let _ = window.emit("recorder-opened", ());
+    } else {
+        // Create the recorder window if it doesn't exist
+        let builder = tauri::WebviewWindowBuilder::new(
+            &app_handle,
+            "recorder",
+            tauri::WebviewUrl::App("index.html".into())
+        )
+        .title("Screen Recorder")
+        .inner_size(620.0, 500.0)
+        .resizable(false)
+        .decorations(false)
+        .transparent(true)
+        .always_on_top(true)
+        .center();
+        
+        builder.build().map_err(|e| e.to_string())?;
+    }
+    
+    Ok(())
+}
 
 fn show_app_notification(state: &State<'_, AppState>, title: &str, body: &str, image_path: Option<&str>) {
     if let Ok(show) = state.show_notifications.lock() {
@@ -554,6 +768,7 @@ fn register_all_shortcuts_helper(
     timer_shortcut_str: &str,
     zoom_shortcut_str: &str,
     live_zoom_shortcut_str: &str,
+    record_shortcut_str: &str,
 ) -> Result<(), String> {
     use std::str::FromStr;
     let _ = app_handle.global_shortcut().unregister_all();
@@ -573,6 +788,9 @@ fn register_all_shortcuts_helper(
     if let Ok(sc) = Shortcut::from_str(&live_zoom_shortcut_str.to_lowercase()) {
         let _ = app_handle.global_shortcut().register(sc);
     }
+    if let Ok(sc) = Shortcut::from_str(&record_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
     Ok(())
 }
 
@@ -585,10 +803,12 @@ fn update_shortcuts(
     zoom_shortcut: Option<String>,
     timer_shortcut: Option<String>,
     live_zoom_shortcut: Option<String>,
+    record_shortcut: Option<String>,
 ) -> Result<(), String> {
     let timer_str = timer_shortcut.unwrap_or_else(|| state.break_timer_shortcut.lock().unwrap().clone());
     let zoom_str = zoom_shortcut.unwrap_or_else(|| state.zoom_shortcut.lock().unwrap().clone());
     let live_zoom_str = live_zoom_shortcut.unwrap_or_else(|| state.live_zoom_shortcut.lock().unwrap().clone());
+    let record_str = record_shortcut.unwrap_or_else(|| state.record_shortcut.lock().unwrap().clone());
 
     register_all_shortcuts_helper(
         &app_handle,
@@ -597,6 +817,7 @@ fn update_shortcuts(
         &timer_str,
         &zoom_str,
         &live_zoom_str,
+        &record_str,
     )?;
 
     if let Ok(mut reg_state) = state.region_shortcut.lock() {
@@ -613,6 +834,9 @@ fn update_shortcuts(
     }
     if let Ok(mut live_zoom_state) = state.live_zoom_shortcut.lock() {
         *live_zoom_state = live_zoom_str.to_lowercase();
+    }
+    if let Ok(mut record_state) = state.record_shortcut.lock() {
+        *record_state = record_str.to_lowercase();
     }
 
     Ok(())
@@ -1102,9 +1326,11 @@ pub fn run() {
             break_timer_shortcut: Mutex::new("ctrl+3".to_string()),
             zoom_shortcut: Mutex::new("ctrl+1".to_string()),
             live_zoom_shortcut: Mutex::new("ctrl+4".to_string()),
+            record_shortcut: Mutex::new("ctrl+5".to_string()),
             pinned_image: Mutex::new(None),
 
             show_notifications: Mutex::new(true),
+            recorder_stop_tx: Mutex::new(None),
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -1140,6 +1366,7 @@ pub fn run() {
                         let timer_shortcut_str = state.break_timer_shortcut.lock().unwrap().clone();
                         let zoom_shortcut_str = state.zoom_shortcut.lock().unwrap().clone();
                         let live_zoom_shortcut_str = state.live_zoom_shortcut.lock().unwrap().clone();
+                        let record_shortcut_str = state.record_shortcut.lock().unwrap().clone();
                         
                         if let Ok(timer_sc) = timer_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &timer_sc {
@@ -1162,6 +1389,12 @@ pub fn run() {
                             }
                         }
 
+                        if let Ok(record_sc) = record_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &record_sc {
+                                let _ = open_recorder_view(app_handle_shortcut.clone());
+                                return;
+                            }
+                        }
 
                         let matches_fs = if let Ok(fs_shortcut) = fs_shortcut_str.parse::<Shortcut>() {
                             shortcut == &fs_shortcut
@@ -1196,12 +1429,14 @@ pub fn run() {
             let timer_shortcut = Shortcut::from_str("ctrl+3").unwrap();
             let zoom_shortcut = Shortcut::from_str("ctrl+1").unwrap();
             let live_zoom_shortcut = Shortcut::from_str("ctrl+4").unwrap();
+            let record_shortcut = Shortcut::from_str("ctrl+5").unwrap();
             
             let _ = app.global_shortcut().register(reg_shortcut);
             let _ = app.global_shortcut().register(fs_shortcut);
             let _ = app.global_shortcut().register(timer_shortcut);
             let _ = app.global_shortcut().register(zoom_shortcut);
             let _ = app.global_shortcut().register(live_zoom_shortcut);
+            let _ = app.global_shortcut().register(record_shortcut);
 
             // 2. Setup System Tray with retry mechanism for Windows Fast Startup
             let create_tray = |app_ref: &tauri::App| -> Result<tauri::tray::TrayIcon, tauri::Error> {
@@ -1319,7 +1554,11 @@ pub fn run() {
             write_log_entry,
             unblock_autostart_registry,
             is_autostart_launch,
-            save_zoom_snapshot
+            save_zoom_snapshot,
+            get_capture_sources,
+            start_native_recording,
+            stop_native_recording,
+            resize_recorder_window
         ])
 
         .run(tauri::generate_context!())

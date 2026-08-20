@@ -12,7 +12,8 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "about";
+import ScreenRecorderModal from "./ScreenRecorderModal";
+type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
 
 
 function SettingsWindow() {
@@ -37,6 +38,7 @@ function SettingsWindow() {
   const [fullscreenShortcut, setFullscreenShortcut] = useState(() => localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F");
   const [zoomShortcut, setZoomShortcut] = useState(() => localStorage.getItem("zoomShortcut") || "Ctrl+1");
   const [liveZoomShortcut, setLiveZoomShortcut] = useState(() => localStorage.getItem("liveZoomShortcut") || "Ctrl+4");
+  const [recordShortcut, setRecordShortcut] = useState(() => localStorage.getItem("recordShortcut") || "Ctrl+5");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
   const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
@@ -57,8 +59,9 @@ function SettingsWindow() {
   });
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
-  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "timer" | null>(null);
+  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
+  const [isRecorderModalOpen, setIsRecorderModalOpen] = useState(false);
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -194,6 +197,7 @@ function SettingsWindow() {
     localStorage.setItem("fullscreenShortcut", fullscreenShortcut);
     localStorage.setItem("zoomShortcut", zoomShortcut);
     localStorage.setItem("liveZoomShortcut", liveZoomShortcut);
+    localStorage.setItem("recordShortcut", recordShortcut);
     localStorage.setItem("timerShortcut", timerShortcut);
     localStorage.setItem("timerDefaultDuration", String(timerDefaultDuration));
     localStorage.setItem("timerCountDirection", timerCountDirection);
@@ -215,10 +219,11 @@ function SettingsWindow() {
       zoomShortcut: zoomShortcut,
       timerShortcut: timerShortcut,
       liveZoomShortcut: liveZoomShortcut,
+      recordShortcut: recordShortcut,
     }).catch((e) => {
       console.error("Failed to sync shortcuts with Rust backend:", e);
     });
-  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, liveZoomShortcut]);
+  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, liveZoomShortcut, recordShortcut]);
 
   // Handle global shortcut recording
   useEffect(() => {
@@ -293,6 +298,9 @@ function SettingsWindow() {
       } else if (recordingType === "live_zoom") {
         setLiveZoomShortcut(shortcutStr);
         localStorage.setItem("liveZoomShortcut", shortcutStr);
+      } else if (recordingType === "record") {
+        setRecordShortcut(shortcutStr);
+        localStorage.setItem("recordShortcut", shortcutStr);
       } else if (recordingType === "timer") {
         setTimerShortcut(shortcutStr);
         localStorage.setItem("timerShortcut", shortcutStr);
@@ -331,9 +339,12 @@ function SettingsWindow() {
       } else if (recordingType === "fullscreen") {
         setFullscreenShortcut(shortcutStr);
         localStorage.setItem("fullscreenShortcut", shortcutStr);
-      } else if (recordingType === "zoom") {
-        setZoomShortcut(shortcutStr);
-        localStorage.setItem("zoomShortcut", shortcutStr);
+      } else if (recordingType === "live_zoom") {
+        setLiveZoomShortcut(shortcutStr);
+        localStorage.setItem("liveZoomShortcut", shortcutStr);
+      } else if (recordingType === "record") {
+        setRecordShortcut(shortcutStr);
+        localStorage.setItem("recordShortcut", shortcutStr);
       } else if (recordingType === "timer") {
         setTimerShortcut(shortcutStr);
         localStorage.setItem("timerShortcut", shortcutStr);
@@ -364,11 +375,15 @@ function SettingsWindow() {
       const fsShortcut = localStorage.getItem("fullscreenShortcut") || "Ctrl+Shift+F";
       const zmShortcut = localStorage.getItem("zoomShortcut") || "Ctrl+1";
       const tmShortcut = localStorage.getItem("timerShortcut") || "Ctrl+3";
+      const lzShortcut = localStorage.getItem("liveZoomShortcut") || "Ctrl+4";
+      const recShortcut = localStorage.getItem("recordShortcut") || "Ctrl+5";
       invoke("update_shortcuts", {
         regionShortcut: regShortcut,
         fullscreenShortcut: fsShortcut,
         zoomShortcut: zmShortcut,
         timerShortcut: tmShortcut,
+        liveZoomShortcut: lzShortcut,
+        recordShortcut: recShortcut,
       }).catch((err) => console.error(err));
     };
   }, [recordingType]);
@@ -505,6 +520,13 @@ function SettingsWindow() {
               <Video className="nav-icon" />
               <span>{(t as any).sidebarLiveZoom}</span>
             </div>
+            <div
+              className={`nav-item ${activeTab === "record" ? "active" : ""}`}
+              onClick={() => setActiveTab("record")}
+            >
+              <Play className="nav-icon" />
+              <span>{(t as any).sidebarRecord || "Screen Record"}</span>
+            </div>
 
             <div
               className={`nav-item ${activeTab === "about" ? "active" : ""}`}
@@ -554,6 +576,7 @@ function SettingsWindow() {
             {activeTab === "save" && t.saveTitle}
             {activeTab === "zoom" && (t as any).zoomTitle}
             {activeTab === "live_zoom" && (t as any).liveZoomTitle}
+            {activeTab === "record" && ((t as any).recordTitle || "Screen Recording (Beta)")}
             {activeTab === "timer" && (t as any).timerTitle}
             {activeTab === "about" && t.aboutTitle}
           </h2>
@@ -563,6 +586,7 @@ function SettingsWindow() {
             {activeTab === "save" && t.saveSubtitle}
             {activeTab === "zoom" && (t as any).zoomSubtitle}
             {activeTab === "live_zoom" && (t as any).liveZoomSubtitle}
+            {activeTab === "record" && ((t as any).recordSubtitle || "Hardware-accelerated native screen recording settings.")}
             {activeTab === "timer" && (t as any).timerSubtitle}
             {activeTab === "about" && t.aboutSubtitle}
           </p>
@@ -1818,6 +1842,49 @@ function SettingsWindow() {
           </div>
         )}
 
+        {activeTab === "record" && (
+          <div className="settings-card">
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">Native Screen Recording</span>
+                <span className="setting-desc">Record high-quality video using hardware encoder (NVENC/QSV). Pick any screen or window directly.</span>
+              </div>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "record" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "record" ? null : "record")}
+                  title={t.shortcutChangeHint}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "record" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "record" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "record" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "record" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none"
+                  }}
+                >
+                  {recordingType === "record" ? t.shortcutPressKeys : formatShortcut(recordShortcut)}
+                </button>
+                <button className="premium-button" onClick={() => invoke("open_recorder_view")} style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+                  <Video size={16} />
+                  Open Recorder
+                </button>
+              </div>
+            </div>
+            
+            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+              <div className="setting-info">
+                <span className="setting-label">Performance Mode</span>
+                <span className="setting-desc">Currently defaults to Windows Graphics Capture (WGC) for best modern API support.</span>
+              </div>
+              <div className="shortcut-badge" style={{ cursor: "default" }}>
+                WGC / DXGI
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "about" && (
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -2069,6 +2136,12 @@ function SettingsWindow() {
           </div>
         )}
       </main>
+
+      <ScreenRecorderModal 
+        isOpen={isRecorderModalOpen} 
+        onClose={() => setIsRecorderModalOpen(false)} 
+      />
+
       {warningMessage && (
         <div style={{
           position: "fixed",
