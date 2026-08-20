@@ -32,6 +32,7 @@ function SettingsWindow() {
   const [includeCursor, setIncludeCursor] = useState(() => localStorage.getItem("includeCursor") === "true");
   const [playAudio, setPlayAudio] = useState(() => localStorage.getItem("playAudio") !== "false"); // default true
   const [savePath, setSavePath] = useState(() => localStorage.getItem("savePath") || "Pictures/Shotera");
+  const [videoSavePath, setVideoSavePath] = useState(() => localStorage.getItem("videoSavePath") || "Videos/Shotera");
   const [fileFormat, setFileFormat] = useState(() => localStorage.getItem("fileFormat") || "PNG");
   const [imageQuality, setImageQuality] = useState(() => Number(localStorage.getItem("imageQuality") || "100"));
   const [regionShortcut, setRegionShortcut] = useState(() => localStorage.getItem("regionShortcut") || "Ctrl+Shift+S");
@@ -195,6 +196,7 @@ function SettingsWindow() {
     localStorage.setItem("includeCursor", String(includeCursor));
     localStorage.setItem("playAudio", String(playAudio));
     localStorage.setItem("savePath", savePath);
+    localStorage.setItem("videoSavePath", videoSavePath);
     localStorage.setItem("fileFormat", fileFormat);
     localStorage.setItem("imageQuality", String(imageQuality));
     localStorage.setItem("regionShortcut", regionShortcut);
@@ -213,7 +215,7 @@ function SettingsWindow() {
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -882,6 +884,60 @@ function SettingsWindow() {
                     const folder = await invoke<string | null>("select_folder");
                     if (folder) {
                       setSavePath(folder);
+                    }
+                  }}
+                  className="action-btn"
+                  title={t.selectFolder}
+                  style={{
+                    padding: "0 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    color: "white",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                    e.currentTarget.style.borderColor = "var(--accent-cyan)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                    e.currentTarget.style.borderColor = "var(--border-color)";
+                  }}
+                >
+                  <FolderOpen size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).defaultVideoSaveDir || "Varsayılan Video Kayıt Dizini"}</span>
+                <span className="setting-desc">{(t as any).defaultVideoSaveDirDesc || "Ekran kayıtlarının (video) kaydedileceği klasör."}</span>
+              </div>
+              <div style={{ display: "flex", gap: "8px", flex: 1, maxWidth: "500px", minWidth: "240px" }}>
+                <input
+                  type="text"
+                  className="premium-input"
+                  value={videoSavePath}
+                  readOnly
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setVideoSavePath(folder);
+                    }
+                  }}
+                  style={{ minWidth: "0", flexGrow: 1, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer" }}
+                />
+                <button
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setVideoSavePath(folder);
                     }
                   }}
                   className="action-btn"

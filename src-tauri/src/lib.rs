@@ -138,7 +138,8 @@ async fn start_native_recording(
     source_id: String,
     fps: u32,
     record_audio: bool,
-    record_mic: bool
+    record_mic: bool,
+    video_save_path: Option<String>
 ) -> Result<String, String> {
     use win_native_media::{Pipeline, PipelineConfig, VideoConfig, RecordConfig, CaptureTarget};
     use chrono::Local;
@@ -179,9 +180,13 @@ async fn start_native_recording(
     let now = Local::now();
     let filename = now.format("Recording_%Y%m%d_%H%M%S.mp4").to_string();
     
-    // Resolve output path (Videos folder)
-    let mut path = app_handle.path().video_dir().unwrap_or_else(|_| std::path::PathBuf::from("C:\\"));
-    path.push("Shotera");
+    let mut path = if let Some(p) = video_save_path.filter(|s| !s.trim().is_empty()) {
+        std::path::PathBuf::from(p)
+    } else {
+        let mut p = app_handle.path().video_dir().unwrap_or_else(|_| std::path::PathBuf::from("C:\\"));
+        p.push("Shotera");
+        p
+    };
     let _ = std::fs::create_dir_all(&path);
     path.push(&filename);
 
