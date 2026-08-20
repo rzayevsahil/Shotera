@@ -290,6 +290,7 @@ fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), St
     Ok(())
 }
 
+#[tauri::command]
 fn open_recorder_view(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("recorder") {
         if window.is_visible().unwrap_or(false) {
@@ -1646,6 +1647,7 @@ pub fn run() {
             stop_native_recording,
             resize_recorder_window,
             hide_recorder_window,
+            open_recorder_view,
             disable_windows_audio_ducking
         ])
 
