@@ -1418,7 +1418,7 @@ function SettingsWindow() {
                 <div className="setting-info">
                   <span className="setting-label">{(t as any).timerRingColorLabel}</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
                   {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].map((color) => (
                     <button
                       key={color}
@@ -1537,7 +1537,7 @@ function SettingsWindow() {
                 <div className="setting-info">
                   <span className="setting-label">{(t as any).timerBgColorLabel || "Arka Plan Rengi"}</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
                   {["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].map((color) => (
                     <button
                       key={color}
@@ -1718,7 +1718,7 @@ function SettingsWindow() {
                     <span className="setting-label">{(t as any).timerSoundTitle}</span>
                     <span className="setting-desc">{(t as any).timerSoundDesc}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
                     <select
                       className="premium-input"
                       value={timerSoundPreset}
