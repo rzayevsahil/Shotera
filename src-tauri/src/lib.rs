@@ -71,10 +71,29 @@ fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
     
     // Windows
     if let Ok(windows) = xcap::Window::all() {
+        let mut seen_titles = std::collections::HashSet::new();
+        
         for w in windows {
             if let Ok(title) = w.title() {
                 // Ignore empty titles or basic system windows
                 if !title.is_empty() && title != "Program Manager" && title != "Settings" && title != "Shotera" {
+                    
+                    // Windows uygulamalarında bazen (1) WhatsApp gibi bildirim ekleri olan
+                    // hayalet/ikinci pencereler olabiliyor. Bunları filtrelemek için title'ı temizleyelim.
+                    let mut clean_title = title.as_str();
+                    if clean_title.starts_with("(") {
+                        if let Some(idx) = clean_title.find(") ") {
+                            let potential_num = &clean_title[1..idx];
+                            if potential_num.chars().all(|c| c.is_ascii_digit()) {
+                                clean_title = &clean_title[idx + 2..];
+                            }
+                        }
+                    }
+                    
+                    // Eğer bu pencere ismini daha önce eklediysek atla
+                    if seen_titles.contains(clean_title) {
+                        continue;
+                    }
                     
                     // Sadece ekranda küçültülmemiş pencereleri almayı deneriz
                     let is_min = w.is_minimized().unwrap_or(true);
@@ -90,6 +109,13 @@ fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
                             }
                         }
                     }
+                    
+                    // Geçerli bir önizleme (thumb) alınamadıysa bu büyük ihtimalle hayalet penceredir, atla
+                    if thumb.is_none() {
+                        continue;
+                    }
+                    
+                    seen_titles.insert(clean_title.to_string());
                     
                     sources.push(CaptureSource {
                         id: format!("window_{}", w.id().unwrap_or(0)),
