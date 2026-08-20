@@ -59,6 +59,7 @@ function SettingsWindow() {
   });
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
+  const [timerSoundRepeat, setTimerSoundRepeat] = useState<string>(() => localStorage.getItem("timerSoundRepeat") || "1");
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [isRecorderModalOpen, setIsRecorderModalOpen] = useState(false);
@@ -1745,6 +1746,27 @@ function SettingsWindow() {
                       {(t as any).timerTestSound || "Sesi Dinle"}
                     </button>
                   </div>
+                </div>
+
+                {/* Sound Repeat Row */}
+                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0, marginTop: "12px" }}>
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).timerSoundRepeatLabel}</span>
+                  </div>
+                  <select
+                    className="premium-input"
+                    value={timerSoundRepeat}
+                    onChange={(e) => {
+                      setTimerSoundRepeat(e.target.value);
+                      localStorage.setItem("timerSoundRepeat", e.target.value);
+                      window.dispatchEvent(new Event("storage"));
+                    }}
+                    style={{ width: "240px" }}
+                  >
+                    <option value="1">{(t as any).timerSoundRepeat1}</option>
+                    <option value="3">{(t as any).timerSoundRepeat3}</option>
+                    <option value="loop">{(t as any).timerSoundRepeatLoop}</option>
+                  </select>
                 </div>
               </div>
             </div>

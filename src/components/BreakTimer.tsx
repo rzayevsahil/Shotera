@@ -25,12 +25,21 @@ export default function BreakTimer() {
   const [timerBgColor, setTimerBgColor] = useState<string>(() => localStorage.getItem("timerBgColor") || "#0f172a");
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
+  const [timerSoundRepeat, setTimerSoundRepeat] = useState<string>(() => localStorage.getItem("timerSoundRepeat") || "1");
 
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const alarmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopAlarm = () => {
+    if (alarmIntervalRef.current) {
+      clearInterval(alarmIntervalRef.current);
+      alarmIntervalRef.current = null;
+    }
+  };
 
   useEffect(() => {
     const updateLang = () => setLang(getLanguage());
@@ -55,8 +64,10 @@ export default function BreakTimer() {
       setTimerBgColor(localStorage.getItem("timerBgColor") || "#0f172a");
       setTimerFontStyle(localStorage.getItem("timerFontStyle") || "sans");
       setTimerSoundPreset(localStorage.getItem("timerSoundPreset") || "chime");
+      setTimerSoundRepeat(localStorage.getItem("timerSoundRepeat") || "1");
 
       if (isTriggerEvent) {
+        stopAlarm();
         setCurrentSeconds(dir === "down" ? defaultDuration : 0);
         setIsRunning(true);
         setIsFinished(false);
@@ -85,6 +96,7 @@ export default function BreakTimer() {
   const handleClose = async () => {
     setIsRunning(false);
     setIsFinished(false);
+    stopAlarm();
     try {
       await invoke("hide_timer_window");
     } catch (e) {
@@ -99,15 +111,32 @@ export default function BreakTimer() {
 
   // Play audio chime when timer finishes (only if window is currently visible and sound enabled)
   const playAlarm = async () => {
+    stopAlarm();
     if (!soundEnabled) return;
-    try {
-      const win = getCurrentWindow();
-      const isVis = await win.isVisible();
-      if (isVis) {
+    
+    const playOnce = async () => {
+      try {
+        const win = getCurrentWindow();
+        const isVis = await win.isVisible();
+        if (isVis) playTimerSound(timerSoundPreset);
+      } catch {
         playTimerSound(timerSoundPreset);
       }
-    } catch {
-      playTimerSound(timerSoundPreset);
+    };
+
+    playOnce();
+
+    if (timerSoundRepeat !== "1") {
+      let count = 1;
+      const maxCount = timerSoundRepeat === "3" ? 3 : Infinity;
+      alarmIntervalRef.current = setInterval(() => {
+        if (count >= maxCount) {
+          stopAlarm();
+        } else {
+          playOnce();
+          count++;
+        }
+      }, 3500); // 3.5 seconds between repeats
     }
   };
 
@@ -176,9 +205,7 @@ export default function BreakTimer() {
       } else if (e.key.toLowerCase() === "r") {
         e.preventDefault();
         e.stopPropagation();
-        setCurrentSeconds(timerDirectionRef.current === "down" ? totalSecondsRef.current : 0);
-        setIsRunning(true);
-        setIsFinished(false);
+        handleReset();
       }
     };
 
@@ -221,6 +248,7 @@ export default function BreakTimer() {
   const strokeDashoffset = 880 - (880 * progress) / 100;
 
   const handleReset = () => {
+    stopAlarm();
     setCurrentSeconds(timerDirection === "down" ? totalSeconds : 0);
     setIsRunning(true);
     setIsFinished(false);
