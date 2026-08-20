@@ -62,6 +62,8 @@ function SettingsWindow() {
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [isRecorderModalOpen, setIsRecorderModalOpen] = useState(false);
+  const [recordFps, setRecordFps] = useState<number>(() => Number(localStorage.getItem("recordFps") || "30"));
+  const [recordAudio, setRecordAudio] = useState<boolean>(() => localStorage.getItem("recordAudio") !== "false");
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -1868,8 +1870,8 @@ function SettingsWindow() {
                 >
                   {recordingType === "record" ? t.shortcutPressKeys : formatShortcut(recordShortcut)}
                 </button>
-                <button 
-                  className="premium-button" 
+                <button
+                  className="premium-button"
                   onClick={() => invoke("open_recorder_view")}
                   style={{ padding: "6px 14px", fontSize: "0.85rem" }}
                 >
@@ -1887,6 +1889,45 @@ function SettingsWindow() {
               <div className="shortcut-badge" style={{ cursor: "default" }}>
                 WGC / DXGI
               </div>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).recordFpsLabel || "Kare Hızı (FPS)"}</span>
+                <span className="setting-desc">{(t as any).recordFpsDesc || "Akıcılık ve performans dengesini ayarlayın."}</span>
+              </div>
+              <select
+                className="premium-input"
+                value={recordFps}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setRecordFps(val);
+                  localStorage.setItem("recordFps", val.toString());
+                }}
+                style={{ width: "120px" }}
+              >
+                <option value={30}>30 FPS</option>
+                <option value={60}>60 FPS</option>
+              </select>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
+                <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={recordAudio}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setRecordAudio(checked);
+                    localStorage.setItem("recordAudio", checked.toString());
+                  }}
+                />
+                <span className="slider"></span>
+              </label>
             </div>
           </div>
         )}

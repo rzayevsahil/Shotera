@@ -56,7 +56,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 await invoke("resize_recorder_window", { compact: true }).catch(console.error);
             }
 
-            await invoke("start_native_recording", { sourceId: selectedId });
+            const fps = Number(localStorage.getItem("recordFps")) || 30;
+            const recordAudio = localStorage.getItem("recordAudio") !== "false";
+            await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio });
         } catch (error) {
             console.error("Failed to start recording:", error);
             setIsRecording(false);

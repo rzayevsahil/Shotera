@@ -83,13 +83,15 @@ fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
 async fn start_native_recording(
     app_handle: AppHandle,
     state: State<'_, AppState>,
-    source_id: String
+    source_id: String,
+    fps: u32,
+    record_audio: bool
 ) -> Result<String, String> {
     use win_native_media::{Pipeline, PipelineConfig, VideoConfig, RecordConfig, CaptureTarget};
     use chrono::Local;
     use tauri::Manager;
 
-    println!("Starting native hardware-accelerated recording for source: {}", source_id);
+    println!("Starting native hardware-accelerated recording for source: {}, fps: {}, audio: {}", source_id, fps, record_audio);
 
     let mut target = CaptureTarget::Monitor(0);
     let mut target_width = 1920;
@@ -117,9 +119,9 @@ async fn start_native_recording(
         }
     }
 
-    // Ensure dimensions are even numbers (required by many hardware encoders)
-    target_width = target_width - (target_width % 2);
-    target_height = target_height - (target_height % 2);
+    // Ensure dimensions are multiples of 16 (strict requirement for H264 hardware encoders to prevent macroblock corruption/tearing)
+    target_width = target_width - (target_width % 16);
+    target_height = target_height - (target_height % 16);
 
     let now = Local::now();
     let filename = now.format("Recording_%Y%m%d_%H%M%S.mp4").to_string();
@@ -137,12 +139,20 @@ async fn start_native_recording(
         video: VideoConfig { 
             width: target_width, 
             height: target_height, 
-            fps: 60, 
-            bitrate: 15_000_000,
+            fps, 
+            bitrate: if fps > 30 { 15_000_000 } else { 10_000_000 },
             keyframe_interval: 2,
         },
         record: Some(RecordConfig { output_path: path.clone().into() }),
-        audio: None,
+        audio: if record_audio {
+            Some(win_native_media::AudioConfig {
+                bitrate: 192_000,
+                loopback: true,
+                microphone: false, // You can set this to true if microphone capture is also desired
+            })
+        } else {
+            None
+        },
         capture_cursor: true,
         stream: None,
     };

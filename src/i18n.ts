@@ -241,6 +241,10 @@ export const translations = {
     recordOpenBtn: "Kaydediciyi Aç",
     recordPerfMode: "Performans Modu",
     recordPerfModeDesc: "En iyi modern API desteği için varsayılan olarak Windows Grafik Yakalama (WGC) kullanılır.",
+    recordFpsLabel: "Kare Hızı (FPS)",
+    recordFpsDesc: "Akıcılık ve performans dengesini ayarlayın.",
+    recordAudioLabel: "Sistem Sesini Kaydet",
+    recordAudioDesc: "Video kaydına bilgisayarın dahili sesini de dahil edin.",
   },
 
 
@@ -486,6 +490,10 @@ export const translations = {
     recordOpenBtn: "Open Recorder",
     recordPerfMode: "Performance Mode",
     recordPerfModeDesc: "Currently defaults to Windows Graphics Capture (WGC) for best modern API support.",
+    recordFpsLabel: "Framerate (FPS)",
+    recordFpsDesc: "Adjust recording smoothness and performance balance.",
+    recordAudioLabel: "Record System Audio",
+    recordAudioDesc: "Include computer's internal sound in the video recording.",
   },
 
 
@@ -731,6 +739,10 @@ export const translations = {
     recordOpenBtn: "Qeydedicini Aç",
     recordPerfMode: "Performans Rejimi",
     recordPerfModeDesc: "Ən yaxşı müasir API dəstəyi üçün varsayılan olaraq Windows Qrafik Yaxalama (WGC) istifadə olunur.",
+    recordFpsLabel: "Kadr Tezliyi (FPS)",
+    recordFpsDesc: "Qeyd axıcılığını və performans balansını tənzimləyin.",
+    recordAudioLabel: "Sistem Səsini Qeyd Et",
+    recordAudioDesc: "Video qeydinə kompüterin daxili səsini daxil edin.",
   },
 
   ru: {
@@ -978,6 +990,10 @@ export const translations = {
     recordOpenBtn: "Открыть рекордер",
     recordPerfMode: "Режим Производительности",
     recordPerfModeDesc: "По умолчанию используется Windows Graphics Capture (WGC) для лучшей поддержки современных API.",
+    recordFpsLabel: "Частота кадров (FPS)",
+    recordFpsDesc: "Настройте плавность записи и баланс производительности.",
+    recordAudioLabel: "Запись звука системы",
+    recordAudioDesc: "Включить внутренний звук компьютера в видеозапись.",
   },
 
   de: {
@@ -1222,6 +1238,10 @@ export const translations = {
     recordOpenBtn: "Rekorder öffnen",
     recordPerfMode: "Leistungsmodus",
     recordPerfModeDesc: "Verwendet standardmäßig Windows Graphics Capture (WGC) für die beste moderne API-Unterstützung.",
+    recordFpsLabel: "Bildrate (FPS)",
+    recordFpsDesc: "Passen Sie die Aufnahme-Glätte und Leistungsbalance an.",
+    recordAudioLabel: "Systemaudio aufnehmen",
+    recordAudioDesc: "Internen Computerton in die Videoaufnahme einbeziehen.",
   }
 };
 
