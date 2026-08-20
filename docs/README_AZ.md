@@ -31,6 +31,8 @@
 - 📌 **Ekrana Sancma (Pin):** Aldığınız ekran şəkillərini ekranın hər hansı bir yerində, digər pencerələrin üzərində "həmişə üstdə" (always-on-top) qalacaq şəkildə sancın. Kod yazarkən və ya dizayn edərkən baxış üçün mükəmməldir.
 - 🔎 **Ekran Böyüdücüsü və ZoomIt Aləti (`Ctrl` + `1`):** Ekranı dondurub istədiyiniz hissəni yaxınlaşdırın (1.0x - 5.0x), sərbəst qələm, düz xətt (`Shift`), düzbucaqlı (`Ctrl`), dairə (`Alt`), ox işarəsi (`Shift`+`Ctrl`) çəkin, mətn yazın (`T`), və tək düyməli rəng düymələri (`R`, `G`, `B`, `Y`, `O`, `P`) ilə ağ lövhə (`W`) / qara lövhə (`K`) rejimlərinə keçin.
 - ⌛ **Tam Ekran Fasilə Taymeri (`Ctrl` + `3`):** Təqdimat və fasilələriniz üçün canlı geri sayım halqası, tərəqqi çubuğu, pauza/başlat, +1dəq/-1dəq idarəetmələri və səsli xəbərdarlıq ehtiva edən tam ekran taymer (1-99 dəqiqə).
+- 🔎 **Canlı Ekran Böyütmə (`Ctrl` + `4`):** Arxa plandakı tətbiqlərlə qarşılıqlı əlaqəyə davam edərkən iş masanızı farenizin ətrafında canlı olaraq böyüdün.
+- 🎥 **Ekran Qeydi (`Ctrl` + `5`):** Seçilmiş sahəni və ya bütün ekranı MP4 formatında video olaraq asanlıqla qeyd edin.
 - ☁️ **Sürətli Bulud Yükləməsi:** Ekran şəkillərini tək kliklə Imgur-a yükləyin və keçidini anında mübadilə buferinə (clipboard) kopyalayın.
 - ⚙️ **Fərdiləşdirilə Bilən Qısayollar:** Qlobal klaviatura qısayollarını öz iş vərdişlərinizə uyğunlaşdırın.
 - 💾 **Çoxlu Format Dəstəyi:** Ekran şəkillərinizi PNG, JPG və ya müasir WebP formatında, təyin etdiyiniz keyfiyyət tənzimləmələri ilə yadda saxlayın.
@@ -56,6 +58,8 @@ Tətbiqi yükləmək və istifadəyə başlamaq çox asandır:
 - **Tam Ekran Şəkli:** `Ctrl` + `Shift` + `F`
 - **Ekran Böyüdücüsü (ZoomIt):** `Ctrl` + `1`
 - **Fasilə Taymeri:** `Ctrl` + `3`
+- **Canlı Ekran Böyütmə:** `Ctrl` + `4`
+- **Ekran Qeydi:** `Ctrl` + `5`
 
 
 *(Bu qısayolları tətbiqin "Tənzimləmələr" menyusundan istədiyiniz kimi dəyişə bilərsiniz.)*

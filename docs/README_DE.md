@@ -31,6 +31,8 @@
 - 📌 **Am Bildschirm Anheften (Pin):** Heften Sie Screenshots an einer beliebigen Stelle als "immer im Vordergrund" stehende Fenster an. Sehr nützlich bei der Arbeit mit Referenzbildern oder Code-Snippets.
 - 🔎 **Bildschirmlupe & ZoomIt-Tool (`Ctrl` + `1`):** Bildschirm einfrieren und vergrößern (1.0x - 5.0x), Freihandzeichnen, gerade Linien (`Shift`), Rechtecke (`Ctrl`), Ovale (`Alt`), Pfeile (`Shift`+`Ctrl`), Text hinzufügen (`T`) und zu Whiteboard (`W`) / Blackboard (`K`) mit Farbtasten (`R`, `G`, `B`, `Y`, `O`, `P`) wechseln.
 - ⌛ **Vollbild-Pausentimer (`Ctrl` + `3`):** Vollbild-Timer für Präsentationen und Pausen (1-99 Minuten) mit Echtzeit-Countdown, Fortschrittsbalken, Pause/Start und akustischem Signal.
+- 🔎 **Live-Bildschirmvergrößerung (`Ctrl` + `4`):** Vergrößern Sie Ihren Desktop live um Ihren Mauszeiger, während Sie weiterhin mit Anwendungen im Hintergrund interagieren.
+- 🎥 **Bildschirmaufnahme (`Ctrl` + `5`):** Nehmen Sie ausgewählte Bereiche oder den gesamten Bildschirm einfach als MP4-Video auf.
 - ☁️ **Schneller Cloud-Upload:** Laden Sie Screenshots mit einem Klick auf Imgur hoch und kopieren Sie den Link sofort in die Zwischenablage.
 - ⚙️ **Anpassbare Tastenkombinationen:** Personalisieren Sie globale Tastenkombinationen für Ihren Arbeitsablauf.
 - 💾 **Unterstützung mehrerer Formate:** Speichern Sie Ihre Screenshots in den Formaten PNG, JPG oder modernem WebP mit anpassbaren Qualitätseinstellungen.
@@ -52,6 +54,8 @@
 - **Vollbildaufnahme:** `Ctrl` + `Shift` + `F`
 - **Bildschirmlupe (ZoomIt):** `Ctrl` + `1`
 - **Pausentimer:** `Ctrl` + `3`
+- **Live-Bildschirmvergrößerung:** `Ctrl` + `4`
+- **Bildschirmaufnahme:** `Ctrl` + `5`
 
 
 *(Sie können diese Tastenkombinationen einfach im Menü "Einstellungen" in der Anwendung ändern.)*
