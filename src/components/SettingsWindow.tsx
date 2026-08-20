@@ -1949,6 +1949,30 @@ function SettingsWindow() {
                 <span className="slider"></span>
               </label>
             </div>
+
+            {recordMic && (
+              <div className="setting-row" style={{ marginTop: "-8px", paddingTop: "0", borderTop: "none" }}>
+                <div className="setting-info">
+                  <span className="setting-label" style={{ color: "#fbbf24" }}>{(t as any).fixAudioDucking || "Sistem Sesi Kısılmasını Önle"}</span>
+                  <span className="setting-desc">{(t as any).fixAudioDuckingDesc || "Mikrofon açıldığında Windows'un diğer sesleri (video/müzik) %80 kısmasını (Ducking) engeller."}</span>
+                </div>
+                <button 
+                  className="premium-button" 
+                  style={{ fontSize: "0.8rem", padding: "6px 12px", background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
+                  onClick={async () => {
+                    try {
+                      await invoke("disable_windows_audio_ducking");
+                      setWarningMessage("Windows ayarı güncellendi! Etkin olması için varsa açık olan videoları veya ekran kaydediciyi yeniden başlatın.");
+                      setTimeout(() => setWarningMessage(null), 5000);
+                    } catch (err) {
+                      console.error("Failed to update registry:", err);
+                    }
+                  }}
+                >
+                  {(t as any).fixAudioDuckingBtn || "Windows Ayarını Düzelt"}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
