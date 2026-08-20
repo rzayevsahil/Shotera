@@ -35,6 +35,19 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        import("@tauri-apps/api/event").then(({ listen }) => {
+            const unlisten = listen("recorder-opened", () => {
+                if (isOpen) {
+                    loadSources();
+                }
+            });
+            return () => {
+                unlisten.then(f => f());
+            };
+        });
+    }, [isOpen]);
+
     const loadSources = async () => {
         setLoading(true);
         try {
