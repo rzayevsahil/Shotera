@@ -452,6 +452,14 @@ function SettingsWindow() {
     }
   };
 
+  const handleTakeFullscreenScreenshot = async () => {
+    try {
+      await invoke("trigger_fullscreen_capture_command");
+    } catch (e) {
+      console.error("Failed to trigger fullscreen screenshot:", e);
+    }
+  };
+
   const t = translations[lang];
 
   const isMac = navigator.userAgent.toLowerCase().includes('mac');
@@ -668,16 +676,6 @@ function SettingsWindow() {
               </select>
             </div>
 
-            <div className="setting-row" style={{ marginTop: "12px" }}>
-              <div className="setting-info">
-                <span className="setting-label">{t.takeScreenshot}</span>
-                <span className="setting-desc">{t.takeScreenshotDesc} <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>{regionShortcut}</span></span>
-              </div>
-              <button className="premium-button" onClick={handleTakeScreenshot}>
-                <Camera size={16} />
-                {t.captureNow}
-              </button>
-            </div>
           </div>
         )}
 
@@ -753,6 +751,15 @@ function SettingsWindow() {
                 >
                   {recordingType === "region" ? t.shortcutPressKeys : formatShortcut(regionShortcut)}
                 </button>
+                <button 
+                  className="premium-button" 
+                  onClick={handleTakeScreenshot}
+                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                  title={t.captureNow}
+                >
+                  <Camera size={14} />
+                  {t.captureNow}
+                </button>
               </div>
             </div>
 
@@ -777,6 +784,15 @@ function SettingsWindow() {
                   }}
                 >
                   {recordingType === "fullscreen" ? t.shortcutPressKeys : formatShortcut(fullscreenShortcut)}
+                </button>
+                <button 
+                  className="premium-button" 
+                  onClick={handleTakeFullscreenScreenshot}
+                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                  title={t.captureNow}
+                >
+                  <Camera size={14} />
+                  {t.captureNow}
                 </button>
               </div>
             </div>
