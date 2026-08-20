@@ -780,22 +780,13 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
-              <div className="setting-info" style={{ marginBottom: "12px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
+              <div className="setting-info">
                 <span className="setting-label">{t.editorShortcuts}</span>
                 <span className="setting-desc">{t.editorShortcutsDesc}</span>
               </div>
 
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-                width: "100%",
-                background: "rgba(255, 255, 255, 0.025)",
-                padding: "14px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)"
-              }}>
+              <div className="responsive-shortcut-grid">
                 {/* 1. Kopyala */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                   <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
@@ -1087,22 +1078,13 @@ function SettingsWindow() {
             </div>
 
             {/* Zoom Navigation & Exit Shortcuts Card */}
-            <div className="setting-row">
-              <div className="setting-info" style={{ marginBottom: "12px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
+              <div className="setting-info">
                 <span className="setting-label">{(t as any).zoomNavShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).zoomNavShortcutsDesc}</span>
               </div>
 
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-                width: "100%",
-                background: "rgba(255, 255, 255, 0.025)",
-                padding: "14px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)"
-              }}>
+              <div className="responsive-shortcut-grid">
                 {/* 1. Zoom In/Out */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                   <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
@@ -1768,22 +1750,13 @@ function SettingsWindow() {
             </div>
 
             {/* Break Timer Quick Shortcuts Card */}
-            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
-              <div className="setting-info" style={{ marginBottom: "12px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px", marginTop: "8px" }}>
+              <div className="setting-info">
                 <span className="setting-label">{(t as any).timerShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
               </div>
 
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-                width: "100%",
-                background: "rgba(255, 255, 255, 0.025)",
-                padding: "14px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)"
-              }}>
+              <div className="responsive-shortcut-grid">
                 {/* 1. Toggle Pause/Play */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                   <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>

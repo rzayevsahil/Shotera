@@ -619,3 +619,20 @@ input:checked+.slider:before {
   box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
   transform: scale(1.05);
 }
+
+.responsive-shortcut-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.responsive-shortcut-grid > div {
+  flex: 1 1 calc(50% - 10px);
+  min-width: 280px;
+  max-width: 100%;
+}
