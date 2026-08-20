@@ -157,7 +157,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                         <div className="loading-state">{(t as any).modalLoading}</div>
                     ) : (
                         <div className="sources-container">
-                            <div className="source-tabs" style={{ display: "flex", gap: "10px", marginBottom: "15px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", paddingBottom: "10px" }}>
+                            <div className="source-tabs" style={{ display: "flex", gap: "10px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", paddingBottom: "10px" }}>
                                 <button 
                                     className={`source-tab ${activeTab === "monitors" ? "active" : ""}`} 
                                     onClick={() => setActiveTab("monitors")}
