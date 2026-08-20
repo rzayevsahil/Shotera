@@ -780,7 +780,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+            <div className="setting-row">
               <div className="setting-info" style={{ marginBottom: "12px" }}>
                 <span className="setting-label">{t.editorShortcuts}</span>
                 <span className="setting-desc">{t.editorShortcutsDesc}</span>
@@ -1087,7 +1087,7 @@ function SettingsWindow() {
             </div>
 
             {/* Zoom Navigation & Exit Shortcuts Card */}
-            <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+            <div className="setting-row">
               <div className="setting-info" style={{ marginBottom: "12px" }}>
                 <span className="setting-label">{(t as any).zoomNavShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).zoomNavShortcutsDesc}</span>
@@ -1956,8 +1956,8 @@ function SettingsWindow() {
                   <span className="setting-label" style={{ color: "#fbbf24" }}>{(t as any).fixAudioDucking || "Sistem Sesi Kısılmasını Önle"}</span>
                   <span className="setting-desc">{(t as any).fixAudioDuckingDesc || "Mikrofon açıldığında Windows'un diğer sesleri (video/müzik) %80 kısmasını (Ducking) engeller."}</span>
                 </div>
-                <button 
-                  className="premium-button" 
+                <button
+                  className="premium-button"
                   style={{ fontSize: "0.8rem", padding: "6px 12px", background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
                   onClick={async () => {
                     try {
