@@ -23,7 +23,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
-    
+
     const t = translations[getLanguage()];
 
     useEffect(() => {
@@ -68,7 +68,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         setIsRecording(true);
         try {
             console.log("Starting native recording for:", selectedId);
-            
+
             if (isStandalone) {
                 await invoke("resize_recorder_window", { compact: true }).catch(console.error);
             }
@@ -106,10 +106,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     if (isRecording && isStandalone) {
         return (
-            <div className="compact-recorder-bar" style={{ 
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                padding: '12px 20px', background: 'rgba(20, 20, 20, 0.95)', 
-                border: '1px solid rgba(239, 68, 68, 0.5)', 
+            <div className="compact-recorder-bar" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 20px', background: 'rgba(20, 20, 20, 0.95)',
+                border: '1px solid rgba(239, 68, 68, 0.5)',
                 height: '100vh', boxSizing: 'border-box',
                 borderRadius: '0'
             }} data-tauri-drag-region>
@@ -142,7 +142,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                         <X size={18} />
                     </button>
                 </div>
-                
+
                 <div className="recorder-modal-content">
                     {isRecording ? (
                         <div className="recording-active-state">
@@ -158,15 +158,15 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     ) : (
                         <div className="sources-container">
                             <div className="source-tabs" style={{ display: "flex", gap: "10px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", paddingBottom: "10px" }}>
-                                <button 
-                                    className={`source-tab ${activeTab === "monitors" ? "active" : ""}`} 
+                                <button
+                                    className={`source-tab ${activeTab === "monitors" ? "active" : ""}`}
                                     onClick={() => setActiveTab("monitors")}
                                     style={{ background: activeTab === "monitors" ? "rgba(0, 242, 254, 0.15)" : "transparent", border: activeTab === "monitors" ? "1px solid var(--accent-cyan)" : "1px solid transparent", color: activeTab === "monitors" ? "var(--accent-cyan)" : "#a1a1aa", padding: "6px 12px", borderRadius: "6px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: 500 }}
                                 >
                                     <Monitor size={14} /> {(t as any).modalMonitors}
                                 </button>
-                                <button 
-                                    className={`source-tab ${activeTab === "windows" ? "active" : ""}`} 
+                                <button
+                                    className={`source-tab ${activeTab === "windows" ? "active" : ""}`}
                                     onClick={() => setActiveTab("windows")}
                                     style={{ background: activeTab === "windows" ? "rgba(0, 242, 254, 0.15)" : "transparent", border: activeTab === "windows" ? "1px solid var(--accent-cyan)" : "1px solid transparent", color: activeTab === "windows" ? "var(--accent-cyan)" : "#a1a1aa", padding: "6px 12px", borderRadius: "6px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: 500 }}
                                 >
@@ -177,8 +177,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                             {activeTab === "monitors" && monitors.length > 0 && (
                                 <div className="source-grid">
                                     {monitors.map(m => (
-                                        <div 
-                                            key={m.id} 
+                                        <div
+                                            key={m.id}
                                             className={`source-card ${selectedId === m.id ? "selected" : ""}`}
                                             onClick={() => setSelectedId(m.id)}
                                         >
@@ -199,8 +199,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                             {activeTab === "windows" && windows.length > 0 && (
                                 <div className="source-grid">
                                     {windows.map(w => (
-                                        <div 
-                                            key={w.id} 
+                                        <div
+                                            key={w.id}
                                             className={`source-card ${selectedId === w.id ? "selected" : ""}`}
                                             onClick={() => setSelectedId(w.id)}
                                         >
