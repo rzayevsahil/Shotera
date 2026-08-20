@@ -245,6 +245,14 @@ export const translations = {
     recordFpsDesc: "Akıcılık ve performans dengesini ayarlayın.",
     recordAudioLabel: "Sistem Sesini Kaydet",
     recordAudioDesc: "Video kaydına bilgisayarın dahili sesini de dahil edin.",
+    modalSelectSource: "Ekran Kaydı İçin Kaynak Seçin",
+    modalMonitors: "Monitörler",
+    modalWindows: "Pencereler",
+    modalStartRecording: "Kaydı Başlat",
+    modalStopRecording: "Kaydı Durdur",
+    modalRecording: "Kayıt devam ediyor...",
+    modalHwAccel: "Donanımsal hızlandırma kullanılıyor (NVENC/QSV)",
+    modalLoading: "Kaynaklar yükleniyor...",
   },
 
 
@@ -494,6 +502,14 @@ export const translations = {
     recordFpsDesc: "Adjust recording smoothness and performance balance.",
     recordAudioLabel: "Record System Audio",
     recordAudioDesc: "Include computer's internal sound in the video recording.",
+    modalSelectSource: "Select Source for Screen Recording",
+    modalMonitors: "Monitors",
+    modalWindows: "Windows",
+    modalStartRecording: "Start Recording",
+    modalStopRecording: "Stop Recording",
+    modalRecording: "Recording in progress...",
+    modalHwAccel: "Using native hardware acceleration (NVENC/QSV)",
+    modalLoading: "Loading sources...",
   },
 
 
@@ -743,6 +759,14 @@ export const translations = {
     recordFpsDesc: "Qeyd axıcılığını və performans balansını tənzimləyin.",
     recordAudioLabel: "Sistem Səsini Qeyd Et",
     recordAudioDesc: "Video qeydinə kompüterin daxili səsini daxil edin.",
+    modalSelectSource: "Ekran Qeydi Üçün Mənbə Seçin",
+    modalMonitors: "Monitorlar",
+    modalWindows: "Pəncərələr",
+    modalStartRecording: "Qeydi Başlat",
+    modalStopRecording: "Qeydi Dayandır",
+    modalRecording: "Qeyd davam edir...",
+    modalHwAccel: "Avadanlıq sürətləndirməsi istifadə olunur (NVENC/QSV)",
+    modalLoading: "Mənbələr yüklənir...",
   },
 
   ru: {
@@ -994,6 +1018,14 @@ export const translations = {
     recordFpsDesc: "Настройте плавность записи и баланс производительности.",
     recordAudioLabel: "Запись звука системы",
     recordAudioDesc: "Включить внутренний звук компьютера в видеозапись.",
+    modalSelectSource: "Выберите источник для записи экрана",
+    modalMonitors: "Мониторы",
+    modalWindows: "Окна",
+    modalStartRecording: "Начать запись",
+    modalStopRecording: "Остановить запись",
+    modalRecording: "Идет запись...",
+    modalHwAccel: "Используется аппаратное ускорение (NVENC/QSV)",
+    modalLoading: "Загрузка источников...",
   },
 
   de: {
@@ -1242,6 +1274,14 @@ export const translations = {
     recordFpsDesc: "Passen Sie die Aufnahme-Glätte und Leistungsbalance an.",
     recordAudioLabel: "Systemaudio aufnehmen",
     recordAudioDesc: "Internen Computerton in die Videoaufnahme einbeziehen.",
+    modalSelectSource: "Wählen Sie die Quelle für die Bildschirmaufnahme",
+    modalMonitors: "Monitore",
+    modalWindows: "Fenster",
+    modalStartRecording: "Aufnahme starten",
+    modalStopRecording: "Aufnahme stoppen",
+    modalRecording: "Aufnahme läuft...",
+    modalHwAccel: "Verwendung nativer Hardwarebeschleunigung (NVENC/QSV)",
+    modalLoading: "Quellen werden geladen...",
   }
 };
 

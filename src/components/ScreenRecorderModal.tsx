@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Monitor, AppWindow, Video, X, Check, Square } from "lucide-react";
+import { translations, getLanguage } from "../i18n";
 import "./ScreenRecorderModal.css";
 
 interface CaptureSource {
@@ -22,6 +23,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
+    
+    const t = translations[getLanguage()];
 
     useEffect(() => {
         if (isOpen) {
@@ -99,10 +102,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             }} data-tauri-drag-region>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
                     <div className="recording-indicator" style={{ width: '14px', height: '14px', margin: 0, animation: 'pulse-recording 1s infinite' }}></div>
-                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>Recording...</span>
+                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{(t as any).modalRecording}</span>
                 </div>
                 <button className="premium-button stop-btn" onClick={handleStopRecording} style={{ padding: '8px 14px', fontSize: '0.85rem' }}>
-                    <Square size={14} fill="currentColor" /> Stop
+                    <Square size={14} fill="currentColor" /> {(t as any).modalStopRecording}
                 </button>
             </div>
         );
@@ -115,7 +118,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         <div className={`recorder-modal-overlay ${isStandalone ? 'standalone' : ''}`}>
             <div className="recorder-modal">
                 <div className="recorder-modal-header">
-                    <h3>Select Source for Screen Recording</h3>
+                    <h3>{(t as any).modalSelectSource}</h3>
                     <button className="close-btn" onClick={() => {
                         if (isStandalone) {
                             invoke("hide_recorder_window").catch(console.error);
@@ -131,14 +134,14 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     {isRecording ? (
                         <div className="recording-active-state">
                             <div className="recording-indicator"></div>
-                            <h2>Recording in progress...</h2>
-                            <p>Using native hardware acceleration (NVENC/QSV)</p>
+                            <h2>{(t as any).modalRecording}</h2>
+                            <p>{(t as any).modalHwAccel}</p>
                             <button className="premium-button stop-btn" onClick={handleStopRecording}>
-                                <Square size={16} fill="currentColor" /> Stop Recording
+                                <Square size={16} fill="currentColor" /> {(t as any).modalStopRecording}
                             </button>
                         </div>
                     ) : loading ? (
-                        <div className="loading-state">Loading sources...</div>
+                        <div className="loading-state">{(t as any).modalLoading}</div>
                     ) : (
                         <div className="sources-container">
                             <div className="source-tabs" style={{ display: "flex", gap: "10px", marginBottom: "15px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", paddingBottom: "10px" }}>
@@ -147,14 +150,14 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                     onClick={() => setActiveTab("monitors")}
                                     style={{ background: activeTab === "monitors" ? "rgba(0, 242, 254, 0.15)" : "transparent", border: activeTab === "monitors" ? "1px solid var(--accent-cyan)" : "1px solid transparent", color: activeTab === "monitors" ? "var(--accent-cyan)" : "#a1a1aa", padding: "6px 12px", borderRadius: "6px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: 500 }}
                                 >
-                                    <Monitor size={14} /> Monitors
+                                    <Monitor size={14} /> {(t as any).modalMonitors}
                                 </button>
                                 <button 
                                     className={`source-tab ${activeTab === "windows" ? "active" : ""}`} 
                                     onClick={() => setActiveTab("windows")}
                                     style={{ background: activeTab === "windows" ? "rgba(0, 242, 254, 0.15)" : "transparent", border: activeTab === "windows" ? "1px solid var(--accent-cyan)" : "1px solid transparent", color: activeTab === "windows" ? "var(--accent-cyan)" : "#a1a1aa", padding: "6px 12px", borderRadius: "6px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontWeight: 500 }}
                                 >
-                                    <AppWindow size={14} /> Windows
+                                    <AppWindow size={14} /> {(t as any).modalWindows}
                                 </button>
                             </div>
 
@@ -208,7 +211,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 {!isRecording && (
                     <div className="recorder-modal-footer">
                         <button className="premium-button" onClick={handleStartRecording} disabled={!selectedId || loading}>
-                            <Video size={16} /> Start Recording
+                            <Video size={16} /> {(t as any).modalStartRecording}
                         </button>
                     </div>
                 )}

@@ -75,16 +75,22 @@ fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
             if let Ok(title) = w.title() {
                 // Ignore empty titles or basic system windows
                 if !title.is_empty() && title != "Program Manager" && title != "Settings" && title != "Shotera" {
+                    
+                    // Sadece ekranda küçültülmemiş pencereleri almayı deneriz
+                    let is_min = w.is_minimized().unwrap_or(true);
+                    
                     let mut thumb = None;
-                    // Attempt to capture a thumbnail for the window
-                    if let Ok(image) = w.capture_image() {
-                        let resized = image::imageops::thumbnail(&image, 320, 180);
-                        let mut png_bytes = std::io::Cursor::new(Vec::new());
-                        if resized.write_to(&mut png_bytes, image::ImageFormat::Png).is_ok() {
-                            thumb = Some(base64::prelude::BASE64_STANDARD.encode(png_bytes.get_ref()));
+                    
+                    if !is_min {
+                        if let Ok(image) = w.capture_image() {
+                            let resized = image::imageops::thumbnail(&image, 320, 180);
+                            let mut png_bytes = std::io::Cursor::new(Vec::new());
+                            if resized.write_to(&mut png_bytes, image::ImageFormat::Png).is_ok() {
+                                thumb = Some(base64::prelude::BASE64_STANDARD.encode(png_bytes.get_ref()));
+                            }
                         }
                     }
-
+                    
                     sources.push(CaptureSource {
                         id: format!("window_{}", w.id().unwrap_or(0)),
                         name: title,
