@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Monitor, AppWindow, Video, X, Check, Square, Camera } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
@@ -22,10 +22,15 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [loading, setLoading] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
+    const isRecordingRef = useRef(false);
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
     const [useWebcam, setUseWebcam] = useState(localStorage.getItem("recordWebcam") === "true");
 
     const t = translations[getLanguage()];
+
+    useEffect(() => {
+        isRecordingRef.current = isRecording;
+    }, [isRecording]);
 
     useEffect(() => {
         if (isOpen) {
@@ -36,7 +41,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         } else {
             setSources([]);
             setSelectedId(null);
-            if (!isRecording) {
+            if (!isRecordingRef.current) {
                 invoke("toggle_webcam", { show: false }).catch(console.error);
             }
         }
@@ -70,8 +75,49 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         }
     };
 
+    // Workaround for Windows WASAPI Loopback Silence Deadlock
+    // If no audio is playing, WASAPI stops sending packets, which deadlocks the recording engine when stopping.
+    const audioKeepAliveRef = useRef<{ ctx: AudioContext, osc: OscillatorNode } | null>(null);
+
+    const startAudioKeepAlive = () => {
+        try {
+            const ctx = new window.AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            gain.gain.value = 0.0001; // virtually silent
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            audioKeepAliveRef.current = { ctx, osc };
+        } catch (e) {
+            console.error("Failed to start audio keep-alive", e);
+        }
+    };
+
+    const stopAudioKeepAlive = () => {
+        if (audioKeepAliveRef.current) {
+            try {
+                audioKeepAliveRef.current.osc.stop();
+                audioKeepAliveRef.current.ctx.close();
+            } catch (e) {
+                console.error("Failed to stop audio keep-alive", e);
+            }
+            audioKeepAliveRef.current = null;
+        }
+    };
+
     const handleStartRecording = async () => {
         if (!selectedId) return;
+        
+        const fps = Number(localStorage.getItem("recordFps")) || 30;
+        const recordAudio = localStorage.getItem("recordAudio") !== "false";
+        const recordMic = localStorage.getItem("recordMic") === "true";
+        const videoSavePath = localStorage.getItem("videoSavePath") || "";
+        
+        if (recordAudio) {
+            startAudioKeepAlive();
+        }
+        
         setIsRecording(true);
         try {
             console.log("Starting native recording for:", selectedId);
@@ -80,13 +126,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 await invoke("resize_recorder_window", { compact: true }).catch(console.error);
             }
 
-            const fps = Number(localStorage.getItem("recordFps")) || 30;
-            const recordAudio = localStorage.getItem("recordAudio") !== "false";
-            const recordMic = localStorage.getItem("recordMic") === "true";
-            const videoSavePath = localStorage.getItem("videoSavePath") || "";
             await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio, recordMic, videoSavePath });
         } catch (error) {
             console.error("Failed to start recording:", error);
+            stopAudioKeepAlive();
             setIsRecording(false);
             if (isStandalone) {
                 await invoke("resize_recorder_window", { compact: false }).catch(console.error);
@@ -101,13 +144,16 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         } catch (error) {
             console.error(error);
         } finally {
+            stopAudioKeepAlive();
             setIsRecording(false);
             if (useWebcam) {
                 invoke("toggle_webcam", { show: false }).catch(console.error);
             }
             if (isStandalone) {
-                await invoke("resize_recorder_window", { compact: false }).catch(console.error);
                 await invoke("hide_recorder_window").catch(console.error);
+                setTimeout(() => {
+                    invoke("resize_recorder_window", { compact: false }).catch(console.error);
+                }, 300);
             } else {
                 onClose();
             }

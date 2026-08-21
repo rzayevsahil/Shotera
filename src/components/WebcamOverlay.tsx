@@ -52,10 +52,6 @@ export default function WebcamOverlay() {
         videoRef.current.srcObject = null;
       }
       setStarted(false);
-      // Wait a tiny bit to ensure the hardware light goes off before hiding the window
-      setTimeout(() => {
-        getCurrentWindow().hide().catch(console.error);
-      }, 50);
     }
 
     const unlistenPromises: Promise<() => void>[] = [];
@@ -94,8 +90,13 @@ export default function WebcamOverlay() {
 
   return (
     <div 
-      data-tauri-drag-region 
       onWheel={handleWheel}
+      onPointerDown={(e) => {
+        if (e.button === 0) {
+          getCurrentWindow().startDragging().catch(console.error);
+        }
+      }}
+      data-tauri-drag-region
       style={{
         width: "100vw",
         height: "100vh",
@@ -108,7 +109,10 @@ export default function WebcamOverlay() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "white"
+        color: "white",
+        cursor: "move",
+        WebkitAppRegion: "drag",
+        userSelect: "none"
       }}
     >
       <video 
@@ -119,18 +123,22 @@ export default function WebcamOverlay() {
           height: "100%",
           objectFit: "cover",
           transform: "scaleX(-1)",
-          pointerEvents: "none",
           borderRadius: "50%",
-          display: (started && !hasError) ? "block" : "none"
+          display: (started && !hasError) ? "block" : "none",
+          pointerEvents: "none"
         }}
       />
       {!started && (
-        <div data-tauri-drag-region style={{ fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}>
+        <div 
+          style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
+        >
           Kamera Kapalı
         </div>
       )}
       {started && hasError && (
-        <div data-tauri-drag-region style={{ color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}>
+        <div 
+          style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
+        >
           Kamera<br/>Bulunamadı
         </div>
       )}

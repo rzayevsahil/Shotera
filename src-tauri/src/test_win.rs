@@ -11,18 +11,19 @@ pub async fn test() {
             keyframe_interval: 2,
         },
         record: Some(RecordConfig { output_path: "capture.mp4".into() }),
-        audio: None, // Or AudioConfig { .. }
+        audio: Some(AudioConfig {
+            bitrate: 192_000,
+            loopback: true,
+            microphone: false,
+        }),
         capture_cursor: true,
         stream: None,
     };
     
     let mut pipeline = Pipeline::new(config).expect("create pipeline");
-    
-    let pipeline_mtx = std::sync::Arc::new(std::sync::Mutex::new(pipeline));
-    
-    let pm2 = pipeline_mtx.clone();
-    std::thread::spawn(move || {
-        let mut p = pm2.lock().unwrap();
-        // Just checking if it can be sent to thread
-    });
+    pipeline.start().await.expect("start pipeline");
+    println!("Recording for 3 seconds...");
+    tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+    pipeline.stop().await.expect("stop pipeline");
+    println!("Recording stopped and saved to capture.mp4");
 }

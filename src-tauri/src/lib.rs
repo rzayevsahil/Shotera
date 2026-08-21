@@ -218,11 +218,32 @@ async fn start_native_recording(
     let (tx, rx) = tokio::sync::oneshot::channel();
     
     tauri::async_runtime::spawn(async move {
-        if let Ok(mut pipeline) = Pipeline::new(config) {
-            if pipeline.start().await.is_ok() {
-                let _ = rx.await; // wait for stop signal
-                let _ = pipeline.stop().await;
-            }
+        let start_time = std::time::Instant::now();
+        match Pipeline::new(config) {
+            Ok(mut pipeline) => {
+                match pipeline.start().await {
+                    Ok(_) => {
+                        println!("Native recording pipeline started successfully.");
+                        let _ = rx.await; // wait for stop signal
+                        
+                        let elapsed = start_time.elapsed();
+                        if elapsed.as_millis() < 2500 {
+                            let delay = 2500 - elapsed.as_millis() as u64;
+                            println!("Recording was too short, delaying stop by {}ms to prevent Media Foundation deadlock...", delay);
+                            tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
+                        }
+
+                        println!("Stop signal received, stopping pipeline...");
+                        if let Err(e) = pipeline.stop().await {
+                            eprintln!("Error stopping pipeline: {}", e);
+                        } else {
+                            println!("Pipeline stopped successfully.");
+                        }
+                    },
+                    Err(e) => eprintln!("Failed to start native recording pipeline: {}", e),
+                }
+            },
+            Err(e) => eprintln!("Failed to create native recording pipeline: {}", e),
         }
     });
 
@@ -340,6 +361,11 @@ fn toggle_webcam(app_handle: AppHandle, show: bool) -> Result<(), String> {
             let _ = window.set_focus();
         } else {
             let _ = window.emit("stop-camera", ());
+            let window_clone = window.clone();
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+                let _ = window_clone.hide();
+            });
         }
     }
     Ok(())

@@ -3,6 +3,11 @@
 
 mod test_win;
 
-fn main() {
-    tauri_app_lib::run()
+#[tokio::main]
+async fn main() {
+    if std::env::args().any(|arg| arg == "--run-test") {
+        test_win::test().await;
+        return;
+    }
+    tauri_app_lib::run();
 }
