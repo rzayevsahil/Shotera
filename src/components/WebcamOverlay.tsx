@@ -117,7 +117,6 @@ export default function WebcamOverlay() {
         border: "3px solid #38bdf8",
         boxSizing: "border-box",
         background: "rgba(15, 23, 42, 0.95)",
-        boxShadow: "0 0 15px rgba(56, 189, 248, 0.4)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
