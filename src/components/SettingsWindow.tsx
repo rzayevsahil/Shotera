@@ -2071,7 +2071,7 @@ function SettingsWindow() {
             )}
 
             {/* Webcam Control Shortcuts */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "16px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamControlsTitle || "Kamera Kontrolleri"}</span>
                 <span className="setting-desc">{(t as any).webcamControlsDesc || "Ekran kaydı sırasında kamera penceresini yönetin."}</span>
