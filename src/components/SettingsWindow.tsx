@@ -292,6 +292,25 @@ function SettingsWindow() {
         return;
       }
 
+      const allShortcuts: Record<string, string> = {
+        region: regionShortcut,
+        fullscreen: fullscreenShortcut,
+        zoom: zoomShortcut,
+        live_zoom: liveZoomShortcut,
+        record: recordShortcut,
+        timer: timerShortcut,
+      };
+
+      const conflictingAction = Object.entries(allShortcuts).find(([key, val]) => 
+        key !== recordingType && val.toLowerCase() === shortcutStr.toLowerCase()
+      );
+
+      if (conflictingAction) {
+        setWarningMessage((t as any).shortcutInUseMsg ? (t as any).shortcutInUseMsg(shortcutStr) : `${shortcutStr} is already in use!`);
+        setRecordingType(null);
+        return;
+      }
+
       if (recordingType === "region") {
         setRegionShortcut(shortcutStr);
         localStorage.setItem("regionShortcut", shortcutStr);
@@ -335,6 +354,25 @@ function SettingsWindow() {
       const ctrlKeyName = isMac ? "Cmd" : "Ctrl";
       if (shortcutStr.toLowerCase() === "ctrl+c" || shortcutStr.toLowerCase() === "ctrl+s" || shortcutStr.toLowerCase() === "super+c" || shortcutStr.toLowerCase() === "super+s") {
         setWarningMessage(t.shortcutConflictMsg(ctrlKeyName));
+        setRecordingType(null);
+        return;
+      }
+
+      const allShortcuts: Record<string, string> = {
+        region: regionShortcut,
+        fullscreen: fullscreenShortcut,
+        zoom: zoomShortcut,
+        live_zoom: liveZoomShortcut,
+        record: recordShortcut,
+        timer: timerShortcut,
+      };
+
+      const conflictingAction = Object.entries(allShortcuts).find(([key, val]) => 
+        key !== recordingType && val.toLowerCase() === shortcutStr.toLowerCase()
+      );
+
+      if (conflictingAction) {
+        setWarningMessage((t as any).shortcutInUseMsg ? (t as any).shortcutInUseMsg(shortcutStr) : `${shortcutStr} is already in use!`);
         setRecordingType(null);
         return;
       }
