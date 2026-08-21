@@ -93,12 +93,12 @@ export default function WebcamOverlay() {
 
       let newSize = currentLogical;
       if (e.deltaY < 0) {
-        newSize += 30;
+        newSize += 20; // Reduced step for smoother scaling
       } else {
-        newSize -= 30;
+        newSize -= 20;
       }
 
-      newSize = Math.max(120, Math.min(800, newSize));
+      newSize = Math.max(160, Math.min(800, newSize)); // Increased min size to account for padding
       await win.setSize(new LogicalSize(newSize, newSize));
     } catch (err: any) {
       console.error("Tekerlek Hatası:", err);
@@ -112,45 +112,60 @@ export default function WebcamOverlay() {
       style={{
         width: "100vw",
         height: "100vh",
-        borderRadius: "50%",
-        overflow: "hidden",
-        border: "3px solid #38bdf8",
-        boxSizing: "border-box",
-        background: "rgba(15, 23, 42, 0.95)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "white",
         cursor: "move",
         userSelect: "none"
       }}
     >
-      <video
-        ref={videoRef}
+      <div
         style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          transform: "scaleX(-1)",
+          width: "calc(100% - 80px)",
+          height: "calc(100% - 80px)",
           borderRadius: "50%",
-          display: (started && !hasError) ? "block" : "none",
-          pointerEvents: "none"
+          border: "3px solid #38bdf8",
+          boxSizing: "border-box",
+          background: "rgba(15, 23, 42, 0.95)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          clipPath: "circle(50% at 50% 50%)",
+          WebkitClipPath: "circle(50% at 50% 50%)",
+          transform: "translateZ(0)", // Force GPU layer lock
+          position: "relative"
         }}
-      />
-      {!started && (
-        <div
-          style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
-        >
-          Kamera Kapalı
-        </div>
-      )}
-      {started && hasError && (
-        <div
-          style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
-        >
-          Kamera<br />Bulunamadı
-        </div>
-      )}
+      >
+        <video
+          ref={videoRef}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transform: "scaleX(-1) translateZ(0)", // Maintain mirror + GPU layer lock
+            borderRadius: "50%",
+            clipPath: "circle(50% at 50% 50%)", // Force circular mask at GPU level
+            WebkitClipPath: "circle(50% at 50% 50%)", // Safari/Webkit fallback
+            display: (started && !hasError) ? "block" : "none",
+            pointerEvents: "none"
+          }}
+        />
+        {!started && (
+          <div
+            style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
+          >
+            Kamera Kapalı
+          </div>
+        )}
+        {started && hasError && (
+          <div
+            style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
+          >
+            Kamera<br />Bulunamadı
+          </div>
+        )}
+      </div>
     </div>
   );
 }
