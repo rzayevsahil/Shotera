@@ -8,17 +8,17 @@ export default function WebcamOverlay() {
   const [hasError, setHasError] = useState(false);
   const [started, setStarted] = useState(false);
   const isStartingRef = useRef(false);
-  
+
   useEffect(() => {
     async function startCam() {
       if (isStartingRef.current) return;
       isStartingRef.current = true;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { width: { ideal: 640 }, height: { ideal: 480 } } 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 } }
         });
         activeStreams.add(stream);
-        
+
         // In case stopCam was called while we were waiting for the camera
         if (!isStartingRef.current) {
           stream.getTracks().forEach(track => track.stop());
@@ -42,7 +42,7 @@ export default function WebcamOverlay() {
 
     function stopCam() {
       isStartingRef.current = false; // Cancel any pending start
-      
+
       activeStreams.forEach(stream => {
         stream.getTracks().forEach(track => track.stop());
       });
@@ -67,20 +67,36 @@ export default function WebcamOverlay() {
     };
   }, []);
 
+  useEffect(() => {
+    const el = document.getElementById("webcam-container");
+    if (!el) return;
+    
+    const handleDrag = (e: MouseEvent) => {
+      if (e.button === 0) {
+        getCurrentWindow().startDragging().catch(console.error);
+      }
+    };
+
+    el.addEventListener("mousedown", handleDrag);
+    return () => {
+      el.removeEventListener("mousedown", handleDrag);
+    };
+  }, []);
+
   const handleWheel = async (e: React.WheelEvent) => {
     try {
       const win = getCurrentWindow();
       const factor = await win.scaleFactor();
       const physicalSize = await win.innerSize();
       const currentSize = physicalSize.width / factor;
-      
+
       let newSize = currentSize;
       if (e.deltaY < 0) {
         newSize += 30; // scroll up -> bigger
       } else {
         newSize -= 30; // scroll down -> smaller
       }
-      
+
       newSize = Math.max(120, Math.min(800, newSize));
       await win.setSize(new LogicalSize(newSize, newSize));
     } catch (err) {
@@ -89,14 +105,9 @@ export default function WebcamOverlay() {
   };
 
   return (
-    <div 
+    <div
+      id="webcam-container"
       onWheel={handleWheel}
-      onPointerDown={(e) => {
-        if (e.button === 0) {
-          getCurrentWindow().startDragging().catch(console.error);
-        }
-      }}
-      data-tauri-drag-region
       style={{
         width: "100vw",
         height: "100vh",
@@ -111,13 +122,11 @@ export default function WebcamOverlay() {
         justifyContent: "center",
         color: "white",
         cursor: "move",
-        WebkitAppRegion: "drag",
         userSelect: "none"
       }}
     >
-      <video 
+      <video
         ref={videoRef}
-        data-tauri-drag-region
         style={{
           width: "100%",
           height: "100%",
@@ -129,17 +138,17 @@ export default function WebcamOverlay() {
         }}
       />
       {!started && (
-        <div 
+        <div
           style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
         >
           Kamera Kapalı
         </div>
       )}
       {started && hasError && (
-        <div 
+        <div
           style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
         >
-          Kamera<br/>Bulunamadı
+          Kamera<br />Bulunamadı
         </div>
       )}
     </div>
