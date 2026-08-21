@@ -9,7 +9,25 @@ import BreakTimer from "./components/BreakTimer";
 import ZoomCanvas from "./components/ZoomCanvas";
 import LiveZoomCanvas from "./components/LiveZoomCanvas";
 import ScreenRecorderModal from "./components/ScreenRecorderModal";
+import WebcamOverlay from "./components/WebcamOverlay";
 import "./App.css";
+
+function StandaloneRecorder() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  useEffect(() => {
+    import("@tauri-apps/api/event").then(({ listen }) => {
+      const unlistenOpened = listen("recorder-opened", () => setIsOpen(true));
+      const unlistenClosed = listen("recorder-closed", () => setIsOpen(false));
+      return () => {
+        unlistenOpened.then(f => f());
+        unlistenClosed.then(f => f());
+      };
+    });
+  }, []);
+
+  return <ScreenRecorderModal isOpen={isOpen} onClose={() => { setIsOpen(false); getCurrentWindow().hide(); }} isStandalone={true} />;
+}
 
 
 function App() {
@@ -102,7 +120,11 @@ function App() {
   }
 
   if (label === "recorder") {
-    return <ScreenRecorderModal isOpen={true} onClose={() => getCurrentWindow().hide()} isStandalone={true} />;
+    return <StandaloneRecorder />;
+  }
+
+  if (label === "webcam") {
+    return <WebcamOverlay />;
   }
 
   return <SettingsWindow />;

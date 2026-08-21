@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Monitor, AppWindow, Video, X, Check, Square } from "lucide-react";
+import { Monitor, AppWindow, Video, X, Check, Square, Camera } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
 import "./ScreenRecorderModal.css";
 
@@ -23,15 +23,22 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
+    const [useWebcam, setUseWebcam] = useState(localStorage.getItem("recordWebcam") === "true");
 
     const t = translations[getLanguage()];
 
     useEffect(() => {
         if (isOpen) {
             loadSources();
+            if (useWebcam) {
+                invoke("toggle_webcam", { show: true }).catch(console.error);
+            }
         } else {
             setSources([]);
             setSelectedId(null);
+            if (!isRecording) {
+                invoke("toggle_webcam", { show: false }).catch(console.error);
+            }
         }
     }, [isOpen]);
 
@@ -95,6 +102,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             console.error(error);
         } finally {
             setIsRecording(false);
+            if (useWebcam) {
+                invoke("toggle_webcam", { show: false }).catch(console.error);
+            }
             if (isStandalone) {
                 await invoke("resize_recorder_window", { compact: false }).catch(console.error);
                 await invoke("hide_recorder_window").catch(console.error);
@@ -224,8 +234,29 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 </div>
 
                 {!isRecording && (
-                    <div className="recorder-modal-footer">
-                        <button className="premium-button" onClick={handleStartRecording} disabled={!selectedId || loading}>
+                    <div className="recorder-modal-footer" style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <button 
+                            className="secondary-button"
+                            onClick={() => {
+                                const next = !useWebcam;
+                                setUseWebcam(next);
+                                localStorage.setItem("recordWebcam", next.toString());
+                                invoke("toggle_webcam", { show: next }).catch(console.error);
+                            }}
+                            title="Kamerayı Göster/Gizle"
+                            style={{
+                                padding: '10px',
+                                borderRadius: '8px',
+                                background: useWebcam ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                                border: useWebcam ? '1px solid var(--accent-cyan)' : '1px solid transparent',
+                                color: useWebcam ? 'var(--accent-cyan)' : '#a1a1aa',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <Camera size={18} />
+                        </button>
+                        <button className="premium-button" onClick={handleStartRecording} disabled={!selectedId || loading} style={{ flex: 1, justifyContent: 'center' }}>
                             <Video size={16} /> {(t as any).modalStartRecording}
                         </button>
                     </div>

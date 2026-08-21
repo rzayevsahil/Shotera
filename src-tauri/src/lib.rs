@@ -252,6 +252,7 @@ fn disable_windows_audio_ducking() -> Result<bool, String> {
 #[tauri::command]
 fn hide_recorder_window(app_handle: AppHandle) {
     if let Some(window) = app_handle.get_webview_window("recorder") {
+        let _ = window.emit("recorder-closed", ());
         let _ = window.hide();
     }
 }
@@ -299,15 +300,13 @@ fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), St
 fn open_recorder_view(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("recorder") {
         if window.is_visible().unwrap_or(false) {
+            let _ = window.emit("recorder-closed", ());
             let _ = window.hide();
-            return Ok(());
+        } else {
+            let _ = window.emit("recorder-opened", ());
+            let _ = window.show();
+            let _ = window.set_focus();
         }
-    }
-
-    if let Some(window) = app_handle.get_webview_window("recorder") {
-        let _ = window.show();
-        let _ = window.set_focus();
-        let _ = window.emit("recorder-opened", ());
     } else {
         let app_handle_clone = app_handle.clone();
         let _ = app_handle.run_on_main_thread(move || {
@@ -329,6 +328,20 @@ fn open_recorder_view(app_handle: AppHandle) -> Result<(), String> {
         });
     }
     
+    Ok(())
+}
+
+#[tauri::command]
+fn toggle_webcam(app_handle: AppHandle, show: bool) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("webcam") {
+        if show {
+            let _ = window.emit("start-camera", ());
+            let _ = window.show();
+            let _ = window.set_focus();
+        } else {
+            let _ = window.emit("stop-camera", ());
+        }
+    }
     Ok(())
 }
 
@@ -1627,6 +1640,7 @@ pub fn run() {
             open_break_timer,
             open_zoom_view,
             open_live_zoom_view,
+            toggle_webcam,
             show_zoom_window,
             hide_timer_window,
             hide_zoom_window,

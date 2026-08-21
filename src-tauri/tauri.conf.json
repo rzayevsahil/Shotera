@@ -74,6 +74,18 @@
         "visible": false,
         "alwaysOnTop": true,
         "center": true
+      },
+      {
+        "label": "webcam",
+        "title": "Webcam",
+        "width": 240,
+        "height": 240,
+        "resizable": false,
+        "transparent": true,
+        "decorations": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
       }
     ],
     "security": {
