@@ -78,6 +78,7 @@ export default function WebcamOverlay() {
     };
 
     el.addEventListener("mousedown", handleDrag);
+
     return () => {
       el.removeEventListener("mousedown", handleDrag);
     };
@@ -88,19 +89,19 @@ export default function WebcamOverlay() {
       const win = getCurrentWindow();
       const factor = await win.scaleFactor();
       const physicalSize = await win.innerSize();
-      const currentSize = physicalSize.width / factor;
+      const currentLogical = physicalSize.width / factor;
 
-      let newSize = currentSize;
+      let newSize = currentLogical;
       if (e.deltaY < 0) {
-        newSize += 30; // scroll up -> bigger
+        newSize += 30;
       } else {
-        newSize -= 30; // scroll down -> smaller
+        newSize -= 30;
       }
 
       newSize = Math.max(120, Math.min(800, newSize));
       await win.setSize(new LogicalSize(newSize, newSize));
-    } catch (err) {
-      console.error("Resize error", err);
+    } catch (err: any) {
+      console.error("Tekerlek Hatası:", err);
     }
   };
 
