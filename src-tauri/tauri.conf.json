@@ -80,7 +80,7 @@
         "title": "Webcam",
         "width": 240,
         "height": 240,
-        "resizable": false,
+        "resizable": true,
         "transparent": true,
         "shadow": false,
         "decorations": false,
