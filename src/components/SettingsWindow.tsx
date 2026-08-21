@@ -1949,15 +1949,6 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).recordPerfMode}</span>
-                <span className="setting-desc">{(t as any).recordPerfModeDesc}</span>
-              </div>
-              <div className="shortcut-badge" style={{ cursor: "default" }}>
-                WGC / DXGI
-              </div>
-            </div>
 
             <div className="setting-row">
               <div className="setting-info">

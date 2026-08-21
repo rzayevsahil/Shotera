@@ -32,7 +32,7 @@
 - 🔎 **Ekran Büyüteci ve ZoomIt Aracı (`Ctrl` + `1`):** Ekranı dondurup istediğiniz bölgeyi yakınlaştırın (1.0x - 5.0x), serbest kalem, düz çizgi (`Shift`), dikdörtgen (`Ctrl`), daire (`Alt`), yön oku (`Shift`+`Ctrl`) çizin, metin yazın (`T`), ve tek tuşla renk kısayolları (`R`, `G`, `B`, `Y`, `O`, `P`) ile beyaz tahta (`W`) / siyah tahta (`K`) modlarına geçin.
 - ⌛ **Tam Ekran Mola & Odak Zamanlayıcısı (`Ctrl` + `3`):** Sunum ve molalarınız için canlı geri sayım halkası, ilerleme çubuğu, duraklat/başlat, +1dk/-1dk kontrolleri ve sesli/bildirimli uyarı içeren tam ekran zamanlayıcı (1-99 dakika).
 - 🔎 **Canlı Ekran Büyütme (`Ctrl` + `4`):** Arka plandaki uygulamalarla etkileşime girmeye devam ederken, masaüstünüzü farenizin etrafında canlı olarak büyütün (ZoomIt benzeri).
-- 🎥 **Ekran Kaydı (`Ctrl` + `5`):** Seçilen alanı veya tüm ekranı yerel ve şık bir arayüz ile MP4 video olarak kaydedin.
+- 🎥 **Ekran Kaydı (`Ctrl` + `5`):** Windows Grafik Yakalama (WGC/DXGI) ve donanım hızlandırmalı GPU kodlayıcıları (NVENC/QSV/AMF) ile yüksek kaliteli, takılmasız MP4 video ekran kaydı alın. Doğrudan monitörleri veya pencereleri seçin.
 - ☁️ **Hızlı Bulut Yükleme:** Ekran görüntülerini tek tıkla Imgur'a yükleyin ve bağlantısını anında panoya (clipboard) kopyalayın.
 - ⚙️ **Özelleştirilebilir Kısayollar:** Global klavye kısayollarını kendi çalışma alışkanlıklarınıza göre kişiselleştirin.
 - 💾 **Çoklu Format Desteği:** Ekran görüntülerinizi PNG, JPG veya modern WebP formatlarında, belirlediğiniz kalite ayarlarıyla kaydedin.

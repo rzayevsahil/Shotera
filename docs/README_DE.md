@@ -32,7 +32,7 @@
 - 🔎 **Bildschirmlupe & ZoomIt-Tool (`Ctrl` + `1`):** Bildschirm einfrieren und vergrößern (1.0x - 5.0x), Freihandzeichnen, gerade Linien (`Shift`), Rechtecke (`Ctrl`), Ovale (`Alt`), Pfeile (`Shift`+`Ctrl`), Text hinzufügen (`T`) und zu Whiteboard (`W`) / Blackboard (`K`) mit Farbtasten (`R`, `G`, `B`, `Y`, `O`, `P`) wechseln.
 - ⌛ **Vollbild-Pausentimer (`Ctrl` + `3`):** Vollbild-Timer für Präsentationen und Pausen (1-99 Minuten) mit Echtzeit-Countdown, Fortschrittsbalken, Pause/Start und akustischem Signal.
 - 🔎 **Live-Bildschirmvergrößerung (`Ctrl` + `4`):** Vergrößern Sie Ihren Desktop live um Ihren Mauszeiger, während Sie weiterhin mit Anwendungen im Hintergrund interagieren.
-- 🎥 **Bildschirmaufnahme (`Ctrl` + `5`):** Nehmen Sie ausgewählte Bereiche oder den gesamten Bildschirm einfach als MP4-Video auf.
+- 🎥 **Bildschirmaufnahme (`Ctrl` + `5`):** Hardwarebeschleunigte native Bildschirmaufnahme mit Windows Graphics Capture (WGC/DXGI) und GPU-Encodern (NVENC/QSV/AMF) für hochwertige, ruckelfreie MP4-Videos. Direkte Auswahl von Monitoren oder Fenstern.
 - ☁️ **Schneller Cloud-Upload:** Laden Sie Screenshots mit einem Klick auf Imgur hoch und kopieren Sie den Link sofort in die Zwischenablage.
 - ⚙️ **Anpassbare Tastenkombinationen:** Personalisieren Sie globale Tastenkombinationen für Ihren Arbeitsablauf.
 - 💾 **Unterstützung mehrerer Formate:** Speichern Sie Ihre Screenshots in den Formaten PNG, JPG oder modernem WebP mit anpassbaren Qualitätseinstellungen.

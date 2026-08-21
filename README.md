@@ -31,7 +31,7 @@
 - 📌 **Screen Pinning:** Pin your screenshots anywhere on your screen as "always-on-top" windows. Highly useful when working with reference images or code snippets.
 - 🔎 **Screen Zoom & Magnifier (ZoomIt Tool - `Ctrl` + `1`):** Freeze and magnify any part of your screen (1.0x - 5.0x), draw freehand, straight lines (`Shift`), rectangles (`Ctrl`), ovals (`Alt`), arrows (`Shift`+`Ctrl`), type bold text (`T`), and switch to instant whiteboard (`W`) or blackboard (`K`) modes with single-key color palette (`R`, `G`, `B`, `Y`, `O`, `P`).
 - 🔎 **Live Screen Zoom (`Ctrl` + `4`):** Magnify your desktop live around your mouse pointer while continuing to interact with background applications, similar to the iconic ZoomIt feature.
-- 🎥 **Screen Recording (`Ctrl` + `5`):** Easily record selected regions or the entire screen as an MP4 video with a native and intuitive interface. Pure high-quality video.
+- 🎥 **Screen Recording (`Ctrl` + `5`):** Hardware-accelerated native screen recording using Windows Graphics Capture (WGC/DXGI) and GPU encoders (NVENC/QSV/AMF) for high-quality, lag-free MP4 video capture. Directly select monitors or windows.
 - ⌛ **Break & Focus Timer (`Ctrl` + `3`):** Fullscreen presentation timer (1-99 minutes) with real-time countdown, animated progress ring/bar, play/pause controls, +1m/-1m time adjustments, and expiration audio alerts.
 - ☁️ **Quick Cloud Upload:** Upload screenshots to Imgur with a single click and instantly copy the link to your clipboard.
 - ⚙️ **Customizable Shortcuts:** Personalize global keyboard shortcuts to match your workflow.
