@@ -180,7 +180,7 @@ async fn start_native_recording(
     let now = Local::now();
     let filename = now.format("Recording_%Y%m%d_%H%M%S.mp4").to_string();
     
-    let mut path = if let Some(p) = video_save_path.filter(|s| !s.trim().is_empty()) {
+    let mut path = if let Some(p) = video_save_path.filter(|s| !s.trim().is_empty() && s != "Videos/Shotera") {
         std::path::PathBuf::from(p)
     } else {
         let mut p = app_handle.path().video_dir().unwrap_or_else(|_| std::path::PathBuf::from("C:\\"));
