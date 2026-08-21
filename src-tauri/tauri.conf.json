@@ -62,6 +62,18 @@
         "visible": false,
         "alwaysOnTop": true,
         "skipTaskbar": true
+      },
+      {
+        "label": "recorder",
+        "title": "Screen Recorder",
+        "width": 620,
+        "height": 500,
+        "resizable": false,
+        "transparent": true,
+        "decorations": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "center": true
       }
     ],
     "security": {

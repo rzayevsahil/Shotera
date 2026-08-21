@@ -309,21 +309,24 @@ fn open_recorder_view(app_handle: AppHandle) -> Result<(), String> {
         let _ = window.set_focus();
         let _ = window.emit("recorder-opened", ());
     } else {
-        // Create the recorder window if it doesn't exist
-        let builder = tauri::WebviewWindowBuilder::new(
-            &app_handle,
-            "recorder",
-            tauri::WebviewUrl::App("index.html".into())
-        )
-        .title("Screen Recorder")
-        .inner_size(620.0, 500.0)
-        .resizable(false)
-        .decorations(false)
-        .transparent(true)
-        .always_on_top(true)
-        .center();
-        
-        builder.build().map_err(|e| e.to_string())?;
+        let app_handle_clone = app_handle.clone();
+        let _ = app_handle.run_on_main_thread(move || {
+            // Create the recorder window if it doesn't exist
+            let builder = tauri::WebviewWindowBuilder::new(
+                &app_handle_clone,
+                "recorder",
+                tauri::WebviewUrl::App("index.html".into())
+            )
+            .title("Screen Recorder")
+            .inner_size(620.0, 500.0)
+            .resizable(false)
+            .decorations(false)
+            .transparent(true)
+            .always_on_top(true)
+            .center();
+            
+            let _ = builder.build();
+        });
     }
     
     Ok(())
