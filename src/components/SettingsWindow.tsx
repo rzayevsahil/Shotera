@@ -1176,7 +1176,7 @@ function SettingsWindow() {
                       {(t as any).badgeBox || "Kutu"}
                     </span>
                     <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>Tab</kbd>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "0 5px", fontFamily: "monospace", fontWeight: 700, color: "#ffffff" }}>Alt</kbd>
                       {(t as any).badgeCircle || "Daire"}
                     </span>
                     <span className="shortcut-badge" style={{ fontSize: "0.78rem", padding: "3px 8px 3px 4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
