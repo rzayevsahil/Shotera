@@ -24,7 +24,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [isRecording, setIsRecording] = useState(false);
     const isRecordingRef = useRef(false);
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
-    const [useWebcam, setUseWebcam] = useState(localStorage.getItem("recordWebcam") === "true");
+    const [useWebcam, setUseWebcam] = useState(false);
 
     const t = translations[getLanguage()];
 
@@ -34,10 +34,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     useEffect(() => {
         if (isOpen) {
+            setUseWebcam(false);
             loadSources();
-            if (useWebcam) {
-                invoke("toggle_webcam", { show: true }).catch(console.error);
-            }
         } else {
             setSources([]);
             setSelectedId(null);
