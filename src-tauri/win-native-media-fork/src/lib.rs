@@ -25,6 +25,8 @@ use std::time::Duration;
 pub struct CapturedFrame {
     /// The BGRA8 D3D11 texture for this frame.
     pub texture: windows::Win32::Graphics::Direct3D11::ID3D11Texture2D,
+    /// The WGC frame object. Must be kept alive so the texture isn't recycled.
+    pub frame: windows::Graphics::Capture::Direct3D11CaptureFrame,
     /// Time since capture started.
     pub timestamp: Duration,
     /// Frame content width in pixels.

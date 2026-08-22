@@ -13,6 +13,10 @@ use windows::Foundation::TypedEventHandler;
 use windows::Graphics::Capture::{
     Direct3D11CaptureFramePool, GraphicsCaptureItem, GraphicsCaptureSession,
 };
+use windows::Win32::Graphics::Direct3D11::{
+    ID3D11DeviceContext, D3D11_TEXTURE2D_DESC, D3D11_USAGE_STAGING, D3D11_CPU_ACCESS_READ,
+    D3D11_MAP_READ, D3D11_MAPPED_SUBRESOURCE, D3D11_BOX,
+};
 use windows::Graphics::DirectX::Direct3D11::IDirect3DDevice;
 use windows::Graphics::DirectX::DirectXPixelFormat;
 use windows::Graphics::SizeInt32;
@@ -102,11 +106,17 @@ pub fn start(
     // Shared state the callback needs: the sender, the frame pool (to recreate
     // on resize), the winrt device (for recreation), and the capture-start QPC
     // baseline (set on the first frame so timestamps are relative).
+    let context = unsafe { device.GetImmediateContext().ok() };
+    
     let state = std::sync::Arc::new(Mutex::new(FrameState {
         tx,
         device: AgileDevice(d3d_interop.clone()),
+        d3d11_device: AgileD3D11Device(device.clone()),
+        context: context.map(AgileContext),
+        staging_tex: None,
         last_size: size,
         recording_start_100ns,
+        last_timestamp: None,
     }));
 
     let handler_state = state.clone();
@@ -140,8 +150,12 @@ pub fn start(
 struct FrameState {
     tx: SyncSender<CapturedFrame>,
     device: AgileDevice,
+    d3d11_device: AgileD3D11Device,
+    context: Option<AgileContext>,
+    staging_tex: Option<windows::Win32::Graphics::Direct3D11::ID3D11Texture2D>,
     last_size: SizeInt32,
     recording_start_100ns: i64,
+    last_timestamp: Option<Duration>,
 }
 
 /// The `windows` bindings mark COM interfaces `!Send` conservatively, but WGC
@@ -152,6 +166,13 @@ struct FrameState {
 // ponytail: narrow unsafe Send only for the agile WGC device, not a blanket wrapper.
 struct AgileDevice(IDirect3DDevice);
 unsafe impl Send for AgileDevice {}
+
+struct AgileD3D11Device(ID3D11Device);
+unsafe impl Send for AgileD3D11Device {}
+
+#[derive(Clone)]
+struct AgileContext(ID3D11DeviceContext);
+unsafe impl Send for AgileContext {}
 
 fn on_frame_arrived(
     pool: &Direct3D11CaptureFramePool,
@@ -195,6 +216,16 @@ fn on_frame_arrived(
     let rel_100ns = (ticks - start).max(0) as u64;
     let timestamp = Duration::from_nanos(rel_100ns * 100);
 
+    // [DIAGNOSTIC] Timestamp Gap Detection
+    let last = guard.last_timestamp;
+    guard.last_timestamp = Some(timestamp);
+    if let Some(prev) = last {
+        let diff = timestamp.saturating_sub(prev);
+        if diff > Duration::from_millis(60) {
+            tracing::warn!(target: "av_sync_diagnostics", "VIDEO_TIMESTAMP_GAP | PTS: {:?} | Gap: {:?}", timestamp, diff);
+        }
+    }
+
     // Pull the D3D11 texture out of the WinRT surface (stays on GPU).
     let surface = match frame.Surface() {
         Ok(s) => s,
@@ -224,23 +255,70 @@ fn on_frame_arrived(
     let width = content_size.Width.max(0) as u32;
     let height = content_size.Height.max(0) as u32;
 
+    // [DIAGNOSTIC] Texture Black Check
+    let ctx_opt = guard.context.clone();
+    if let Some(ctx) = ctx_opt {
+        unsafe {
+            if guard.staging_tex.is_none() {
+                let mut desc = D3D11_TEXTURE2D_DESC::default();
+                texture.GetDesc(&mut desc);
+                let mut staging_desc = desc;
+                staging_desc.Width = 1;
+                staging_desc.Height = 1;
+                staging_desc.Usage = D3D11_USAGE_STAGING;
+                staging_desc.BindFlags = 0;
+                staging_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ.0 as u32;
+                staging_desc.MiscFlags = 0;
+                let mut staging: Option<windows::Win32::Graphics::Direct3D11::ID3D11Texture2D> = None;
+                if guard.d3d11_device.0.CreateTexture2D(&staging_desc, None, Some(&mut staging)).is_ok() {
+                    guard.staging_tex = staging;
+                }
+            }
+
+            if let Some(staging) = &guard.staging_tex {
+                let src_box = D3D11_BOX {
+                    left: width / 2,
+                    top: height / 2,
+                    right: (width / 2) + 1,
+                    bottom: (height / 2) + 1,
+                    front: 0,
+                    back: 1,
+                };
+                ctx.0.CopySubresourceRegion(staging, 0, 0, 0, 0, &texture, 0, Some(&src_box));
+                let mut mapped = D3D11_MAPPED_SUBRESOURCE::default();
+                if ctx.0.Map(staging, 0, D3D11_MAP_READ, 0, Some(&mut mapped)).is_ok() {
+                    let pixel = std::slice::from_raw_parts(mapped.pData as *const u8, 4);
+                    if pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0 {
+                        tracing::warn!(target: "av_sync_diagnostics", "POSSIBLE_BLACK_FRAME | PTS: {:?} | Center Pixel: {:?}", timestamp, pixel);
+                    }
+                    ctx.0.Unmap(staging, 0);
+                }
+            }
+        }
+    }
+
     // Bounded, non-blocking: if the consumer is behind, drop this frame rather
     // than stall the compositor.
     let _ = state_send_nonblocking(
         &guard.tx,
         CapturedFrame {
             texture,
+            frame,
             timestamp,
             width,
             height,
         },
+        current_qpc,
     );
 }
 
-fn state_send_nonblocking(tx: &SyncSender<CapturedFrame>, f: CapturedFrame) -> Result<()> {
+fn state_send_nonblocking(tx: &SyncSender<CapturedFrame>, f: CapturedFrame, current_qpc: i64) -> Result<()> {
     match tx.try_send(f) {
         Ok(()) => Ok(()),
-        Err(std::sync::mpsc::TrySendError::Full(_)) => Ok(()), // drop, don't stall
+        Err(std::sync::mpsc::TrySendError::Full(dropped_f)) => {
+            tracing::warn!(target: "av_sync_diagnostics", "FRAME_DROPPED_QUEUE_FULL | Current_QPC: {} | Dropped_PTS: {:?}", current_qpc, dropped_f.timestamp);
+            Ok(())
+        },
         Err(std::sync::mpsc::TrySendError::Disconnected(_)) => Err(PipelineError::Stopped),
     }
 }
