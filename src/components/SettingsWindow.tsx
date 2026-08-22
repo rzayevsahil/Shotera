@@ -2203,6 +2203,17 @@ function SettingsWindow() {
                 <span className="setting-label">{(t as any).webcamPreviewLabel || "Önizleme"}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", flex: 1, paddingRight: "4px" }}>
+                <style>
+                  {`
+                    @keyframes webcam-logo-gif {
+                      0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(56,189,248,0.3)); }
+                      25% { transform: scale(1.05) translateY(-2px); filter: drop-shadow(0 0 10px rgba(56,189,248,0.6)); }
+                      50% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 15px rgba(56,189,248,0.8)); }
+                      75% { transform: scale(0.95) translateY(2px); filter: drop-shadow(0 0 10px rgba(56,189,248,0.6)); }
+                      100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(56,189,248,0.3)); }
+                    }
+                  `}
+                </style>
                 <div style={{
                   width: "90px",
                   height: "90px",
@@ -2218,7 +2229,16 @@ function SettingsWindow() {
                   overflow: "hidden",
                   position: "relative"
                 }}>
-                  <img src={avatar} alt="Webcam Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img
+                    src={logo}
+                    alt="Webcam Preview Animated"
+                    style={{
+                      width: "55%",
+                      height: "55%",
+                      objectFit: "contain",
+                      animation: "webcam-logo-gif 3.5s infinite ease-in-out"
+                    }}
+                  />
                   {/* Subtle camera icon overlay to reinforce it's a webcam */}
                   <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
                     <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
