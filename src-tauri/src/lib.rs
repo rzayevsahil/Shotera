@@ -321,12 +321,11 @@ fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), St
 fn open_recorder_view(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("recorder") {
         if window.is_visible().unwrap_or(false) {
-            let _ = window.emit("recorder-closed", ());
-            let _ = window.hide();
+            let _ = window.emit("recorder-shortcut-pressed", ());
         } else {
-            let _ = window.emit("recorder-opened", ());
             let _ = window.show();
             let _ = window.set_focus();
+            let _ = window.emit("recorder-opened", ());
         }
     } else {
         let app_handle_clone = app_handle.clone();

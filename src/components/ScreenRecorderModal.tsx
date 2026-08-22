@@ -45,18 +45,29 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         }
     }, [isOpen]);
 
+    // Use a ref to always have the latest handleStopRecording function inside the event listener
+    const handleStopRecordingRef = useRef<(() => Promise<void>) | null>(null);
+
     useEffect(() => {
         import("@tauri-apps/api/event").then(({ listen }) => {
-            const unlisten = listen("recorder-opened", () => {
+            const unlistenOpened = listen("recorder-opened", () => {
                 if (isOpen) {
                     loadSources();
                 }
             });
+            const unlistenShortcut = listen("recorder-shortcut-pressed", async () => {
+                if (isRecordingRef.current && handleStopRecordingRef.current) {
+                    await handleStopRecordingRef.current();
+                } else {
+                    onClose();
+                }
+            });
             return () => {
-                unlisten.then(f => f());
+                unlistenOpened.then(f => f());
+                unlistenShortcut.then(f => f());
             };
         });
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
     const loadSources = async () => {
         setLoading(true);
@@ -157,6 +168,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             }
         }
     };
+
+    useEffect(() => {
+        handleStopRecordingRef.current = handleStopRecording;
+    }, [handleStopRecording]);
 
     if (!isOpen) return null;
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -2096,6 +2096,17 @@ function SettingsWindow() {
                     {(t as any).webcamMoveLabel || "Sürükle"}
                   </span>
                   <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
+                </div>
+
+                {/* 3. Exit/Stop Recording */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Square size={15} color="#ef4444" />
+                    {(t as any).webcamExitLabel || "Çıkış (Kaydı Durdur)"}
+                  </span>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                    {formatShortcut(recordShortcut) || "Ctrl+5"}
+                  </kbd>
                 </div>
               </div>
             </div>
