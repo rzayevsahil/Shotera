@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { Camera } from "lucide-react";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 
 const activeStreams = new Set<MediaStream>();
@@ -8,40 +9,64 @@ export default function WebcamOverlay() {
   const [hasError, setHasError] = useState(false);
   const [started, setStarted] = useState(false);
   const isStartingRef = useRef(false);
+  const [permissionState, setPermissionState] = useState<"idle" | "prompt" | "requesting" | "denied">("idle");
+
+  const executeGetUserMedia = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+      activeStreams.add(stream);
+
+      // In case stopCam was called while we were waiting for the camera
+      if (!isStartingRef.current) {
+        stream.getTracks().forEach(track => track.stop());
+        activeStreams.delete(stream);
+        return;
+      }
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      setStarted(true);
+      setHasError(false);
+      setPermissionState("idle");
+    } catch (e) {
+      console.error("Camera error:", e);
+      setHasError(true);
+      setPermissionState("denied");
+    } finally {
+      isStartingRef.current = false;
+    }
+  };
 
   useEffect(() => {
     async function startCam() {
       if (isStartingRef.current) return;
       isStartingRef.current = true;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 640 }, height: { ideal: 480 } }
-        });
-        activeStreams.add(stream);
-
-        // In case stopCam was called while we were waiting for the camera
-        if (!isStartingRef.current) {
-          stream.getTracks().forEach(track => track.stop());
-          activeStreams.delete(stream);
+        const perm = await navigator.permissions.query({ name: "camera" as any });
+        if (perm.state === "prompt") {
+          setPermissionState("prompt");
+          // Keep isStartingRef true to block concurrent starts, but we wait for user action
+          return;
+        } else if (perm.state === "denied") {
+          setPermissionState("denied");
+          setHasError(true);
+          isStartingRef.current = false;
           return;
         }
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-        }
-        setStarted(true);
-        setHasError(false);
       } catch (e) {
-        console.error("Camera error:", e);
-        setHasError(true);
-      } finally {
-        isStartingRef.current = false;
+        // Fallback if permissions API fails
       }
+
+      await executeGetUserMedia();
     }
 
     function stopCam() {
       isStartingRef.current = false; // Cancel any pending start
+      setPermissionState("idle");
 
       activeStreams.forEach(stream => {
         stream.getTracks().forEach(track => track.stop());
@@ -70,7 +95,7 @@ export default function WebcamOverlay() {
   useEffect(() => {
     const el = document.getElementById("webcam-container");
     if (!el) return;
-    
+
     const handleDrag = (e: MouseEvent) => {
       if (e.button === 0) {
         getCurrentWindow().startDragging().catch(console.error);
@@ -151,18 +176,42 @@ export default function WebcamOverlay() {
             pointerEvents: "none"
           }}
         />
-        {!started && (
+        {!started && permissionState === "idle" && (
           <div
             style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
           >
             Kamera Kapalı
           </div>
         )}
-        {started && hasError && (
+        {permissionState === "prompt" && (
+          <div style={{ position: "absolute", width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10%" }}>
+            <Camera size={28} color="#38bdf8" style={{ marginBottom: 10 }} />
+            <span style={{ fontSize: "14px", fontWeight: "bold", marginBottom: 4 }}>İzin Gerekli</span>
+            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", marginBottom: 14, lineHeight: 1.2 }}>Shotera'nın kameraya<br />erişimi gerekiyor</span>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("requesting"); executeGetUserMedia(); }} style={{ background: "#38bdf8", border: "none", color: "#000", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px", boxShadow: "0 0 10px rgba(56,189,248,0.4)" }}>Evet</button>
+              <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("idle"); isStartingRef.current = false; }} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px" }}>Hayır</button>
+            </div>
+          </div>
+        )}
+        {permissionState === "requesting" && (
+          <div style={{ position: "absolute", width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10%" }}>
+            <div className="recording-indicator" style={{ width: 14, height: 14, marginBottom: 12, animation: "pulse-recording 1s infinite", background: "#38bdf8", boxShadow: "0 0 8px #38bdf8" }}></div>
+            <span style={{ fontSize: "11px", fontWeight: "bold", lineHeight: 1.3 }}>Ekrana gelen<br />uyarıdan izin verin</span>
+          </div>
+        )}
+        {started && hasError && permissionState !== "denied" && (
           <div
             style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
           >
             Kamera<br />Bulunamadı
+          </div>
+        )}
+        {permissionState === "denied" && (
+          <div
+            style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
+          >
+            Erişim<br />Reddedildi
           </div>
         )}
       </div>
