@@ -265,6 +265,14 @@ export const translations = {
     modalRecording: "Kayıt devam ediyor...",
     modalHwAccel: "Donanımsal hızlandırma kullanılıyor (NVENC/QSV)",
     modalLoading: "Kaynaklar yükleniyor...",
+    webcamOff: "Kamera Kapalı",
+    webcamPermissionRequired: "İzin Gerekli",
+    webcamPermissionDesc: "Shotera'nın kameraya\nerişimi gerekiyor",
+    webcamYes: "Evet",
+    webcamNo: "Hayır",
+    webcamStarting: "Kamera\nbaşlatılıyor...",
+    webcamNotFound: "Kamera\nBulunamadı",
+    webcamAccessDenied: "Erişim\nReddedildi",
   },
 
 
@@ -534,6 +542,14 @@ export const translations = {
     modalRecording: "Recording in progress...",
     modalHwAccel: "Using native hardware acceleration (NVENC/QSV)",
     modalLoading: "Loading sources...",
+    webcamOff: "Camera Off",
+    webcamPermissionRequired: "Permission Required",
+    webcamPermissionDesc: "Shotera needs access\nto your camera",
+    webcamYes: "Yes",
+    webcamNo: "No",
+    webcamStarting: "Starting\ncamera...",
+    webcamNotFound: "Camera\nNot Found",
+    webcamAccessDenied: "Access\nDenied",
   },
 
 
@@ -801,10 +817,18 @@ export const translations = {
     modalStartRecording: "Qeydi Başlat",
     modalStopRecording: "Qeydi Dayandır",
     modalRecording: "Qeyd davam edir...",
-    modalHwAccel: "Avadanlıq sürətləndirməsi istifadə olunur (NVENC/QSV)",
+    modalHwAccel: "Aparat sürətləndirməsi istifadə olunur (NVENC/QSV)",
     modalLoading: "Mənbələr yüklənir...",
+    webcamOff: "Kamera Söndürülüb",
+    webcamPermissionRequired: "İcazə Tələb Olunur",
+    webcamPermissionDesc: "Shotera-nın kameraya\ngirişinə ehtiyacı var",
+    webcamYes: "Bəli",
+    webcamNo: "Xeyr",
+    webcamStarting: "Kamera\nbaşladılır...",
+    webcamNotFound: "Kamera\nTapılmadı",
+    webcamAccessDenied: "Giriş\nRədd Edildi",
   },
-
+  
   ru: {
     sidebarGeneral: "Общие",
     sidebarCapture: "Захват",
@@ -1073,6 +1097,14 @@ export const translations = {
     modalRecording: "Идет запись...",
     modalHwAccel: "Используется аппаратное ускорение (NVENC/QSV)",
     modalLoading: "Загрузка источников...",
+    webcamOff: "Камера выключена",
+    webcamPermissionRequired: "Требуется разрешение",
+    webcamPermissionDesc: "Shotera нужен доступ\nк вашей камере",
+    webcamYes: "Да",
+    webcamNo: "Нет",
+    webcamStarting: "Запуск\nкамеры...",
+    webcamNotFound: "Камера\nне найдена",
+    webcamAccessDenied: "Доступ\nзапрещен",
   },
 
   de: {
@@ -1339,6 +1371,14 @@ export const translations = {
     modalRecording: "Aufnahme läuft...",
     modalHwAccel: "Verwendung nativer Hardwarebeschleunigung (NVENC/QSV)",
     modalLoading: "Quellen werden geladen...",
+    webcamOff: "Kamera Aus",
+    webcamPermissionRequired: "Berechtigung erforderlich",
+    webcamPermissionDesc: "Shotera benötigt Zugriff\nauf Ihre Kamera",
+    webcamYes: "Ja",
+    webcamNo: "Nein",
+    webcamStarting: "Kamera\nwird gestartet...",
+    webcamNotFound: "Kamera\nnicht gefunden",
+    webcamAccessDenied: "Zugriff\nverweigert",
   }
 };
 
