@@ -2204,8 +2204,8 @@ function SettingsWindow() {
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", flex: 1, paddingRight: "4px" }}>
                 <div style={{
-                  width: "56px",
-                  height: "56px",
+                  width: "90px",
+                  height: "90px",
                   borderRadius: "50%",
                   border: `3px solid ${webcamBorderColor}`,
                   boxSizing: "border-box",
@@ -2214,9 +2214,15 @@ function SettingsWindow() {
                   alignItems: "center",
                   justifyContent: "center",
                   boxShadow: `0 0 15px ${webcamBorderColor}40`,
-                  transition: "all 0.3s ease"
+                  transition: "all 0.3s ease",
+                  overflow: "hidden",
+                  position: "relative"
                 }}>
-                  <Camera size={24} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
+                  <img src={avatar} alt="Webcam Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  {/* Subtle camera icon overlay to reinforce it's a webcam */}
+                  <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
+                    <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
+                  </div>
                 </div>
               </div>
             </div>
