@@ -68,6 +68,13 @@ function SettingsWindow() {
   const [recordAudio, setRecordAudio] = useState<boolean>(() => localStorage.getItem("recordAudio") !== "false");
   const [recordMic, setRecordMic] = useState<boolean>(() => localStorage.getItem("recordMic") === "true");
   const [webcamPermissionMode, setWebcamPermissionMode] = useState<string>(() => localStorage.getItem("webcamPermissionMode") || "once");
+  const [webcamBorderColor, setWebcamBorderColor] = useState<string>(() => localStorage.getItem("webcamBorderColor") || "#38bdf8");
+  const [customWebcamBorderColor, setCustomWebcamBorderColor] = useState<string>(() => {
+    const savedCustom = localStorage.getItem("customWebcamBorderColor");
+    if (savedCustom) return savedCustom;
+    const current = localStorage.getItem("webcamBorderColor") || "#38bdf8";
+    return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(current) ? "#06b6d4" : current;
+  });
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -2069,6 +2076,149 @@ function SettingsWindow() {
                 <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
                 <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
               </select>
+            </div>
+
+            {/* Webcam Border Color Preset Row */}
+            <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamBorderColorLabel || "Kamera Çerçeve Rengi"}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
+                {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => {
+                      setWebcamBorderColor(color);
+                      localStorage.setItem("webcamBorderColor", color);
+                      window.dispatchEvent(new Event("storage"));
+                    }}
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: color,
+                      border: webcamBorderColor === color ? "2px solid #ffffff" : "2px solid transparent",
+                      cursor: "pointer",
+                      boxShadow: webcamBorderColor === color ? `0 0 10px ${color}` : "none",
+                      transition: "all 0.2s ease"
+                    }}
+                  />
+                ))}
+                {/* Circular Custom Color Picker Swatch */}
+                <div
+                  onClick={() => {
+                    const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor);
+                    if (isPreset) {
+                      const activeCustom = customWebcamBorderColor || "#06b6d4";
+                      setWebcamBorderColor(activeCustom);
+                      localStorage.setItem("webcamBorderColor", activeCustom);
+                      window.dispatchEvent(new Event("storage"));
+                    }
+                  }}
+                  style={{
+                    position: "relative",
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "50%",
+                    background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
+                      ? customWebcamBorderColor
+                      : webcamBorderColor,
+                    border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
+                      ? "2px solid #ffffff"
+                      : "2px solid transparent",
+                    boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
+                      ? `0 0 10px ${webcamBorderColor}`
+                      : "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                  title="Özel Renk Seç"
+                >
+                  <input
+                    type="color"
+                    value={customWebcamBorderColor.startsWith("#") && customWebcamBorderColor.length === 7 ? customWebcamBorderColor : "#06b6d4"}
+                    onClick={() => {
+                      const activeCustom = customWebcamBorderColor || "#06b6d4";
+                      setWebcamBorderColor(activeCustom);
+                      localStorage.setItem("webcamBorderColor", activeCustom);
+                      window.dispatchEvent(new Event("storage"));
+                    }}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomWebcamBorderColor(val);
+                      setWebcamBorderColor(val);
+                      localStorage.setItem("customWebcamBorderColor", val);
+                      localStorage.setItem("webcamBorderColor", val);
+                      window.dispatchEvent(new Event("storage"));
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      opacity: 0,
+                      cursor: "pointer"
+                    }}
+                  />
+                  <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                </div>
+
+                {/* Hex Color Text Input */}
+                <input
+                  type="text"
+                  className="premium-input"
+                  value={webcamBorderColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setWebcamBorderColor(val);
+                    if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                      if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
+                        setCustomWebcamBorderColor(val);
+                        localStorage.setItem("customWebcamBorderColor", val);
+                      }
+                      localStorage.setItem("webcamBorderColor", val);
+                      window.dispatchEvent(new Event("storage"));
+                    }
+                  }}
+                  placeholder="#38BDF8"
+                  style={{
+                    width: "110px",
+                    padding: "10px 12px",
+                    fontSize: "0.9rem",
+                    fontFamily: "monospace",
+                    textTransform: "uppercase",
+                    textAlign: "center"
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Webcam Border Color Preview */}
+            <div className="setting-row" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
+              <div className="setting-info" style={{ flex: 1 }}>
+                <span className="setting-label">{(t as any).webcamPreviewLabel || "Önizleme"}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", flex: 1, paddingRight: "4px" }}>
+                <div style={{
+                  width: "56px",
+                  height: "56px",
+                  borderRadius: "50%",
+                  border: `3px solid ${webcamBorderColor}`,
+                  boxSizing: "border-box",
+                  background: "rgba(15, 23, 42, 0.95)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: `0 0 15px ${webcamBorderColor}40`,
+                  transition: "all 0.3s ease"
+                }}>
+                  <Camera size={24} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
+                </div>
+              </div>
             </div>
 
             {recordMic && (

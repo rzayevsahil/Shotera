@@ -13,11 +13,13 @@ export default function WebcamOverlay() {
   const [permissionState, setPermissionState] = useState<"idle" | "prompt" | "requesting" | "denied">("idle");
   const [lang, setLang] = useState<Language>(getLanguage);
   const t = translations[lang];
+  const [borderColor, setBorderColor] = useState(() => localStorage.getItem("webcamBorderColor") || "#38bdf8");
 
   useEffect(() => {
     // Listen for language changes from localStorage
     const handleStorageChange = () => {
       setLang(getLanguage());
+      setBorderColor(localStorage.getItem("webcamBorderColor") || "#38bdf8");
     };
     window.addEventListener("storage", handleStorageChange);
     
@@ -188,7 +190,7 @@ export default function WebcamOverlay() {
           width: "calc(100% - 80px)",
           height: "calc(100% - 80px)",
           borderRadius: "50%",
-          border: "3px solid #38bdf8",
+          border: `3px solid ${borderColor}`,
           boxSizing: "border-box",
           background: "rgba(15, 23, 42, 0.95)",
           display: "flex",
@@ -224,18 +226,18 @@ export default function WebcamOverlay() {
         )}
         {permissionState === "prompt" && (
           <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
-            <Camera size={28} color="#38bdf8" style={{ marginBottom: 10 }} />
+            <Camera size={28} color={borderColor} style={{ marginBottom: 10 }} />
             <span style={{ fontSize: "14px", fontWeight: "bold", marginBottom: 4 }}>{t.webcamPermissionRequired}</span>
             <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", marginBottom: 14, lineHeight: 1.2, whiteSpace: "pre-line" }}>{t.webcamPermissionDesc}</span>
             <div style={{ display: "flex", gap: "8px" }}>
-              <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("requesting"); executeGetUserMedia(); }} style={{ background: "#38bdf8", border: "none", color: "#000", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px", boxShadow: "0 0 10px rgba(56,189,248,0.4)" }}>{t.webcamYes}</button>
+              <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("requesting"); executeGetUserMedia(); }} style={{ background: borderColor, border: "none", color: "#000", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px", boxShadow: `0 0 10px ${borderColor}` }}>{t.webcamYes}</button>
               <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("idle"); isStartingRef.current = false; }} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px" }}>{t.webcamNo}</button>
             </div>
           </div>
         )}
         {permissionState === "requesting" && (
           <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
-            <div className="recording-indicator" style={{ width: 14, height: 14, marginBottom: 12, animation: "pulse-recording 1s infinite", background: "#38bdf8", boxShadow: "0 0 8px #38bdf8" }}></div>
+            <div className="recording-indicator" style={{ width: 14, height: 14, marginBottom: 12, animation: "pulse-recording 1s infinite", background: borderColor, boxShadow: `0 0 8px ${borderColor}` }}></div>
             <span style={{ fontSize: "11px", fontWeight: "bold", lineHeight: 1.3, whiteSpace: "pre-line" }}>{t.webcamStarting}</span>
           </div>
         )}
