@@ -30,6 +30,7 @@ export default function WebcamOverlay() {
   }, []);
 
   const executeGetUserMedia = async () => {
+    localStorage.setItem("webcamHasAllowed", "true");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 640 }, height: { ideal: 480 } }
@@ -64,15 +65,35 @@ export default function WebcamOverlay() {
       if (isStartingRef.current) return;
       isStartingRef.current = true;
       try {
+        const mode = localStorage.getItem("webcamPermissionMode") || "once";
+        const hasAllowed = localStorage.getItem("webcamHasAllowed") === "true";
         const perm = await navigator.permissions.query({ name: "camera" as any });
-        if (perm.state === "prompt") {
-          setPermissionState("prompt");
-          // Keep isStartingRef true to block concurrent starts, but we wait for user action
-          return;
-        } else if (perm.state === "denied") {
+        
+        if (perm.state === "denied") {
           setPermissionState("denied");
           setHasError(true);
           isStartingRef.current = false;
+          return;
+        }
+
+        if (mode === "always") {
+          setPermissionState("prompt");
+          return;
+        }
+
+        if (perm.state === "prompt") {
+          if (mode === "once" && hasAllowed) {
+            setPermissionState("requesting");
+            executeGetUserMedia();
+            return;
+          } else {
+            setPermissionState("prompt");
+            return;
+          }
+        } else {
+          // Granted state, just execute
+          setPermissionState("requesting");
+          executeGetUserMedia();
           return;
         }
       } catch (e) {

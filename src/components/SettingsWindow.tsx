@@ -67,6 +67,7 @@ function SettingsWindow() {
   const [recordFps, setRecordFps] = useState<number>(() => Number(localStorage.getItem("recordFps") || "30"));
   const [recordAudio, setRecordAudio] = useState<boolean>(() => localStorage.getItem("recordAudio") !== "false");
   const [recordMic, setRecordMic] = useState<boolean>(() => localStorage.getItem("recordMic") === "true");
+  const [webcamPermissionMode, setWebcamPermissionMode] = useState<string>(() => localStorage.getItem("webcamPermissionMode") || "once");
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -2044,6 +2045,30 @@ function SettingsWindow() {
                 />
                 <span className="slider"></span>
               </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
+                <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
+              </div>
+              <select
+                className="premium-input"
+                value={webcamPermissionMode}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setWebcamPermissionMode(val);
+                  localStorage.setItem("webcamPermissionMode", val);
+                  if (val === "always") {
+                    localStorage.removeItem("webcamHasAllowed");
+                  }
+                  window.dispatchEvent(new Event("storage"));
+                }}
+                style={{ width: "180px" }}
+              >
+                <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
+                <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
+              </select>
             </div>
 
             {recordMic && (
