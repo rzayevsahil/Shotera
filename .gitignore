@@ -27,3 +27,8 @@ DEV_README.md
 plan.md
 premium_features_plan.md
 sprint1_summary.md
+
+# Tauri backend rules
+src-tauri/target/
+src-tauri/gen/schemas
+src-tauri/win-native-media-fork/target/

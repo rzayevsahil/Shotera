@@ -4412,6 +4412,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-updater",
  "tokio",
+ "tracing-subscriber",
  "win-native-media",
  "windows-capture",
  "windows-sys 0.59.0",
@@ -6076,8 +6077,6 @@ checksum = "72069c3113ab32ab29e5584db3c6ec55d416895e60715417b5b883a357c3e471"
 [[package]]
 name = "win-native-media"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cde35b597f9d3afb981684ba61d7c4a32d367d6b8208d48cd3e97ed0b9314242"
 dependencies = [
  "thiserror 2.0.18",
  "tokio",
