@@ -217,13 +217,13 @@ export default function WebcamOverlay() {
         />
         {!started && permissionState === "idle" && (
           <div
-            style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
+            style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
           >
             {t.webcamOff}
           </div>
         )}
         {permissionState === "prompt" && (
-          <div style={{ position: "absolute", width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10%" }}>
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
             <Camera size={28} color="#38bdf8" style={{ marginBottom: 10 }} />
             <span style={{ fontSize: "14px", fontWeight: "bold", marginBottom: 4 }}>{t.webcamPermissionRequired}</span>
             <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", marginBottom: 14, lineHeight: 1.2, whiteSpace: "pre-line" }}>{t.webcamPermissionDesc}</span>
@@ -234,21 +234,21 @@ export default function WebcamOverlay() {
           </div>
         )}
         {permissionState === "requesting" && (
-          <div style={{ position: "absolute", width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10%" }}>
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
             <div className="recording-indicator" style={{ width: 14, height: 14, marginBottom: 12, animation: "pulse-recording 1s infinite", background: "#38bdf8", boxShadow: "0 0 8px #38bdf8" }}></div>
             <span style={{ fontSize: "11px", fontWeight: "bold", lineHeight: 1.3, whiteSpace: "pre-line" }}>{t.webcamStarting}</span>
           </div>
         )}
         {started && hasError && permissionState !== "denied" && (
           <div
-            style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line" }}
+            style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line", padding: "10px" }}
           >
             {t.webcamNotFound}
           </div>
         )}
         {permissionState === "denied" && (
           <div
-            style={{ position: "absolute", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line" }}
+            style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line", padding: "10px" }}
           >
             {t.webcamAccessDenied}
           </div>
