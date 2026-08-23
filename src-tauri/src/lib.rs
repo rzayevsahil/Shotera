@@ -24,6 +24,11 @@ struct AppState {
     recorder_stop_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
 }
 
+#[tauri::command]
+fn is_autostart_launch() -> bool {
+    std::env::args().any(|arg| arg == "--autostart")
+}
+
 #[derive(serde::Serialize)]
 struct CaptureSource {
     id: String,
@@ -1492,24 +1497,8 @@ pub fn run() {
             }
         }))
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec!["--autostart"])))
-        .setup(|app| {
-            let handle = app.handle();
-            log_app_event(handle, "INFO", "Shotera starting up...");
-            unblock_autostart_registry(handle.clone());
-
-            let is_autostart = std::env::args().any(|arg| arg == "--autostart");
-            if is_autostart {
-                log_app_event(handle, "INFO", "App launched in background via autostart flag (--autostart)");
-            } else {
-                log_app_event(handle, "INFO", "App launched manually by user");
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
-            }
-
-            // 1. Setup Global Shortcut Plugin
-            let shortcut_plugin = tauri_plugin_global_shortcut::Builder::new()
+        .plugin(
+            tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(move |app_handle_shortcut, shortcut, event| {
                     if event.state() == ShortcutState::Pressed {
                         let state = app_handle_shortcut.state::<AppState>();
@@ -1572,8 +1561,23 @@ pub fn run() {
                         }
                     }
                 })
-                .build();
-            app.handle().plugin(shortcut_plugin)?;
+                .build()
+        )
+        .setup(|app| {
+            let handle = app.handle();
+            log_app_event(handle, "INFO", "Shotera starting up...");
+            unblock_autostart_registry(handle.clone());
+
+            let is_autostart = std::env::args().any(|arg| arg == "--autostart");
+            if is_autostart {
+                log_app_event(handle, "INFO", "App launched in background via autostart flag (--autostart)");
+            } else {
+                log_app_event(handle, "INFO", "App launched manually by user");
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
 
             // Register Region, Fullscreen, Zoom, and Break Timer Shortcuts using default values on initial startup
             use std::str::FromStr;
@@ -1676,6 +1680,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            is_autostart_launch,
             get_last_screenshot,
             copy_to_clipboard,
             save_to_file,
