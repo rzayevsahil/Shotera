@@ -24,10 +24,6 @@ struct AppState {
     recorder_stop_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
 }
 
-#[tauri::command]
-fn is_autostart_launch() -> bool {
-    std::env::args().any(|arg| arg == "--autostart")
-}
 
 #[derive(serde::Serialize)]
 struct CaptureSource {
@@ -300,7 +296,7 @@ fn hide_recorder_window(app_handle: AppHandle) {
 }
 
 #[tauri::command]
-fn stop_native_recording(app_handle: AppHandle, state: State<'_, AppState>) -> Result<String, String> {
+fn stop_native_recording(#[allow(unused_variables)] app_handle: AppHandle, state: State<'_, AppState>) -> Result<String, String> {
     println!("Stopping native hardware-accelerated recording.");
     
     if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
@@ -1390,7 +1386,7 @@ fn is_autostart_launch() -> bool {
 }
 
 #[tauri::command]
-fn unblock_autostart_registry(app_handle: AppHandle) {
+fn unblock_autostart_registry(#[allow(unused_variables)] app_handle: AppHandle) {
     #[cfg(target_os = "windows")]
     {
         use std::process::Command;
@@ -1680,7 +1676,6 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            is_autostart_launch,
             get_last_screenshot,
             copy_to_clipboard,
             save_to_file,
