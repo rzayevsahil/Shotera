@@ -133,6 +133,7 @@ fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
 }
 
 #[tauri::command]
+#[allow(unused_variables)]
 async fn start_native_recording(
     app_handle: AppHandle,
     state: State<'_, AppState>,
