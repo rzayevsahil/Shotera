@@ -141,132 +141,148 @@ async fn start_native_recording(
     record_mic: bool,
     video_save_path: Option<String>
 ) -> Result<String, String> {
-    use win_native_media::{Pipeline, PipelineConfig, VideoConfig, RecordConfig, CaptureTarget};
-    use chrono::Local;
-    use tauri::Manager;
+    #[cfg(target_os = "windows")]
+    {
+        use win_native_media::{Pipeline, PipelineConfig, VideoConfig, RecordConfig, CaptureTarget};
+        use chrono::Local;
+        use tauri::Manager;
 
-    println!("Starting native hardware-accelerated recording for source: {}, fps: {}, audio: {}, mic: {}", source_id, fps, record_audio, record_mic);
+        println!("Starting native hardware-accelerated recording for source: {}, fps: {}, audio: {}, mic: {}", source_id, fps, record_audio, record_mic);
 
-    let mut target = CaptureTarget::Monitor(0);
-    let mut target_width = 1920;
-    let mut target_height = 1080;
+        let mut target = CaptureTarget::Monitor(0);
+        let mut target_width = 1920;
+        let mut target_height = 1080;
 
-    if source_id.starts_with("monitor_") {
-        if let Ok(idx) = source_id.replace("monitor_", "").parse::<usize>() {
-            target = CaptureTarget::Monitor(idx);
-            if let Ok(monitors) = xcap::Monitor::all() {
-                if let Some(m) = monitors.get(idx) {
-                    target_width = m.width().unwrap_or(1920);
-                    target_height = m.height().unwrap_or(1080);
+        if source_id.starts_with("monitor_") {
+            if let Ok(idx) = source_id.replace("monitor_", "").parse::<usize>() {
+                target = CaptureTarget::Monitor(idx);
+                if let Ok(monitors) = xcap::Monitor::all() {
+                    if let Some(m) = monitors.get(idx) {
+                        target_width = m.width().unwrap_or(1920);
+                        target_height = m.height().unwrap_or(1080);
+                    }
+                }
+            }
+        } else if source_id.starts_with("window_") {
+            if let Ok(hwnd) = source_id.replace("window_", "").parse::<isize>() {
+                target = CaptureTarget::Window(hwnd);
+                if let Ok(windows) = xcap::Window::all() {
+                    if let Some(w) = windows.iter().find(|w| w.id().unwrap_or(0) as isize == hwnd) {
+                        target_width = w.width().unwrap_or(1920);
+                        target_height = w.height().unwrap_or(1080);
+                    }
                 }
             }
         }
-    } else if source_id.starts_with("window_") {
-        if let Ok(hwnd) = source_id.replace("window_", "").parse::<isize>() {
-            target = CaptureTarget::Window(hwnd);
-            if let Ok(windows) = xcap::Window::all() {
-                if let Some(w) = windows.iter().find(|w| w.id().unwrap_or(0) as isize == hwnd) {
-                    target_width = w.width().unwrap_or(1920);
-                    target_height = w.height().unwrap_or(1080);
-                }
-            }
-        }
-    }
 
-    // Ensure dimensions are multiples of 16 (strict requirement for H264 hardware encoders to prevent macroblock corruption/tearing)
-    target_width = target_width - (target_width % 16);
-    target_height = target_height - (target_height % 16);
+        // Ensure dimensions are multiples of 16 (strict requirement for H264 hardware encoders to prevent macroblock corruption/tearing)
+        target_width = target_width - (target_width % 16);
+        target_height = target_height - (target_height % 16);
 
-    let now = Local::now();
-    let filename = now.format("Recording_%Y%m%d_%H%M%S.mp4").to_string();
-    
-    let mut path = if let Some(p) = video_save_path.filter(|s| !s.trim().is_empty() && s != "Videos/Shotera") {
-        std::path::PathBuf::from(p)
-    } else {
-        let mut p = app_handle.path().video_dir().unwrap_or_else(|_| std::path::PathBuf::from("C:\\"));
-        p.push("Shotera");
-        p
-    };
-    let _ = std::fs::create_dir_all(&path);
-    path.push(&filename);
-
-    let output_path_str = path.to_string_lossy().to_string();
-
-    let config = PipelineConfig {
-        capture_target: target,
-        video: VideoConfig { 
-            width: target_width, 
-            height: target_height, 
-            fps, 
-            bitrate: if fps > 30 { 15_000_000 } else { 10_000_000 },
-            keyframe_interval: 2,
-        },
-        record: Some(RecordConfig { output_path: path.clone().into() }),
-        audio: if record_audio || record_mic {
-            Some(win_native_media::AudioConfig {
-                bitrate: 192_000,
-                loopback: record_audio,
-                microphone: record_mic,
-            })
+        let now = Local::now();
+        let filename = now.format("Recording_%Y%m%d_%H%M%S.mp4").to_string();
+        
+        let mut path = if let Some(p) = video_save_path.filter(|s| !s.trim().is_empty() && s != "Videos/Shotera") {
+            std::path::PathBuf::from(p)
         } else {
-            None
-        },
-        capture_cursor: true,
-        stream: None,
-    };
+            let mut p = app_handle.path().video_dir().unwrap_or_else(|_| std::path::PathBuf::from("C:\\"));
+            p.push("Shotera");
+            p
+        };
+        let _ = std::fs::create_dir_all(&path);
+        path.push(&filename);
 
-    let (tx, rx) = tokio::sync::oneshot::channel();
-    
-    tauri::async_runtime::spawn(async move {
-        let start_time = std::time::Instant::now();
-        match Pipeline::new(config) {
-            Ok(mut pipeline) => {
-                match pipeline.start().await {
-                    Ok(_) => {
-                        println!("Native recording pipeline started successfully.");
-                        let _ = rx.await; // wait for stop signal
-                        
-                        let elapsed = start_time.elapsed();
-                        if elapsed.as_millis() < 2500 {
-                            let delay = 2500 - elapsed.as_millis() as u64;
-                            println!("Recording was too short, delaying stop by {}ms to prevent Media Foundation deadlock...", delay);
-                            tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
-                        }
+        let output_path_str = path.to_string_lossy().to_string();
 
-                        println!("Stop signal received, stopping pipeline...");
-                        if let Err(e) = pipeline.stop().await {
-                            eprintln!("Error stopping pipeline: {}", e);
-                        } else {
-                            println!("Pipeline stopped successfully.");
-                        }
-                    },
-                    Err(e) => eprintln!("Failed to start native recording pipeline: {}", e),
-                }
+        let config = PipelineConfig {
+            capture_target: target,
+            video: VideoConfig { 
+                width: target_width, 
+                height: target_height, 
+                fps, 
+                bitrate: if fps > 30 { 15_000_000 } else { 10_000_000 },
+                keyframe_interval: 2,
             },
-            Err(e) => eprintln!("Failed to create native recording pipeline: {}", e),
-        }
-    });
+            record: Some(RecordConfig { output_path: path.clone().into() }),
+            audio: if record_audio || record_mic {
+                Some(win_native_media::AudioConfig {
+                    bitrate: 192_000,
+                    loopback: record_audio,
+                    microphone: record_mic,
+                })
+            } else {
+                None
+            },
+            capture_cursor: true,
+            stream: None,
+        };
 
-    if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
-        *stop_tx = Some(tx);
+        let (tx, rx) = tokio::sync::oneshot::channel();
+        
+        tauri::async_runtime::spawn(async move {
+            let start_time = std::time::Instant::now();
+            match Pipeline::new(config) {
+                Ok(mut pipeline) => {
+                    match pipeline.start().await {
+                        Ok(_) => {
+                            println!("Native recording pipeline started successfully.");
+                            let _ = rx.await; // wait for stop signal
+                            
+                            let elapsed = start_time.elapsed();
+                            if elapsed.as_millis() < 2500 {
+                                let delay = 2500 - elapsed.as_millis() as u64;
+                                println!("Recording was too short, delaying stop by {}ms to prevent Media Foundation deadlock...", delay);
+                                tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
+                            }
+
+                            println!("Stop signal received, stopping pipeline...");
+                            if let Err(e) = pipeline.stop().await {
+                                eprintln!("Error stopping pipeline: {}", e);
+                            } else {
+                                println!("Pipeline stopped successfully.");
+                            }
+                        },
+                        Err(e) => eprintln!("Failed to start native recording pipeline: {}", e),
+                    }
+                },
+                Err(e) => eprintln!("Failed to create native recording pipeline: {}", e),
+            }
+        });
+
+        if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
+            *stop_tx = Some(tx);
+        }
+
+        Ok(output_path_str)
     }
 
-    Ok(output_path_str)
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("Hardware-accelerated native recording is currently only supported on Windows.".into())
+    }
 }
 
 #[tauri::command]
 fn disable_windows_audio_ducking() -> Result<bool, String> {
-    use std::process::Command;
-    // Set UserDuckingPreference to 3 (Do nothing)
-    let output = Command::new("reg")
-        .args(["add", r"HKCU\Software\Microsoft\Multimedia\Audio", "/v", "UserDuckingPreference", "/t", "REG_DWORD", "/d", "3", "/f"])
-        .output()
-        .map_err(|e| e.to_string())?;
+    #[cfg(target_os = "windows")]
+    {
+        use std::process::Command;
+        // Set UserDuckingPreference to 3 (Do nothing)
+        let output = Command::new("reg")
+            .args(["add", r"HKCU\Software\Microsoft\Multimedia\Audio", "/v", "UserDuckingPreference", "/t", "REG_DWORD", "/d", "3", "/f"])
+            .output()
+            .map_err(|e| e.to_string())?;
 
-    if output.status.success() {
+        if output.status.success() {
+            Ok(true)
+        } else {
+            Err(String::from_utf8_lossy(&output.stderr).to_string())
+        }
+    }
+    
+    #[cfg(not(target_os = "windows"))]
+    {
         Ok(true)
-    } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
     }
 }
 
@@ -1486,6 +1502,10 @@ pub fn run() {
                 log_app_event(handle, "INFO", "App launched in background via autostart flag (--autostart)");
             } else {
                 log_app_event(handle, "INFO", "App launched manually by user");
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
             }
 
             // 1. Setup Global Shortcut Plugin
