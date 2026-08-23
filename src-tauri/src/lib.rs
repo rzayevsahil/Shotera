@@ -694,14 +694,7 @@ async fn pin_image(
     .inner_size(width, height)
     .position(x, y)
     .decorations(false);
-    #[cfg(not(target_os = "macos"))]
     let builder = builder.transparent(true);
-
-    // On macOS, WebviewWindowBuilder doesn't have the transparent method directly exposed in the same way,
-    // so we set the background color to transparent.
-    #[cfg(target_os = "macos")]
-    let builder = builder.background_color(tauri::utils::config::Color(0, 0, 0, 0));
-
     builder
         .always_on_top(true)
         .resizable(true)
