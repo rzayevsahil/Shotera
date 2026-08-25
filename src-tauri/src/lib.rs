@@ -549,6 +549,14 @@ fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Re
         }
     }
 
+    if let Some(window) = app_handle.get_webview_window("screenshot") {
+        if window.is_visible().unwrap_or(false) {
+            let _ = window.hide();
+            restore_focus(app_handle, "screenshot");
+            return Ok(());
+        }
+    }
+
     capture_screen_to_state(app_handle, state)?;
     // Notify the screenshot window to load the new image
     if let Some(window) = app_handle.get_webview_window("screenshot") {
@@ -560,6 +568,14 @@ fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Re
 
 
 fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("screenshot") {
+        if window.is_visible().unwrap_or(false) {
+            let _ = window.hide();
+            restore_focus(app_handle, "screenshot");
+            return Ok(());
+        }
+    }
+
     // 1. Capture screen
     let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
     if monitors.is_empty() {
@@ -1026,16 +1042,25 @@ fn select_folder() -> Option<String> {
         .map(|p| p.to_string_lossy().to_string())
 }
 
+fn restore_focus(app_handle: &AppHandle, skip: &str) {
+    let windows = ["timer", "live_zoom", "zoom", "screenshot"];
+    for w_name in windows {
+        if w_name == skip { continue; }
+        if let Some(w) = app_handle.get_webview_window(w_name) {
+            if w.is_visible().unwrap_or(false) {
+                let _ = w.set_focus();
+                return;
+            }
+        }
+    }
+}
+
 #[tauri::command]
 fn hide_screenshot_window(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("screenshot") {
-        window.hide().map_err(|e| e.to_string())?;
+        let _ = window.hide();
     }
-    if let Some(zoom_window) = app_handle.get_webview_window("zoom") {
-        if zoom_window.is_visible().unwrap_or(false) {
-            let _ = zoom_window.set_focus();
-        }
-    }
+    restore_focus(&app_handle, "screenshot");
     Ok(())
 }
 
@@ -1079,6 +1104,7 @@ fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("timer") {
         if window.is_visible().unwrap_or(false) {
             let _ = window.hide();
+            restore_focus(&app_handle, "timer");
             return Ok(());
         }
         let _ = window.set_fullscreen(true);
@@ -1101,6 +1127,7 @@ fn open_zoom_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(
     if let Some(window) = app_handle.get_webview_window("zoom") {
         if window.is_visible().unwrap_or(false) {
             let _ = window.hide();
+            restore_focus(&app_handle, "zoom");
             return Ok(());
         }
     }
@@ -1250,6 +1277,7 @@ fn hide_timer_window(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("timer") {
         let _ = window.hide();
     }
+    restore_focus(&app_handle, "timer");
     Ok(())
 }
 
@@ -1258,6 +1286,7 @@ fn hide_zoom_window(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("zoom") {
         let _ = window.hide();
     }
+    restore_focus(&app_handle, "zoom");
     Ok(())
 }
 
