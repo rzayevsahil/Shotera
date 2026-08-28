@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square } from "lucide-react";
 import logo from "../assets/logo.png";
@@ -14,6 +14,111 @@ import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 import ScreenRecorderModal from "./ScreenRecorderModal";
 type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
+const SYSTEM_FONTS = [
+  "Arial", "Arial Black", "Bahnschrift", "Calibri", "Cambria", "Cambria Math", 
+  "Candara", "Comic Sans MS", "Consolas", "Constantia", "Corbel", "Courier New", 
+  "Ebrima", "Franklin Gothic Medium", "Gabriola", "Gadugi", "Georgia", 
+  "Impact", "Ink Free", "Javanese Text", "Leelawadee UI", "Lucida Console", 
+  "Lucida Sans Unicode", "Malgun Gothic", "Microsoft Himalaya", "Microsoft JhengHei", 
+  "Microsoft New Tai Lue", "Microsoft PhagsPa", "Microsoft Sans Serif", 
+  "Microsoft Tai Le", "Microsoft YaHei", "Microsoft Yi Baiti", "MingLiU-ExtB", 
+  "Mongolian Baiti", "MS Gothic", "MV Boli", "Myanmar Text", "Nirmala UI", 
+  "Palatino Linotype", "Segoe Print", "Segoe Script", "Segoe UI", "Segoe UI Historic", 
+  "Segoe UI Symbol", "SimSun", "Sitka", "Sylfaen", "Symbol", "Tahoma", 
+  "Times New Roman", "Trebuchet MS", "Verdana", "Webdings", "Wingdings",
+  "Helvetica", "Helvetica Neue", "Monaco", "Menlo", "Ubuntu", "Roboto", "Inter", "Outfit",
+  "sans-serif", "serif", "monospace", "cursive", "fantasy"
+].sort();
+
+function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value: string, onChange: (val: string) => void, placeholder?: string, searchPlaceholder?: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredFonts = SYSTEM_FONTS.filter(f => f.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative", width: "180px" }}>
+      <div 
+        className="premium-input"
+        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}
+        onClick={() => { setIsOpen(!isOpen); setSearch(""); }}
+      >
+        <span style={{ fontFamily: value, overflow: "hidden", textOverflow: "ellipsis", fontSize: "0.9rem" }}>{value || placeholder}</span>
+        <span style={{ fontSize: "10px", marginLeft: "8px", opacity: 0.6 }}>▼</span>
+      </div>
+      {isOpen && (
+        <div style={{
+          position: "absolute",
+          top: "100%",
+          left: 0,
+          right: 0,
+          marginTop: "4px",
+          background: "rgba(15, 23, 42, 0.98)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: "6px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.8)",
+          zIndex: 100,
+          display: "flex",
+          flexDirection: "column"
+        }}>
+          <input
+            autoFocus
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={searchPlaceholder || "Font ara..."}
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "none",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+              padding: "10px 12px",
+              color: "white",
+              outline: "none",
+              fontSize: "0.85rem",
+              borderRadius: "6px 6px 0 0"
+            }}
+          />
+          <div className="custom-scrollbar" style={{ maxHeight: "200px", overflowY: "auto", padding: "4px 0" }}>
+            {filteredFonts.length > 0 ? filteredFonts.map(font => (
+              <div
+                key={font}
+                onClick={() => {
+                  onChange(font);
+                  setIsOpen(false);
+                }}
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  fontFamily: font,
+                  background: value === font ? "rgba(56, 189, 248, 0.2)" : "transparent",
+                  color: value === font ? "#38bdf8" : "white",
+                  fontSize: "1rem"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                onMouseLeave={(e) => e.currentTarget.style.background = value === font ? "rgba(56, 189, 248, 0.2)" : "transparent"}
+              >
+                {font}
+              </div>
+            )) : (
+              <div style={{ padding: "12px", color: "rgba(255,255,255,0.5)", fontSize: "0.85rem", textAlign: "center" }}>Bulunamadı</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 function SettingsWindow() {
@@ -2378,18 +2483,12 @@ function SettingsWindow() {
                 <span className="setting-desc">{(t as any).webcamTextFontDesc || "Kamera yazısının görünümünü özelleştirin."}</span>
               </div>
               <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <select
-                  className="premium-input"
+                <FontSelect
                   value={webcamTextFont}
-                  onChange={(e) => setWebcamTextFont(e.target.value)}
-                  style={{ width: "120px" }}
-                >
-                  <option value="sans">{(t as any).webcamFontSans || "Modern (Sans)"}</option>
-                  <option value="serif">{(t as any).webcamFontSerif || "Klasik (Serif)"}</option>
-                  <option value="monospace">{(t as any).webcamFontMono || "Kod (Mono)"}</option>
-                  <option value="cursive">{(t as any).webcamFontCursive || "El Yazısı"}</option>
-                  <option value="Impact, sans-serif">{(t as any).webcamFontImpact || "Kalın (Impact)"}</option>
-                </select>
+                  onChange={setWebcamTextFont}
+                  placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
+                  searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
+                />
 
                 <div
                   style={{
