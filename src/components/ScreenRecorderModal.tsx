@@ -260,14 +260,14 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 borderRadius: '0'
             }} data-tauri-drag-region>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
-                    <div className="recording-indicator" style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
+                    <div className="recording-indicator" style={{ width: '14px', height: '14px', minWidth: '14px', minHeight: '14px', borderRadius: '50%', margin: 0, flexShrink: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
                     <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{isPaused ? 'Mola' : (t as any).modalRecording}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={(t as any).recordTooltipWebcam || "Kamerayı Aç/Kapat"}>
+                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
                         <Camera size={16} color={useWebcam ? "var(--accent-cyan)" : "#a1a1aa"} />
                     </button>
-                    <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={isPaused ? "Devam Et" : "Duraklat"}>
+                    <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
                         {isPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
                     </button>
                     <button className="premium-button stop-btn" onClick={handleStopRecording} style={{ padding: '8px 14px', fontSize: '0.85rem' }}>

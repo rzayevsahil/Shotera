@@ -428,6 +428,20 @@ fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), St
             let _ = window.set_size(tauri::LogicalSize::new(620.0, 500.0));
             let _ = window.center();
         }
+        
+        #[cfg(target_os = "windows")]
+        if let Ok(hwnd) = window.hwnd() {
+            unsafe {
+                windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                    hwnd.0 as _,
+                    windows_sys::Win32::UI::WindowsAndMessaging::WDA_NONE
+                );
+                windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                    hwnd.0 as _,
+                    windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE
+                );
+            }
+        }
     }
     Ok(())
 }
@@ -452,6 +466,20 @@ fn open_recorder_view(app_handle: AppHandle, state: State<'_, AppState>) -> Resu
             let _ = window.show();
             let _ = window.set_focus();
             let _ = window.emit("recorder-opened", ());
+            
+            #[cfg(target_os = "windows")]
+            if let Ok(hwnd) = window.hwnd() {
+                unsafe {
+                    windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                        hwnd.0 as _,
+                        windows_sys::Win32::UI::WindowsAndMessaging::WDA_NONE
+                    );
+                    windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                        hwnd.0 as _,
+                        windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE
+                    );
+                }
+            }
         }
     } else {
         let app_handle_clone = app_handle.clone();
@@ -470,7 +498,17 @@ fn open_recorder_view(app_handle: AppHandle, state: State<'_, AppState>) -> Resu
             .always_on_top(true)
             .center();
             
-            let _ = builder.build();
+            if let Ok(window) = builder.build() {
+                #[cfg(target_os = "windows")]
+                if let Ok(hwnd) = window.hwnd() {
+                    unsafe {
+                        windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                            hwnd.0 as _,
+                            windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE
+                        );
+                    }
+                }
+            }
         });
     }
     
