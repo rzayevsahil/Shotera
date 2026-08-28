@@ -26,6 +26,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
     const [useWebcam, setUseWebcam] = useState(false);
     const useWebcamRef = useRef(false);
+    const [useMic, setUseMic] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const isPausedRef = useRef(false);
     const [isMicMuted, setIsMicMuted] = useState(false);
@@ -41,8 +42,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     useEffect(() => {
         if (isOpen) {
             const savedWebcam = localStorage.getItem("recordWebcam") === "true";
+            const savedMic = localStorage.getItem("recordMic") === "true";
             setUseWebcam(savedWebcam);
             useWebcamRef.current = savedWebcam;
+            setUseMic(savedMic);
             setIsPaused(false);
             isPausedRef.current = false;
             setIsMicMuted(false);
@@ -162,7 +165,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         
         const fps = Number(localStorage.getItem("recordFps")) || 30;
         const recordAudio = localStorage.getItem("recordAudio") !== "false";
-        const recordMic = localStorage.getItem("recordMic") === "true";
+        const recordMic = useMic;
         const videoSavePath = localStorage.getItem("videoSavePath") || "";
         
         if (recordAudio) {
@@ -455,6 +458,28 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                             }}
                         >
                             <Camera size={18} />
+                        </button>
+                        <button 
+                            className="secondary-button"
+                            onClick={() => {
+                                const next = !useMic;
+                                setUseMic(next);
+                                localStorage.setItem("recordMic", next.toString());
+                                // Also update other windows that might be listening to storage
+                                window.dispatchEvent(new Event("storage"));
+                            }}
+                            title={(t as any).recordMicLabel || "Mikrofonu Kaydet"}
+                            style={{
+                                padding: '10px',
+                                borderRadius: '8px',
+                                background: useMic ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                                border: useMic ? '1px solid var(--accent-cyan)' : '1px solid transparent',
+                                color: useMic ? 'var(--accent-cyan)' : '#a1a1aa',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {useMic ? <Mic size={18} /> : <MicOff size={18} />}
                         </button>
                         <button className="premium-button" onClick={handleStartRecording} disabled={!selectedId || loading} style={{ flex: 1, justifyContent: 'center' }}>
                             <Video size={16} /> {(t as any).modalStartRecording}
