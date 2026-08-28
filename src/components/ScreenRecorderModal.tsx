@@ -43,6 +43,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             useWebcamRef.current = savedWebcam;
             setIsPaused(false);
             isPausedRef.current = false;
+            if (savedWebcam) {
+                invoke("toggle_webcam", { show: true }).catch(console.error);
+            }
             loadSources();
         } else {
             setSources([]);
