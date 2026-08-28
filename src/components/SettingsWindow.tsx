@@ -2302,8 +2302,8 @@ function SettingsWindow() {
               <div className="setting-info" style={{ flex: 1 }}>
                 <span className="setting-label">{(t as any).webcamPreviewLabel || "Önizleme"}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", flex: 1, paddingRight: "4px" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", position: "relative" }}>
+              <div style={{ display: "flex", justifyContent: "flex-end", flex: 1, paddingRight: "14px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", position: "relative", height: "140px", width: "90px", justifyContent: "flex-start" }}>
                   <style>
                     {`
                       @keyframes webcam-logo-gif {
