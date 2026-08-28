@@ -308,7 +308,6 @@ export default function BreakTimer() {
         alignItems: "center",
         justifyContent: "center",
         color: "#ffffff",
-        fontFamily: fontFamilyCSS,
         userSelect: "none",
         position: "relative",
         overflow: "hidden",
