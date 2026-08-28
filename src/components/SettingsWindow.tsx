@@ -1624,7 +1624,7 @@ function SettingsWindow() {
                       cursor: "pointer",
                       transition: "all 0.2s ease"
                     }}
-                    title="Özel Renk Seç"
+                    title={(t as any).timerPickCustomColor || "Özel Renk Seç"}
                   >
                     <input
                       type="color"
@@ -2224,7 +2224,7 @@ function SettingsWindow() {
                     cursor: "pointer",
                     transition: "all 0.2s ease"
                   }}
-                  title="Özel Renk Seç"
+                  title={(t as any).webcamPickCustomColor || "Özel Renk Seç"}
                 >
                   <input
                     type="color"
@@ -2384,11 +2384,11 @@ function SettingsWindow() {
                   onChange={(e) => setWebcamTextFont(e.target.value)}
                   style={{ width: "120px" }}
                 >
-                  <option value="sans">Modern (Sans)</option>
-                  <option value="serif">Klasik (Serif)</option>
-                  <option value="monospace">Kod (Mono)</option>
-                  <option value="cursive">El Yazısı</option>
-                  <option value="Impact, sans-serif">Kalın (Impact)</option>
+                  <option value="sans">{(t as any).webcamFontSans || "Modern (Sans)"}</option>
+                  <option value="serif">{(t as any).webcamFontSerif || "Klasik (Serif)"}</option>
+                  <option value="monospace">{(t as any).webcamFontMono || "Kod (Mono)"}</option>
+                  <option value="cursive">{(t as any).webcamFontCursive || "El Yazısı"}</option>
+                  <option value="Impact, sans-serif">{(t as any).webcamFontImpact || "Kalın (Impact)"}</option>
                 </select>
 
                 <div
@@ -2402,7 +2402,7 @@ function SettingsWindow() {
                     cursor: "pointer",
                     overflow: "hidden"
                   }}
-                  title="Yazı Rengi Seç"
+                  title={(t as any).webcamPickTextColor || "Yazı Rengi Seç"}
                 >
                   <input
                     type="color"

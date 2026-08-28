@@ -261,7 +261,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{isPaused ? 'Mola' : (t as any).modalRecording}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title="Kamerayı Aç/Kapat">
+                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={(t as any).recordTooltipWebcam || "Kamerayı Aç/Kapat"}>
                         <Camera size={16} color={useWebcam ? "var(--accent-cyan)" : "#a1a1aa"} />
                     </button>
                     <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={isPaused ? "Devam Et" : "Duraklat"}>
@@ -386,7 +386,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 setShowControls(next);
                                 localStorage.setItem("showRecordControls", next.toString());
                             }}
-                            title="Kayıt Çubuğunu Gizle/Göster"
+                            title={(t as any).recordTooltipBar || "Kayıt Çubuğunu Gizle/Göster"}
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
@@ -407,7 +407,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 localStorage.setItem("recordWebcam", next.toString());
                                 invoke("toggle_webcam", { show: next }).catch(console.error);
                             }}
-                            title="Kamerayı Göster/Gizle"
+                            title={(t as any).recordTooltipWebcam || "Kamerayı Göster/Gizle"}
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
