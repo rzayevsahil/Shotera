@@ -26,7 +26,6 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
     const [useWebcam, setUseWebcam] = useState(false);
     const useWebcamRef = useRef(false);
-    const [useMic, setUseMic] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const isPausedRef = useRef(false);
     const [isMicMuted, setIsMicMuted] = useState(false);
@@ -45,11 +44,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             const savedMic = localStorage.getItem("recordMic") === "true";
             setUseWebcam(savedWebcam);
             useWebcamRef.current = savedWebcam;
-            setUseMic(savedMic);
             setIsPaused(false);
             isPausedRef.current = false;
-            setIsMicMuted(false);
-            isMicMutedRef.current = false;
+            setIsMicMuted(!savedMic);
+            isMicMutedRef.current = !savedMic;
             if (savedWebcam) {
                 invoke("toggle_webcam", { show: true }).catch(console.error);
             }
@@ -114,6 +112,22 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         });
     }, [isOpen, onClose]);
 
+    useEffect(() => {
+        const handleStorageChange = () => {
+            if (!isRecordingRef.current) {
+                const savedMic = localStorage.getItem("recordMic") === "true";
+                setIsMicMuted(!savedMic);
+                isMicMutedRef.current = !savedMic;
+
+                const savedWebcam = localStorage.getItem("recordWebcam") === "true";
+                setUseWebcam(savedWebcam);
+                useWebcamRef.current = savedWebcam;
+            }
+        };
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
+
     const loadSources = async () => {
         setLoading(true);
         try {
@@ -165,7 +179,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         
         const fps = Number(localStorage.getItem("recordFps")) || 30;
         const recordAudio = localStorage.getItem("recordAudio") !== "false";
-        const recordMic = useMic;
+        // ALWAYS pass true so the mic track is created and can be unmuted mid-recording
+        const recordMic = true;
         const videoSavePath = localStorage.getItem("videoSavePath") || "";
         
         if (recordAudio) {
@@ -185,6 +200,13 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             }
 
             await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio, recordMic, videoSavePath });
+            
+            // If the user selected to start with mic muted, apply it immediately
+            if (isMicMuted) {
+                await invoke("toggle_mic", { muted: true }).catch(console.error);
+            } else {
+                await invoke("toggle_mic", { muted: false }).catch(console.error);
+            }
         } catch (error) {
             console.error("Failed to start recording:", error);
             stopAudioKeepAlive();
@@ -269,6 +291,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             await invoke("toggle_mic", { muted: nextMuted });
             setIsMicMuted(nextMuted);
             isMicMutedRef.current = nextMuted;
+            
+            // Sync with Settings window by updating localStorage
+            localStorage.setItem("recordMic", (!nextMuted).toString());
+            window.dispatchEvent(new Event("storage"));
         } catch (error) {
             console.error("Failed to toggle mic:", error);
         }
@@ -462,24 +488,24 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                         <button 
                             className="secondary-button"
                             onClick={() => {
-                                const next = !useMic;
-                                setUseMic(next);
-                                localStorage.setItem("recordMic", next.toString());
-                                // Also update other windows that might be listening to storage
+                                const next = !isMicMuted;
+                                setIsMicMuted(next);
+                                isMicMutedRef.current = next;
+                                localStorage.setItem("recordMic", (!next).toString());
                                 window.dispatchEvent(new Event("storage"));
                             }}
-                            title={(t as any).recordMicLabel || "Mikrofonu Kaydet"}
+                            title={(t as any).recordMicLabel || "Mikrofonu Aç/Kapat"}
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
-                                background: useMic ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                                border: useMic ? '1px solid var(--accent-cyan)' : '1px solid transparent',
-                                color: useMic ? 'var(--accent-cyan)' : '#a1a1aa',
+                                background: !isMicMuted ? 'rgba(56, 189, 248, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                border: !isMicMuted ? '1px solid var(--accent-cyan)' : '1px solid transparent',
+                                color: !isMicMuted ? 'var(--accent-cyan)' : '#ef4444',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                             }}
                         >
-                            {useMic ? <Mic size={18} /> : <MicOff size={18} />}
+                            {!isMicMuted ? <Mic size={18} /> : <MicOff size={18} />}
                         </button>
                         <button className="premium-button" onClick={handleStartRecording} disabled={!selectedId || loading} style={{ flex: 1, justifyContent: 'center' }}>
                             <Video size={16} /> {(t as any).modalStartRecording}

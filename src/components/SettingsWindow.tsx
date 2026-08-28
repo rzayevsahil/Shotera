@@ -656,6 +656,7 @@ function SettingsWindow() {
     const handleStorageChange = () => {
       setLang(getLanguage());
       setRecordWebcam(localStorage.getItem("recordWebcam") === "true");
+      setRecordMic(localStorage.getItem("recordMic") === "true");
       setShowRecordControls(localStorage.getItem("showRecordControls") !== "false");
     };
     window.addEventListener("storage", handleStorageChange);
