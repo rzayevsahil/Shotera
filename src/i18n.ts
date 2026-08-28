@@ -321,6 +321,8 @@ export const translations = {
     modalStopRecording: "Kaydı Durdur",
     modalRecording: "Kayıt devam ediyor...",
     modalPaused: "Mola",
+    statusPaused: "Duraklatıldı",
+    statusResumed: "Devam Ediyor",
     modalHwAccel: "Donanımsal hızlandırma kullanılıyor (NVENC/QSV)",
     modalLoading: "Kaynaklar yükleniyor...",
     webcamOff: "Kamera Kapatılıyor...",
@@ -656,6 +658,8 @@ export const translations = {
     modalStopRecording: "Stop Recording",
     modalRecording: "Recording in progress...",
     modalPaused: "Paused",
+    statusPaused: "Paused",
+    statusResumed: "Resumed",
     modalHwAccel: "Using native hardware acceleration (NVENC/QSV)",
     modalLoading: "Loading sources...",
     webcamOff: "Turning Camera Off...",
@@ -991,6 +995,8 @@ export const translations = {
     modalStopRecording: "Qeydi Dayandır",
     modalRecording: "Qeyd davam edir...",
     modalPaused: "Fasilə",
+    statusPaused: "Dayandırıldı",
+    statusResumed: "Davam Edir",
     modalHwAccel: "Aparat sürətləndirməsi istifadə olunur (NVENC/QSV)",
     modalLoading: "Mənbələr yüklənir...",
     webcamOff: "Kamera Söndürülür...",
@@ -1324,6 +1330,8 @@ export const translations = {
     modalStopRecording: "Остановить запись",
     modalRecording: "Идет запись...",
     modalPaused: "Пауза",
+    statusPaused: "Приостановлено",
+    statusResumed: "Продолжается",
     modalHwAccel: "Используется аппаратное ускорение (NVENC/QSV)",
     modalLoading: "Загрузка источников...",
     webcamOff: "Выключение камеры...",
@@ -1656,6 +1664,8 @@ export const translations = {
     modalStopRecording: "Aufnahme stoppen",
     modalRecording: "Aufnahme läuft...",
     modalPaused: "Pause",
+    statusPaused: "Pausiert",
+    statusResumed: "Fortgesetzt",
     modalHwAccel: "Verwendung nativer Hardwarebeschleunigung (NVENC/QSV)",
     modalLoading: "Quellen werden geladen...",
     webcamOff: "Kamera wird ausgeschaltet...",
@@ -1686,10 +1696,19 @@ export function getLanguage(): Language {
 }
 
 export function setLanguage(lang: Language) {
+  localStorage.getItem("language");
   localStorage.setItem("language", lang);
   // Dispatch custom storage event for multi-webview tab coordination
   window.dispatchEvent(new Event("storage"));
   // Sync language with native system tray menu
   invoke("update_tray_language", { lang }).catch((err) => console.error("Failed to update tray language:", err));
 }
+
+export const allPausedTexts = Array.from(
+  new Set([
+    ...Object.values(translations).flatMap((t: any) => [t.statusPaused, t.modalPaused]),
+    "Duraklatıldı", "Dayandırıldı", "Приостановлено", "Pausiert", "Paused", "Mola", "Pause", "Пауза"
+  ].filter(Boolean))
+);
+
 

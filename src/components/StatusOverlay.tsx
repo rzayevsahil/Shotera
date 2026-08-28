@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
+import { allPausedTexts } from "../i18n";
 import "./StatusOverlay.css";
 
 export default function StatusOverlay() {
@@ -40,10 +41,12 @@ export default function StatusOverlay() {
     return null;
   }
 
+  const isPaused = allPausedTexts.includes(text);
+
   return (
     <div className="status-overlay-container" data-tauri-drag-region>
-      <div key={animKey} className="status-overlay-pill" data-tauri-drag-region>
-        <div className="status-indicator-dot" />
+      <div key={animKey} className={`status-overlay-pill ${isPaused ? "paused" : "resumed"}`} data-tauri-drag-region>
+        <div className={`status-indicator-dot ${isPaused ? "paused" : "resumed"}`} />
         <span className="status-overlay-text">{text}</span>
       </div>
     </div>
