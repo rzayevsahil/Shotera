@@ -125,7 +125,7 @@ fn capture_loop(
         windows::Win32::System::Com::CoTaskMemFree(Some(fmt_ptr as *const _));
 
         let mut qpc_freq = 0i64;
-        unsafe { windows::Win32::System::Performance::QueryPerformanceFrequency(&mut qpc_freq).unwrap(); }
+        windows::Win32::System::Performance::QueryPerformanceFrequency(&mut qpc_freq).unwrap();
         // Poll interval ~ half the buffer.
         let poll = std::time::Duration::from_millis(10);
 
@@ -167,7 +167,7 @@ fn capture_loop(
 
             // Compute relative timestamp
             let mut current_qpc = 0i64;
-            unsafe { windows::Win32::System::Performance::QueryPerformanceCounter(&mut current_qpc).unwrap(); }
+            windows::Win32::System::Performance::QueryPerformanceCounter(&mut current_qpc).unwrap();
             
             let current_100ns = (current_qpc as f64 * 10_000_000.0 / qpc_freq as f64) as i64;
             let start_100ns = base_time_100ns.load(Ordering::SeqCst);
