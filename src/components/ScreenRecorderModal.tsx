@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { emit, listen } from "@tauri-apps/api/event";
 import { Monitor, AppWindow, Video, X, Check, Square, Camera, Pause, Play, EyeOff, Mic, MicOff } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
 import "./ScreenRecorderModal.css";
@@ -114,21 +115,38 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     useEffect(() => {
         const handleStorageChange = () => {
-            if (!isRecordingRef.current) {
-                const savedMic = localStorage.getItem("recordMic") === "true";
-                setIsMicMuted(!savedMic);
-                isMicMutedRef.current = !savedMic;
+            const savedMic = localStorage.getItem("recordMic") === "true";
+            const newMicMuted = !savedMic;
+            if (isMicMutedRef.current !== newMicMuted) {
+                setIsMicMuted(newMicMuted);
+                isMicMutedRef.current = newMicMuted;
+                if (isRecordingRef.current) {
+                    invoke("toggle_mic", { muted: newMicMuted }).catch(console.error);
+                }
+            }
 
-                const savedWebcam = localStorage.getItem("recordWebcam") === "true";
+            const savedWebcam = localStorage.getItem("recordWebcam") === "true";
+            if (useWebcamRef.current !== savedWebcam) {
                 setUseWebcam(savedWebcam);
                 useWebcamRef.current = savedWebcam;
-
-                const savedShowControls = localStorage.getItem("showRecordControls") !== "false";
-                setShowControls(savedShowControls);
+                if (isRecordingRef.current) {
+                    invoke("toggle_webcam", { show: savedWebcam }).catch(console.error);
+                }
             }
+
+            const savedShowControls = localStorage.getItem("showRecordControls") !== "false";
+            setShowControls(savedShowControls);
         };
         window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
+        
+        const unlistenForceSync = listen("force_storage_sync", () => {
+            handleStorageChange();
+        });
+
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+            unlistenForceSync.then(f => f());
+        };
     }, []);
 
     const loadSources = async () => {
@@ -278,6 +296,11 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             await invoke("toggle_webcam", { show: nextWebcam });
             setUseWebcam(nextWebcam);
             useWebcamRef.current = nextWebcam;
+            
+            // Sync with Settings window by updating localStorage
+            localStorage.setItem("recordWebcam", nextWebcam.toString());
+            window.dispatchEvent(new Event("storage"));
+            emit("force_storage_sync").catch(console.error);
         } catch (error) {
             console.error("Failed to toggle webcam:", error);
         }
@@ -298,6 +321,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             // Sync with Settings window by updating localStorage
             localStorage.setItem("recordMic", (!nextMuted).toString());
             window.dispatchEvent(new Event("storage"));
+            emit("force_storage_sync").catch(console.error);
         } catch (error) {
             console.error("Failed to toggle mic:", error);
         }
@@ -454,6 +478,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 setShowControls(next);
                                 localStorage.setItem("showRecordControls", next.toString());
                                 window.dispatchEvent(new Event("storage"));
+                                emit("force_storage_sync").catch(console.error);
                             }}
                             title={(t as any).recordTooltipBar || "Kayıt Çubuğunu Gizle/Göster"}
                             style={{
@@ -476,6 +501,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 useWebcamRef.current = next;
                                 localStorage.setItem("recordWebcam", next.toString());
                                 window.dispatchEvent(new Event("storage"));
+                                emit("force_storage_sync").catch(console.error);
                                 invoke("toggle_webcam", { show: next }).catch(console.error);
                             }}
                             title={(t as any).recordTooltipWebcam || "Kamerayı Göster/Gizle"}
@@ -499,6 +525,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 isMicMutedRef.current = next;
                                 localStorage.setItem("recordMic", (!next).toString());
                                 window.dispatchEvent(new Event("storage"));
+                                emit("force_storage_sync").catch(console.error);
                             }}
                             title={(t as any).recordMicLabel || "Mikrofonu Aç/Kapat"}
                             style={{

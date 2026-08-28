@@ -8,6 +8,7 @@ import { playTimerSound } from "../utils/audio";
 import { listen } from "@tauri-apps/api/event";
 import shutterSoundUrl from "../assets/shutter.mp3";
 import { check as checkUpdate } from "@tauri-apps/plugin-updater";
+import { emit } from "@tauri-apps/api/event";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
@@ -659,8 +660,17 @@ function SettingsWindow() {
       setRecordMic(localStorage.getItem("recordMic") === "true");
       setShowRecordControls(localStorage.getItem("showRecordControls") !== "false");
     };
+    
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    
+    const unlistenForceSync = listen("force_storage_sync", () => {
+      handleStorageChange();
+    });
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      unlistenForceSync.then(f => f());
+    };
   }, []);
 
   // Listen for global fullscreen screenshots and play shutter sound if enabled
@@ -2316,6 +2326,7 @@ function SettingsWindow() {
                     setRecordMic(checked);
                     localStorage.setItem("recordMic", checked.toString());
                     window.dispatchEvent(new Event("storage"));
+                    emit("force_storage_sync").catch(console.error);
                   }}
                 />
                 <span className="slider"></span>
@@ -2336,6 +2347,7 @@ function SettingsWindow() {
                     setRecordWebcam(checked);
                     localStorage.setItem("recordWebcam", checked.toString());
                     window.dispatchEvent(new Event("storage"));
+                    emit("force_storage_sync").catch(console.error);
                   }}
                 />
                 <span className="slider"></span>
@@ -2356,6 +2368,7 @@ function SettingsWindow() {
                     setShowRecordControls(checked);
                     localStorage.setItem("showRecordControls", checked.toString());
                     window.dispatchEvent(new Event("storage"));
+                    emit("force_storage_sync").catch(console.error);
                   }}
                 />
                 <span className="slider"></span>
