@@ -260,7 +260,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 borderRadius: '0'
             }} data-tauri-drag-region>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
-                    <div className="recording-indicator" style={{ width: '14px', height: '14px', margin: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
+                    <div className="recording-indicator" style={{ width: '14px', height: '14px', margin: 0, flexShrink: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
                     <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{isPaused ? 'Mola' : (t as any).modalRecording}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

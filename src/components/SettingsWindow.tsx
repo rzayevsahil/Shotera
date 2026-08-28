@@ -186,6 +186,8 @@ function SettingsWindow() {
   const [recordFps, setRecordFps] = useState<number>(() => Number(localStorage.getItem("recordFps") || "30"));
   const [recordAudio, setRecordAudio] = useState<boolean>(() => localStorage.getItem("recordAudio") !== "false");
   const [recordMic, setRecordMic] = useState<boolean>(() => localStorage.getItem("recordMic") === "true");
+  const [recordWebcam, setRecordWebcam] = useState<boolean>(() => localStorage.getItem("recordWebcam") === "true");
+  const [showRecordControls, setShowRecordControls] = useState<boolean>(() => localStorage.getItem("showRecordControls") !== "false");
   const [webcamPermissionMode, setWebcamPermissionMode] = useState<string>(() => localStorage.getItem("webcamPermissionMode") || "once");
   const [webcamBorderColor, setWebcamBorderColor] = useState<string>(() => localStorage.getItem("webcamBorderColor") || "#38bdf8");
   const [customWebcamBorderColor, setCustomWebcamBorderColor] = useState<string>(() => {
@@ -641,6 +643,8 @@ function SettingsWindow() {
   useEffect(() => {
     const handleStorageChange = () => {
       setLang(getLanguage());
+      setRecordWebcam(localStorage.getItem("recordWebcam") === "true");
+      setShowRecordControls(localStorage.getItem("showRecordControls") !== "false");
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
@@ -2271,6 +2275,46 @@ function SettingsWindow() {
                     const checked = e.target.checked;
                     setRecordMic(checked);
                     localStorage.setItem("recordMic", checked.toString());
+                  }}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
+                <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={recordWebcam}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setRecordWebcam(checked);
+                    localStorage.setItem("recordWebcam", checked.toString());
+                    window.dispatchEvent(new Event("storage"));
+                  }}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).showRecordControlsLabel || "Kayıt Kontrolcüsünü Göster"}</span>
+                <span className="setting-desc">{(t as any).showRecordControlsDesc || "Kayıt sırasında duraklatma ve durdurma çubuğunu ekranda gösterin."}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={showRecordControls}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setShowRecordControls(checked);
+                    localStorage.setItem("showRecordControls", checked.toString());
+                    window.dispatchEvent(new Event("storage"));
                   }}
                 />
                 <span className="slider"></span>
