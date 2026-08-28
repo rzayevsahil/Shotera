@@ -13,7 +13,7 @@ import WebcamOverlay from "./components/WebcamOverlay";
 import "./App.css";
 
 function StandaloneRecorder() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   
   useEffect(() => {
     import("@tauri-apps/api/event").then(({ listen }) => {
