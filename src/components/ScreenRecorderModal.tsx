@@ -122,6 +122,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 const savedWebcam = localStorage.getItem("recordWebcam") === "true";
                 setUseWebcam(savedWebcam);
                 useWebcamRef.current = savedWebcam;
+
+                const savedShowControls = localStorage.getItem("showRecordControls") !== "false";
+                setShowControls(savedShowControls);
             }
         };
         window.addEventListener("storage", handleStorageChange);
@@ -450,6 +453,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 const next = !showControls;
                                 setShowControls(next);
                                 localStorage.setItem("showRecordControls", next.toString());
+                                window.dispatchEvent(new Event("storage"));
                             }}
                             title={(t as any).recordTooltipBar || "Kayıt Çubuğunu Gizle/Göster"}
                             style={{
@@ -469,7 +473,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                             onClick={() => {
                                 const next = !useWebcam;
                                 setUseWebcam(next);
+                                useWebcamRef.current = next;
                                 localStorage.setItem("recordWebcam", next.toString());
+                                window.dispatchEvent(new Event("storage"));
                                 invoke("toggle_webcam", { show: next }).catch(console.error);
                             }}
                             title={(t as any).recordTooltipWebcam || "Kamerayı Göster/Gizle"}

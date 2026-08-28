@@ -2315,6 +2315,7 @@ function SettingsWindow() {
                     const checked = e.target.checked;
                     setRecordMic(checked);
                     localStorage.setItem("recordMic", checked.toString());
+                    window.dispatchEvent(new Event("storage"));
                   }}
                 />
                 <span className="slider"></span>
