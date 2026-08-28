@@ -15,16 +15,16 @@ import { sendNotification } from "@tauri-apps/plugin-notification";
 import ScreenRecorderModal from "./ScreenRecorderModal";
 type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
 const SYSTEM_FONTS = [
-  "Arial", "Arial Black", "Bahnschrift", "Calibri", "Cambria", "Cambria Math", 
-  "Candara", "Comic Sans MS", "Consolas", "Constantia", "Corbel", "Courier New", 
-  "Ebrima", "Franklin Gothic Medium", "Gabriola", "Gadugi", "Georgia", 
-  "Impact", "Ink Free", "Javanese Text", "Leelawadee UI", "Lucida Console", 
-  "Lucida Sans Unicode", "Malgun Gothic", "Microsoft Himalaya", "Microsoft JhengHei", 
-  "Microsoft New Tai Lue", "Microsoft PhagsPa", "Microsoft Sans Serif", 
-  "Microsoft Tai Le", "Microsoft YaHei", "Microsoft Yi Baiti", "MingLiU-ExtB", 
-  "Mongolian Baiti", "MS Gothic", "MV Boli", "Myanmar Text", "Nirmala UI", 
-  "Palatino Linotype", "Segoe Print", "Segoe Script", "Segoe UI", "Segoe UI Historic", 
-  "Segoe UI Symbol", "SimSun", "Sitka", "Sylfaen", "Symbol", "Tahoma", 
+  "Arial", "Arial Black", "Bahnschrift", "Calibri", "Cambria", "Cambria Math",
+  "Candara", "Comic Sans MS", "Consolas", "Constantia", "Corbel", "Courier New",
+  "Ebrima", "Franklin Gothic Medium", "Gabriola", "Gadugi", "Georgia",
+  "Impact", "Ink Free", "Javanese Text", "Leelawadee UI", "Lucida Console",
+  "Lucida Sans Unicode", "Malgun Gothic", "Microsoft Himalaya", "Microsoft JhengHei",
+  "Microsoft New Tai Lue", "Microsoft PhagsPa", "Microsoft Sans Serif",
+  "Microsoft Tai Le", "Microsoft YaHei", "Microsoft Yi Baiti", "MingLiU-ExtB",
+  "Mongolian Baiti", "MS Gothic", "MV Boli", "Myanmar Text", "Nirmala UI",
+  "Palatino Linotype", "Segoe Print", "Segoe Script", "Segoe UI", "Segoe UI Historic",
+  "Segoe UI Symbol", "SimSun", "Sitka", "Sylfaen", "Symbol", "Tahoma",
   "Times New Roman", "Trebuchet MS", "Verdana", "Webdings", "Wingdings",
   "Helvetica", "Helvetica Neue", "Monaco", "Menlo", "Ubuntu", "Roboto", "Inter", "Outfit",
   "sans-serif", "serif", "monospace", "cursive", "fantasy"
@@ -49,9 +49,21 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
 
   return (
     <div ref={dropdownRef} style={{ position: "relative", width: "180px" }}>
-      <div 
+      <div
         className="premium-input"
-        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}
+        style={{
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
+          padding: "10px 12px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          boxSizing: "border-box",
+          minWidth: "180px"
+        }}
         onClick={() => { setIsOpen(!isOpen); setSearch(""); }}
       >
         <span style={{ fontFamily: value, overflow: "hidden", textOverflow: "ellipsis", fontSize: "0.9rem" }}>{value || placeholder}</span>
@@ -186,6 +198,12 @@ function SettingsWindow() {
   // Webcam Text Settings
   const [webcamText, setWebcamText] = useState<string>(() => localStorage.getItem("webcamText") || "");
   const [webcamTextColor, setWebcamTextColor] = useState<string>(() => localStorage.getItem("webcamTextColor") || "#ffffff");
+  const [customWebcamTextColor, setCustomWebcamTextColor] = useState<string>(() => {
+    const savedCustom = localStorage.getItem("customWebcamTextColor");
+    if (savedCustom) return savedCustom;
+    const current = localStorage.getItem("webcamTextColor") || "#ffffff";
+    return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(current) ? "#ffffff" : current;
+  });
   const [webcamTextFont, setWebcamTextFont] = useState<string>(() => localStorage.getItem("webcamTextFont") || "sans");
 
   // Updater state
@@ -2381,6 +2399,7 @@ function SettingsWindow() {
                   placeholder="#38BDF8"
                   style={{
                     width: "110px",
+                    minWidth: "110px",
                     padding: "10px 12px",
                     fontSize: "0.9rem",
                     fontFamily: "monospace",
@@ -2479,45 +2498,134 @@ function SettingsWindow() {
 
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">{(t as any).webcamTextFontLabel || "Yazı Tipi ve Rengi"}</span>
-                <span className="setting-desc">{(t as any).webcamTextFontDesc || "Kamera yazısının görünümünü özelleştirin."}</span>
+                <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"}</span>
+                <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) seçin."}</span>
               </div>
-              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <FontSelect
-                  value={webcamTextFont}
-                  onChange={setWebcamTextFont}
-                  placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
-                  searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
-                />
+              <FontSelect
+                value={webcamTextFont}
+                onChange={setWebcamTextFont}
+                placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
+                searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
+              />
+            </div>
 
-                <div
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "6px",
-                    border: "2px solid rgba(255,255,255,0.1)",
-                    background: webcamTextColor,
-                    position: "relative",
-                    cursor: "pointer",
-                    overflow: "hidden"
-                  }}
-                  title={(t as any).webcamPickTextColor || "Yazı Rengi Seç"}
-                >
-                  <input
-                    type="color"
-                    value={webcamTextColor}
-                    onChange={(e) => setWebcamTextColor(e.target.value)}
-                    style={{
-                      position: "absolute",
-                      top: "-10px",
-                      left: "-10px",
-                      width: "150%",
-                      height: "150%",
-                      opacity: 0,
-                      cursor: "pointer"
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamTextColorOnlyLabel || "Yazı Rengi"}</span>
+                <span className="setting-desc">{(t as any).webcamTextColorOnlyDesc || "Kamera yazısının rengini belirleyin."}</span>
+              </div>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setWebcamTextColor(color);
+                        localStorage.setItem("webcamTextColor", color);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: color,
+                        border: webcamTextColor === color ? "2px solid #ffffff" : "2px solid transparent",
+                        cursor: "pointer",
+                        boxShadow: webcamTextColor === color ? `0 0 10px ${color}` : "none",
+                        transition: "all 0.2s ease"
+                      }}
+                    />
+                  ))}
+
+                  <div
+                    onClick={() => {
+                      const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor);
+                      if (isPreset) {
+                        const activeCustom = customWebcamTextColor || "#ffffff";
+                        setWebcamTextColor(activeCustom);
+                        localStorage.setItem("webcamTextColor", activeCustom);
+                        window.dispatchEvent(new Event("storage"));
+                      }
                     }}
-                  />
+                    style={{
+                      position: "relative",
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
+                        ? customWebcamTextColor
+                        : webcamTextColor,
+                      border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
+                        ? "2px solid #ffffff"
+                        : "2px solid transparent",
+                      boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
+                        ? `0 0 10px ${webcamTextColor}`
+                        : "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease"
+                    }}
+                    title={(t as any).webcamPickTextColor || "Yazı Rengi Seç"}
+                  >
+                    <input
+                      type="color"
+                      value={customWebcamTextColor.startsWith("#") && customWebcamTextColor.length === 7 ? customWebcamTextColor : "#ffffff"}
+                      onClick={() => {
+                        const activeCustom = customWebcamTextColor || "#ffffff";
+                        setWebcamTextColor(activeCustom);
+                        localStorage.setItem("webcamTextColor", activeCustom);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomWebcamTextColor(val);
+                        setWebcamTextColor(val);
+                        localStorage.setItem("customWebcamTextColor", val);
+                        localStorage.setItem("webcamTextColor", val);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        opacity: 0,
+                        cursor: "pointer"
+                      }}
+                    />
+                    <span style={{ fontSize: "11px", color: "white", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                  </div>
                 </div>
+
+                <input
+                  type="text"
+                  className="premium-input"
+                  value={webcamTextColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setWebcamTextColor(val);
+                    if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                      if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
+                        setCustomWebcamTextColor(val);
+                        localStorage.setItem("customWebcamTextColor", val);
+                      }
+                      localStorage.setItem("webcamTextColor", val);
+                      window.dispatchEvent(new Event("storage"));
+                    }
+                  }}
+                  placeholder="#FFFFFF"
+                  style={{
+                    width: "110px",
+                    padding: "10px 12px",
+                    fontSize: "0.9rem",
+                    fontFamily: "monospace",
+                    textTransform: "uppercase",
+                    textAlign: "center"
+                  }}
+                />
               </div>
             </div>
 
