@@ -48,7 +48,7 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
   const filteredFonts = SYSTEM_FONTS.filter(f => f.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div ref={dropdownRef} style={{ position: "relative", width: "180px" }}>
+    <div ref={dropdownRef} style={{ position: "relative", width: "240px" }}>
       <div
         className="premium-input"
         style={{
@@ -62,7 +62,7 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
           padding: "10px 12px",
           border: "1px solid rgba(255, 255, 255, 0.1)",
           boxSizing: "border-box",
-          minWidth: "180px"
+          minWidth: "240px"
         }}
         onClick={() => { setIsOpen(!isOpen); setSearch(""); }}
       >
