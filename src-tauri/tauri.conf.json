@@ -88,6 +88,19 @@
         "visible": false,
         "alwaysOnTop": true,
         "skipTaskbar": true
+      },
+      {
+        "label": "status_overlay",
+        "title": "Shotera Status",
+        "width": 220,
+        "height": 60,
+        "resizable": false,
+        "transparent": true,
+        "shadow": false,
+        "decorations": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
       }
     ],
     "security": {

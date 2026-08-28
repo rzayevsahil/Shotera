@@ -24,6 +24,7 @@ struct AppState {
     mic_shortcut: Mutex<String>,
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
+    status_overlay_token: std::sync::atomic::AtomicU64,
     recorder_stop_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
     #[cfg(target_os = "windows")]
     recorder_pipeline: Mutex<Option<std::sync::Arc<tokio::sync::Mutex<win_native_media::Pipeline>>>>,
@@ -371,7 +372,7 @@ async fn toggle_mic(state: State<'_, AppState>, muted: bool) -> Result<(), Strin
 }
 
 #[tauri::command]
-async fn pause_native_recording(state: State<'_, AppState>) -> Result<(), String> {
+async fn pause_native_recording(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         let pipe = {
@@ -386,20 +387,20 @@ async fn pause_native_recording(state: State<'_, AppState>) -> Result<(), String
                 state_lang
             };
             let body = match lang.as_str() {
-                "tr" => "Kayıt duraklatıldı.",
-                "az" => "Qeyd dayandırıldı.",
-                "ru" => "Запись приостановлена.",
-                "de" => "Aufnahme pausiert.",
-                _ => "Recording paused.",
+                "tr" => "Duraklatıldı",
+                "az" => "Dayandırıldı",
+                "ru" => "Приостановлено",
+                "de" => "Pausiert",
+                _ => "Paused",
             };
-            show_app_notification(&state, "Shotera", body, None);
+            show_status_overlay(&app_handle, body);
         }
     }
     Ok(())
 }
 
 #[tauri::command]
-async fn resume_native_recording(state: State<'_, AppState>) -> Result<(), String> {
+async fn resume_native_recording(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         let pipe = {
@@ -414,13 +415,13 @@ async fn resume_native_recording(state: State<'_, AppState>) -> Result<(), Strin
                 state_lang
             };
             let body = match lang.as_str() {
-                "tr" => "Kayıt devam ediyor.",
-                "az" => "Qeyd davam edir.",
-                "ru" => "Запись продолжается.",
-                "de" => "Aufnahme fortgesetzt.",
-                _ => "Recording resumed.",
+                "tr" => "Devam Ediyor",
+                "az" => "Davam Edir",
+                "ru" => "Продолжается",
+                "de" => "Fortgesetzt",
+                _ => "Resumed",
             };
-            show_app_notification(&state, "Shotera", body, None);
+            show_status_overlay(&app_handle, body);
         }
     }
     Ok(())
@@ -572,6 +573,91 @@ fn show_app_notification(state: &State<'_, AppState>, title: &str, body: &str, i
     }
     
     let _ = notification.show();
+}
+
+#[tauri::command]
+fn hide_status_overlay(app_handle: AppHandle) {
+    if let Some(window) = app_handle.get_webview_window("status_overlay") {
+        let _ = window.hide();
+    }
+}
+
+fn show_status_overlay(app_handle: &AppHandle, message: &str) {
+    // If the recording control bar ("recorder" window) is visible, do not show the temporary status overlay
+    if let Some(recorder_win) = app_handle.get_webview_window("recorder") {
+        if recorder_win.is_visible().unwrap_or(false) {
+            return;
+        }
+    }
+
+    let msg_string = message.to_string();
+    let app_handle_clone = app_handle.clone();
+    let state = app_handle.state::<AppState>();
+    let current_token = state.status_overlay_token.fetch_add(1, std::sync::atomic::Ordering::SeqCst) + 1;
+
+    let app_handle_trigger = app_handle.clone();
+    let trigger_show = move |window: tauri::WebviewWindow| {
+        if let Ok(Some(monitor)) = window.current_monitor() {
+            let size = monitor.size();
+            let scale_factor = monitor.scale_factor();
+            let win_w = 220.0 * scale_factor;
+            let win_h = 60.0 * scale_factor;
+            let x = (size.width as f64 - win_w - (30.0 * scale_factor)) as i32;
+            let y = (size.height as f64 - win_h - (60.0 * scale_factor)) as i32;
+            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+        }
+
+        #[cfg(target_os = "windows")]
+        if let Ok(hwnd) = window.hwnd() {
+            unsafe {
+                windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                    hwnd.0 as _,
+                    windows_sys::Win32::UI::WindowsAndMessaging::WDA_NONE,
+                );
+                windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                    hwnd.0 as _,
+                    windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE,
+                );
+            }
+        }
+
+        let _ = window.emit("show-status", msg_string.clone());
+        let _ = window.show();
+
+        let window_clone = window.clone();
+        let app_handle_timer = app_handle_trigger.clone();
+        tauri::async_runtime::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
+            let state_timer = app_handle_timer.state::<AppState>();
+            if state_timer.status_overlay_token.load(std::sync::atomic::Ordering::SeqCst) == current_token {
+                let _ = window_clone.hide();
+            }
+        });
+    };
+
+    if let Some(window) = app_handle.get_webview_window("status_overlay") {
+        trigger_show(window);
+    } else {
+        let _ = app_handle.run_on_main_thread(move || {
+            let builder = tauri::WebviewWindowBuilder::new(
+                &app_handle_clone,
+                "status_overlay",
+                tauri::WebviewUrl::App("index.html".into())
+            )
+            .title("Shotera Status")
+            .inner_size(220.0, 60.0)
+            .resizable(false)
+            .decorations(false)
+            .transparent(true)
+            .always_on_top(true)
+            .skip_taskbar(true)
+            .shadow(false);
+
+            if let Ok(window) = builder.build() {
+                trigger_show(window);
+            }
+        });
+    }
 }
 
 const CURSOR_WIDTH: usize = 12;
@@ -1714,6 +1800,7 @@ pub fn run() {
             pinned_image: Mutex::new(None),
 
             show_notifications: Mutex::new(true),
+            status_overlay_token: std::sync::atomic::AtomicU64::new(0),
             recorder_stop_tx: Mutex::new(None),
             #[cfg(target_os = "windows")]
             recorder_pipeline: Mutex::new(None),
@@ -1986,7 +2073,8 @@ pub fn run() {
             resize_recorder_window,
             hide_recorder_window,
             open_recorder_view,
-            disable_windows_audio_ducking
+            disable_windows_audio_ducking,
+            hide_status_overlay
         ])
 
         .run(tauri::generate_context!())

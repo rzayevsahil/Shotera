@@ -10,6 +10,7 @@ import ZoomCanvas from "./components/ZoomCanvas";
 import LiveZoomCanvas from "./components/LiveZoomCanvas";
 import ScreenRecorderModal from "./components/ScreenRecorderModal";
 import WebcamOverlay from "./components/WebcamOverlay";
+import StatusOverlay from "./components/StatusOverlay";
 import "./App.css";
 
 function StandaloneRecorder() {
@@ -125,6 +126,10 @@ function App() {
 
   if (label === "webcam") {
     return <WebcamOverlay />;
+  }
+
+  if (label === "status_overlay") {
+    return <StatusOverlay />;
   }
 
   return <SettingsWindow />;
