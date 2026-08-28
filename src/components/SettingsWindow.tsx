@@ -2469,8 +2469,7 @@ function SettingsWindow() {
                   }}
                   placeholder="#38BDF8"
                   style={{
-                    width: "110px",
-                    minWidth: "110px",
+                    width: "240px",
                     padding: "10px 12px",
                     fontSize: "0.9rem",
                     fontFamily: "monospace",
@@ -2620,7 +2619,7 @@ function SettingsWindow() {
                   }}
                   placeholder="#FFFFFF"
                   style={{
-                    width: "110px",
+                    width: "240px",
                     padding: "10px 12px",
                     fontSize: "0.9rem",
                     fontFamily: "monospace",
