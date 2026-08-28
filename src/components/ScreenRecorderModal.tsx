@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
-import { Monitor, AppWindow, Video, X, Check, Square, Camera, Pause, Play, EyeOff, Mic, MicOff } from "lucide-react";
+import { Monitor, AppWindow, Video, X, Check, Square, Camera, Pause, Play, Eye, EyeOff, Mic, MicOff } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
 import "./ScreenRecorderModal.css";
 
@@ -483,14 +483,14 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
-                                background: showControls ? 'rgba(255, 255, 255, 0.05)' : 'rgba(239, 68, 68, 0.15)',
-                                border: showControls ? '1px solid transparent' : '1px solid rgba(239, 68, 68, 0.5)',
-                                color: showControls ? '#a1a1aa' : '#ef4444',
+                                background: showControls ? 'rgba(56, 189, 248, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                border: showControls ? '1px solid var(--accent-cyan)' : '1px solid transparent',
+                                color: showControls ? 'var(--accent-cyan)' : '#ef4444',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                             }}
                         >
-                            <EyeOff size={18} />
+                            {showControls ? <Eye size={18} /> : <EyeOff size={18} />}
                         </button>
                         <button 
                             className="secondary-button"
