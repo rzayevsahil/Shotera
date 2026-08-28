@@ -78,6 +78,11 @@ function SettingsWindow() {
     return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(current) ? "#06b6d4" : current;
   });
 
+  // Webcam Text Settings
+  const [webcamText, setWebcamText] = useState<string>(() => localStorage.getItem("webcamText") || "");
+  const [webcamTextColor, setWebcamTextColor] = useState<string>(() => localStorage.getItem("webcamTextColor") || "#ffffff");
+  const [webcamTextFont, setWebcamTextFont] = useState<string>(() => localStorage.getItem("webcamTextFont") || "sans");
+
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
   const [updateVersion, setUpdateVersion] = useState<string | null>(null);
@@ -226,8 +231,12 @@ function SettingsWindow() {
     localStorage.setItem("defaultBlurAmount", String(defaultBlurAmount));
     localStorage.setItem("showNotifications", String(showNotifications));
 
+    localStorage.setItem("webcamText", webcamText);
+    localStorage.setItem("webcamTextColor", webcamTextColor);
+    localStorage.setItem("webcamTextFont", webcamTextFont);
+
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -2282,7 +2291,7 @@ function SettingsWindow() {
               <div className="setting-info" style={{ flex: 1 }}>
                 <span className="setting-label">{(t as any).webcamPreviewLabel || "Önizleme"}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", flex: 1, paddingRight: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", flex: 1, paddingRight: "4px", gap: "8px", position: "relative" }}>
                 <style>
                   {`
                     @keyframes webcam-logo-gif {
@@ -2323,6 +2332,92 @@ function SettingsWindow() {
                   <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
                     <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
                   </div>
+                </div>
+                {webcamText.trim() && (
+                  <div style={{
+                    color: webcamTextColor,
+                    fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
+                    fontSize: "11px",
+                    fontWeight: "bold",
+                    background: "rgba(0,0,0,0.6)",
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                    maxWidth: "110px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    textAlign: "center"
+                  }}>
+                    {webcamText}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Webcam Text Settings */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamTextLabel || "Kamera Altı Yazısı"}</span>
+                <span className="setting-desc">{(t as any).webcamTextDesc || "Kameranın altında görünecek özel bir metin ekleyin (Kanal adı vb.)."}</span>
+              </div>
+              <input
+                type="text"
+                className="premium-input"
+                value={webcamText}
+                onChange={(e) => setWebcamText(e.target.value)}
+                placeholder="Örn: Shotera"
+                style={{ width: "240px", fontSize: "0.9rem" }}
+                maxLength={30}
+              />
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamTextFontLabel || "Yazı Tipi ve Rengi"}</span>
+                <span className="setting-desc">{(t as any).webcamTextFontDesc || "Kamera yazısının görünümünü özelleştirin."}</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <select
+                  className="premium-input"
+                  value={webcamTextFont}
+                  onChange={(e) => setWebcamTextFont(e.target.value)}
+                  style={{ width: "120px" }}
+                >
+                  <option value="sans">Modern (Sans)</option>
+                  <option value="serif">Klasik (Serif)</option>
+                  <option value="monospace">Kod (Mono)</option>
+                  <option value="cursive">El Yazısı</option>
+                  <option value="Impact, sans-serif">Kalın (Impact)</option>
+                </select>
+
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "6px",
+                    border: "2px solid rgba(255,255,255,0.1)",
+                    background: webcamTextColor,
+                    position: "relative",
+                    cursor: "pointer",
+                    overflow: "hidden"
+                  }}
+                  title="Yazı Rengi Seç"
+                >
+                  <input
+                    type="color"
+                    value={webcamTextColor}
+                    onChange={(e) => setWebcamTextColor(e.target.value)}
+                    style={{
+                      position: "absolute",
+                      top: "-10px",
+                      left: "-10px",
+                      width: "150%",
+                      height: "150%",
+                      opacity: 0,
+                      cursor: "pointer"
+                    }}
+                  />
                 </div>
               </div>
             </div>

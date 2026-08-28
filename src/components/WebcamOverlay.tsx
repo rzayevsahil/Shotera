@@ -14,12 +14,18 @@ export default function WebcamOverlay() {
   const [lang, setLang] = useState<Language>(getLanguage);
   const t = translations[lang];
   const [borderColor, setBorderColor] = useState(() => localStorage.getItem("webcamBorderColor") || "#38bdf8");
+  const [webcamText, setWebcamText] = useState(() => localStorage.getItem("webcamText") || "");
+  const [webcamTextColor, setWebcamTextColor] = useState(() => localStorage.getItem("webcamTextColor") || "#ffffff");
+  const [webcamTextFont, setWebcamTextFont] = useState(() => localStorage.getItem("webcamTextFont") || "sans");
 
   useEffect(() => {
     // Listen for language changes from localStorage
     const handleStorageChange = () => {
       setLang(getLanguage());
       setBorderColor(localStorage.getItem("webcamBorderColor") || "#38bdf8");
+      setWebcamText(localStorage.getItem("webcamText") || "");
+      setWebcamTextColor(localStorage.getItem("webcamTextColor") || "#ffffff");
+      setWebcamTextFont(localStorage.getItem("webcamTextFont") || "sans");
     };
     window.addEventListener("storage", handleStorageChange);
     
@@ -256,6 +262,28 @@ export default function WebcamOverlay() {
           </div>
         )}
       </div>
+      {webcamText.trim() && (
+        <div style={{
+          position: "absolute",
+          bottom: "10px",
+          color: webcamTextColor,
+          fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
+          fontSize: "14px",
+          fontWeight: "bold",
+          background: "rgba(0,0,0,0.6)",
+          padding: "4px 12px",
+          borderRadius: "12px",
+          textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+          maxWidth: "calc(100% - 40px)",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          pointerEvents: "none",
+          textAlign: "center"
+        }}>
+          {webcamText}
+        </div>
+      )}
     </div>
   );
 }
