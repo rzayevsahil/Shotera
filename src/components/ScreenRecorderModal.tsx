@@ -69,7 +69,12 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 if (isRecordingRef.current && handleStopRecordingRef.current) {
                     await handleStopRecordingRef.current();
                 } else {
-                    onClose();
+                    // Replicate the X button close logic exactly to prevent transparent window artifacts
+                    if (isStandalone) {
+                        invoke("hide_recorder_window").catch(console.error);
+                    } else {
+                        onClose();
+                    }
                 }
             });
             const unlistenPause = listen("toggle-pause-recording", async () => {
