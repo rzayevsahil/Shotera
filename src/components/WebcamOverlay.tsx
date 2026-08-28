@@ -19,6 +19,7 @@ export default function WebcamOverlay() {
   const [webcamTextColor, setWebcamTextColor] = useState(() => localStorage.getItem("webcamTextColor") || "#ffffff");
   const [webcamTextFont, setWebcamTextFont] = useState(() => localStorage.getItem("webcamTextFont") || "sans");
   const [webcamTextSize, setWebcamTextSize] = useState(() => Number(localStorage.getItem("webcamTextSize") || "11"));
+  const [webcamBorderAnimation, setWebcamBorderAnimation] = useState(() => localStorage.getItem("webcamBorderAnimation") || "solid");
   const [webcamMode, setWebcamMode] = useState(() => localStorage.getItem("webcamMode") || "camera");
   const [webcamImagePath, setWebcamImagePath] = useState(() => localStorage.getItem("webcamImagePath") || "");
 
@@ -31,6 +32,7 @@ export default function WebcamOverlay() {
       setWebcamTextColor(localStorage.getItem("webcamTextColor") || "#ffffff");
       setWebcamTextFont(localStorage.getItem("webcamTextFont") || "sans");
       setWebcamTextSize(Number(localStorage.getItem("webcamTextSize") || "11"));
+      setWebcamBorderAnimation(localStorage.getItem("webcamBorderAnimation") || "solid");
       setWebcamMode(localStorage.getItem("webcamMode") || "camera");
       setWebcamImagePath(localStorage.getItem("webcamImagePath") || "");
     };
@@ -208,13 +210,44 @@ export default function WebcamOverlay() {
         userSelect: "none"
       }}
     >
+      <style>
+        {`
+          .webcam-border-bg {
+             position: absolute;
+             inset: 0;
+             border-radius: 50%;
+             transition: all 0.3s ease;
+          }
+          .webcam-border-solid { background: ${borderColor}; }
+          .webcam-border-pulse { background: ${borderColor}; animation: pulse-border 2s infinite ease-in-out; }
+          .webcam-border-breathe { background: ${borderColor}; animation: breathe-border 3s infinite ease-in-out; }
+          .webcam-border-spin-rainbow { background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); animation: spin-border 3s linear infinite; }
+          .webcam-border-spin-ocean { background: conic-gradient(#0ea5e9, #38bdf8, #0284c7, #0ea5e9); animation: spin-border 3s linear infinite; }
+          .webcam-border-spin-fire { background: conic-gradient(#ef4444, #f97316, #eab308, #ef4444); animation: spin-border 2s linear infinite; }
+          .webcam-border-spin-cyber { background: conic-gradient(#ec4899, #a855f7, #06b6d4, #ec4899); animation: spin-border 2.5s linear infinite; }
+          
+          @keyframes spin-border { 100% { transform: rotate(360deg); } }
+          @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 10px ${borderColor}; } 50% { box-shadow: 0 0 30px ${borderColor}; } }
+          @keyframes breathe-border { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        `}
+      </style>
       <div
         style={{
           width: "calc(100% - 80px)",
           height: "calc(100% - 80px)",
           borderRadius: "50%",
-          border: `3px solid ${borderColor}`,
+          padding: "3px",
           boxSizing: "border-box",
+          position: "relative",
+          boxShadow: webcamBorderAnimation === 'solid' ? `0 0 20px ${borderColor}40` : 'none',
+          transition: "all 0.3s ease"
+        }}
+      >
+        <div className={`webcam-border-bg webcam-border-${webcamBorderAnimation}`}></div>
+        <div style={{
+          width: "100%",
+          height: "100%",
+          borderRadius: "50%",
           background: "rgba(15, 23, 42, 0.95)",
           display: "flex",
           alignItems: "center",
@@ -223,9 +256,10 @@ export default function WebcamOverlay() {
           clipPath: "circle(50% at 50% 50%)",
           WebkitClipPath: "circle(50% at 50% 50%)",
           transform: "translateZ(0)", // Force GPU layer lock
-          position: "relative"
-        }}
-      >
+          position: "relative",
+          overflow: "hidden",
+          zIndex: 1
+        }}>
         {webcamMode === "image" ? (
           <img
             src={webcamImagePath ? convertFileSrc(webcamImagePath) : ""}
@@ -296,6 +330,7 @@ export default function WebcamOverlay() {
             {t.webcamAccessDenied}
           </div>
         )}
+        </div>
       </div>
       {webcamText.trim() && (
         <div style={{

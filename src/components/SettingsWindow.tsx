@@ -194,6 +194,7 @@ function SettingsWindow() {
     const current = localStorage.getItem("webcamBorderColor") || "#38bdf8";
     return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(current) ? "#06b6d4" : current;
   });
+  const [webcamBorderAnimation, setWebcamBorderAnimation] = useState<string>(() => localStorage.getItem("webcamBorderAnimation") || "solid");
 
   const [webcamMode, setWebcamMode] = useState<string>(() => localStorage.getItem("webcamMode") || "camera");
   const [webcamImagePath, setWebcamImagePath] = useState<string>(() => localStorage.getItem("webcamImagePath") || "");
@@ -364,9 +365,10 @@ function SettingsWindow() {
     localStorage.setItem("webcamTextSize", webcamTextSize.toString());
     localStorage.setItem("webcamMode", webcamMode);
     localStorage.setItem("webcamImagePath", webcamImagePath);
+    localStorage.setItem("webcamBorderAnimation", webcamBorderAnimation);
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamMode, webcamImagePath]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamMode, webcamImagePath, webcamBorderAnimation]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -2313,23 +2315,48 @@ function SettingsWindow() {
                         75% { transform: scale(0.95) translateY(2px); filter: drop-shadow(0 0 10px rgba(56,189,248,0.6)); }
                         100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(56,189,248,0.3)); }
                       }
+                      .webcam-border-bg {
+                         position: absolute;
+                         inset: 0;
+                         border-radius: 50%;
+                         transition: all 0.3s ease;
+                      }
+                      .webcam-border-solid { background: ${webcamBorderColor}; }
+                      .webcam-border-pulse { background: ${webcamBorderColor}; animation: pulse-border 2s infinite ease-in-out; }
+                      .webcam-border-breathe { background: ${webcamBorderColor}; animation: breathe-border 3s infinite ease-in-out; }
+                      .webcam-border-spin-rainbow { background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); animation: spin-border 3s linear infinite; }
+                      .webcam-border-spin-ocean { background: conic-gradient(#0ea5e9, #38bdf8, #0284c7, #0ea5e9); animation: spin-border 3s linear infinite; }
+                      .webcam-border-spin-fire { background: conic-gradient(#ef4444, #f97316, #eab308, #ef4444); animation: spin-border 2s linear infinite; }
+                      .webcam-border-spin-cyber { background: conic-gradient(#ec4899, #a855f7, #06b6d4, #ec4899); animation: spin-border 2.5s linear infinite; }
+                      
+                      @keyframes spin-border { 100% { transform: rotate(360deg); } }
+                      @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 5px ${webcamBorderColor}; } 50% { box-shadow: 0 0 20px ${webcamBorderColor}; } }
+                      @keyframes breathe-border { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
                     `}
                   </style>
                   <div style={{
                     width: "90px",
                     height: "90px",
                     borderRadius: "50%",
-                    border: `3px solid ${webcamBorderColor}`,
+                    padding: "3px",
                     boxSizing: "border-box",
-                    background: "rgba(15, 23, 42, 0.95)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: `0 0 15px ${webcamBorderColor}40`,
-                    transition: "all 0.3s ease",
-                    overflow: "hidden",
-                    position: "relative"
+                    position: "relative",
+                    boxShadow: webcamBorderAnimation === 'solid' ? `0 0 15px ${webcamBorderColor}40` : 'none',
+                    transition: "all 0.3s ease"
                   }}>
+                    <div className={`webcam-border-bg webcam-border-${webcamBorderAnimation}`}></div>
+                    <div style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      background: "rgba(15, 23, 42, 0.95)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      position: "relative",
+                      zIndex: 1
+                    }}>
                     <img
                       src={webcamMode === "image" && webcamImagePath ? convertFileSrc(webcamImagePath) : logo}
                       alt="Webcam Preview Animated"
@@ -2343,6 +2370,7 @@ function SettingsWindow() {
                     {/* Subtle camera icon overlay to reinforce it's a webcam */}
                     <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
                       <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
+                    </div>
                     </div>
                   </div>
                   {webcamText.trim() && (
@@ -2532,6 +2560,32 @@ function SettingsWindow() {
                   }}
                 />
               </div>
+            </div>
+
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamBorderStyleLabel || "Çerçeve Stili"}</span>
+                <span className="setting-desc">{(t as any).webcamBorderStyleDesc || "Kamera çerçevesi için animasyon veya renk efekti seçin."}</span>
+              </div>
+              <select
+                className="premium-select"
+                value={webcamBorderAnimation}
+                onChange={(e) => {
+                  setWebcamBorderAnimation(e.target.value);
+                  localStorage.setItem("webcamBorderAnimation", e.target.value);
+                  window.dispatchEvent(new Event("storage"));
+                }}
+                style={{ width: "240px" }}
+              >
+                <option value="solid">{(t as any).animSolid || "Sabit Renk"}</option>
+                <option value="pulse">{(t as any).animPulse || "Yanıp Sönen"}</option>
+                <option value="breathe">{(t as any).animBreathe || "Nefes Alan"}</option>
+                <option value="spin-rainbow">{(t as any).animSpinRainbow || "Gökkuşağı Dönüşü"}</option>
+                <option value="spin-ocean">{(t as any).animSpinOcean || "Okyanus Dalgası"}</option>
+                <option value="spin-fire">{(t as any).animSpinFire || "Ateş Çemberi"}</option>
+                <option value="spin-cyber">{(t as any).animSpinCyber || "Neon Siber"}</option>
+              </select>
             </div>
 
             {/* Webcam Text Settings */}
