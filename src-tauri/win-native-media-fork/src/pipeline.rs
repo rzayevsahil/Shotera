@@ -75,6 +75,9 @@ pub struct Pipeline {
     is_recording: Arc<AtomicBool>,
     is_streaming: Arc<AtomicBool>,
     worker: Option<std::thread::JoinHandle<Result<()>>>,
+    is_paused: Arc<AtomicBool>,
+    base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
+    pause_start_qpc: Arc<std::sync::atomic::AtomicI64>,
 }
 
 impl Pipeline {
@@ -90,6 +93,9 @@ impl Pipeline {
             is_recording: Arc::new(AtomicBool::new(false)),
             is_streaming: Arc::new(AtomicBool::new(false)),
             worker: None,
+            is_paused: Arc::new(AtomicBool::new(false)),
+            base_time_100ns: Arc::new(std::sync::atomic::AtomicI64::new(0)),
+            pause_start_qpc: Arc::new(std::sync::atomic::AtomicI64::new(0)),
         })
     }
 
@@ -112,8 +118,11 @@ impl Pipeline {
         // the caller instead of losing them inside the thread.
         let (ready_tx, ready_rx) = std::sync::mpsc::channel::<Result<()>>();
 
+        let is_paused = self.is_paused.clone();
+        let base_time_100ns = self.base_time_100ns.clone();
+
         let worker = std::thread::spawn(move || {
-            run_worker(config, running, is_recording, is_streaming, ready_tx)
+            run_worker(config, running, is_recording, is_streaming, is_paused, base_time_100ns, ready_tx)
         });
         self.worker = Some(worker);
 
@@ -157,6 +166,30 @@ impl Pipeline {
     pub fn is_streaming(&self) -> bool {
         self.is_streaming.load(Ordering::SeqCst)
     }
+
+    pub fn pause(&self) {
+        if !self.is_paused.swap(true, Ordering::SeqCst) {
+            let mut current_qpc = 0i64;
+            unsafe { windows::Win32::System::Performance::QueryPerformanceCounter(&mut current_qpc).unwrap(); }
+            self.pause_start_qpc.store(current_qpc, Ordering::SeqCst);
+        }
+    }
+
+    pub fn resume(&self) {
+        if self.is_paused.swap(false, Ordering::SeqCst) {
+            let mut current_qpc = 0i64;
+            unsafe { windows::Win32::System::Performance::QueryPerformanceCounter(&mut current_qpc).unwrap(); }
+            let start = self.pause_start_qpc.load(Ordering::SeqCst);
+            let mut qpc_freq = 0i64;
+            unsafe { windows::Win32::System::Performance::QueryPerformanceFrequency(&mut qpc_freq).unwrap(); }
+            let pause_duration_100ns = ((current_qpc - start) as f64 * 10_000_000.0 / qpc_freq as f64) as i64;
+            self.base_time_100ns.fetch_add(pause_duration_100ns, Ordering::SeqCst);
+        }
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.is_paused.load(Ordering::SeqCst)
+    }
 }
 
 impl Drop for Pipeline {
@@ -176,6 +209,8 @@ fn run_worker(
     running: Arc<AtomicBool>,
     is_recording: Arc<AtomicBool>,
     is_streaming: Arc<AtomicBool>,
+    is_paused: Arc<AtomicBool>,
+    base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
     ready_tx: std::sync::mpsc::Sender<Result<()>>,
 ) -> Result<()> {
     // [DIAGNOSTIC LOGGING]
@@ -184,6 +219,7 @@ fn run_worker(
     let mut qpc_freq = 0i64;
     unsafe { windows::Win32::System::Performance::QueryPerformanceFrequency(&mut qpc_freq).unwrap(); }
     let recording_start_100ns = (current_qpc as f64 * 10_000_000.0 / qpc_freq as f64) as i64;
+    base_time_100ns.store(recording_start_100ns, Ordering::SeqCst);
 
     tracing::info!(
         target: "av_sync_diagnostics",
@@ -199,7 +235,8 @@ fn run_worker(
                 capture_cursor: config.capture_cursor,
             },
             8,
-            recording_start_100ns,
+            base_time_100ns.clone(),
+            is_paused.clone(),
         )?;
         let mut encoder = MfH264Encoder::new(session.device(), config.video)?;
 
@@ -243,9 +280,11 @@ fn run_worker(
         let vcfg = config.video;
         let rparams = params.clone();
         let audio_cfg = config.audio.clone();
+        let bt = base_time_100ns.clone();
+        let ip = is_paused.clone();
         is_recording.store(true, Ordering::SeqCst);
         Some(std::thread::spawn(move || -> Result<()> {
-            record_consumer(rec, vcfg, rparams, audio_cfg, record_rx, recording_start_100ns)
+            record_consumer(rec, vcfg, rparams, audio_cfg, record_rx, bt, ip)
         }))
     } else {
         None
@@ -257,12 +296,14 @@ fn run_worker(
         let vcfg = config.video;
         let sparams = params.clone();
         let audio_cfg = config.audio.clone();
+        let bt = base_time_100ns.clone();
+        let ip = is_paused.clone();
         is_streaming.store(true, Ordering::SeqCst);
         Some(std::thread::spawn(move || -> Result<()> {
             let rt = tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()?;
-            rt.block_on(stream_consumer(scfg, vcfg, sparams, audio_cfg, stream_rx, recording_start_100ns))
+            rt.block_on(stream_consumer(scfg, vcfg, sparams, audio_cfg, stream_rx, bt, ip))
         }))
     } else {
         None
@@ -326,7 +367,8 @@ fn record_consumer(
     params: crate::encoder::ParameterSets,
     audio_cfg: Option<AudioConfig>,
     record_rx: std::sync::mpsc::Receiver<EncodedSample>,
-    recording_start_100ns: i64,
+    base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
+    is_paused: Arc<AtomicBool>,
 ) -> Result<()> {
     // Set up audio captures + encoders + MP4 track descriptors. The
     // AudioCapture handles (`_loop_h`/`_mic_h`) must stay alive for the whole
@@ -341,7 +383,7 @@ fn record_consumer(
 
     if let Some(acfg) = &audio_cfg {
         if acfg.loopback {
-            if let Ok((cap, rx)) = acap::start(AudioSource::SystemLoopback, 64, recording_start_100ns) {
+            if let Ok((cap, rx)) = acap::start(AudioSource::SystemLoopback, 64, base_time_100ns.clone(), is_paused.clone()) {
                 let enc = AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate)?;
                 tracks.push(AudioTrack {
                     sample_rate: cap.sample_rate,
@@ -355,7 +397,7 @@ fn record_consumer(
             }
         }
         if acfg.microphone {
-            if let Ok((cap, rx)) = acap::start(AudioSource::Microphone, 64, recording_start_100ns) {
+            if let Ok((cap, rx)) = acap::start(AudioSource::Microphone, 64, base_time_100ns.clone(), is_paused.clone()) {
                 let enc = AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate)?;
                 tracks.push(AudioTrack {
                     sample_rate: cap.sample_rate,
@@ -427,7 +469,8 @@ async fn stream_consumer(
     params: crate::encoder::ParameterSets,
     audio_cfg: Option<AudioConfig>,
     stream_rx: std::sync::mpsc::Receiver<EncodedSample>,
-    recording_start_100ns: i64,
+    base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
+    is_paused: Arc<AtomicBool>,
 ) -> Result<()> {
     let mut publisher = RtmpPublisher::connect(scfg, vcfg, params).await?;
 
@@ -441,7 +484,7 @@ async fn stream_consumer(
 
     if let Some(acfg) = &audio_cfg {
         if acfg.loopback {
-            if let Ok((cap, rx)) = acap::start(AudioSource::SystemLoopback, 64, recording_start_100ns) {
+            if let Ok((cap, rx)) = acap::start(AudioSource::SystemLoopback, 64, base_time_100ns.clone(), is_paused.clone()) {
                 let enc = AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate)?;
                 publisher
                     .send_audio_sequence_header(enc.audio_specific_config())
@@ -452,7 +495,7 @@ async fn stream_consumer(
             }
         }
         if acfg.microphone {
-            if let Ok((cap, rx)) = acap::start(AudioSource::Microphone, 64, recording_start_100ns) {
+            if let Ok((cap, rx)) = acap::start(AudioSource::Microphone, 64, base_time_100ns.clone(), is_paused.clone()) {
                 _mic_h = Some(cap);
                 mic_rx = Some(rx);
             }

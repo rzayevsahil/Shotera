@@ -83,10 +83,14 @@ export default function BreakTimer() {
     };
 
     const unlistenPromise = listen("timer-opened", handleTrigger);
+    const unlistenFocusPromise = listen("force-focus", () => {
+      window.focus();
+    });
     window.addEventListener("storage", handleStorage);
 
     return () => {
       unlistenPromise.then((unlisten) => unlisten());
+      unlistenFocusPromise.then((unlisten) => unlisten());
       window.removeEventListener("storage", handleStorage);
     };
   }, []);

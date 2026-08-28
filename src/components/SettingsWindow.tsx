@@ -40,6 +40,8 @@ function SettingsWindow() {
   const [zoomShortcut, setZoomShortcut] = useState(() => localStorage.getItem("zoomShortcut") || "Ctrl+1");
   const [liveZoomShortcut, setLiveZoomShortcut] = useState(() => localStorage.getItem("liveZoomShortcut") || "Ctrl+4");
   const [recordShortcut, setRecordShortcut] = useState(() => localStorage.getItem("recordShortcut") || "Ctrl+5");
+  const [pauseRecordShortcut, setPauseRecordShortcut] = useState(() => localStorage.getItem("pauseRecordShortcut") || "Ctrl+6");
+  const [webcamShortcut, setWebcamShortcut] = useState(() => localStorage.getItem("webcamShortcut") || "Ctrl+7");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
   const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
@@ -61,7 +63,7 @@ function SettingsWindow() {
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
   const [timerSoundRepeat, setTimerSoundRepeat] = useState<string>(() => localStorage.getItem("timerSoundRepeat") || "1");
-  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "timer" | null>(null);
+  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "pause_record" | "webcam" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [isRecorderModalOpen, setIsRecorderModalOpen] = useState(false);
   const [recordFps, setRecordFps] = useState<number>(() => Number(localStorage.getItem("recordFps") || "30"));
@@ -212,6 +214,8 @@ function SettingsWindow() {
     localStorage.setItem("zoomShortcut", zoomShortcut);
     localStorage.setItem("liveZoomShortcut", liveZoomShortcut);
     localStorage.setItem("recordShortcut", recordShortcut);
+    localStorage.setItem("pauseRecordShortcut", pauseRecordShortcut);
+    localStorage.setItem("webcamShortcut", webcamShortcut);
     localStorage.setItem("timerShortcut", timerShortcut);
     localStorage.setItem("timerDefaultDuration", String(timerDefaultDuration));
     localStorage.setItem("timerCountDirection", timerCountDirection);
@@ -223,7 +227,7 @@ function SettingsWindow() {
     localStorage.setItem("showNotifications", String(showNotifications));
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -234,10 +238,12 @@ function SettingsWindow() {
       timerShortcut: timerShortcut,
       liveZoomShortcut: liveZoomShortcut,
       recordShortcut: recordShortcut,
+      pauseRecordShortcut: pauseRecordShortcut,
+      webcamShortcut: webcamShortcut,
     }).catch((e) => {
       console.error("Failed to sync shortcuts with Rust backend:", e);
     });
-  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, liveZoomShortcut, recordShortcut]);
+  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, liveZoomShortcut, recordShortcut, pauseRecordShortcut, webcamShortcut]);
 
   // Handle global shortcut recording
   useEffect(() => {
@@ -306,6 +312,8 @@ function SettingsWindow() {
         zoom: zoomShortcut,
         live_zoom: liveZoomShortcut,
         record: recordShortcut,
+        pause_record: pauseRecordShortcut,
+        webcam: webcamShortcut,
         timer: timerShortcut,
       };
 
@@ -334,6 +342,12 @@ function SettingsWindow() {
       } else if (recordingType === "record") {
         setRecordShortcut(shortcutStr);
         localStorage.setItem("recordShortcut", shortcutStr);
+      } else if (recordingType === "pause_record") {
+        setPauseRecordShortcut(shortcutStr);
+        localStorage.setItem("pauseRecordShortcut", shortcutStr);
+      } else if (recordingType === "webcam") {
+        setWebcamShortcut(shortcutStr);
+        localStorage.setItem("webcamShortcut", shortcutStr);
       } else if (recordingType === "timer") {
         setTimerShortcut(shortcutStr);
         localStorage.setItem("timerShortcut", shortcutStr);
@@ -372,6 +386,8 @@ function SettingsWindow() {
         zoom: zoomShortcut,
         live_zoom: liveZoomShortcut,
         record: recordShortcut,
+        pause_record: pauseRecordShortcut,
+        webcam: webcamShortcut,
         timer: timerShortcut,
       };
 
@@ -397,6 +413,12 @@ function SettingsWindow() {
       } else if (recordingType === "record") {
         setRecordShortcut(shortcutStr);
         localStorage.setItem("recordShortcut", shortcutStr);
+      } else if (recordingType === "pause_record") {
+        setPauseRecordShortcut(shortcutStr);
+        localStorage.setItem("pauseRecordShortcut", shortcutStr);
+      } else if (recordingType === "webcam") {
+        setWebcamShortcut(shortcutStr);
+        localStorage.setItem("webcamShortcut", shortcutStr);
       } else if (recordingType === "timer") {
         setTimerShortcut(shortcutStr);
         localStorage.setItem("timerShortcut", shortcutStr);
@@ -429,6 +451,8 @@ function SettingsWindow() {
       const tmShortcut = localStorage.getItem("timerShortcut") || "Ctrl+3";
       const lzShortcut = localStorage.getItem("liveZoomShortcut") || "Ctrl+4";
       const recShortcut = localStorage.getItem("recordShortcut") || "Ctrl+5";
+      const pauseRecShortcut = localStorage.getItem("pauseRecordShortcut") || "Ctrl+6";
+      const webShortcut = localStorage.getItem("webcamShortcut") || "Ctrl+7";
       invoke("update_shortcuts", {
         regionShortcut: regShortcut,
         fullscreenShortcut: fsShortcut,
@@ -436,6 +460,8 @@ function SettingsWindow() {
         timerShortcut: tmShortcut,
         liveZoomShortcut: lzShortcut,
         recordShortcut: recShortcut,
+        pauseRecordShortcut: pauseRecShortcut,
+        webcamShortcut: webShortcut,
       }).catch((err) => console.error(err));
     };
   }, [recordingType]);
@@ -1991,6 +2017,60 @@ function SettingsWindow() {
                 >
                   <Video size={14} />
                   {(t as any).recordOpenBtn}
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}</span>
+                <span className="setting-desc">{(t as any).shortcutPauseRecordDesc || "Aktif ekran kaydını duraklatmak veya devam ettirmek için kısayol."}</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "pause_record" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "pause_record" ? null : "pause_record")}
+                  title={t.shortcutChangeHint}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "pause_record" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "pause_record" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "pause_record" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "pause_record" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none",
+                    minWidth: "100px",
+                    textAlign: "center"
+                  }}
+                >
+                  {recordingType === "pause_record" ? t.shortcutPressKeys : formatShortcut(pauseRecordShortcut)}
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}</span>
+                <span className="setting-desc">{(t as any).shortcutWebcamDesc || "Kayıt sırasında kameranızı açıp kapatmak için kısayol."}</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <button
+                  className={`shortcut-badge customizable ${recordingType === "webcam" ? "recording" : ""}`}
+                  onClick={() => setRecordingType(recordingType === "webcam" ? null : "webcam")}
+                  title={t.shortcutChangeHint}
+                  style={{
+                    cursor: "pointer",
+                    border: recordingType === "webcam" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: recordingType === "webcam" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                    color: recordingType === "webcam" ? "var(--accent-cyan)" : "white",
+                    fontWeight: 600,
+                    animation: recordingType === "webcam" ? "pulse-border 1.5s infinite" : "none",
+                    outline: "none",
+                    minWidth: "100px",
+                    textAlign: "center"
+                  }}
+                >
+                  {recordingType === "webcam" ? t.shortcutPressKeys : formatShortcut(webcamShortcut)}
                 </button>
               </div>
             </div>

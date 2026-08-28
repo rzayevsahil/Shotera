@@ -222,9 +222,14 @@ export default function ZoomCanvas() {
       }
     });
 
+    const unlistenFocus = listen("force-focus", () => {
+      window.focus();
+    });
+
     return () => {
       unlistenZoom.then((fn) => fn());
       unlistenSnapshot.then((fn) => fn());
+      unlistenFocus.then((fn) => fn());
       if (animId) cancelAnimationFrame(animId);
     };
   }, []);

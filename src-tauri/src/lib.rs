@@ -19,9 +19,13 @@ struct AppState {
     zoom_shortcut: Mutex<String>,
     live_zoom_shortcut: Mutex<String>,
     record_shortcut: Mutex<String>,
+    pause_record_shortcut: Mutex<String>,
+    webcam_shortcut: Mutex<String>,
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
     recorder_stop_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
+    #[cfg(target_os = "windows")]
+    recorder_pipeline: Mutex<Option<std::sync::Arc<tokio::sync::Mutex<win_native_media::Pipeline>>>>,
 }
 
 
@@ -220,12 +224,25 @@ async fn start_native_recording(
         };
 
         let (tx, rx) = tokio::sync::oneshot::channel();
+        let app_handle_clone = app_handle.clone();
         
         tauri::async_runtime::spawn(async move {
+            let state = app_handle_clone.state::<AppState>();
             let start_time = std::time::Instant::now();
             match Pipeline::new(config) {
-                Ok(mut pipeline) => {
-                    match pipeline.start().await {
+                Ok(pipeline) => {
+                    let pipeline_arc = std::sync::Arc::new(tokio::sync::Mutex::new(pipeline));
+                    
+                    if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
+                        *pipe_lock = Some(pipeline_arc.clone());
+                    }
+                    
+                    let start_res = {
+                        let mut p = pipeline_arc.lock().await;
+                        p.start().await
+                    };
+
+                    match start_res {
                         Ok(_) => {
                             println!("Native recording pipeline started successfully.");
                             let _ = rx.await; // wait for stop signal
@@ -238,20 +255,26 @@ async fn start_native_recording(
                             }
 
                             println!("Stop signal received, stopping pipeline...");
-                            if let Err(e) = pipeline.stop().await {
+                            let mut p = pipeline_arc.lock().await;
+                            if let Err(e) = p.stop().await {
                                 eprintln!("Error stopping pipeline: {}", e);
                             } else {
                                 println!("Pipeline stopped successfully.");
                             }
                         },
-                        Err(e) => eprintln!("Failed to start native recording pipeline: {}", e),
+                        Err(e) => {
+                            eprintln!("Failed to start recording pipeline: {}", e);
+                        }
                     }
                 },
-                Err(e) => eprintln!("Failed to create native recording pipeline: {}", e),
+                Err(e) => {
+                    eprintln!("Failed to create recording pipeline: {}", e);
+                }
             }
         });
 
-        if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
+        let state2 = app_handle.state::<AppState>();
+        if let Ok(mut stop_tx) = state2.recorder_stop_tx.lock() {
             *stop_tx = Some(tx);
         }
 
@@ -300,17 +323,91 @@ fn hide_recorder_window(app_handle: AppHandle) {
 fn stop_native_recording(#[allow(unused_variables)] app_handle: AppHandle, state: State<'_, AppState>) -> Result<String, String> {
     println!("Stopping native hardware-accelerated recording.");
     
+    let mut stopped_now = false;
     if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
         if let Some(tx) = stop_tx.take() {
             let _ = tx.send(());
+            stopped_now = true;
         }
     }
+
+    #[cfg(target_os = "windows")]
+    if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
+        *pipe_lock = None;
+    }
     
-    // Send notification
-    let body = "Screen recording saved successfully!";
-    show_app_notification(&state, "Shotera", body, None);
+    if stopped_now {
+        let lang = {
+            let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+            state_lang.clone()
+        };
+        let body = match lang.as_str() {
+            "de" => "Bildschirmaufnahme erfolgreich gespeichert!",
+            "ru" => "Запись экрана успешно сохранена!",
+            "az" => "Ekran qeydi uğurla yadda saxlanıldı!",
+            "tr" => "Ekran kaydı başarıyla kaydedildi!",
+            _ => "Screen recording saved successfully!",
+        };
+        show_app_notification(&state, "Shotera", body, None);
+    }
 
     Ok("Recording stopped and saved to MP4.".into())
+}
+
+#[tauri::command]
+async fn pause_native_recording(state: State<'_, AppState>) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let pipe = {
+            let pipe_lock = state.recorder_pipeline.lock().unwrap();
+            pipe_lock.as_ref().cloned()
+        };
+        if let Some(pipeline_arc) = pipe {
+            pipeline_arc.lock().await.pause();
+            
+            let lang = {
+                let state_lang = state.language.lock().unwrap().clone();
+                state_lang
+            };
+            let body = match lang.as_str() {
+                "tr" => "Kayıt duraklatıldı.",
+                "az" => "Qeyd dayandırıldı.",
+                "ru" => "Запись приостановлена.",
+                "de" => "Aufnahme pausiert.",
+                _ => "Recording paused.",
+            };
+            show_app_notification(&state, "Shotera", body, None);
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+async fn resume_native_recording(state: State<'_, AppState>) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let pipe = {
+            let pipe_lock = state.recorder_pipeline.lock().unwrap();
+            pipe_lock.as_ref().cloned()
+        };
+        if let Some(pipeline_arc) = pipe {
+            pipeline_arc.lock().await.resume();
+            
+            let lang = {
+                let state_lang = state.language.lock().unwrap().clone();
+                state_lang
+            };
+            let body = match lang.as_str() {
+                "tr" => "Kayıt devam ediyor.",
+                "az" => "Qeyd davam edir.",
+                "ru" => "Запись продолжается.",
+                "de" => "Aufnahme fortgesetzt.",
+                _ => "Recording resumed.",
+            };
+            show_app_notification(&state, "Shotera", body, None);
+        }
+    }
+    Ok(())
 }
 
 
@@ -336,9 +433,20 @@ fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), St
 }
 
 #[tauri::command]
-fn open_recorder_view(app_handle: AppHandle) -> Result<(), String> {
+fn open_recorder_view(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    let is_recording = {
+        #[cfg(target_os = "windows")]
+        {
+            state.recorder_pipeline.lock().unwrap().is_some()
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            false
+        }
+    };
+
     if let Some(window) = app_handle.get_webview_window("recorder") {
-        if window.is_visible().unwrap_or(false) {
+        if is_recording || window.is_visible().unwrap_or(false) {
             let _ = window.emit("recorder-shortcut-pressed", ());
         } else {
             let _ = window.show();
@@ -483,6 +591,10 @@ fn draw_cursor(img: &mut image::RgbaImage, start_x: i32, start_y: i32) {
 }
 
 fn capture_screen_to_state(_app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+    // Sleep briefly to ensure any recently hidden overlays are flushed from the OS compositor buffer (DWM).
+    // This prevents the "progressively darkening screen" bug if the user captures immediately after hiding an overlay.
+    std::thread::sleep(std::time::Duration::from_millis(80));
+
     // 1. Capture screen
     let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
     if monitors.is_empty() {
@@ -575,6 +687,9 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
             return Ok(());
         }
     }
+
+    // Sleep briefly to ensure the hidden overlay is flushed from the OS compositor buffer (DWM).
+    std::thread::sleep(std::time::Duration::from_millis(80));
 
     // 1. Capture screen
     let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
@@ -929,6 +1044,8 @@ fn register_all_shortcuts_helper(
     zoom_shortcut_str: &str,
     live_zoom_shortcut_str: &str,
     record_shortcut_str: &str,
+    pause_record_shortcut_str: &str,
+    webcam_shortcut_str: &str,
 ) -> Result<(), String> {
     use std::str::FromStr;
     let _ = app_handle.global_shortcut().unregister_all();
@@ -951,6 +1068,12 @@ fn register_all_shortcuts_helper(
     if let Ok(sc) = Shortcut::from_str(&record_shortcut_str.to_lowercase()) {
         let _ = app_handle.global_shortcut().register(sc);
     }
+    if let Ok(sc) = Shortcut::from_str(&pause_record_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
+    if let Ok(sc) = Shortcut::from_str(&webcam_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
     Ok(())
 }
 
@@ -964,11 +1087,15 @@ fn update_shortcuts(
     timer_shortcut: Option<String>,
     live_zoom_shortcut: Option<String>,
     record_shortcut: Option<String>,
+    pause_record_shortcut: Option<String>,
+    webcam_shortcut: Option<String>,
 ) -> Result<(), String> {
     let timer_str = timer_shortcut.unwrap_or_else(|| state.break_timer_shortcut.lock().unwrap().clone());
     let zoom_str = zoom_shortcut.unwrap_or_else(|| state.zoom_shortcut.lock().unwrap().clone());
     let live_zoom_str = live_zoom_shortcut.unwrap_or_else(|| state.live_zoom_shortcut.lock().unwrap().clone());
     let record_str = record_shortcut.unwrap_or_else(|| state.record_shortcut.lock().unwrap().clone());
+    let pause_record_str = pause_record_shortcut.unwrap_or_else(|| state.pause_record_shortcut.lock().unwrap().clone());
+    let webcam_str = webcam_shortcut.unwrap_or_else(|| state.webcam_shortcut.lock().unwrap().clone());
 
     register_all_shortcuts_helper(
         &app_handle,
@@ -978,6 +1105,8 @@ fn update_shortcuts(
         &zoom_str,
         &live_zoom_str,
         &record_str,
+        &pause_record_str,
+        &webcam_str,
     )?;
 
     if let Ok(mut reg_state) = state.region_shortcut.lock() {
@@ -997,6 +1126,12 @@ fn update_shortcuts(
     }
     if let Ok(mut record_state) = state.record_shortcut.lock() {
         *record_state = record_str.to_lowercase();
+    }
+    if let Ok(mut pause_record_state) = state.pause_record_shortcut.lock() {
+        *pause_record_state = pause_record_str.to_lowercase();
+    }
+    if let Ok(mut webcam_state) = state.webcam_shortcut.lock() {
+        *webcam_state = webcam_str.to_lowercase();
     }
 
     Ok(())
@@ -1049,6 +1184,7 @@ fn restore_focus(app_handle: &AppHandle, skip: &str) {
         if let Some(w) = app_handle.get_webview_window(w_name) {
             if w.is_visible().unwrap_or(false) {
                 let _ = w.set_focus();
+                let _ = w.emit("force-focus", ());
                 return;
             }
         }
@@ -1500,10 +1636,14 @@ pub fn run() {
             zoom_shortcut: Mutex::new("ctrl+1".to_string()),
             live_zoom_shortcut: Mutex::new("ctrl+4".to_string()),
             record_shortcut: Mutex::new("ctrl+5".to_string()),
+            pause_record_shortcut: Mutex::new("ctrl+6".to_string()),
+            webcam_shortcut: Mutex::new("ctrl+7".to_string()),
             pinned_image: Mutex::new(None),
 
             show_notifications: Mutex::new(true),
             recorder_stop_tx: Mutex::new(None),
+            #[cfg(target_os = "windows")]
+            recorder_pipeline: Mutex::new(None),
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -1528,6 +1668,22 @@ pub fn run() {
                         let zoom_shortcut_str = state.zoom_shortcut.lock().unwrap().clone();
                         let live_zoom_shortcut_str = state.live_zoom_shortcut.lock().unwrap().clone();
                         let record_shortcut_str = state.record_shortcut.lock().unwrap().clone();
+                        let pause_record_shortcut_str = state.pause_record_shortcut.lock().unwrap().clone();
+                        let webcam_shortcut_str = state.webcam_shortcut.lock().unwrap().clone();
+                        
+                        if let Ok(pause_sc) = pause_record_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &pause_sc {
+                                let _ = app_handle_shortcut.emit("toggle-pause-recording", ());
+                                return;
+                            }
+                        }
+
+                        if let Ok(webcam_sc) = webcam_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &webcam_sc {
+                                let _ = app_handle_shortcut.emit("toggle-webcam-shortcut", ());
+                                return;
+                            }
+                        }
                         
                         if let Ok(timer_sc) = timer_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &timer_sc {
@@ -1552,7 +1708,7 @@ pub fn run() {
 
                         if let Ok(record_sc) = record_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &record_sc {
-                                let _ = open_recorder_view(app_handle_shortcut.clone());
+                                let _ = open_recorder_view(app_handle_shortcut.clone(), state.clone());
                                 return;
                             }
                         }
@@ -1606,6 +1762,8 @@ pub fn run() {
             let zoom_shortcut = Shortcut::from_str("ctrl+1").unwrap();
             let live_zoom_shortcut = Shortcut::from_str("ctrl+4").unwrap();
             let record_shortcut = Shortcut::from_str("ctrl+5").unwrap();
+            let pause_record_shortcut = Shortcut::from_str("ctrl+6").unwrap();
+            let webcam_shortcut = Shortcut::from_str("ctrl+7").unwrap();
             
             let _ = app.global_shortcut().register(reg_shortcut);
             let _ = app.global_shortcut().register(fs_shortcut);
@@ -1613,6 +1771,8 @@ pub fn run() {
             let _ = app.global_shortcut().register(zoom_shortcut);
             let _ = app.global_shortcut().register(live_zoom_shortcut);
             let _ = app.global_shortcut().register(record_shortcut);
+            let _ = app.global_shortcut().register(pause_record_shortcut);
+            let _ = app.global_shortcut().register(webcam_shortcut);
 
             // 2. Setup System Tray with retry mechanism for Windows Fast Startup
             let create_tray = |app_ref: &tauri::App| -> Result<tauri::tray::TrayIcon, tauri::Error> {
@@ -1735,6 +1895,8 @@ pub fn run() {
             get_capture_sources,
             start_native_recording,
             stop_native_recording,
+            pause_native_recording,
+            resume_native_recording,
             resize_recorder_window,
             hide_recorder_window,
             open_recorder_view,

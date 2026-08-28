@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Monitor, AppWindow, Video, X, Check, Square, Camera } from "lucide-react";
+import { Monitor, AppWindow, Video, X, Check, Square, Camera, Pause, Play, EyeOff } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
 import "./ScreenRecorderModal.css";
 
@@ -25,6 +25,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const isRecordingRef = useRef(false);
     const [activeTab, setActiveTab] = useState<"monitors" | "windows">("monitors");
     const [useWebcam, setUseWebcam] = useState(false);
+    const useWebcamRef = useRef(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const isPausedRef = useRef(false);
+    const [showControls, setShowControls] = useState(() => localStorage.getItem("showRecordControls") !== "false");
 
     const t = translations[getLanguage()];
 
@@ -34,7 +38,11 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     useEffect(() => {
         if (isOpen) {
-            setUseWebcam(false);
+            const savedWebcam = localStorage.getItem("recordWebcam") === "true";
+            setUseWebcam(savedWebcam);
+            useWebcamRef.current = savedWebcam;
+            setIsPaused(false);
+            isPausedRef.current = false;
             loadSources();
         } else {
             setSources([]);
@@ -47,6 +55,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     // Use a ref to always have the latest handleStopRecording function inside the event listener
     const handleStopRecordingRef = useRef<(() => Promise<void>) | null>(null);
+    const handlePauseToggleRef = useRef<(() => Promise<void>) | null>(null);
+    const handleWebcamToggleRef = useRef<(() => Promise<void>) | null>(null);
 
     useEffect(() => {
         import("@tauri-apps/api/event").then(({ listen }) => {
@@ -62,9 +72,21 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     onClose();
                 }
             });
+            const unlistenPause = listen("toggle-pause-recording", async () => {
+                if (isRecordingRef.current && handlePauseToggleRef.current) {
+                    await handlePauseToggleRef.current();
+                }
+            });
+            const unlistenWebcam = listen("toggle-webcam-shortcut", async () => {
+                if (isRecordingRef.current && handleWebcamToggleRef.current) {
+                    await handleWebcamToggleRef.current();
+                }
+            });
             return () => {
                 unlistenOpened.then(f => f());
                 unlistenShortcut.then(f => f());
+                unlistenPause.then(f => f());
+                unlistenWebcam.then(f => f());
             };
         });
     }, [isOpen, onClose]);
@@ -132,7 +154,11 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             console.log("Starting native recording for:", selectedId);
 
             if (isStandalone) {
-                await invoke("resize_recorder_window", { compact: true }).catch(console.error);
+                if (showControls) {
+                    await invoke("resize_recorder_window", { compact: true }).catch(console.error);
+                } else {
+                    await invoke("hide_recorder_window").catch(console.error);
+                }
             }
 
             await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio, recordMic, videoSavePath });
@@ -169,9 +195,50 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         }
     };
 
+    const lastPauseToggleRef = useRef<number>(0);
+    const lastWebcamToggleRef = useRef<number>(0);
+
+    const handlePauseToggle = async () => {
+        if (!isRecording) return;
+        const now = Date.now();
+        if (now - lastPauseToggleRef.current < 500) return;
+        lastPauseToggleRef.current = now;
+        
+        try {
+            const nextPaused = !isPausedRef.current;
+            if (nextPaused) {
+                await invoke("pause_native_recording");
+            } else {
+                await invoke("resume_native_recording");
+            }
+            setIsPaused(nextPaused);
+            isPausedRef.current = nextPaused;
+        } catch (error) {
+            console.error("Failed to toggle pause:", error);
+        }
+    };
+
+    const handleWebcamToggle = async () => {
+        if (!isRecording) return;
+        const now = Date.now();
+        if (now - lastWebcamToggleRef.current < 500) return;
+        lastWebcamToggleRef.current = now;
+        
+        try {
+            const nextWebcam = !useWebcamRef.current;
+            await invoke("toggle_webcam", { show: nextWebcam });
+            setUseWebcam(nextWebcam);
+            useWebcamRef.current = nextWebcam;
+        } catch (error) {
+            console.error("Failed to toggle webcam:", error);
+        }
+    };
+
     useEffect(() => {
         handleStopRecordingRef.current = handleStopRecording;
-    }, [handleStopRecording]);
+        handlePauseToggleRef.current = handlePauseToggle;
+        handleWebcamToggleRef.current = handleWebcamToggle;
+    }, [handleStopRecording, handlePauseToggle, handleWebcamToggle]);
 
     if (!isOpen) return null;
 
@@ -185,12 +252,20 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 borderRadius: '0'
             }} data-tauri-drag-region>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
-                    <div className="recording-indicator" style={{ width: '14px', height: '14px', margin: 0, animation: 'pulse-recording 1s infinite' }}></div>
-                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{(t as any).modalRecording}</span>
+                    <div className="recording-indicator" style={{ width: '14px', height: '14px', margin: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
+                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{isPaused ? 'Mola' : (t as any).modalRecording}</span>
                 </div>
-                <button className="premium-button stop-btn" onClick={handleStopRecording} style={{ padding: '8px 14px', fontSize: '0.85rem' }}>
-                    <Square size={14} fill="currentColor" /> {(t as any).modalStopRecording}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title="Kamerayı Aç/Kapat">
+                        <Camera size={16} color={useWebcam ? "var(--accent-cyan)" : "#a1a1aa"} />
+                    </button>
+                    <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={isPaused ? "Devam Et" : "Duraklat"}>
+                        {isPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
+                    </button>
+                    <button className="premium-button stop-btn" onClick={handleStopRecording} style={{ padding: '8px 14px', fontSize: '0.85rem' }}>
+                        <Square size={14} fill="currentColor" /> {(t as any).modalStopRecording}
+                    </button>
+                </div>
             </div>
         );
     }
@@ -217,12 +292,17 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 <div className="recorder-modal-content">
                     {isRecording ? (
                         <div className="recording-active-state">
-                            <div className="recording-indicator"></div>
-                            <h2>{(t as any).modalRecording}</h2>
+                            <div className="recording-indicator" style={{ background: isPaused ? 'gray' : 'red', animation: isPaused ? 'none' : 'pulse-recording 1s infinite' }}></div>
+                            <h2>{isPaused ? 'Mola' : (t as any).modalRecording}</h2>
                             <p>{(t as any).modalHwAccel}</p>
-                            <button className="premium-button stop-btn" onClick={handleStopRecording}>
-                                <Square size={16} fill="currentColor" /> {(t as any).modalStopRecording}
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '15px' }}>
+                                <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 20px' }}>
+                                    {isPaused ? <><Play size={16} fill="currentColor" /> Devam Et</> : <><Pause size={16} fill="currentColor" /> Duraklat</>}
+                                </button>
+                                <button className="premium-button stop-btn" onClick={handleStopRecording}>
+                                    <Square size={16} fill="currentColor" /> {(t as any).modalStopRecording}
+                                </button>
+                            </div>
                         </div>
                     ) : loading ? (
                         <div className="loading-state">{(t as any).modalLoading}</div>
@@ -294,6 +374,26 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
                 {!isRecording && (
                     <div className="recorder-modal-footer" style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <button 
+                            className="secondary-button"
+                            onClick={() => {
+                                const next = !showControls;
+                                setShowControls(next);
+                                localStorage.setItem("showRecordControls", next.toString());
+                            }}
+                            title="Kayıt Çubuğunu Gizle/Göster"
+                            style={{
+                                padding: '10px',
+                                borderRadius: '8px',
+                                background: showControls ? 'rgba(255, 255, 255, 0.05)' : 'rgba(239, 68, 68, 0.15)',
+                                border: showControls ? '1px solid transparent' : '1px solid rgba(239, 68, 68, 0.5)',
+                                color: showControls ? '#a1a1aa' : '#ef4444',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <EyeOff size={18} />
+                        </button>
                         <button 
                             className="secondary-button"
                             onClick={() => {

@@ -36,7 +36,7 @@ impl Drop for AudioCapture {
 /// Start capturing `source`. Returns the capture handle and a receiver of PCM
 /// buffers. The format (sample rate / channels) is read from the device and
 /// exposed on the handle so the encoder can be configured to match.
-pub fn start(source: AudioSource, bound: usize, recording_start_100ns: i64) -> Result<(AudioCapture, Receiver<AudioBuffer>)> {
+pub fn start(source: AudioSource, bound: usize, base_time_100ns: Arc<std::sync::atomic::AtomicI64>, is_paused: Arc<AtomicBool>) -> Result<(AudioCapture, Receiver<AudioBuffer>)> {
     // Probe the device format synchronously so we can report it to the caller.
     let (sample_rate, channels) = probe_format(source)?;
 
@@ -45,7 +45,7 @@ pub fn start(source: AudioSource, bound: usize, recording_start_100ns: i64) -> R
     let stop_thread = stop.clone();
 
     let handle = std::thread::spawn(move || {
-        if let Err(e) = capture_loop(source, tx, stop_thread, recording_start_100ns) {
+        if let Err(e) = capture_loop(source, tx, stop_thread, base_time_100ns, is_paused) {
             tracing::error!("audio capture loop ended: {e}");
         }
     });
@@ -91,7 +91,8 @@ fn capture_loop(
     source: AudioSource,
     tx: SyncSender<AudioBuffer>,
     stop: Arc<AtomicBool>,
-    recording_start_100ns: i64,
+    base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
+    is_paused: Arc<AtomicBool>,
 ) -> Result<()> {
     unsafe {
         let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
@@ -146,6 +147,11 @@ fn capture_loop(
                 None,
             )?;
 
+            if is_paused.load(Ordering::Relaxed) {
+                capture.ReleaseBuffer(num_frames)?;
+                continue;
+            }
+
             let silent = (flags & AUDCLNT_BUFFERFLAGS_SILENT.0 as u32) != 0;
             let frame_bytes = (bits / 8) as usize * channels as usize;
             let byte_len = num_frames as usize * frame_bytes;
@@ -164,7 +170,8 @@ fn capture_loop(
             unsafe { windows::Win32::System::Performance::QueryPerformanceCounter(&mut current_qpc).unwrap(); }
             
             let current_100ns = (current_qpc as f64 * 10_000_000.0 / qpc_freq as f64) as i64;
-            let rel_100ns = (current_100ns - recording_start_100ns).max(0) as u64;
+            let start_100ns = base_time_100ns.load(Ordering::SeqCst);
+            let rel_100ns = (current_100ns - start_100ns).max(0) as u64;
             let timestamp = std::time::Duration::from_nanos(rel_100ns * 100);
             
             // [DIAGNOSTIC LOGGING]

@@ -82,7 +82,8 @@ pub struct CaptureConfig {
 pub fn start(
     config: CaptureConfig,
     bound: usize,
-    recording_start_100ns: i64,
+    base_time_100ns: std::sync::Arc<std::sync::atomic::AtomicI64>,
+    is_paused: std::sync::Arc<std::sync::atomic::AtomicBool>,
 ) -> Result<(CaptureSession, Receiver<CapturedFrame>)> {
     if !GraphicsCaptureSession::IsSupported()? {
         return Err(PipelineError::CaptureUnsupported);
@@ -115,7 +116,8 @@ pub fn start(
         context: context.map(AgileContext),
         staging_tex: None,
         last_size: size,
-        recording_start_100ns,
+        base_time_100ns,
+        is_paused,
         last_timestamp: None,
     }));
 
@@ -154,7 +156,8 @@ struct FrameState {
     context: Option<AgileContext>,
     staging_tex: Option<windows::Win32::Graphics::Direct3D11::ID3D11Texture2D>,
     last_size: SizeInt32,
-    recording_start_100ns: i64,
+    base_time_100ns: std::sync::Arc<std::sync::atomic::AtomicI64>,
+    is_paused: std::sync::Arc<std::sync::atomic::AtomicBool>,
     last_timestamp: Option<Duration>,
 }
 
@@ -208,11 +211,15 @@ fn on_frame_arrived(
         return;
     }
 
+    if guard.is_paused.load(std::sync::atomic::Ordering::Relaxed) {
+        return;
+    }
+
     let ticks = match frame.SystemRelativeTime() {
         Ok(t) => t.Duration, // 100ns units
         Err(_) => return,
     };
-    let start = guard.recording_start_100ns;
+    let start = guard.base_time_100ns.load(std::sync::atomic::Ordering::SeqCst);
     let rel_100ns = (ticks - start).max(0) as u64;
     let timestamp = Duration::from_nanos(rel_100ns * 100);
 

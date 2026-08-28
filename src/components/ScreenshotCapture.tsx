@@ -178,8 +178,13 @@ function ScreenshotCapture() {
       loadScreenshot();
     });
 
+    const unlistenFocus = listen("force-focus", () => {
+      window.focus();
+    });
+
     return () => {
       unlisten.then((fn) => fn());
+      unlistenFocus.then((fn) => fn());
     };
   }, []);
 
