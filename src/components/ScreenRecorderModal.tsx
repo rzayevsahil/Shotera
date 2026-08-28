@@ -371,8 +371,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             }} data-tauri-drag-region>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
                     <div className="recording-indicator" style={{ width: '14px', height: '14px', minWidth: '14px', minHeight: '14px', borderRadius: '50%', margin: 0, flexShrink: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
-                    {isPaused && <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>Mola</span>}
-                    <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 500, letterSpacing: '1px' }}>{formatDuration(recordingDuration)}</span>
+                    {isPaused && <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{(t as any).modalPaused}</span>}
+                    <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 500, letterSpacing: '1px', marginRight: '5px', marginLeft: '-5px' }}>{formatDuration(recordingDuration)}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}>

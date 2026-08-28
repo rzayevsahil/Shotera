@@ -432,11 +432,11 @@ fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), St
     use tauri::Manager;
     if let Some(window) = app_handle.get_webview_window("recorder") {
         if compact {
-            let _ = window.set_size(tauri::LogicalSize::new(420.0, 80.0));
+            let _ = window.set_size(tauri::LogicalSize::new(460.0, 80.0));
             if let Ok(Some(monitor)) = window.current_monitor() {
                 let size = monitor.size();
                 let scale_factor = monitor.scale_factor();
-                let x = (size.width as f64 - (440.0 * scale_factor)) as i32;
+                let x = (size.width as f64 - (480.0 * scale_factor)) as i32;
                 let y = (size.height as f64 - (120.0 * scale_factor)) as i32;
                 let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
             }
