@@ -375,17 +375,33 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 500, letterSpacing: '1px', marginRight: '5px', marginLeft: '-5px' }}>{formatDuration(recordingDuration)}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}>
-                        <Camera size={16} color={useWebcam ? "var(--accent-cyan)" : "#a1a1aa"} />
+                    <button
+                        className={`compact-bar-btn ${useWebcam ? 'active' : ''}`}
+                        onClick={handleWebcamToggle}
+                        title={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
+                    >
+                        <Camera size={16} />
                     </button>
-                    <button className="secondary-button" onClick={handleMicToggle} style={{ width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={!isMicMuted ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}>
-                        {isMicMuted ? <MicOff size={16} color="#ef4444" /> : <Mic size={16} color="var(--accent-cyan)" />}
+                    <button
+                        className={`compact-bar-btn ${!isMicMuted ? 'active' : 'active-muted'}`}
+                        onClick={handleMicToggle}
+                        title={!isMicMuted ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
+                    >
+                        {isMicMuted ? <MicOff size={16} /> : <Mic size={16} />}
                     </button>
-                    <button className="secondary-button" onClick={handlePauseToggle} style={{ width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={isPaused ? "Devam Et" : "Duraklat"}>
+                    <button
+                        className="compact-bar-btn"
+                        onClick={handlePauseToggle}
+                        title={isPaused ? "Devam Et" : "Duraklat"}
+                    >
                         {isPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
                     </button>
-                    <button className="premium-button stop-btn" onClick={handleStopRecording} style={{ width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title={(t as any).modalStopRecording}>
-                        <Square size={16} fill="currentColor" />
+                    <button
+                        className="compact-bar-btn stop-btn"
+                        onClick={handleStopRecording}
+                        title={(t as any).modalStopRecording}
+                    >
+                        <Square size={15} fill="currentColor" />
                     </button>
                 </div>
             </div>
