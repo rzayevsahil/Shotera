@@ -2569,7 +2569,7 @@ function SettingsWindow() {
                 <span className="setting-desc">{(t as any).webcamBorderStyleDesc || "Kamera çerçevesi için animasyon veya renk efekti seçin."}</span>
               </div>
               <select
-                className="premium-select"
+                className="premium-input"
                 value={webcamBorderAnimation}
                 onChange={(e) => {
                   setWebcamBorderAnimation(e.target.value);
