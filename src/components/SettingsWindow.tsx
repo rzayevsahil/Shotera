@@ -2290,8 +2290,79 @@ function SettingsWindow() {
               </select>
             </div>
 
-            {/* Webcam Border Color Preset Row */}
+            {/* Webcam Border Color Preview */}
             <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
+              <div className="setting-info" style={{ flex: 1 }}>
+                <span className="setting-label">{(t as any).webcamPreviewLabel || "Önizleme"}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", flex: 1, paddingRight: "4px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", position: "relative" }}>
+                  <style>
+                    {`
+                      @keyframes webcam-logo-gif {
+                        0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(56,189,248,0.3)); }
+                        25% { transform: scale(1.05) translateY(-2px); filter: drop-shadow(0 0 10px rgba(56,189,248,0.6)); }
+                        50% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 15px rgba(56,189,248,0.8)); }
+                        75% { transform: scale(0.95) translateY(2px); filter: drop-shadow(0 0 10px rgba(56,189,248,0.6)); }
+                        100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(56,189,248,0.3)); }
+                      }
+                    `}
+                  </style>
+                  <div style={{
+                    width: "90px",
+                    height: "90px",
+                    borderRadius: "50%",
+                    border: `3px solid ${webcamBorderColor}`,
+                    boxSizing: "border-box",
+                    background: "rgba(15, 23, 42, 0.95)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: `0 0 15px ${webcamBorderColor}40`,
+                    transition: "all 0.3s ease",
+                    overflow: "hidden",
+                    position: "relative"
+                  }}>
+                    <img
+                      src={logo}
+                      alt="Webcam Preview Animated"
+                      style={{
+                        width: "55%",
+                        height: "55%",
+                        objectFit: "contain",
+                        animation: "webcam-logo-gif 3.5s infinite ease-in-out"
+                      }}
+                    />
+                    {/* Subtle camera icon overlay to reinforce it's a webcam */}
+                    <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
+                      <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
+                    </div>
+                  </div>
+                  {webcamText.trim() && (
+                    <div style={{
+                      color: webcamTextColor,
+                      fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
+                      fontSize: "11px",
+                      fontWeight: "bold",
+                      background: "rgba(0,0,0,0.6)",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                      maxWidth: "110px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      textAlign: "center"
+                    }}>
+                      {webcamText}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Webcam Border Color Preset Row */}
+            <div className="setting-row" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamBorderColorLabel || "Kamera Çerçeve Rengi"}</span>
               </div>
@@ -2407,75 +2478,6 @@ function SettingsWindow() {
                     textAlign: "center"
                   }}
                 />
-              </div>
-            </div>
-
-            {/* Webcam Border Color Preview */}
-            <div className="setting-row" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
-              <div className="setting-info" style={{ flex: 1 }}>
-                <span className="setting-label">{(t as any).webcamPreviewLabel || "Önizleme"}</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", flex: 1, paddingRight: "4px", gap: "8px", position: "relative" }}>
-                <style>
-                  {`
-                    @keyframes webcam-logo-gif {
-                      0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(56,189,248,0.3)); }
-                      25% { transform: scale(1.05) translateY(-2px); filter: drop-shadow(0 0 10px rgba(56,189,248,0.6)); }
-                      50% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 15px rgba(56,189,248,0.8)); }
-                      75% { transform: scale(0.95) translateY(2px); filter: drop-shadow(0 0 10px rgba(56,189,248,0.6)); }
-                      100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(56,189,248,0.3)); }
-                    }
-                  `}
-                </style>
-                <div style={{
-                  width: "90px",
-                  height: "90px",
-                  borderRadius: "50%",
-                  border: `3px solid ${webcamBorderColor}`,
-                  boxSizing: "border-box",
-                  background: "rgba(15, 23, 42, 0.95)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: `0 0 15px ${webcamBorderColor}40`,
-                  transition: "all 0.3s ease",
-                  overflow: "hidden",
-                  position: "relative"
-                }}>
-                  <img
-                    src={logo}
-                    alt="Webcam Preview Animated"
-                    style={{
-                      width: "55%",
-                      height: "55%",
-                      objectFit: "contain",
-                      animation: "webcam-logo-gif 3.5s infinite ease-in-out"
-                    }}
-                  />
-                  {/* Subtle camera icon overlay to reinforce it's a webcam */}
-                  <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
-                    <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
-                  </div>
-                </div>
-                {webcamText.trim() && (
-                  <div style={{
-                    color: webcamTextColor,
-                    fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
-                    fontSize: "11px",
-                    fontWeight: "bold",
-                    background: "rgba(0,0,0,0.6)",
-                    padding: "2px 8px",
-                    borderRadius: "12px",
-                    textShadow: "0 1px 3px rgba(0,0,0,0.8)",
-                    maxWidth: "110px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    textAlign: "center"
-                  }}>
-                    {webcamText}
-                  </div>
-                )}
               </div>
             </div>
 
