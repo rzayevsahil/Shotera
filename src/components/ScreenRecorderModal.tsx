@@ -479,7 +479,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 window.dispatchEvent(new Event("storage"));
                                 emit("force_storage_sync").catch(console.error);
                             }}
-                            title={(t as any).recordTooltipBar || "Kayıt Çubuğunu Gizle/Göster"}
+                            title={showControls ? ((t as any).recordTooltipBarHide || "Kayıt Çubuğunu Gizle") : ((t as any).recordTooltipBarShow || "Kayıt Çubuğunu Göster")}
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
