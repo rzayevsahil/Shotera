@@ -1177,6 +1177,14 @@ fn select_folder() -> Option<String> {
         .map(|p| p.to_string_lossy().to_string())
 }
 
+#[tauri::command]
+fn select_image() -> Option<String> {
+    rfd::FileDialog::new()
+        .add_filter("Image", &["png", "jpg", "jpeg", "webp", "gif"])
+        .pick_file()
+        .map(|p| p.to_string_lossy().to_string())
+}
+
 fn restore_focus(app_handle: &AppHandle, skip: &str) {
     let windows = ["timer", "live_zoom", "zoom", "screenshot"];
     for w_name in windows {
@@ -1880,6 +1888,7 @@ pub fn run() {
             update_save_settings,
             update_notification_setting,
             select_folder,
+            select_image,
             update_shortcuts,
             unregister_global_shortcuts,
             pin_image,

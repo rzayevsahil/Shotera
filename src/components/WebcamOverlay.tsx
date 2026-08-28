@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Camera } from "lucide-react";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { translations, getLanguage, Language } from "../i18n";
 
 const activeStreams = new Set<MediaStream>();
@@ -17,6 +18,8 @@ export default function WebcamOverlay() {
   const [webcamText, setWebcamText] = useState(() => localStorage.getItem("webcamText") || "");
   const [webcamTextColor, setWebcamTextColor] = useState(() => localStorage.getItem("webcamTextColor") || "#ffffff");
   const [webcamTextFont, setWebcamTextFont] = useState(() => localStorage.getItem("webcamTextFont") || "sans");
+  const [webcamMode, setWebcamMode] = useState(() => localStorage.getItem("webcamMode") || "camera");
+  const [webcamImagePath, setWebcamImagePath] = useState(() => localStorage.getItem("webcamImagePath") || "");
 
   useEffect(() => {
     // Listen for language changes from localStorage
@@ -26,6 +29,8 @@ export default function WebcamOverlay() {
       setWebcamText(localStorage.getItem("webcamText") || "");
       setWebcamTextColor(localStorage.getItem("webcamTextColor") || "#ffffff");
       setWebcamTextFont(localStorage.getItem("webcamTextFont") || "sans");
+      setWebcamMode(localStorage.getItem("webcamMode") || "camera");
+      setWebcamImagePath(localStorage.getItem("webcamImagePath") || "");
     };
     window.addEventListener("storage", handleStorageChange);
     
@@ -72,6 +77,16 @@ export default function WebcamOverlay() {
     async function startCam() {
       if (isStartingRef.current) return;
       isStartingRef.current = true;
+
+      const currentMode = localStorage.getItem("webcamMode") || "camera";
+      if (currentMode === "image") {
+        setStarted(true);
+        setHasError(false);
+        setPermissionState("idle");
+        isStartingRef.current = false;
+        return;
+      }
+
       try {
         const mode = localStorage.getItem("webcamPermissionMode") || "once";
         const hasAllowed = localStorage.getItem("webcamHasAllowed") === "true";
@@ -209,20 +224,38 @@ export default function WebcamOverlay() {
           position: "relative"
         }}
       >
-        <video
-          ref={videoRef}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            transform: "scaleX(-1) translateZ(0)", // Maintain mirror + GPU layer lock
-            borderRadius: "50%",
-            clipPath: "circle(50% at 50% 50%)", // Force circular mask at GPU level
-            WebkitClipPath: "circle(50% at 50% 50%)", // Safari/Webkit fallback
-            display: (started && !hasError) ? "block" : "none",
-            pointerEvents: "none"
-          }}
-        />
+        {webcamMode === "image" ? (
+          <img
+            src={webcamImagePath ? convertFileSrc(webcamImagePath) : ""}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: "translateZ(0)",
+              borderRadius: "50%",
+              clipPath: "circle(50% at 50% 50%)",
+              WebkitClipPath: "circle(50% at 50% 50%)",
+              display: (started && !hasError && webcamImagePath) ? "block" : "none",
+              pointerEvents: "none"
+            }}
+            alt=""
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: "scaleX(-1) translateZ(0)", // Maintain mirror + GPU layer lock
+              borderRadius: "50%",
+              clipPath: "circle(50% at 50% 50%)", // Force circular mask at GPU level
+              WebkitClipPath: "circle(50% at 50% 50%)", // Safari/Webkit fallback
+              display: (started && !hasError) ? "block" : "none",
+              pointerEvents: "none"
+            }}
+          />
+        )}
         {!started && permissionState === "idle" && (
           <div
             style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}

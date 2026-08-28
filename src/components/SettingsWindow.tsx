@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
@@ -195,6 +195,9 @@ function SettingsWindow() {
     return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(current) ? "#06b6d4" : current;
   });
 
+  const [webcamMode, setWebcamMode] = useState<string>(() => localStorage.getItem("webcamMode") || "camera");
+  const [webcamImagePath, setWebcamImagePath] = useState<string>(() => localStorage.getItem("webcamImagePath") || "");
+
   // Webcam Text Settings
   const [webcamText, setWebcamText] = useState<string>(() => localStorage.getItem("webcamText") || "");
   const [webcamTextColor, setWebcamTextColor] = useState<string>(() => localStorage.getItem("webcamTextColor") || "#ffffff");
@@ -357,9 +360,11 @@ function SettingsWindow() {
     localStorage.setItem("webcamText", webcamText);
     localStorage.setItem("webcamTextColor", webcamTextColor);
     localStorage.setItem("webcamTextFont", webcamTextFont);
+    localStorage.setItem("webcamMode", webcamMode);
+    localStorage.setItem("webcamImagePath", webcamImagePath);
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont, webcamMode, webcamImagePath]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -2324,13 +2329,13 @@ function SettingsWindow() {
                     position: "relative"
                   }}>
                     <img
-                      src={logo}
+                      src={webcamMode === "image" && webcamImagePath ? convertFileSrc(webcamImagePath) : logo}
                       alt="Webcam Preview Animated"
                       style={{
-                        width: "55%",
-                        height: "55%",
-                        objectFit: "contain",
-                        animation: "webcam-logo-gif 3.5s infinite ease-in-out"
+                        width: webcamMode === "image" && webcamImagePath ? "100%" : "55%",
+                        height: webcamMode === "image" && webcamImagePath ? "100%" : "55%",
+                        objectFit: webcamMode === "image" && webcamImagePath ? "cover" : "contain",
+                        animation: webcamMode === "image" && webcamImagePath ? "none" : "webcam-logo-gif 3.5s infinite ease-in-out"
                       }}
                     />
                     {/* Subtle camera icon overlay to reinforce it's a webcam */}
@@ -2358,6 +2363,53 @@ function SettingsWindow() {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+
+            {/* Webcam Mode */}
+            <div className="setting-row" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                {webcamMode === "image" && (
+                  <>
+
+                    <button
+                      className="premium-button secondary"
+                      style={{ padding: "6px 12px", fontSize: "0.8rem", gap: "6px" }}
+                      onClick={async () => {
+                        try {
+                          const path = await invoke<string | null>("select_image");
+                          if (path) {
+                            setWebcamImagePath(path);
+                            localStorage.setItem("webcamImagePath", path);
+                            window.dispatchEvent(new Event("storage"));
+                          }
+                        } catch (err) {
+                          console.error("Görsel seçilemedi", err);
+                        }
+                      }}
+                    >
+                      <FolderOpen size={14} />
+                      {(t as any).webcamImageSelect || "Görsel Seç"}
+                    </button>
+                  </>
+                )}
+                <select
+                  className="premium-input"
+                  value={webcamMode}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setWebcamMode(val);
+                    localStorage.setItem("webcamMode", val);
+                    window.dispatchEvent(new Event("storage"));
+                  }}
+                  style={{ width: "160px", minWidth: "160px", padding: "8px 12px" }}
+                >
+                  <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
+                  <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
+                </select>
               </div>
             </div>
 
