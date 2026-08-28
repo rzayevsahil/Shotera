@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Monitor, AppWindow, Video, X, Check, Square, Camera, Pause, Play, EyeOff } from "lucide-react";
+import { Monitor, AppWindow, Video, X, Check, Square, Camera, Pause, Play, EyeOff, Mic, MicOff } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
 import "./ScreenRecorderModal.css";
 
@@ -28,6 +28,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const useWebcamRef = useRef(false);
     const [isPaused, setIsPaused] = useState(false);
     const isPausedRef = useRef(false);
+    const [isMicMuted, setIsMicMuted] = useState(false);
+    const isMicMutedRef = useRef(false);
     const [showControls, setShowControls] = useState(() => localStorage.getItem("showRecordControls") !== "false");
 
     const t = translations[getLanguage()];
@@ -43,6 +45,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             useWebcamRef.current = savedWebcam;
             setIsPaused(false);
             isPausedRef.current = false;
+            setIsMicMuted(false);
+            isMicMutedRef.current = false;
             if (savedWebcam) {
                 invoke("toggle_webcam", { show: true }).catch(console.error);
             }
@@ -60,6 +64,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const handleStopRecordingRef = useRef<(() => Promise<void>) | null>(null);
     const handlePauseToggleRef = useRef<(() => Promise<void>) | null>(null);
     const handleWebcamToggleRef = useRef<(() => Promise<void>) | null>(null);
+    const handleMicToggleRef = useRef<(() => Promise<void>) | null>(null);
 
     useEffect(() => {
         import("@tauri-apps/api/event").then(({ listen }) => {
@@ -90,11 +95,18 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     await handleWebcamToggleRef.current();
                 }
             });
+            const unlistenMic = listen("toggle-mic-shortcut", async () => {
+                if (isRecordingRef.current && handleMicToggleRef.current) {
+                    await handleMicToggleRef.current();
+                }
+            });
+
             return () => {
                 unlistenOpened.then(f => f());
                 unlistenShortcut.then(f => f());
                 unlistenPause.then(f => f());
                 unlistenWebcam.then(f => f());
+                unlistenMic.then(f => f());
             };
         });
     }, [isOpen, onClose]);
@@ -205,6 +217,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     const lastPauseToggleRef = useRef<number>(0);
     const lastWebcamToggleRef = useRef<number>(0);
+    const lastMicToggleRef = useRef<number>(0);
 
     const handlePauseToggle = async () => {
         if (!isRecording) return;
@@ -242,11 +255,28 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         }
     };
 
+    const handleMicToggle = async () => {
+        if (!isRecording) return;
+        const now = Date.now();
+        if (now - lastMicToggleRef.current < 500) return;
+        lastMicToggleRef.current = now;
+
+        try {
+            const nextMuted = !isMicMutedRef.current;
+            await invoke("toggle_mic", { muted: nextMuted });
+            setIsMicMuted(nextMuted);
+            isMicMutedRef.current = nextMuted;
+        } catch (error) {
+            console.error("Failed to toggle mic:", error);
+        }
+    };
+
     useEffect(() => {
         handleStopRecordingRef.current = handleStopRecording;
         handlePauseToggleRef.current = handlePauseToggle;
         handleWebcamToggleRef.current = handleWebcamToggle;
-    }, [handleStopRecording, handlePauseToggle, handleWebcamToggle]);
+        handleMicToggleRef.current = handleMicToggle;
+    }, [handleStopRecording, handlePauseToggle, handleWebcamToggle, handleMicToggle]);
 
     if (!isOpen) return null;
 
@@ -266,6 +296,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
                         <Camera size={16} color={useWebcam ? "var(--accent-cyan)" : "#a1a1aa"} />
+                    </button>
+                    <button className="secondary-button" onClick={handleMicToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
+                        {isMicMuted ? <MicOff size={16} color="#ef4444" /> : <Mic size={16} color="var(--accent-cyan)" />}
                     </button>
                     <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
                         {isPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}

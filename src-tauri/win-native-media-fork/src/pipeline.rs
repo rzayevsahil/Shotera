@@ -78,6 +78,7 @@ pub struct Pipeline {
     is_paused: Arc<AtomicBool>,
     base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
     pause_start_qpc: Arc<std::sync::atomic::AtomicI64>,
+    is_mic_muted: Arc<AtomicBool>,
 }
 
 impl Pipeline {
@@ -96,6 +97,7 @@ impl Pipeline {
             is_paused: Arc::new(AtomicBool::new(false)),
             base_time_100ns: Arc::new(std::sync::atomic::AtomicI64::new(0)),
             pause_start_qpc: Arc::new(std::sync::atomic::AtomicI64::new(0)),
+            is_mic_muted: Arc::new(AtomicBool::new(false)),
         })
     }
 
@@ -120,9 +122,10 @@ impl Pipeline {
 
         let is_paused = self.is_paused.clone();
         let base_time_100ns = self.base_time_100ns.clone();
+        let is_mic_muted = self.is_mic_muted.clone();
 
         let worker = std::thread::spawn(move || {
-            run_worker(config, running, is_recording, is_streaming, is_paused, base_time_100ns, ready_tx)
+            run_worker(config, running, is_recording, is_streaming, is_paused, base_time_100ns, is_mic_muted, ready_tx)
         });
         self.worker = Some(worker);
 
@@ -190,6 +193,14 @@ impl Pipeline {
     pub fn is_paused(&self) -> bool {
         self.is_paused.load(Ordering::SeqCst)
     }
+
+    pub fn set_mic_muted(&self, muted: bool) {
+        self.is_mic_muted.store(muted, Ordering::SeqCst);
+    }
+
+    pub fn is_mic_muted(&self) -> bool {
+        self.is_mic_muted.load(Ordering::SeqCst)
+    }
 }
 
 impl Drop for Pipeline {
@@ -211,6 +222,7 @@ fn run_worker(
     is_streaming: Arc<AtomicBool>,
     is_paused: Arc<AtomicBool>,
     base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
+    is_mic_muted: Arc<AtomicBool>,
     ready_tx: std::sync::mpsc::Sender<Result<()>>,
 ) -> Result<()> {
     // [DIAGNOSTIC LOGGING]
@@ -282,9 +294,10 @@ fn run_worker(
         let audio_cfg = config.audio.clone();
         let bt = base_time_100ns.clone();
         let ip = is_paused.clone();
+        let imm = is_mic_muted.clone();
         is_recording.store(true, Ordering::SeqCst);
         Some(std::thread::spawn(move || -> Result<()> {
-            record_consumer(rec, vcfg, rparams, audio_cfg, record_rx, bt, ip)
+            record_consumer(rec, vcfg, rparams, audio_cfg, record_rx, bt, ip, imm)
         }))
     } else {
         None
@@ -298,12 +311,13 @@ fn run_worker(
         let audio_cfg = config.audio.clone();
         let bt = base_time_100ns.clone();
         let ip = is_paused.clone();
+        let imm = is_mic_muted.clone();
         is_streaming.store(true, Ordering::SeqCst);
         Some(std::thread::spawn(move || -> Result<()> {
             let rt = tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()?;
-            rt.block_on(stream_consumer(scfg, vcfg, sparams, audio_cfg, stream_rx, bt, ip))
+            rt.block_on(stream_consumer(scfg, vcfg, sparams, audio_cfg, stream_rx, bt, ip, imm))
         }))
     } else {
         None
@@ -369,6 +383,7 @@ fn record_consumer(
     record_rx: std::sync::mpsc::Receiver<EncodedSample>,
     base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
     is_paused: Arc<AtomicBool>,
+    is_mic_muted: Arc<AtomicBool>,
 ) -> Result<()> {
     // Set up audio captures + encoders + MP4 track descriptors. The
     // AudioCapture handles (`_loop_h`/`_mic_h`) must stay alive for the whole
@@ -430,12 +445,14 @@ fn record_consumer(
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
             Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
         }
-        drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut())?;
-        drain_audio(&mut recorder, mic_track, &mic_cap, mic_enc.as_mut())?;
+        let mic_muted = is_mic_muted.load(Ordering::Relaxed);
+        drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut(), false)?;
+        drain_audio(&mut recorder, mic_track, &mic_cap, mic_enc.as_mut(), mic_muted)?;
     }
     // Final audio drain.
-    drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut())?;
-    drain_audio(&mut recorder, mic_track, &mic_cap, mic_enc.as_mut())?;
+    let mic_muted = is_mic_muted.load(Ordering::Relaxed);
+    drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut(), false)?;
+    drain_audio(&mut recorder, mic_track, &mic_cap, mic_enc.as_mut(), mic_muted)?;
 
     recorder.finalize()?;
     Ok(())
@@ -447,11 +464,15 @@ fn drain_audio(
     track: Option<usize>,
     cap: &Option<std::sync::mpsc::Receiver<crate::AudioBuffer>>,
     enc: Option<&mut AacEncoder>,
+    muted: bool,
 ) -> Result<()> {
     let (Some(track), Some(rx), Some(enc)) = (track, cap.as_ref(), enc) else {
         return Ok(());
     };
-    while let Ok(buf) = rx.try_recv() {
+    while let Ok(mut buf) = rx.try_recv() {
+        if muted {
+            buf.data.fill(0);
+        }
         let mut out = Vec::new();
         enc.encode(&buf.data, buf.timestamp, &mut out)?;
         for f in &out {
@@ -471,6 +492,7 @@ async fn stream_consumer(
     stream_rx: std::sync::mpsc::Receiver<EncodedSample>,
     base_time_100ns: Arc<std::sync::atomic::AtomicI64>,
     is_paused: Arc<AtomicBool>,
+    is_mic_muted: Arc<AtomicBool>,
 ) -> Result<()> {
     let mut publisher = RtmpPublisher::connect(scfg, vcfg, params).await?;
 
@@ -519,7 +541,12 @@ async fn stream_consumer(
         if let (Some(lrx), Some(enc)) = (&loop_rx, mix_enc.as_mut()) {
             while let Ok(buf) = lrx.try_recv() {
                 let mixed = match mic_rx.as_ref().and_then(|r| r.try_recv().ok()) {
-                    Some(m) => mix::mix_pcm16(&buf.data, &m.data),
+                    Some(mut m) => {
+                        if is_mic_muted.load(Ordering::Relaxed) {
+                            m.data.fill(0);
+                        }
+                        mix::mix_pcm16(&buf.data, &m.data)
+                    }
                     None => buf.data.clone(),
                 };
                 let mut out = Vec::new();

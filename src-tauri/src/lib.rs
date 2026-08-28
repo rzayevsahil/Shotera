@@ -21,6 +21,7 @@ struct AppState {
     record_shortcut: Mutex<String>,
     pause_record_shortcut: Mutex<String>,
     webcam_shortcut: Mutex<String>,
+    mic_shortcut: Mutex<String>,
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
     recorder_stop_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
@@ -352,6 +353,21 @@ fn stop_native_recording(#[allow(unused_variables)] app_handle: AppHandle, state
     }
 
     Ok("Recording stopped and saved to MP4.".into())
+}
+
+#[tauri::command]
+async fn toggle_mic(state: State<'_, AppState>, muted: bool) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let pipe = {
+            let pipe_lock = state.recorder_pipeline.lock().unwrap();
+            pipe_lock.as_ref().cloned()
+        };
+        if let Some(pipeline_arc) = pipe {
+            pipeline_arc.lock().await.set_mic_muted(muted);
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -1084,6 +1100,7 @@ fn register_all_shortcuts_helper(
     record_shortcut_str: &str,
     pause_record_shortcut_str: &str,
     webcam_shortcut_str: &str,
+    mic_shortcut_str: &str,
 ) -> Result<(), String> {
     use std::str::FromStr;
     let _ = app_handle.global_shortcut().unregister_all();
@@ -1112,6 +1129,9 @@ fn register_all_shortcuts_helper(
     if let Ok(sc) = Shortcut::from_str(&webcam_shortcut_str.to_lowercase()) {
         let _ = app_handle.global_shortcut().register(sc);
     }
+    if let Ok(sc) = Shortcut::from_str(&mic_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
     Ok(())
 }
 
@@ -1127,6 +1147,7 @@ fn update_shortcuts(
     record_shortcut: Option<String>,
     pause_record_shortcut: Option<String>,
     webcam_shortcut: Option<String>,
+    mic_shortcut: Option<String>,
 ) -> Result<(), String> {
     let timer_str = timer_shortcut.unwrap_or_else(|| state.break_timer_shortcut.lock().unwrap().clone());
     let zoom_str = zoom_shortcut.unwrap_or_else(|| state.zoom_shortcut.lock().unwrap().clone());
@@ -1134,6 +1155,7 @@ fn update_shortcuts(
     let record_str = record_shortcut.unwrap_or_else(|| state.record_shortcut.lock().unwrap().clone());
     let pause_record_str = pause_record_shortcut.unwrap_or_else(|| state.pause_record_shortcut.lock().unwrap().clone());
     let webcam_str = webcam_shortcut.unwrap_or_else(|| state.webcam_shortcut.lock().unwrap().clone());
+    let mic_str = mic_shortcut.unwrap_or_else(|| state.mic_shortcut.lock().unwrap().clone());
 
     register_all_shortcuts_helper(
         &app_handle,
@@ -1145,6 +1167,7 @@ fn update_shortcuts(
         &record_str,
         &pause_record_str,
         &webcam_str,
+        &mic_str,
     )?;
 
     if let Ok(mut reg_state) = state.region_shortcut.lock() {
@@ -1170,6 +1193,9 @@ fn update_shortcuts(
     }
     if let Ok(mut webcam_state) = state.webcam_shortcut.lock() {
         *webcam_state = webcam_str.to_lowercase();
+    }
+    if let Ok(mut mic_state) = state.mic_shortcut.lock() {
+        *mic_state = mic_str.to_lowercase();
     }
 
     Ok(())
@@ -1684,6 +1710,7 @@ pub fn run() {
             record_shortcut: Mutex::new("ctrl+5".to_string()),
             pause_record_shortcut: Mutex::new("ctrl+6".to_string()),
             webcam_shortcut: Mutex::new("ctrl+7".to_string()),
+            mic_shortcut: Mutex::new("ctrl+8".to_string()),
             pinned_image: Mutex::new(None),
 
             show_notifications: Mutex::new(true),
@@ -1716,6 +1743,7 @@ pub fn run() {
                         let record_shortcut_str = state.record_shortcut.lock().unwrap().clone();
                         let pause_record_shortcut_str = state.pause_record_shortcut.lock().unwrap().clone();
                         let webcam_shortcut_str = state.webcam_shortcut.lock().unwrap().clone();
+                        let mic_shortcut_str = state.mic_shortcut.lock().unwrap().clone();
                         
                         if let Ok(pause_sc) = pause_record_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &pause_sc {
@@ -1727,6 +1755,13 @@ pub fn run() {
                         if let Ok(webcam_sc) = webcam_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &webcam_sc {
                                 let _ = app_handle_shortcut.emit("toggle-webcam-shortcut", ());
+                                return;
+                            }
+                        }
+
+                        if let Ok(mic_sc) = mic_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &mic_sc {
+                                let _ = app_handle_shortcut.emit("toggle-mic-shortcut", ());
                                 return;
                             }
                         }
@@ -1802,14 +1837,16 @@ pub fn run() {
 
             // Register Region, Fullscreen, Zoom, and Break Timer Shortcuts using default values on initial startup
             use std::str::FromStr;
-            let reg_shortcut = Shortcut::from_str("ctrl+shift+s").unwrap();
-            let fs_shortcut = Shortcut::from_str("ctrl+shift+f").unwrap();
-            let timer_shortcut = Shortcut::from_str("ctrl+3").unwrap();
-            let zoom_shortcut = Shortcut::from_str("ctrl+1").unwrap();
-            let live_zoom_shortcut = Shortcut::from_str("ctrl+4").unwrap();
-            let record_shortcut = Shortcut::from_str("ctrl+5").unwrap();
-            let pause_record_shortcut = Shortcut::from_str("ctrl+6").unwrap();
-            let webcam_shortcut = Shortcut::from_str("ctrl+7").unwrap();
+            let state = app.state::<AppState>();
+            let reg_shortcut = Shortcut::from_str(&state.region_shortcut.lock().unwrap()).unwrap();
+            let fs_shortcut = Shortcut::from_str(&state.fullscreen_shortcut.lock().unwrap()).unwrap();
+            let timer_shortcut = Shortcut::from_str(&state.break_timer_shortcut.lock().unwrap()).unwrap();
+            let zoom_shortcut = Shortcut::from_str(&state.zoom_shortcut.lock().unwrap()).unwrap();
+            let live_zoom_shortcut = Shortcut::from_str(&state.live_zoom_shortcut.lock().unwrap()).unwrap();
+            let record_shortcut = Shortcut::from_str(&state.record_shortcut.lock().unwrap()).unwrap();
+            let pause_record_shortcut = Shortcut::from_str(&state.pause_record_shortcut.lock().unwrap()).unwrap();
+            let webcam_shortcut = Shortcut::from_str(&state.webcam_shortcut.lock().unwrap()).unwrap();
+            let mic_shortcut = Shortcut::from_str(&state.mic_shortcut.lock().unwrap()).unwrap();
             
             let _ = app.global_shortcut().register(reg_shortcut);
             let _ = app.global_shortcut().register(fs_shortcut);
@@ -1819,6 +1856,7 @@ pub fn run() {
             let _ = app.global_shortcut().register(record_shortcut);
             let _ = app.global_shortcut().register(pause_record_shortcut);
             let _ = app.global_shortcut().register(webcam_shortcut);
+            let _ = app.global_shortcut().register(mic_shortcut);
 
             // 2. Setup System Tray with retry mechanism for Windows Fast Startup
             let create_tray = |app_ref: &tauri::App| -> Result<tauri::tray::TrayIcon, tauri::Error> {
@@ -1944,6 +1982,7 @@ pub fn run() {
             stop_native_recording,
             pause_native_recording,
             resume_native_recording,
+            toggle_mic,
             resize_recorder_window,
             hide_recorder_window,
             open_recorder_view,
