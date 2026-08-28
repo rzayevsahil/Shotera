@@ -206,8 +206,12 @@ export default function WebcamOverlay() {
         width: "100vw",
         height: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        gap: "8px",
+        padding: "10px",
+        boxSizing: "border-box",
         cursor: "move",
         userSelect: "none"
       }}
@@ -246,8 +250,10 @@ export default function WebcamOverlay() {
       </style>
       <div
         style={{
-          width: "calc(100% - 80px)",
-          height: "calc(100% - 80px)",
+          flex: "0 1 auto",
+          height: "calc(100vh - 80px)",
+          minHeight: 0,
+          aspectRatio: "1 / 1",
           borderRadius: "50%",
           padding: "3px",
           boxSizing: "border-box",
@@ -347,14 +353,13 @@ export default function WebcamOverlay() {
       </div>
       {webcamText.trim() && (
         <div style={{
-          position: "absolute",
-          bottom: "10px",
           background: "rgba(0,0,0,0.6)",
-          padding: "4px 12px",
+          padding: "2px 8px",
           borderRadius: "12px",
-          maxWidth: "calc(100% - 40px)",
+          maxWidth: "100%",
           display: "flex",
-          pointerEvents: "none"
+          pointerEvents: "none",
+          flexShrink: 0
         }}>
           <span className={`webcam-text-anim-${webcamTextAnimation}`} style={{
             fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
