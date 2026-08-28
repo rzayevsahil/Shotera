@@ -349,10 +349,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{isPaused ? 'Mola' : (t as any).modalRecording}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
+                    <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}>
                         <Camera size={16} color={useWebcam ? "var(--accent-cyan)" : "#a1a1aa"} />
                     </button>
-                    <button className="secondary-button" onClick={handleMicToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
+                    <button className="secondary-button" onClick={handleMicToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={!isMicMuted ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}>
                         {isMicMuted ? <MicOff size={16} color="#ef4444" /> : <Mic size={16} color="var(--accent-cyan)" />}
                     </button>
                     <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }}>
@@ -503,7 +503,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 emit("force_storage_sync").catch(console.error);
                                 invoke("toggle_webcam", { show: next }).catch(console.error);
                             }}
-                            title={(t as any).recordTooltipWebcam || "Kamerayı Göster/Gizle"}
+                            title={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
@@ -526,7 +526,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 window.dispatchEvent(new Event("storage"));
                                 emit("force_storage_sync").catch(console.error);
                             }}
-                            title={(t as any).recordMicLabel || "Mikrofonu Aç/Kapat"}
+                            title={!isMicMuted ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
                             style={{
                                 padding: '10px',
                                 borderRadius: '8px',
