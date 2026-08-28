@@ -208,6 +208,7 @@ function SettingsWindow() {
     return ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(current) ? "#ffffff" : current;
   });
   const [webcamTextFont, setWebcamTextFont] = useState<string>(() => localStorage.getItem("webcamTextFont") || "sans");
+  const [webcamTextSize, setWebcamTextSize] = useState<number>(() => Number(localStorage.getItem("webcamTextSize") || "11"));
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -360,11 +361,12 @@ function SettingsWindow() {
     localStorage.setItem("webcamText", webcamText);
     localStorage.setItem("webcamTextColor", webcamTextColor);
     localStorage.setItem("webcamTextFont", webcamTextFont);
+    localStorage.setItem("webcamTextSize", webcamTextSize.toString());
     localStorage.setItem("webcamMode", webcamMode);
     localStorage.setItem("webcamImagePath", webcamImagePath);
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont, webcamMode, webcamImagePath]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamMode, webcamImagePath]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -2347,7 +2349,7 @@ function SettingsWindow() {
                     <div style={{
                       color: webcamTextColor,
                       fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
-                      fontSize: "11px",
+                      fontSize: `${webcamTextSize}px`,
                       fontWeight: "bold",
                       background: "rgba(0,0,0,0.6)",
                       padding: "2px 8px",
@@ -2560,6 +2562,24 @@ function SettingsWindow() {
                 placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
                 searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
               />
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamTextSizeLabel || "Yazı Boyutu"}</span>
+                <span className="setting-desc">{(t as any).webcamTextSizeDesc || "Kamera altındaki metnin boyutunu ayarlayın."}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                <input
+                  type="range"
+                  min="8"
+                  max="24"
+                  value={webcamTextSize}
+                  onChange={(e) => setWebcamTextSize(Number(e.target.value))}
+                  style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                />
+                <span style={{ minWidth: "45px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{webcamTextSize} px</span>
+              </div>
             </div>
 
             <div className="setting-row">

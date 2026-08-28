@@ -18,6 +18,7 @@ export default function WebcamOverlay() {
   const [webcamText, setWebcamText] = useState(() => localStorage.getItem("webcamText") || "");
   const [webcamTextColor, setWebcamTextColor] = useState(() => localStorage.getItem("webcamTextColor") || "#ffffff");
   const [webcamTextFont, setWebcamTextFont] = useState(() => localStorage.getItem("webcamTextFont") || "sans");
+  const [webcamTextSize, setWebcamTextSize] = useState(() => Number(localStorage.getItem("webcamTextSize") || "11"));
   const [webcamMode, setWebcamMode] = useState(() => localStorage.getItem("webcamMode") || "camera");
   const [webcamImagePath, setWebcamImagePath] = useState(() => localStorage.getItem("webcamImagePath") || "");
 
@@ -29,6 +30,7 @@ export default function WebcamOverlay() {
       setWebcamText(localStorage.getItem("webcamText") || "");
       setWebcamTextColor(localStorage.getItem("webcamTextColor") || "#ffffff");
       setWebcamTextFont(localStorage.getItem("webcamTextFont") || "sans");
+      setWebcamTextSize(Number(localStorage.getItem("webcamTextSize") || "11"));
       setWebcamMode(localStorage.getItem("webcamMode") || "camera");
       setWebcamImagePath(localStorage.getItem("webcamImagePath") || "");
     };
@@ -301,7 +303,7 @@ export default function WebcamOverlay() {
           bottom: "10px",
           color: webcamTextColor,
           fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
-          fontSize: "14px",
+          fontSize: `${webcamTextSize}px`,
           fontWeight: "bold",
           background: "rgba(0,0,0,0.6)",
           padding: "4px 12px",
