@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -2921,8 +2921,8 @@ function SettingsWindow() {
             {/* Webcam Control Shortcuts */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div className="setting-info">
-                <span className="setting-label">{(t as any).webcamControlsTitle || "Kamera Kontrolleri"}</span>
-                <span className="setting-desc">{(t as any).webcamControlsDesc || "Ekran kaydı sırasında kamera penceresini yönetin."}</span>
+                <span className="setting-label">{(t as any).webcamControlsTitle || "Kayıt İçi Kontroller ve Kısayollar"}</span>
+                <span className="setting-desc">{(t as any).webcamControlsDesc || "Ekran kaydı sırasında kamera, mikrofon ve temel özellikleri yönetin."}</span>
               </div>
 
               <div className="responsive-shortcut-grid">
@@ -2954,6 +2954,39 @@ function SettingsWindow() {
                   </span>
                   <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
                     {formatShortcut(recordShortcut) || "Ctrl+5"}
+                  </kbd>
+                </div>
+
+                {/* 4. Pause/Resume Recording */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Play size={15} color="#eab308" />
+                    {(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}
+                  </span>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                    {formatShortcut(pauseRecordShortcut) || "Ctrl+6"}
+                  </kbd>
+                </div>
+
+                {/* 5. Toggle Webcam */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Camera size={15} color="var(--accent-cyan)" />
+                    {(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}
+                  </span>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                    {formatShortcut(webcamShortcut) || "Ctrl+7"}
+                  </kbd>
+                </div>
+
+                {/* 6. Toggle Mic */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                    <Mic size={15} color="var(--accent-cyan)" />
+                    {(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}
+                  </span>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                    {formatShortcut(micShortcut) || "Ctrl+8"}
                   </kbd>
                 </div>
               </div>
