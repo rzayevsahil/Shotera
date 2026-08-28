@@ -210,6 +210,7 @@ function SettingsWindow() {
   });
   const [webcamTextFont, setWebcamTextFont] = useState<string>(() => localStorage.getItem("webcamTextFont") || "sans");
   const [webcamTextSize, setWebcamTextSize] = useState<number>(() => Number(localStorage.getItem("webcamTextSize") || "11"));
+  const [webcamTextAnimation, setWebcamTextAnimation] = useState<string>(() => localStorage.getItem("webcamTextAnimation") || "solid");
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -363,12 +364,13 @@ function SettingsWindow() {
     localStorage.setItem("webcamTextColor", webcamTextColor);
     localStorage.setItem("webcamTextFont", webcamTextFont);
     localStorage.setItem("webcamTextSize", webcamTextSize.toString());
+    localStorage.setItem("webcamTextAnimation", webcamTextAnimation);
     localStorage.setItem("webcamMode", webcamMode);
     localStorage.setItem("webcamImagePath", webcamImagePath);
     localStorage.setItem("webcamBorderAnimation", webcamBorderAnimation);
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamMode, webcamImagePath, webcamBorderAnimation]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamMode, webcamImagePath, webcamBorderAnimation]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -2332,6 +2334,17 @@ function SettingsWindow() {
                       @keyframes spin-border { 100% { transform: rotate(360deg); } }
                       @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 5px ${webcamBorderColor}; } 50% { box-shadow: 0 0 20px ${webcamBorderColor}; } }
                       @keyframes breathe-border { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+                      
+                      .webcam-text-anim-solid { color: ${webcamTextColor}; }
+                      .webcam-text-anim-pulse { color: ${webcamTextColor}; animation: pulse-text 2s infinite ease-in-out; }
+                      .webcam-text-anim-breathe { color: ${webcamTextColor}; animation: breathe-border 3s infinite ease-in-out; }
+                      .webcam-text-anim-spin-rainbow { background: linear-gradient(90deg, red, yellow, lime, aqua, blue, magenta, red); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 3s linear infinite; }
+                      .webcam-text-anim-spin-ocean { background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0284c7, #0ea5e9); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 3s linear infinite; }
+                      .webcam-text-anim-spin-fire { background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #ef4444); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 2s linear infinite; }
+                      .webcam-text-anim-spin-cyber { background: linear-gradient(90deg, #ec4899, #a855f7, #06b6d4, #ec4899); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 2.5s linear infinite; }
+                      
+                      @keyframes text-gradient-spin { to { background-position: 200% center; } }
+                      @keyframes pulse-text { 0%, 100% { text-shadow: 0 0 2px ${webcamTextColor}; } 50% { text-shadow: 0 0 10px ${webcamTextColor}; } }
                     `}
                   </style>
                   <div style={{
@@ -2375,21 +2388,26 @@ function SettingsWindow() {
                   </div>
                   {webcamText.trim() && (
                     <div style={{
-                      color: webcamTextColor,
-                      fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
-                      fontSize: `${webcamTextSize}px`,
-                      fontWeight: "bold",
                       background: "rgba(0,0,0,0.6)",
                       padding: "2px 8px",
                       borderRadius: "12px",
-                      textShadow: "0 1px 3px rgba(0,0,0,0.8)",
                       maxWidth: "110px",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      textAlign: "center"
+                      display: "flex"
                     }}>
-                      {webcamText}
+                      <span className={`webcam-text-anim-${webcamTextAnimation}`} style={{
+                        fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
+                        fontSize: `${webcamTextSize}px`,
+                        fontWeight: "bold",
+                        textShadow: webcamTextAnimation.startsWith("spin-") ? "none" : (webcamTextAnimation === "pulse" ? undefined : "0 1px 3px rgba(0,0,0,0.8)"),
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        textAlign: "center",
+                        display: "block",
+                        width: "100%"
+                      }}>
+                        {webcamText}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -2754,6 +2772,31 @@ function SettingsWindow() {
                   }}
                 />
               </div>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).webcamTextStyleLabel || "Yazı Stili"}</span>
+                <span className="setting-desc">{(t as any).webcamTextStyleDesc || "Kamera yazısı için animasyon veya renk efekti seçin."}</span>
+              </div>
+              <select
+                className="premium-input"
+                value={webcamTextAnimation}
+                onChange={(e) => {
+                  setWebcamTextAnimation(e.target.value);
+                  localStorage.setItem("webcamTextAnimation", e.target.value);
+                  window.dispatchEvent(new Event("storage"));
+                }}
+                style={{ width: "240px" }}
+              >
+                <option value="solid">{(t as any).animSolid || "Sabit Renk"}</option>
+                <option value="pulse">{(t as any).animPulse || "Yanıp Sönen"}</option>
+                <option value="breathe">{(t as any).animBreathe || "Nefes Alan"}</option>
+                <option value="spin-rainbow">{(t as any).animSpinRainbow || "Gökkuşağı Dönüşü"}</option>
+                <option value="spin-ocean">{(t as any).animSpinOcean || "Okyanus Dalgası"}</option>
+                <option value="spin-fire">{(t as any).animSpinFire || "Ateş Çemberi"}</option>
+                <option value="spin-cyber">{(t as any).animSpinCyber || "Neon Siber"}</option>
+              </select>
             </div>
 
             {recordMic && (

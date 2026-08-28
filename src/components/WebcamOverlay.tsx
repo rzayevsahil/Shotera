@@ -19,6 +19,7 @@ export default function WebcamOverlay() {
   const [webcamTextColor, setWebcamTextColor] = useState(() => localStorage.getItem("webcamTextColor") || "#ffffff");
   const [webcamTextFont, setWebcamTextFont] = useState(() => localStorage.getItem("webcamTextFont") || "sans");
   const [webcamTextSize, setWebcamTextSize] = useState(() => Number(localStorage.getItem("webcamTextSize") || "11"));
+  const [webcamTextAnimation, setWebcamTextAnimation] = useState(() => localStorage.getItem("webcamTextAnimation") || "solid");
   const [webcamBorderAnimation, setWebcamBorderAnimation] = useState(() => localStorage.getItem("webcamBorderAnimation") || "solid");
   const [webcamMode, setWebcamMode] = useState(() => localStorage.getItem("webcamMode") || "camera");
   const [webcamImagePath, setWebcamImagePath] = useState(() => localStorage.getItem("webcamImagePath") || "");
@@ -32,6 +33,7 @@ export default function WebcamOverlay() {
       setWebcamTextColor(localStorage.getItem("webcamTextColor") || "#ffffff");
       setWebcamTextFont(localStorage.getItem("webcamTextFont") || "sans");
       setWebcamTextSize(Number(localStorage.getItem("webcamTextSize") || "11"));
+      setWebcamTextAnimation(localStorage.getItem("webcamTextAnimation") || "solid");
       setWebcamBorderAnimation(localStorage.getItem("webcamBorderAnimation") || "solid");
       setWebcamMode(localStorage.getItem("webcamMode") || "camera");
       setWebcamImagePath(localStorage.getItem("webcamImagePath") || "");
@@ -229,6 +231,17 @@ export default function WebcamOverlay() {
           @keyframes spin-border { 100% { transform: rotate(360deg); } }
           @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 10px ${borderColor}; } 50% { box-shadow: 0 0 30px ${borderColor}; } }
           @keyframes breathe-border { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+          
+          .webcam-text-anim-solid { color: ${webcamTextColor}; }
+          .webcam-text-anim-pulse { color: ${webcamTextColor}; animation: pulse-text 2s infinite ease-in-out; }
+          .webcam-text-anim-breathe { color: ${webcamTextColor}; animation: breathe-border 3s infinite ease-in-out; }
+          .webcam-text-anim-spin-rainbow { background: linear-gradient(90deg, red, yellow, lime, aqua, blue, magenta, red); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 3s linear infinite; }
+          .webcam-text-anim-spin-ocean { background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0284c7, #0ea5e9); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 3s linear infinite; }
+          .webcam-text-anim-spin-fire { background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #ef4444); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 2s linear infinite; }
+          .webcam-text-anim-spin-cyber { background: linear-gradient(90deg, #ec4899, #a855f7, #06b6d4, #ec4899); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: text-gradient-spin 2.5s linear infinite; }
+          
+          @keyframes text-gradient-spin { to { background-position: 200% center; } }
+          @keyframes pulse-text { 0%, 100% { text-shadow: 0 0 2px ${webcamTextColor}; } 50% { text-shadow: 0 0 10px ${webcamTextColor}; } }
         `}
       </style>
       <div
@@ -336,22 +349,27 @@ export default function WebcamOverlay() {
         <div style={{
           position: "absolute",
           bottom: "10px",
-          color: webcamTextColor,
-          fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
-          fontSize: `${webcamTextSize}px`,
-          fontWeight: "bold",
           background: "rgba(0,0,0,0.6)",
           padding: "4px 12px",
           borderRadius: "12px",
-          textShadow: "0 1px 3px rgba(0,0,0,0.8)",
           maxWidth: "calc(100% - 40px)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          pointerEvents: "none",
-          textAlign: "center"
+          display: "flex",
+          pointerEvents: "none"
         }}>
-          {webcamText}
+          <span className={`webcam-text-anim-${webcamTextAnimation}`} style={{
+            fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
+            fontSize: `${webcamTextSize}px`,
+            fontWeight: "bold",
+            textShadow: webcamTextAnimation.startsWith("spin-") ? "none" : (webcamTextAnimation === "pulse" ? undefined : "0 1px 3px rgba(0,0,0,0.8)"),
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            textAlign: "center",
+            display: "block",
+            width: "100%"
+          }}>
+            {webcamText}
+          </span>
         </div>
       )}
     </div>
