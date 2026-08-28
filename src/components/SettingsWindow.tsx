@@ -2370,20 +2370,20 @@ function SettingsWindow() {
                       position: "relative",
                       zIndex: 1
                     }}>
-                    <img
-                      src={webcamMode === "image" && webcamImagePath ? convertFileSrc(webcamImagePath) : logo}
-                      alt="Webcam Preview Animated"
-                      style={{
-                        width: webcamMode === "image" && webcamImagePath ? "100%" : "55%",
-                        height: webcamMode === "image" && webcamImagePath ? "100%" : "55%",
-                        objectFit: webcamMode === "image" && webcamImagePath ? "cover" : "contain",
-                        animation: webcamMode === "image" && webcamImagePath ? "none" : "webcam-logo-gif 3.5s infinite ease-in-out"
-                      }}
-                    />
-                    {/* Subtle camera icon overlay to reinforce it's a webcam */}
-                    <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
-                      <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
-                    </div>
+                      <img
+                        src={webcamMode === "image" && webcamImagePath ? convertFileSrc(webcamImagePath) : logo}
+                        alt="Webcam Preview Animated"
+                        style={{
+                          width: webcamMode === "image" && webcamImagePath ? "100%" : "55%",
+                          height: webcamMode === "image" && webcamImagePath ? "100%" : "55%",
+                          objectFit: webcamMode === "image" && webcamImagePath ? "cover" : "contain",
+                          animation: webcamMode === "image" && webcamImagePath ? "none" : "webcam-logo-gif 3.5s infinite ease-in-out"
+                        }}
+                      />
+                      {/* Subtle camera icon overlay to reinforce it's a webcam */}
+                      <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", borderRadius: "50%", padding: "4px", display: "flex" }}>
+                        <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
+                      </div>
                     </div>
                   </div>
                   {webcamText.trim() && (
@@ -2569,8 +2569,8 @@ function SettingsWindow() {
                   }}
                   placeholder="#38BDF8"
                   style={{
-                    width: "240px",
-                    padding: "10px 12px",
+                    width: "100px",
+                    padding: "8px 10px",
                     fontSize: "0.9rem",
                     fontFamily: "monospace",
                     textTransform: "uppercase",
@@ -2625,32 +2625,29 @@ function SettingsWindow() {
 
             <div className="setting-row">
               <div className="setting-info">
-                <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"}</span>
-                <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) seçin."}</span>
+                <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"} & {(t as any).webcamTextSizeLabel || "Boyut"}</span>
+                <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) ve boyutunu seçin."}</span>
               </div>
-              <FontSelect
-                value={webcamTextFont}
-                onChange={setWebcamTextFont}
-                placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
-                searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
-              />
-            </div>
-
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).webcamTextSizeLabel || "Yazı Boyutu"}</span>
-                <span className="setting-desc">{(t as any).webcamTextSizeDesc || "Kamera altındaki metnin boyutunu ayarlayın."}</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
-                <input
-                  type="range"
-                  min="8"
-                  max="24"
-                  value={webcamTextSize}
-                  onChange={(e) => setWebcamTextSize(Number(e.target.value))}
-                  style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
-                />
-                <span style={{ minWidth: "45px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{webcamTextSize} px</span>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center", minWidth: "240px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "130px" }}>
+                  <input
+                    type="range"
+                    min="8"
+                    max="24"
+                    value={webcamTextSize}
+                    onChange={(e) => setWebcamTextSize(Number(e.target.value))}
+                    style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer", maxWidth: "110px" }}
+                  />
+                  <span style={{ fontSize: "12px", textAlign: "right", fontWeight: 600, fontFamily: "monospace", minWidth: "10px" }}>{webcamTextSize}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: "120px" }}>
+                  <FontSelect
+                    value={webcamTextFont}
+                    onChange={setWebcamTextFont}
+                    placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
+                    searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
+                  />
+                </div>
               </div>
             </div>
 
@@ -2763,8 +2760,8 @@ function SettingsWindow() {
                   }}
                   placeholder="#FFFFFF"
                   style={{
-                    width: "240px",
-                    padding: "10px 12px",
+                    width: "100px",
+                    padding: "8px 10px",
                     fontSize: "0.9rem",
                     fontFamily: "monospace",
                     textTransform: "uppercase",
