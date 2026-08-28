@@ -284,8 +284,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     return (
         <div className={`recorder-modal-overlay ${isStandalone ? 'standalone' : ''}`}>
             <div className="recorder-modal">
-                <div className="recorder-modal-header">
-                    <h3>{(t as any).modalSelectSource}</h3>
+                <div className="recorder-modal-header" data-tauri-drag-region>
+                    <h3 data-tauri-drag-region>{(t as any).modalSelectSource}</h3>
                     <button className="close-btn" onClick={() => {
                         if (isStandalone) {
                             invoke("hide_recorder_window").catch(console.error);

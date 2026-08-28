@@ -38,7 +38,7 @@ struct CaptureSource {
 }
 
 #[tauri::command]
-fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
+async fn get_capture_sources() -> Result<Vec<CaptureSource>, String> {
     let mut sources = Vec::new();
     
     // Monitors
