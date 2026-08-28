@@ -32,8 +32,33 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const [isMicMuted, setIsMicMuted] = useState(false);
     const isMicMutedRef = useRef(false);
     const [showControls, setShowControls] = useState(() => localStorage.getItem("showRecordControls") !== "false");
+    const [recordingDuration, setRecordingDuration] = useState(0);
 
     const t = translations[getLanguage()];
+
+    useEffect(() => {
+        let interval: number | null = null;
+        if (isRecording && !isPaused) {
+            interval = window.setInterval(() => {
+                setRecordingDuration(prev => prev + 1);
+            }, 1000);
+        } else if (!isRecording) {
+            setRecordingDuration(0);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isRecording, isPaused]);
+
+    const formatDuration = (seconds: number) => {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        if (hrs > 0) {
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
 
     useEffect(() => {
         isRecordingRef.current = isRecording;
@@ -134,7 +159,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             setShowControls(savedShowControls);
         };
         window.addEventListener("storage", handleStorageChange);
-        
+
         const unlistenForceSync = listen("force_storage_sync", () => {
             // Small delay to ensure WebView2 localStorage cache is synced across windows
             setTimeout(() => {
@@ -196,17 +221,17 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     const handleStartRecording = async () => {
         if (!selectedId) return;
-        
+
         const fps = Number(localStorage.getItem("recordFps")) || 30;
         const recordAudio = localStorage.getItem("recordAudio") !== "false";
         // ALWAYS pass true so the mic track is created and can be unmuted mid-recording
         const recordMic = true;
         const videoSavePath = localStorage.getItem("videoSavePath") || "";
-        
+
         if (recordAudio) {
             startAudioKeepAlive();
         }
-        
+
         setIsRecording(true);
         try {
             console.log("Starting native recording for:", selectedId);
@@ -220,7 +245,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             }
 
             await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio, recordMic, videoSavePath });
-            
+
             // If the user selected to start with mic muted, apply it immediately
             if (isMicMuted) {
                 await invoke("toggle_mic", { muted: true }).catch(console.error);
@@ -269,7 +294,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         const now = Date.now();
         if (now - lastPauseToggleRef.current < 500) return;
         lastPauseToggleRef.current = now;
-        
+
         try {
             const nextPaused = !isPausedRef.current;
             if (nextPaused) {
@@ -289,13 +314,13 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         const now = Date.now();
         if (now - lastWebcamToggleRef.current < 500) return;
         lastWebcamToggleRef.current = now;
-        
+
         try {
             const nextWebcam = !useWebcamRef.current;
             await invoke("toggle_webcam", { show: nextWebcam });
             setUseWebcam(nextWebcam);
             useWebcamRef.current = nextWebcam;
-            
+
             // Sync with Settings window by updating localStorage
             localStorage.setItem("recordWebcam", nextWebcam.toString());
             window.dispatchEvent(new Event("storage"));
@@ -316,7 +341,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             await invoke("toggle_mic", { muted: nextMuted });
             setIsMicMuted(nextMuted);
             isMicMutedRef.current = nextMuted;
-            
+
             // Sync with Settings window by updating localStorage
             localStorage.setItem("recordMic", (!nextMuted).toString());
             window.dispatchEvent(new Event("storage"));
@@ -346,9 +371,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             }} data-tauri-drag-region>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
                     <div className="recording-indicator" style={{ width: '14px', height: '14px', minWidth: '14px', minHeight: '14px', borderRadius: '50%', margin: 0, flexShrink: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
-                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{isPaused ? 'Mola' : (t as any).modalRecording}</span>
+                    {isPaused && <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>Mola</span>}
+                    <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 500, letterSpacing: '1px' }}>{formatDuration(recordingDuration)}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     <button className="secondary-button" onClick={handleWebcamToggle} style={{ padding: '8px 10px', fontSize: '0.85rem' }} title={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}>
                         <Camera size={16} color={useWebcam ? "var(--accent-cyan)" : "#a1a1aa"} />
                     </button>
@@ -389,8 +415,11 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     {isRecording ? (
                         <div className="recording-active-state">
                             <div className="recording-indicator" style={{ background: isPaused ? 'gray' : 'red', animation: isPaused ? 'none' : 'pulse-recording 1s infinite' }}></div>
-                            <h2>{isPaused ? 'Mola' : (t as any).modalRecording}</h2>
-                            <p>{(t as any).modalHwAccel}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <h2 style={{ margin: 0 }}>{isPaused ? 'Mola' : (t as any).modalRecording}</h2>
+                                <span style={{ color: '#a1a1aa', fontSize: '1.4rem', fontFamily: 'monospace', fontWeight: 600, letterSpacing: '1px' }}>{formatDuration(recordingDuration)}</span>
+                            </div>
+                            <p style={{ marginTop: '8px' }}>{(t as any).modalHwAccel}</p>
                             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '15px' }}>
                                 <button className="secondary-button" onClick={handlePauseToggle} style={{ padding: '8px 20px' }}>
                                     {isPaused ? <><Play size={16} fill="currentColor" /> Devam Et</> : <><Pause size={16} fill="currentColor" /> Duraklat</>}
@@ -470,7 +499,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
                 {!isRecording && (
                     <div className="recorder-modal-footer" style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'flex-end' }}>
-                        <button 
+                        <button
                             className="secondary-button"
                             onClick={() => {
                                 const next = !showControls;
@@ -492,7 +521,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                         >
                             {showControls ? <Eye size={18} /> : <EyeOff size={18} />}
                         </button>
-                        <button 
+                        <button
                             className="secondary-button"
                             onClick={() => {
                                 const next = !useWebcam;
@@ -516,7 +545,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                         >
                             <Camera size={18} />
                         </button>
-                        <button 
+                        <button
                             className="secondary-button"
                             onClick={() => {
                                 const next = !isMicMuted;
