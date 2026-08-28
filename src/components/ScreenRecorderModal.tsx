@@ -120,18 +120,14 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             if (isMicMutedRef.current !== newMicMuted) {
                 setIsMicMuted(newMicMuted);
                 isMicMutedRef.current = newMicMuted;
-                if (isRecordingRef.current) {
-                    invoke("toggle_mic", { muted: newMicMuted }).catch(console.error);
-                }
+                invoke("toggle_mic", { muted: newMicMuted }).catch(console.error);
             }
 
             const savedWebcam = localStorage.getItem("recordWebcam") === "true";
             if (useWebcamRef.current !== savedWebcam) {
                 setUseWebcam(savedWebcam);
                 useWebcamRef.current = savedWebcam;
-                if (isRecordingRef.current) {
-                    invoke("toggle_webcam", { show: savedWebcam }).catch(console.error);
-                }
+                invoke("toggle_webcam", { show: savedWebcam }).catch(console.error);
             }
 
             const savedShowControls = localStorage.getItem("showRecordControls") !== "false";
@@ -140,7 +136,10 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         window.addEventListener("storage", handleStorageChange);
         
         const unlistenForceSync = listen("force_storage_sync", () => {
-            handleStorageChange();
+            // Small delay to ensure WebView2 localStorage cache is synced across windows
+            setTimeout(() => {
+                handleStorageChange();
+            }, 50);
         });
 
         return () => {
