@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -14,6 +14,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 import ScreenRecorderModal from "./ScreenRecorderModal";
+import FeatureTour from "./FeatureTour";
 type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
 const SYSTEM_FONTS = [
   "Arial", "Arial Black", "Bahnschrift", "Calibri", "Cambria", "Cambria Math",
@@ -138,9 +139,15 @@ function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
   const [lang, setLang] = useState<Language>(getLanguage);
   const [appVersion, setAppVersion] = useState("v0.1.0");
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   useEffect(() => {
     getVersion().then(v => setAppVersion(`v${v}`)).catch(() => { });
+    const tourCompleted = localStorage.getItem("shotera_tour_completed");
+    if (tourCompleted !== "true") {
+      const timer = setTimeout(() => setIsTourOpen(true), 600);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   // Settings state synced with localStorage
@@ -720,7 +727,7 @@ function SettingsWindow() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div>
-          <div className="brand" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px" }}>
+          <div className="brand" data-tour="brand-logo" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px" }}>
             <img src={logo} alt="Shotera Logo" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
             <span className="brand-name" style={{
               fontFamily: "var(--font-title)",
@@ -736,6 +743,7 @@ function SettingsWindow() {
           <nav className="nav-links">
             <div
               className={`nav-item ${activeTab === "general" ? "active" : ""}`}
+              data-tour="nav-general"
               onClick={() => setActiveTab("general")}
             >
               <Settings className="nav-icon" />
@@ -743,6 +751,7 @@ function SettingsWindow() {
             </div>
             <div
               className={`nav-item ${activeTab === "capture" ? "active" : ""}`}
+              data-tour="nav-capture"
               onClick={() => setActiveTab("capture")}
             >
               <Camera className="nav-icon" />
@@ -750,6 +759,7 @@ function SettingsWindow() {
             </div>
             <div
               className={`nav-item ${activeTab === "save" ? "active" : ""}`}
+              data-tour="nav-save"
               onClick={() => setActiveTab("save")}
             >
               <FolderOpen className="nav-icon" />
@@ -757,6 +767,7 @@ function SettingsWindow() {
             </div>
             <div
               className={`nav-item ${activeTab === "zoom" ? "active" : ""}`}
+              data-tour="nav-zoom"
               onClick={() => setActiveTab("zoom")}
             >
               <ZoomIn className="nav-icon" />
@@ -764,6 +775,7 @@ function SettingsWindow() {
             </div>
             <div
               className={`nav-item ${activeTab === "timer" ? "active" : ""}`}
+              data-tour="nav-timer"
               onClick={() => setActiveTab("timer")}
             >
               <Timer className="nav-icon" />
@@ -771,6 +783,7 @@ function SettingsWindow() {
             </div>
             <div
               className={`nav-item ${activeTab === "live_zoom" ? "active" : ""}`}
+              data-tour="nav-live_zoom"
               onClick={() => setActiveTab("live_zoom")}
             >
               <Video className="nav-icon" />
@@ -778,6 +791,7 @@ function SettingsWindow() {
             </div>
             <div
               className={`nav-item ${activeTab === "record" ? "active" : ""}`}
+              data-tour="nav-record"
               onClick={() => setActiveTab("record")}
             >
               <Play className="nav-icon" />
@@ -786,6 +800,7 @@ function SettingsWindow() {
 
             <div
               className={`nav-item ${activeTab === "about" ? "active" : ""}`}
+              data-tour="nav-about"
               onClick={() => setActiveTab("about")}
               style={{ position: "relative" }}
             >
@@ -852,7 +867,7 @@ function SettingsWindow() {
         {/* Tab contents */}
         {activeTab === "general" && (
           <div className="settings-card">
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-autostart">
               <div className="setting-info">
                 <span className="setting-label">{t.runAtStartup}</span>
                 <span className="setting-desc">{t.runAtStartupDesc}</span>
@@ -867,7 +882,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-start-in-tray">
               <div className="setting-info">
                 <span className="setting-label">{t.startInTray}</span>
                 <span className="setting-desc">{t.startInTrayDesc}</span>
@@ -882,7 +897,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-show-notifications">
               <div className="setting-info">
                 <span className="setting-label">{t.showNotifications}</span>
                 <span className="setting-desc">{t.showNotificationsDesc}</span>
@@ -897,7 +912,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-language">
               <div className="setting-info">
                 <span className="setting-label">{t.languageSetting}</span>
                 <span className="setting-desc">{t.languageSettingDesc}</span>
@@ -920,12 +935,27 @@ function SettingsWindow() {
               </select>
             </div>
 
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).startTourBtn || "Uygulama Turunu Başlat"}</span>
+                <span className="setting-desc">{(t as any).startTourDesc || "Shotera'nın ana özelliklerini interaktif adım adım tur ile keşfedin."}</span>
+              </div>
+              <button
+                className="premium-button secondary"
+                onClick={() => setIsTourOpen(true)}
+                style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
+              >
+                <Sparkles size={16} color="var(--accent-cyan)" />
+                <span>{(t as any).startTourBtn || "Turu Başlat"}</span>
+              </button>
+            </div>
+
           </div>
         )}
 
         {activeTab === "capture" && (
-          <div className="settings-card">
-            <div className="setting-row">
+          <div className="settings-card" data-tour="global-shortcut-card">
+            <div className="setting-row" data-tour="shortcut-region">
               <div className="setting-info">
                 <span className="setting-label">{t.globalShortcut}</span>
                 <span className="setting-desc">{t.globalShortcutDesc}</span>
@@ -959,7 +989,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-fullscreen">
               <div className="setting-info">
                 <span className="setting-label">{t.globalFullscreenShortcut}</span>
                 <span className="setting-desc">{t.globalFullscreenShortcutDesc}</span>
@@ -993,7 +1023,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-shutter">
               <div className="setting-info">
                 <span className="setting-label">{t.playShutterSound}</span>
                 <span className="setting-desc">{t.playShutterSoundDesc}</span>
@@ -1008,7 +1038,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-include-cursor">
               <div className="setting-info">
                 <span className="setting-label">{t.includeCursor}</span>
                 <span className="setting-desc">{t.includeCursorDesc}</span>
@@ -1023,7 +1053,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-blur-amount">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).blurAmountSetting}</span>
                 <span className="setting-desc">{(t as any).blurAmountDesc}</span>
@@ -1041,7 +1071,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
+            <div data-tour="setting-editor-shortcuts" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
               <div className="setting-info">
                 <span className="setting-label">{t.editorShortcuts}</span>
                 <span className="setting-desc">{t.editorShortcutsDesc}</span>
@@ -1102,7 +1132,7 @@ function SettingsWindow() {
 
         {activeTab === "save" && (
           <div className="settings-card">
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-save-folder">
               <div className="setting-info">
                 <span className="setting-label">{t.defaultSaveDir}</span>
                 <span className="setting-desc">{t.defaultSaveDirDesc}</span>
@@ -1156,7 +1186,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-video-save-folder">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).defaultVideoSaveDir || "Varsayılan Video Kayıt Dizini"}</span>
                 <span className="setting-desc">{(t as any).defaultVideoSaveDirDesc || "Ekran kayıtlarının (video) kaydedileceği klasör."}</span>
@@ -1210,7 +1240,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-format">
               <div className="setting-info">
                 <span className="setting-label">{t.fileFormat}</span>
                 <span className="setting-desc">{t.fileFormatDesc}</span>
@@ -1228,7 +1258,7 @@ function SettingsWindow() {
             </div>
 
             {fileFormat !== "PNG" && (
-              <div className="setting-row">
+              <div className="setting-row" data-tour="setting-image-quality">
                 <div className="setting-info">
                   <span className="setting-label">{t.imageQuality}</span>
                   <span className="setting-desc">{t.imageQualityDesc}</span>
@@ -1252,7 +1282,7 @@ function SettingsWindow() {
         {activeTab === "zoom" && (
           <div className="settings-card">
             {/* Screen Zoom Row */}
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-zoom">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).shortcutZoom}</span>
                 <span className="setting-desc">{(t as any).shortcutZoomDesc}</span>
@@ -1288,7 +1318,7 @@ function SettingsWindow() {
             </div>
 
             {/* Quick Draw Shortcuts Card */}
-            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
+            <div className="setting-row" data-tour="setting-zoom-draw" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).drawModeShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).drawModeShortcutsDesc}</span>
@@ -1393,7 +1423,7 @@ function SettingsWindow() {
             </div>
 
             {/* Zoom Navigation & Exit Shortcuts Card */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
+            <div data-tour="setting-zoom-nav" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).zoomNavShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).zoomNavShortcutsDesc}</span>
@@ -1455,7 +1485,7 @@ function SettingsWindow() {
         {activeTab === "live_zoom" && (
           <div className="settings-card">
             {/* Live Screen Zoom Row */}
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-live-zoom">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).shortcutLiveZoom || "Canlı Zoom Kısayolu"}</span>
                 <span className="setting-desc">{(t as any).shortcutLiveZoomDesc || "Ekranı canlı takip eden yüksek kaliteli büyüteç modunu başlatan kısayol."}</span>
@@ -1491,7 +1521,7 @@ function SettingsWindow() {
             </div>
 
             {/* Live Zoom Navigation & Exit Shortcuts Card */}
-            <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start" }}>
+            <div className="setting-row" data-tour="setting-live-zoom-nav" style={{ flexDirection: "column", alignItems: "flex-start" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).liveZoomNavShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).liveZoomNavShortcutsDesc}</span>
@@ -1522,7 +1552,7 @@ function SettingsWindow() {
                     <LogOut size={15} color="#f87171" />
                     {(t as any).liveZoomExitLabel || "Çıkış"}
                   </span>
-                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{formatShortcut(liveZoomShortcut)}</kbd>
+                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{formatShortcut(liveZoomShortcut)}</kbd>
                 </div>
               </div>
             </div>
@@ -1532,7 +1562,7 @@ function SettingsWindow() {
         {activeTab === "timer" && (
           <div className="settings-card">
             {/* Break Timer Row */}
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-timer">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).shortcutBreakTimer}</span>
                 <span className="setting-desc">{(t as any).shortcutBreakTimerDesc}</span>
@@ -1568,7 +1598,7 @@ function SettingsWindow() {
             </div>
 
             {/* Default Break Duration Row */}
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-timer-duration">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).timerDefaultDuration}</span>
                 <span className="setting-desc">{(t as any).timerDefaultDurationDesc}</span>
@@ -1597,7 +1627,7 @@ function SettingsWindow() {
             </div>
 
             {/* Count Direction Row */}
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-timer-direction">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).timerCountDirection}</span>
                 <span className="setting-desc">{(t as any).timerCountDirectionDesc}</span>
@@ -1619,7 +1649,7 @@ function SettingsWindow() {
             </div>
 
             {/* Theme & Ring Color Selection Section */}
-            <div>
+            <div data-tour="setting-timer-theme">
               <div className="setting-info" style={{ marginBottom: "14px" }}>
                 <span className="setting-label">{(t as any).timerThemeTitle}</span>
                 <span className="setting-desc">{(t as any).timerThemeDesc}</span>
@@ -2086,7 +2116,7 @@ function SettingsWindow() {
             </div>
 
             {/* Break Timer Quick Shortcuts Card */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px", marginTop: "8px" }}>
+            <div data-tour="setting-timer-shortcuts" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px", marginTop: "8px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).timerShortcutsTitle}</span>
                 <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
@@ -2156,7 +2186,7 @@ function SettingsWindow() {
 
         {activeTab === "record" && (
           <div className="settings-card">
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-record">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).recordNativeTitle}</span>
                 <span className="setting-desc">{(t as any).recordNativeDesc}</span>
@@ -2191,7 +2221,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-pause-record">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}</span>
                 <span className="setting-desc">{(t as any).shortcutPauseRecordDesc || "Aktif ekran kaydını duraklatmak veya devam ettirmek için kısayol."}</span>
@@ -2218,7 +2248,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-webcam">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}</span>
                 <span className="setting-desc">{(t as any).shortcutWebcamDesc || "Kayıt sırasında kameranızı açıp kapatmak için kısayol."}</span>
@@ -2245,7 +2275,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="shortcut-mic">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}</span>
                 <span className="setting-desc">{(t as any).shortcutMicDesc || "Kayıt sırasında mikrofonunuzu açıp kapatmak için kısayol."}</span>
@@ -2273,7 +2303,7 @@ function SettingsWindow() {
             </div>
 
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-record-fps">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).recordFpsLabel || "Kare Hızı (FPS)"}</span>
                 <span className="setting-desc">{(t as any).recordFpsDesc || "Akıcılık ve performans dengesini ayarlayın."}</span>
@@ -2293,7 +2323,7 @@ function SettingsWindow() {
               </select>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-record-audio">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
                 <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
@@ -2312,7 +2342,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-record-mic">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).recordMicLabel || "Mikrofonu Kaydet"}</span>
                 <span className="setting-desc">{(t as any).recordMicDesc || "Kendi sesinizi (mikrofon) video kaydına dahil edin."}</span>
@@ -2333,7 +2363,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-record-webcam">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
                 <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
@@ -2354,7 +2384,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-record-controls">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).showRecordControlsLabel || "Kayıt Kontrolcüsünü Göster"}</span>
                 <span className="setting-desc">{(t as any).showRecordControlsDesc || "Kayıt sırasında duraklatma ve durdurma çubuğunu ekranda gösterin."}</span>
@@ -2375,7 +2405,7 @@ function SettingsWindow() {
               </label>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-webcam-permission">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
                 <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
@@ -2400,7 +2430,7 @@ function SettingsWindow() {
             </div>
 
             {/* Webcam Border Color Preview */}
-            <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
+            <div className="setting-row" data-tour="setting-webcam-preview" style={{ borderBottom: "none", paddingBottom: "12px" }}>
               <div className="setting-info" style={{ flex: 1 }}>
                 <span className="setting-label">{(t as any).webcamPreviewLabel || "Önizleme"}</span>
               </div>
@@ -2513,7 +2543,7 @@ function SettingsWindow() {
             </div>
 
             {/* Webcam Mode */}
-            <div className="setting-row" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
+            <div className="setting-row" data-tour="setting-webcam-mode" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
               </div>
@@ -2560,7 +2590,7 @@ function SettingsWindow() {
             </div>
 
             {/* Webcam Border Color Preset Row */}
-            <div className="setting-row" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
+            <div className="setting-row" data-tour="setting-webcam-border-color" style={{ borderTop: "none", paddingTop: 0, paddingBottom: "12px", marginTop: "-6px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamBorderColorLabel || "Kamera Çerçeve Rengi"}</span>
               </div>
@@ -2679,7 +2709,7 @@ function SettingsWindow() {
             </div>
 
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-webcam-style">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamBorderStyleLabel || "Çerçeve Stili"}</span>
                 <span className="setting-desc">{(t as any).webcamBorderStyleDesc || "Kamera çerçevesi için animasyon veya renk efekti seçin."}</span>
@@ -2705,7 +2735,7 @@ function SettingsWindow() {
             </div>
 
             {/* Webcam Text Settings */}
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-webcam-text">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamTextLabel || "Kamera Altı Yazısı"}</span>
                 <span className="setting-desc">{(t as any).webcamTextDesc || "Kameranın altında görünecek özel bir metin ekleyin (Kanal adı vb.)."}</span>
@@ -2721,7 +2751,7 @@ function SettingsWindow() {
               />
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-webcam-font-size">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"} & {(t as any).webcamTextSizeLabel || "Boyut"}</span>
                 <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) ve boyutunu seçin."}</span>
@@ -2749,7 +2779,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-webcam-text-color">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamTextColorOnlyLabel || "Yazı Rengi"}</span>
                 <span className="setting-desc">{(t as any).webcamTextColorOnlyDesc || "Kamera yazısının rengini belirleyin."}</span>
@@ -2869,7 +2899,7 @@ function SettingsWindow() {
               </div>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-row" data-tour="setting-webcam-text-style">
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamTextStyleLabel || "Yazı Stili"}</span>
                 <span className="setting-desc">{(t as any).webcamTextStyleDesc || "Kamera yazısı için animasyon veya renk efekti seçin."}</span>
@@ -2919,7 +2949,7 @@ function SettingsWindow() {
             )}
 
             {/* Webcam Control Shortcuts */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div data-tour="setting-record-shortcuts-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div className="setting-info">
                 <span className="setting-label">{(t as any).webcamControlsTitle || "Kayıt İçi Kontroller ve Kısayollar"}</span>
                 <span className="setting-desc">{(t as any).webcamControlsDesc || "Ekran kaydı sırasında kamera, mikrofon ve temel özellikleri yönetin."}</span>
@@ -2998,7 +3028,7 @@ function SettingsWindow() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Shotera Info Card */}
-            <div className="settings-card" style={{ gap: "20px" }}>
+            <div className="settings-card" data-tour="setting-about-info" style={{ gap: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
                   <img src={logo} alt="Shotera Logo" style={{ width: "60px", height: "60px", objectFit: "contain" }} />
@@ -3026,7 +3056,9 @@ function SettingsWindow() {
               </p>
 
               {/* Updater Section */}
-              <div style={{
+              <div
+                data-tour="setting-update-check"
+                style={{
                 marginTop: "12px",
                 paddingTop: "16px",
                 borderTop: "1px solid rgba(255,255,255,0.06)",
@@ -3136,7 +3168,7 @@ function SettingsWindow() {
             </div>
 
             {/* Developer Card */}
-            <div className="settings-card" style={{
+            <div className="settings-card" data-tour="setting-developer-info" style={{
               background: "linear-gradient(135deg, rgba(31, 40, 51, 0.6) 0%, rgba(20, 26, 33, 0.8) 100%)",
               border: "1px solid rgba(0, 242, 254, 0.15)",
               display: "flex",
@@ -3317,6 +3349,12 @@ function SettingsWindow() {
           </button>
         </div>
       )}
+
+      <FeatureTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onSelectTab={(tab) => setActiveTab(tab as any)}
+      />
     </div>
   );
 }
