@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles, Upload, Music, Trash2 } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles, Upload, Music, Trash2, Bell, FileAudio } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -2181,6 +2181,9 @@ function SettingsWindow() {
                         playTimerSound(lastPreset);
                       }}
                       style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
                         padding: "6px 14px",
                         fontSize: "0.85rem",
                         fontWeight: 600,
@@ -2193,7 +2196,8 @@ function SettingsWindow() {
                         boxShadow: timerSoundSource === "preset" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
                       }}
                     >
-                      🔔 {(t as any).timerSoundSourcePreset || "Hazır Melodiler"}
+                      <Bell size={15} color={timerSoundSource === "preset" ? "#090d16" : "#38bdf8"} />
+                      {(t as any).timerSoundSourcePreset || "Hazır Melodiler"}
                     </button>
                     <button
                       onClick={() => {
@@ -2208,6 +2212,9 @@ function SettingsWindow() {
                         playTimerSound("custom");
                       }}
                       style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
                         padding: "6px 14px",
                         fontSize: "0.85rem",
                         fontWeight: 600,
@@ -2220,7 +2227,8 @@ function SettingsWindow() {
                         boxShadow: timerSoundSource === "custom" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
                       }}
                     >
-                      📁 {(t as any).timerSoundSourceCustom || "Özel Ses Dosyası"}
+                      <FileAudio size={15} color={timerSoundSource === "custom" ? "#090d16" : "#38bdf8"} />
+                      {(t as any).timerSoundSourceCustom || "Özel Ses Dosyası"}
                     </button>
                   </div>
                 </div>
