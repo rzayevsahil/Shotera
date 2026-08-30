@@ -39,6 +39,36 @@ export default function LiveZoomCanvas() {
     }
   };
 
+  const animRef = useRef<number | null>(null);
+
+  const startZoomAnimation = (cx: number, cy: number, img: HTMLImageElement) => {
+    setPanPos({ x: cx, y: cy });
+    setImgElement(img);
+    setZoomLevel(1.0);
+
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+
+    const startTime = performance.now();
+    const duration = 250; // 220ms smooth ease-out transition
+    const startZoom = 1.0;
+    const targetZoom = 2.0;
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentZoom = startZoom + (targetZoom - startZoom) * easeOut;
+
+      setZoomLevel(Number(currentZoom.toFixed(3)));
+
+      if (progress < 1) {
+        animRef.current = requestAnimationFrame(step);
+      }
+    };
+
+    animRef.current = requestAnimationFrame(step);
+  };
+
   // Load screenshot on mount & listen for live-zoom-captured event
   useEffect(() => {
     const fetchScreenshot = async (cx = 0.5, cy = 0.5) => {
@@ -49,8 +79,7 @@ export default function LiveZoomCanvas() {
         const img = new Image();
         img.src = src;
         img.onload = () => {
-          setImgElement(img);
-          setPanPos({ x: cx, y: cy });
+          startZoomAnimation(cx, cy, img);
         };
       } catch (e) {
         console.error("Failed to load screenshot for Live Zoom Canvas:", e);
@@ -67,6 +96,7 @@ export default function LiveZoomCanvas() {
 
     return () => {
       unlisten.then((fn) => fn());
+      if (animRef.current) cancelAnimationFrame(animRef.current);
     };
   }, []);
 

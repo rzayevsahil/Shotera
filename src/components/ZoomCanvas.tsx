@@ -162,7 +162,7 @@ export default function ZoomCanvas() {
       if (animId) cancelAnimationFrame(animId);
 
       const startTime = performance.now();
-      const duration = 220; // 220ms smooth ease-out transition
+      const duration = 250; // 220ms smooth ease-out transition
       const startZoom = 1.0;
       const targetZoom = 2.0;
 

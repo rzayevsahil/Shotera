@@ -1562,8 +1562,23 @@ mod live_zoom {
                 if w > 0 && h > 0 { (w as f32, h as f32) } else { (1920.0, 1080.0) }
             };
 
+            let start_time = std::time::Instant::now();
+            let anim_duration = Duration::from_millis(250);
+            let start_zoom = 1.0f32;
+            let target_zoom = 2.0f32;
+            let mut last_mag = target_zoom;
+
             while LIVE_ZOOM_ACTIVE.load(Ordering::SeqCst) {
-                let mag = f32::from_bits(ZOOM_LEVEL_BITS.load(Ordering::SeqCst));
+                let elapsed = start_time.elapsed();
+                let mag = if elapsed < anim_duration {
+                    let progress = (elapsed.as_secs_f32() / anim_duration.as_secs_f32()).clamp(0.0, 1.0);
+                    let ease_out = 1.0 - (1.0 - progress).powi(3);
+                    start_zoom + (target_zoom - start_zoom) * ease_out
+                } else {
+                    f32::from_bits(ZOOM_LEVEL_BITS.load(Ordering::SeqCst))
+                };
+                last_mag = mag;
+
                 let mut pt = POINT { x: 0, y: 0 };
                 unsafe {
                     GetPhysicalCursorPos(&mut pt);
@@ -1584,6 +1599,37 @@ mod live_zoom {
                 }
 
                 thread::sleep(Duration::from_millis(16)); // ~60 FPS smooth real-time live desktop update
+            }
+
+            // Smooth exit animation back to 1.0x magnification on exit
+            let exit_start = std::time::Instant::now();
+            let exit_duration = Duration::from_millis(150);
+            let exit_start_mag = last_mag;
+
+            while exit_start.elapsed() < exit_duration {
+                let progress = (exit_start.elapsed().as_secs_f32() / exit_duration.as_secs_f32()).clamp(0.0, 1.0);
+                let ease_out = 1.0 - (1.0 - progress).powi(2);
+                let mag = exit_start_mag + (1.0 - exit_start_mag) * ease_out;
+
+                let mut pt = POINT { x: 0, y: 0 };
+                unsafe {
+                    GetPhysicalCursorPos(&mut pt);
+                }
+
+                let view_w = screen_w / mag;
+                let view_h = screen_h / mag;
+
+                let max_x = screen_w - view_w;
+                let max_y = screen_h - view_h;
+
+                let x_offset = (pt.x as f32 - view_w / 2.0).clamp(0.0, max_x).round() as i32;
+                let y_offset = (pt.y as f32 - view_h / 2.0).clamp(0.0, max_y).round() as i32;
+
+                unsafe {
+                    MagSetFullscreenTransform(mag, x_offset, y_offset);
+                }
+
+                thread::sleep(Duration::from_millis(16));
             }
 
             unsafe {
