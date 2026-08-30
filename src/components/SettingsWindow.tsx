@@ -1847,111 +1847,181 @@ function SettingsWindow() {
                 <span className="setting-desc">{(t as any).timerThemeDesc}</span>
               </div>
 
-              {/* Live Preview Box */}
+              {/* Live Preview Box: Computer Monitor Simulation */}
               <div
                 style={{
                   width: "100%",
-                  height: "170px",
-                  borderRadius: "14px",
-                  border: "1px solid var(--border-color)",
-                  position: "relative",
-                  overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
+                  padding: "10px 0",
                   marginBottom: "20px",
-                  background:
-                    timerBgMode === "image" && timerBgCustomImage
-                      ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
-                      : timerBgMode === "desktop"
-                      ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
-                      : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
-                      ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
-                      : timerBgStyle === "oled-black"
-                        ? "#000000"
-                        : timerBgStyle === "frosted-dark"
-                          ? "rgba(15, 23, 42, 0.95)"
-                          : timerBgStyle === "pomodoro-red"
-                            ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-                            : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`,
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
+                  position: "relative"
                 }}
               >
-                {/* Live Preview Badge */}
-                <span
+                {/* Monitor Screen Frame */}
+                <div
                   style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "14px",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    color: "rgba(255, 255, 255, 0.4)",
-                    background: "rgba(0, 0, 0, 0.3)",
-                    padding: "3px 8px",
-                    borderRadius: "4px",
-                    border: "1px solid rgba(255, 255, 255, 0.08)"
+                    width: "100%",
+                    maxWidth: "380px",
+                    height: "210px",
+                    background: "#090d16",
+                    border: "3px solid #334155",
+                    borderRadius: "10px 10px 4px 4px",
+                    position: "relative",
+                    overflow: "hidden",
+                    boxShadow: "0 14px 36px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.9)",
+                    display: "flex",
+                    flexDirection: "column"
                   }}
                 >
-                  {(t as any).timerLivePreview || "Canlı Önizleme"}
-                </span>
-
-                {/* Mini Circle SVG */}
-                <div style={{ position: "relative", width: "120px", height: "120px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="120" height="120" style={{ transform: "rotate(-90deg)" }}>
-                    <circle cx="60" cy="60" r="48" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="6" fill="transparent" />
-                    <circle
-                      cx="60"
-                      cy="60"
-                      r="48"
-                      stroke={timerRingColor}
-                      strokeWidth="6"
-                      fill="transparent"
-                      strokeDasharray="301"
-                      strokeDashoffset="75"
-                      strokeLinecap="round"
-                      style={{ transition: "stroke 0.3s ease" }}
-                    />
-                  </svg>
-                  <span
+                  {/* Monitor Header / Window Control Dots Bar */}
+                  <div
                     style={{
-                      position: "absolute",
-                      fontSize: "24px",
-                      fontWeight:
-                        timerFontStyle === "segoe-light"
-                          ? 300
-                          : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
-                            ? 700
-                            : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
-                              ? 400
-                              : 800,
-                      color: "#ffffff",
-                      fontFamily:
-                        timerFontStyle === "heading"
-                          ? "'Outfit', sans-serif"
-                          : timerFontStyle === "mono"
-                            ? "monospace"
-                            : timerFontStyle === "segoe-light"
-                              ? "'Segoe UI Light', 'Segoe UI', sans-serif"
-                              : timerFontStyle === "orbitron"
-                                ? "'Orbitron', sans-serif"
-                                : timerFontStyle === "chakra"
-                                  ? "'Chakra Petch', sans-serif"
-                                  : timerFontStyle === "share-tech"
-                                    ? "'Share Tech Mono', monospace"
-                                    : timerFontStyle === "rajdhani"
-                                      ? "'Rajdhani', sans-serif"
-                                      : timerFontStyle === "dseg"
-                                        ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
-                                        : "'Inter', sans-serif",
-                      textShadow: `0 0 16px ${timerRingColor}80`
+                      height: "22px",
+                      background: "rgba(255, 255, 255, 0.04)",
+                      borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "0 10px",
+                      gap: "6px",
+                      zIndex: 6
                     }}
                   >
-                    14:57
-                  </span>
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444" }} />
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#eab308" }} />
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
+
+                    {/* Live Preview Badge */}
+                    <span
+                      style={{
+                        fontSize: "0.62rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "1px",
+                        color: "rgba(255, 255, 255, 0.5)",
+                        background: "rgba(0, 0, 0, 0.4)",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        marginLeft: "8px",
+                        border: "1px solid rgba(255, 255, 255, 0.08)"
+                      }}
+                    >
+                      {(t as any).timerLivePreview || "Canlı Önizleme"}
+                    </span>
+
+                    <span style={{ fontSize: "0.65rem", color: "#38bdf8", marginLeft: "auto", fontWeight: 700, letterSpacing: "0.5px" }}>
+                      Shotera
+                    </span>
+                  </div>
+
+                  {/* Desktop Wallpaper Display Area */}
+                  <div
+                    style={{
+                      flex: 1,
+                      position: "relative",
+                      overflow: "hidden",
+                      background:
+                        timerBgMode === "image" && timerBgCustomImage
+                          ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
+                          : timerBgMode === "desktop"
+                          ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
+                          : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
+                          ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
+                          : timerBgStyle === "oled-black"
+                            ? "#000000"
+                            : timerBgStyle === "frosted-dark"
+                              ? "rgba(15, 23, 42, 0.95)"
+                              : timerBgStyle === "pomodoro-red"
+                                ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+                                : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`
+                    }}
+                  >
+                    {/* Background Mesh Dots Grid */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px)",
+                        backgroundSize: "14px 14px",
+                        opacity: timerBgMode === "color" ? 0.6 : 0.2,
+                        pointerEvents: "none"
+                      }}
+                    />
+
+                    {/* Live Moving Mini Break Timer Ring & Clock Display */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        width: "52px",
+                        height: "52px",
+                        borderRadius: "50%",
+                        background: "rgba(15, 23, 42, 0.85)",
+                        border: `2px solid ${timerRingColor || "#38bdf8"}`,
+                        boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "0.75rem",
+                        fontWeight:
+                          timerFontStyle === "segoe-light"
+                            ? 300
+                            : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
+                              ? 700
+                              : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
+                                ? 400
+                                : 800,
+                        color: "#ffffff",
+                        fontFamily:
+                          timerFontStyle === "heading"
+                            ? "'Outfit', sans-serif"
+                            : timerFontStyle === "mono"
+                              ? "monospace"
+                              : timerFontStyle === "segoe-light"
+                                ? "'Segoe UI Light', 'Segoe UI', sans-serif"
+                                : timerFontStyle === "orbitron"
+                                  ? "'Orbitron', sans-serif"
+                                  : timerFontStyle === "chakra"
+                                    ? "'Chakra Petch', sans-serif"
+                                    : timerFontStyle === "share-tech"
+                                      ? "'Share Tech Mono', monospace"
+                                      : timerFontStyle === "rajdhani"
+                                        ? "'Rajdhani', sans-serif"
+                                        : timerFontStyle === "dseg"
+                                          ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
+                                          : "'Inter', sans-serif",
+                        transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                        backdropFilter: "blur(6px)",
+                        zIndex: 5,
+                        margin: "6px",
+                        textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
+                        ...(timerPosition === "top-left" ? { top: "6px", left: "6px" } :
+                          timerPosition === "top-center" ? { top: "6px", left: "50%", transform: "translateX(-50%)" } :
+                            timerPosition === "top-right" ? { top: "6px", right: "6px" } :
+                              timerPosition === "center-left" ? { top: "50%", left: "6px", transform: "translateY(-50%)" } :
+                                timerPosition === "center-right" ? { top: "50%", right: "6px", transform: "translateY(-50%)" } :
+                                  timerPosition === "bottom-left" ? { bottom: "6px", left: "6px" } :
+                                    timerPosition === "bottom-center" ? { bottom: "6px", left: "50%", transform: "translateX(-50%)" } :
+                                      timerPosition === "bottom-right" ? { bottom: "6px", right: "6px" } :
+                                        { top: "50%", left: "50%", transform: "translate(-50%, -50%)" })
+                      }}
+                    >
+                      10:00
+                    </div>
+                  </div>
+
+                  {/* Monitor Bottom Bezel with Power Indicator LED */}
+                  <div style={{ height: "10px", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                    <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#38bdf8", boxShadow: "0 0 6px #38bdf8", position: "absolute", right: "10px" }} />
+                  </div>
                 </div>
+
+                {/* Monitor Stand Neck */}
+                <div style={{ width: "32px", height: "10px", background: "linear-gradient(to bottom, #334155, #1e293b)", borderLeft: "1px solid rgba(255, 255, 255, 0.1)", borderRight: "1px solid rgba(255, 255, 255, 0.1)" }} />
+
+                {/* Monitor Stand Base */}
+                <div style={{ width: "90px", height: "5px", background: "linear-gradient(to right, #1e293b, #475569, #1e293b)", borderRadius: "3px 3px 1px 1px", boxShadow: "0 4px 10px rgba(0,0,0,0.5)" }} />
               </div>
 
               {/* Ring Color Preset Row */}
@@ -2586,172 +2656,66 @@ function SettingsWindow() {
                     </span>
                   </div>
 
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "28px",
-                    width: "100%",
-                    marginTop: "2px"
-                  }}>
-                    {/* Left: 3x3 Grid Selector Box */}
-                    <div style={{ flex: "0 0 220px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                      <div style={{
-                        width: "100%",
-                        aspectRatio: "16 / 10",
-                        background: "rgba(15, 23, 42, 0.6)",
-                        border: "1px solid rgba(255, 255, 255, 0.12)",
-                        borderRadius: "12px",
-                        padding: "8px",
-                        display: "grid",
-                        gridTemplateColumns: "repeat(3, 1fr)",
-                        gridTemplateRows: "repeat(3, 1fr)",
-                        gap: "6px",
-                        boxShadow: "inset 0 0 20px rgba(0,0,0,0.4)"
-                      }}>
-                        {[
-                          { id: "top-left", label: "Sol Üst" },
-                          { id: "top-center", label: "Üst Orta" },
-                          { id: "top-right", label: "Sağ Üst" },
-                          { id: "center-left", label: "Sol Orta" },
-                          { id: "center", label: "Tam Orta" },
-                          { id: "center-right", label: "Sağ Orta" },
-                          { id: "bottom-left", label: "Sol Alt" },
-                          { id: "bottom-center", label: "Alt Orta" },
-                          { id: "bottom-right", label: "Sağ Alt" }
-                        ].map((pos) => {
-                          const isActive = timerPosition === pos.id;
-                          return (
-                            <button
-                              key={pos.id}
-                              onClick={() => {
-                                setTimerPosition(pos.id);
-                                localStorage.setItem("timerPosition", pos.id);
-                                window.dispatchEvent(new Event("storage"));
-                              }}
-                              title={pos.label}
-                              style={{
-                                borderRadius: "6px",
-                                border: isActive ? "2px solid #38bdf8" : "1px dashed rgba(255, 255, 255, 0.15)",
-                                background: isActive ? "rgba(56, 189, 248, 0.25)" : "rgba(255, 255, 255, 0.02)",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                transition: "all 0.2s ease",
-                                boxShadow: isActive ? "0 0 12px rgba(56, 189, 248, 0.4)" : "none"
-                              }}
-                            >
-                              <div style={{
-                                width: isActive ? "12px" : "6px",
-                                height: isActive ? "12px" : "6px",
-                                borderRadius: "50%",
-                                background: isActive ? "#38bdf8" : "rgba(255, 255, 255, 0.3)",
-                                boxShadow: isActive ? "0 0 8px #38bdf8" : "none",
-                                transition: "all 0.2s ease"
-                              }} />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Right: Computer Monitor Live Position Preview Illustration */}
-                    <div style={{ flex: "1 1 auto", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        {/* Monitor Screen Frame */}
-                        <div style={{
-                          width: "240px",
-                          height: "140px",
-                          background: "#090d16",
-                          border: "3px solid #334155",
-                          borderRadius: "8px 8px 4px 4px",
-                          position: "relative",
-                          overflow: "hidden",
-                          boxShadow: "0 10px 28px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.9)",
-                          display: "flex",
-                          flexDirection: "column"
-                        }}>
-                          {/* Monitor Header / Window Control Dots Bar */}
-                          <div style={{
-                            height: "16px",
-                            background: "rgba(255, 255, 255, 0.04)",
-                            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "0 8px",
-                            gap: "4px"
-                          }}>
-                            <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ef4444" }} />
-                            <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#eab308" }} />
-                            <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#22c55e" }} />
-                            <span style={{ fontSize: "0.6rem", color: "#38bdf8", marginLeft: "auto", fontWeight: 700, letterSpacing: "0.5px" }}>
-                              {"Shotera"}
-                            </span>
-                          </div>
-
-                          {/* Desktop Wallpaper Display Area */}
-                          <div style={{
-                            flex: 1,
-                            background: "radial-gradient(circle at center, #1e293b 0%, #020617 100%)",
-                            position: "relative",
-                            overflow: "hidden"
-                          }}>
-                            {/* Background Mesh Dots Grid */}
-                            <div style={{
-                              position: "absolute",
-                              inset: 0,
-                              backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px)",
-                              backgroundSize: "12px 12px",
-                              opacity: 0.6
-                            }} />
-
-                            {/* Live Moving Mini Break Timer Badge */}
-                            <div style={{
-                              position: "absolute",
-                              width: "36px",
-                              height: "36px",
-                              borderRadius: "50%",
-                              background: "rgba(15, 23, 42, 0.9)",
-                              border: `2px solid ${timerRingColor || "#38bdf8"}`,
-                              boxShadow: `0 0 14px ${timerRingColor || "#38bdf8"}aa, inset 0 0 6px ${timerRingColor || "#38bdf8"}40`,
+                  <div style={{ width: "100%", display: "flex", justifyContent: "center", marginTop: "4px" }}>
+                    {/* 3x3 Grid Selector Box */}
+                    <div style={{
+                      width: "100%",
+                      maxWidth: "280px",
+                      aspectRatio: "16 / 10",
+                      background: "rgba(15, 23, 42, 0.6)",
+                      border: "1px solid rgba(255, 255, 255, 0.12)",
+                      borderRadius: "12px",
+                      padding: "10px",
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, 1fr)",
+                      gridTemplateRows: "repeat(3, 1fr)",
+                      gap: "8px",
+                      boxShadow: "inset 0 0 20px rgba(0,0,0,0.4)"
+                    }}>
+                      {[
+                        { id: "top-left", label: "Sol Üst" },
+                        { id: "top-center", label: "Üst Orta" },
+                        { id: "top-right", label: "Sağ Üst" },
+                        { id: "center-left", label: "Sol Orta" },
+                        { id: "center", label: "Tam Orta" },
+                        { id: "center-right", label: "Sağ Orta" },
+                        { id: "bottom-left", label: "Sol Alt" },
+                        { id: "bottom-center", label: "Alt Orta" },
+                        { id: "bottom-right", label: "Sağ Alt" }
+                      ].map((pos) => {
+                        const isActive = timerPosition === pos.id;
+                        return (
+                          <button
+                            key={pos.id}
+                            onClick={() => {
+                              setTimerPosition(pos.id);
+                              localStorage.setItem("timerPosition", pos.id);
+                              window.dispatchEvent(new Event("storage"));
+                            }}
+                            title={pos.label}
+                            style={{
+                              borderRadius: "8px",
+                              border: isActive ? "2px solid #38bdf8" : "1px dashed rgba(255, 255, 255, 0.15)",
+                              background: isActive ? "rgba(56, 189, 248, 0.25)" : "rgba(255, 255, 255, 0.02)",
+                              cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontSize: "0.55rem",
-                              fontWeight: 800,
-                              color: "#ffffff",
-                              fontFamily: "monospace",
-                              transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                              backdropFilter: "blur(4px)",
-                              zIndex: 5,
-                              margin: "4px",
-                              ...(timerPosition === "top-left" ? { top: "4px", left: "4px" } :
-                                timerPosition === "top-center" ? { top: "4px", left: "50%", transform: "translateX(-50%)" } :
-                                  timerPosition === "top-right" ? { top: "4px", right: "4px" } :
-                                    timerPosition === "center-left" ? { top: "50%", left: "4px", transform: "translateY(-50%)" } :
-                                      timerPosition === "center-right" ? { top: "50%", right: "4px", transform: "translateY(-50%)" } :
-                                        timerPosition === "bottom-left" ? { bottom: "4px", left: "4px" } :
-                                          timerPosition === "bottom-center" ? { bottom: "4px", left: "50%", transform: "translateX(-50%)" } :
-                                            timerPosition === "bottom-right" ? { bottom: "4px", right: "4px" } :
-                                              { top: "50%", left: "50%", transform: "translate(-50%, -50%)" })
-                            }}>
-                              10:00
-                            </div>
-                          </div>
-
-                          {/* Monitor Bottom Bezel with Power Indicator LED */}
-                          <div style={{ height: "10px", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                            <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#38bdf8", boxShadow: "0 0 6px #38bdf8", position: "absolute", right: "10px" }} />
-                          </div>
-                        </div>
-
-                        {/* Monitor Stand Neck */}
-                        <div style={{ width: "26px", height: "10px", background: "linear-gradient(to bottom, #334155, #1e293b)", borderLeft: "1px solid rgba(255, 255, 255, 0.1)", borderRight: "1px solid rgba(255, 255, 255, 0.1)" }} />
-
-                        {/* Monitor Stand Base */}
-                        <div style={{ width: "76px", height: "4px", background: "linear-gradient(to right, #1e293b, #475569, #1e293b)", borderRadius: "3px 3px 1px 1px", boxShadow: "0 4px 10px rgba(0,0,0,0.5)" }} />
-                      </div>
+                              transition: "all 0.2s ease",
+                              boxShadow: isActive ? "0 0 12px rgba(56, 189, 248, 0.4)" : "none"
+                            }}
+                          >
+                            <div style={{
+                              width: isActive ? "12px" : "6px",
+                              height: isActive ? "12px" : "6px",
+                              borderRadius: "50%",
+                              background: isActive ? "#38bdf8" : "rgba(255, 255, 255, 0.3)",
+                              boxShadow: isActive ? "0 0 8px #38bdf8" : "none",
+                              transition: "all 0.2s ease"
+                            }} />
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
