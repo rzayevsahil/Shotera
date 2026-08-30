@@ -29,6 +29,8 @@ export default function BreakTimer() {
 
   const [showElapsedAfter, setShowElapsedAfter] = useState<boolean>(() => localStorage.getItem("timerShowElapsedAfterExpiration") === "true");
   const [lockOnStart, setLockOnStart] = useState<boolean>(() => localStorage.getItem("timerLockWorkstationOnStart") === "true");
+  const [timerOpacity, setTimerOpacity] = useState<number>(() => Number(localStorage.getItem("timerOpacity") || "100") / 100);
+  const [timerPosition, setTimerPosition] = useState<string>(() => localStorage.getItem("timerPosition") || "center");
 
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
@@ -76,6 +78,8 @@ export default function BreakTimer() {
       const shouldLock = localStorage.getItem("timerLockWorkstationOnStart") === "true";
       setShowElapsedAfter(shouldShowElapsed);
       setLockOnStart(shouldLock);
+      setTimerOpacity(Number(localStorage.getItem("timerOpacity") || "100") / 100);
+      setTimerPosition(localStorage.getItem("timerPosition") || "center");
 
       if (isTriggerEvent) {
         stopAlarm();
@@ -339,6 +343,30 @@ export default function BreakTimer() {
       ? 400
       : 800;
 
+  const getAlignmentStyle = (pos: string) => {
+    switch (pos) {
+      case "top-left":
+        return { justifyContent: "flex-start", alignItems: "flex-start", padding: "40px" };
+      case "top-center":
+        return { justifyContent: "flex-start", alignItems: "center", paddingTop: "40px" };
+      case "top-right":
+        return { justifyContent: "flex-start", alignItems: "flex-end", padding: "40px" };
+      case "center-left":
+        return { justifyContent: "center", alignItems: "flex-start", paddingLeft: "40px" };
+      case "center-right":
+        return { justifyContent: "center", alignItems: "flex-end", paddingRight: "40px" };
+      case "bottom-left":
+        return { justifyContent: "flex-end", alignItems: "flex-start", padding: "40px" };
+      case "bottom-center":
+        return { justifyContent: "flex-end", alignItems: "center", paddingBottom: "40px" };
+      case "bottom-right":
+        return { justifyContent: "flex-end", alignItems: "flex-end", padding: "40px" };
+      case "center":
+      default:
+        return { justifyContent: "center", alignItems: "center" };
+    }
+  };
+
   return (
     <div
       style={{
@@ -347,12 +375,12 @@ export default function BreakTimer() {
         background: backgroundStyleCSS,
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#ffffff",
+        opacity: timerOpacity,
         userSelect: "none",
         position: "relative",
         overflow: "hidden",
+        boxSizing: "border-box",
+        ...getAlignmentStyle(timerPosition)
       }}
     >
       {/* Top Controls */}

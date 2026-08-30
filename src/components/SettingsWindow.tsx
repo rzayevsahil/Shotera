@@ -207,6 +207,8 @@ function SettingsWindow() {
   const [timerCustomAudioName, setTimerCustomAudioName] = useState<string>(
     () => localStorage.getItem("timerCustomAudioName") || ""
   );
+  const [timerOpacity, setTimerOpacity] = useState<number>(() => Number(localStorage.getItem("timerOpacity") || "100"));
+  const [timerPosition, setTimerPosition] = useState<string>(() => localStorage.getItem("timerPosition") || "top-right");
   const customAudioInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleCustomAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2343,6 +2345,102 @@ function SettingsWindow() {
                     <option value="3">{(t as any).timerSoundRepeat3}</option>
                     <option value="loop">{(t as any).timerSoundRepeatLoop}</option>
                   </select>
+                </div>
+
+                {/* Timer Opacity Slider Row */}
+                <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "14px", marginTop: "12px" }}>
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).timerOpacityLabel}</span>
+                    <span className="setting-desc">{(t as any).timerOpacityDesc}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <input
+                      type="range"
+                      min="20"
+                      max="100"
+                      step="5"
+                      value={timerOpacity}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setTimerOpacity(val);
+                        localStorage.setItem("timerOpacity", String(val));
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{ width: "130px", accentColor: "#38bdf8", cursor: "pointer" }}
+                    />
+                    <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "monospace", color: "#38bdf8", minWidth: "42px", textAlign: "right" }}>
+                      {timerOpacity}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* 9-Point Screen Grid Alignment Row */}
+                <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "12px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "14px", marginTop: "12px" }}>
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).timerPositionLabel}</span>
+                    <span className="setting-desc">{(t as any).timerPositionDesc}</span>
+                  </div>
+
+                  {/* 3x3 Grid Monitor Mockup Box */}
+                  <div style={{
+                    width: "100%",
+                    maxWidth: "280px",
+                    aspectRatio: "16 / 10",
+                    background: "rgba(15, 23, 42, 0.6)",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    borderRadius: "12px",
+                    padding: "8px",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gridTemplateRows: "repeat(3, 1fr)",
+                    gap: "6px",
+                    boxShadow: "inset 0 0 20px rgba(0,0,0,0.4)"
+                  }}>
+                    {[
+                      { id: "top-left", label: "Sol Üst" },
+                      { id: "top-center", label: "Üst Orta" },
+                      { id: "top-right", label: "Sağ Üst" },
+                      { id: "center-left", label: "Sol Orta" },
+                      { id: "center", label: "Tam Orta" },
+                      { id: "center-right", label: "Sağ Orta" },
+                      { id: "bottom-left", label: "Sol Alt" },
+                      { id: "bottom-center", label: "Alt Orta" },
+                      { id: "bottom-right", label: "Sağ Alt" }
+                    ].map((pos) => {
+                      const isActive = timerPosition === pos.id;
+                      return (
+                        <button
+                          key={pos.id}
+                          onClick={() => {
+                            setTimerPosition(pos.id);
+                            localStorage.setItem("timerPosition", pos.id);
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          title={pos.label}
+                          style={{
+                            borderRadius: "6px",
+                            border: isActive ? "2px solid #38bdf8" : "1px dashed rgba(255, 255, 255, 0.15)",
+                            background: isActive ? "rgba(56, 189, 248, 0.25)" : "rgba(255, 255, 255, 0.02)",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "all 0.2s ease",
+                            boxShadow: isActive ? "0 0 12px rgba(56, 189, 248, 0.4)" : "none"
+                          }}
+                        >
+                          <div style={{
+                            width: isActive ? "12px" : "6px",
+                            height: isActive ? "12px" : "6px",
+                            borderRadius: "50%",
+                            background: isActive ? "#38bdf8" : "rgba(255, 255, 255, 0.3)",
+                            boxShadow: isActive ? "0 0 8px #38bdf8" : "none",
+                            transition: "all 0.2s ease"
+                          }} />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
