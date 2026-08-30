@@ -345,14 +345,15 @@
 .compact-bar-btn[data-tooltip]::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: calc(100% + 6px);
+    bottom: calc(100% + 1.5px);
     left: 50%;
     transform: translateX(-50%) translateY(4px);
     background: rgba(15, 17, 23, 0.95);
     color: #f1f5f9;
     font-size: 0.72rem;
     font-weight: 500;
-    padding: 3px 8px;
+    line-height: 1.2;
+    padding: 2px 6px;
     border-radius: 4px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     white-space: nowrap;
