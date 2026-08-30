@@ -27,9 +27,15 @@ export default function BreakTimer() {
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
   const [timerSoundRepeat, setTimerSoundRepeat] = useState<string>(() => localStorage.getItem("timerSoundRepeat") || "1");
 
+  const [showElapsedAfter, setShowElapsedAfter] = useState<boolean>(() => localStorage.getItem("timerShowElapsedAfterExpiration") === "true");
+  const [lockOnStart, setLockOnStart] = useState<boolean>(() => localStorage.getItem("timerLockWorkstationOnStart") === "true");
+
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [isFinished, setIsFinished] = useState<boolean>(false);
+
+  const [isOvertime, setIsOvertime] = useState<boolean>(false);
+  const [overtimeSeconds, setOvertimeSeconds] = useState<number>(0);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const alarmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -66,11 +72,22 @@ export default function BreakTimer() {
       setTimerSoundPreset(localStorage.getItem("timerSoundPreset") || "chime");
       setTimerSoundRepeat(localStorage.getItem("timerSoundRepeat") || "1");
 
+      const shouldShowElapsed = localStorage.getItem("timerShowElapsedAfterExpiration") === "true";
+      const shouldLock = localStorage.getItem("timerLockWorkstationOnStart") === "true";
+      setShowElapsedAfter(shouldShowElapsed);
+      setLockOnStart(shouldLock);
+
       if (isTriggerEvent) {
         stopAlarm();
         setCurrentSeconds(dir === "down" ? defaultDuration : 0);
         setIsRunning(true);
         setIsFinished(false);
+        setIsOvertime(false);
+        setOvertimeSeconds(0);
+
+        if (shouldLock) {
+          invoke("lock_workstation").catch((err) => console.error("Failed to lock workstation:", err));
+        }
       }
     };
 
@@ -100,6 +117,8 @@ export default function BreakTimer() {
   const handleClose = async () => {
     setIsRunning(false);
     setIsFinished(false);
+    setIsOvertime(false);
+    setOvertimeSeconds(0);
     stopAlarm();
     try {
       await invoke("hide_timer_window");
@@ -146,28 +165,44 @@ export default function BreakTimer() {
 
   // Tick timer every second based on direction
   useEffect(() => {
-    if (isRunning && !isFinished) {
+    if (isRunning) {
       timerRef.current = setInterval(() => {
-        setCurrentSeconds((prev) => {
-          if (timerDirection === "down") {
-            if (prev <= 1) {
-              setIsRunning(false);
-              setIsFinished(true);
-              playAlarm();
-              return 0;
+        if (isOvertime) {
+          setOvertimeSeconds((prev) => prev + 1);
+        } else {
+          setCurrentSeconds((prev) => {
+            if (timerDirection === "down") {
+              if (prev <= 1) {
+                playAlarm();
+                setIsFinished(true);
+                if (showElapsedAfter) {
+                  setIsOvertime(true);
+                  setOvertimeSeconds(0);
+                  return 0;
+                } else {
+                  setIsRunning(false);
+                  return 0;
+                }
+              }
+              return prev - 1;
+            } else {
+              // Count UP mode (0 -> totalSeconds)
+              if (prev >= totalSeconds - 1) {
+                playAlarm();
+                setIsFinished(true);
+                if (showElapsedAfter) {
+                  setIsOvertime(true);
+                  setOvertimeSeconds(0);
+                  return totalSeconds;
+                } else {
+                  setIsRunning(false);
+                  return totalSeconds;
+                }
+              }
+              return prev + 1;
             }
-            return prev - 1;
-          } else {
-            // Count UP mode (0 -> totalSeconds)
-            if (prev >= totalSeconds - 1) {
-              setIsRunning(false);
-              setIsFinished(true);
-              playAlarm();
-              return totalSeconds;
-            }
-            return prev + 1;
-          }
-        });
+          });
+        }
       }, 1000);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -176,7 +211,7 @@ export default function BreakTimer() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isRunning, isFinished, timerDirection, totalSeconds, soundEnabled]);
+  }, [isRunning, isOvertime, timerDirection, totalSeconds, soundEnabled, showElapsedAfter]);
 
   const timerDirectionRef = useRef(timerDirection);
   timerDirectionRef.current = timerDirection;
@@ -240,11 +275,15 @@ export default function BreakTimer() {
     };
   }, []);
 
-  const minutes = Math.floor(currentSeconds / 60);
-  const seconds = currentSeconds % 60;
-  const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  const minutes = isOvertime ? Math.floor(overtimeSeconds / 60) : Math.floor(currentSeconds / 60);
+  const seconds = isOvertime ? overtimeSeconds % 60 : currentSeconds % 60;
+  const formattedTime = isOvertime
+    ? `+${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+    : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-  const progress = totalSeconds > 0
+  const progress = isOvertime
+    ? 100
+    : totalSeconds > 0
     ? (timerDirection === "down"
         ? ((totalSeconds - currentSeconds) / totalSeconds) * 100
         : (currentSeconds / totalSeconds) * 100)
@@ -256,6 +295,11 @@ export default function BreakTimer() {
     setCurrentSeconds(timerDirection === "down" ? totalSeconds : 0);
     setIsRunning(true);
     setIsFinished(false);
+    setIsOvertime(false);
+    setOvertimeSeconds(0);
+    if (lockOnStart) {
+      invoke("lock_workstation").catch((err) => console.error("Failed to lock workstation:", err));
+    }
   };
 
   const backgroundStyleCSS =
@@ -420,12 +464,14 @@ export default function BreakTimer() {
           <span
             style={{
               fontSize: "14px",
-              color: "rgba(255, 255, 255, 0.5)",
-              fontWeight: 500,
+              color: isOvertime ? "#f87171" : "rgba(255, 255, 255, 0.5)",
+              fontWeight: 600,
               marginTop: "4px",
             }}
           >
-            {isFinished
+            {isOvertime
+              ? ((t as any).timerOvertimeStatus || "Süre Aşıldı")
+              : isFinished
               ? (t.breakTimerFinished || "Süre Bitti!")
               : isRunning
               ? (timerDirection === "up" ? ((t as any).timerCountingUp || "0'dan İleriye Sayılıyor") : (t.shortcutBreakTimer || "Mola Devam Ediyor"))

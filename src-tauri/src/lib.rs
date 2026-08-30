@@ -1688,6 +1688,22 @@ fn hide_zoom_window(app_handle: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn lock_workstation() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        extern "system" {
+            fn LockWorkStation() -> i32;
+        }
+        unsafe {
+            if LockWorkStation() == 0 {
+                return Err("Failed to lock workstation".to_string());
+            }
+        }
+    }
+    Ok(())
+}
+
 
 
 #[tauri::command]
@@ -2205,7 +2221,8 @@ pub fn run() {
             hide_recorder_window,
             open_recorder_view,
             disable_windows_audio_ducking,
-            hide_status_overlay
+            hide_status_overlay,
+            lock_workstation
         ])
 
         .run(tauri::generate_context!())

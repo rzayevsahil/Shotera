@@ -171,7 +171,15 @@ function SettingsWindow() {
   const [micShortcut, setMicShortcut] = useState(() => localStorage.getItem("micShortcut") || "Ctrl+8");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
-  const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(() => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down");
+  const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(
+    () => (localStorage.getItem("timerCountDirection") as "down" | "up") || "down"
+  );
+  const [timerShowElapsedAfterExpiration, setTimerShowElapsedAfterExpiration] = useState<boolean>(
+    () => localStorage.getItem("timerShowElapsedAfterExpiration") === "true"
+  );
+  const [timerLockWorkstationOnStart, setTimerLockWorkstationOnStart] = useState<boolean>(
+    () => localStorage.getItem("timerLockWorkstationOnStart") === "true"
+  );
   const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
   const [customTimerRingColor, setCustomTimerRingColor] = useState<string>(() => {
     const savedCustom = localStorage.getItem("customTimerRingColor");
@@ -1659,6 +1667,48 @@ function SettingsWindow() {
                 <option value="down">{(t as any).timerCountDirectionDown}</option>
                 <option value="up">{(t as any).timerCountDirectionUp}</option>
               </select>
+            </div>
+
+            {/* Show Time Elapsed After Expiration Row */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).timerShowElapsedAfterExpiration}</span>
+                <span className="setting-desc">{(t as any).timerShowElapsedAfterExpirationDesc}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={timerShowElapsedAfterExpiration}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setTimerShowElapsedAfterExpiration(checked);
+                    localStorage.setItem("timerShowElapsedAfterExpiration", String(checked));
+                    window.dispatchEvent(new Event("storage"));
+                  }}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            {/* Lock Workstation During Break Row */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).timerLockWorkstationOnStart}</span>
+                <span className="setting-desc">{(t as any).timerLockWorkstationOnStartDesc}</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={timerLockWorkstationOnStart}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setTimerLockWorkstationOnStart(checked);
+                    localStorage.setItem("timerLockWorkstationOnStart", String(checked));
+                    window.dispatchEvent(new Event("storage"));
+                  }}
+                />
+                <span className="slider"></span>
+              </label>
             </div>
 
             {/* Theme & Ring Color Selection Section */}
