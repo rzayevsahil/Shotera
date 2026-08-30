@@ -1,6 +1,15 @@
-// Web Audio API Synthesizer for Break Timer Completion Ringtones
+// Web Audio API & HTML5 Audio Synthesizer for Break Timer Completion Ringtones
 export const playTimerSound = (preset: string = "chime") => {
   try {
+    if (preset === "custom") {
+      const customData = localStorage.getItem("timerCustomAudioData");
+      if (customData) {
+        const audio = new Audio(customData);
+        audio.play().catch((e) => console.error("Failed to play custom audio file:", e));
+        return;
+      }
+    }
+
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContextClass) return;
 

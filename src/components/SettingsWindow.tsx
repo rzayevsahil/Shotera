@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles, Upload, Music, Trash2 } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -197,7 +197,49 @@ function SettingsWindow() {
   });
   const [timerFontStyle, setTimerFontStyle] = useState<string>(() => localStorage.getItem("timerFontStyle") || "sans");
   const [timerSoundPreset, setTimerSoundPreset] = useState<string>(() => localStorage.getItem("timerSoundPreset") || "chime");
+  const [timerSoundSource, setTimerSoundSource] = useState<"preset" | "custom">(() => {
+    const savedSource = localStorage.getItem("timerSoundSource");
+    if (savedSource === "custom" || savedSource === "preset") return savedSource as "preset" | "custom";
+    const currentPreset = localStorage.getItem("timerSoundPreset") || "chime";
+    return currentPreset === "custom" ? "custom" : "preset";
+  });
   const [timerSoundRepeat, setTimerSoundRepeat] = useState<string>(() => localStorage.getItem("timerSoundRepeat") || "1");
+  const [timerCustomAudioName, setTimerCustomAudioName] = useState<string>(
+    () => localStorage.getItem("timerCustomAudioName") || ""
+  );
+  const customAudioInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleCustomAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      try {
+        localStorage.setItem("timerCustomAudioData", result);
+        localStorage.setItem("timerCustomAudioName", file.name);
+        setTimerCustomAudioName(file.name);
+        setTimerSoundPreset("custom");
+        localStorage.setItem("timerSoundPreset", "custom");
+        window.dispatchEvent(new Event("storage"));
+        playTimerSound("custom");
+      } catch (err) {
+        console.error("Failed to save custom audio:", err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveCustomAudio = () => {
+    localStorage.removeItem("timerCustomAudioData");
+    localStorage.removeItem("timerCustomAudioName");
+    setTimerCustomAudioName("");
+    if (timerSoundPreset === "custom") {
+      setTimerSoundPreset("chime");
+      localStorage.setItem("timerSoundPreset", "chime");
+    }
+    window.dispatchEvent(new Event("storage"));
+  };
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "pause_record" | "webcam" | "mic" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [isRecorderModalOpen, setIsRecorderModalOpen] = useState(false);
@@ -2121,39 +2163,158 @@ function SettingsWindow() {
 
               {/* Sound Ringtone Preset Section */}
               <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "18px", marginTop: "6px" }}>
-                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                {/* Dual Choice Audio Source Switch */}
+                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
                   <div className="setting-info">
-                    <span className="setting-label">{(t as any).timerSoundTitle}</span>
+                    <span className="setting-label">{(t as any).timerSoundSourceLabel || "Ses Kaynağı"}</span>
                     <span className="setting-desc">{(t as any).timerSoundDesc}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
-                    <select
-                      className="premium-input"
-                      value={timerSoundPreset}
-                      onChange={(e) => {
-                        setTimerSoundPreset(e.target.value);
-                        localStorage.setItem("timerSoundPreset", e.target.value);
-                        window.dispatchEvent(new Event("storage"));
-                        playTimerSound(e.target.value);
-                      }}
-                      style={{ width: "170px" }}
-                    >
-                      <option value="chime">{(t as any).timerSoundChime}</option>
-                      <option value="digital">{(t as any).timerSoundDigital}</option>
-                      <option value="bell">{(t as any).timerSoundBell}</option>
-                      <option value="classic">{(t as any).timerSoundClassic}</option>
-                    </select>
+                  <div style={{ display: "flex", background: "rgba(255, 255, 255, 0.05)", padding: "3px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
                     <button
-                      className="premium-button"
-                      onClick={() => playTimerSound(timerSoundPreset)}
-                      style={{ padding: "6px 12px", fontSize: "0.85rem", whiteSpace: "nowrap" }}
-                      title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
+                      onClick={() => {
+                        setTimerSoundSource("preset");
+                        localStorage.setItem("timerSoundSource", "preset");
+                        const lastPreset = localStorage.getItem("lastTimerSoundPreset") || (timerSoundPreset === "custom" ? "chime" : timerSoundPreset);
+                        setTimerSoundPreset(lastPreset);
+                        localStorage.setItem("timerSoundPreset", lastPreset);
+                        window.dispatchEvent(new Event("storage"));
+                        playTimerSound(lastPreset);
+                      }}
+                      style={{
+                        padding: "6px 14px",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        borderRadius: "7px",
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        background: timerSoundSource === "preset" ? "var(--accent-color, #38bdf8)" : "transparent",
+                        color: timerSoundSource === "preset" ? "#090d16" : "var(--text-secondary)",
+                        boxShadow: timerSoundSource === "preset" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
+                      }}
                     >
-                      <Volume2 size={14} />
-                      {(t as any).timerTestSound || "Sesi Dinle"}
+                      🔔 {(t as any).timerSoundSourcePreset || "Hazır Melodiler"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setTimerSoundSource("custom");
+                        localStorage.setItem("timerSoundSource", "custom");
+                        if (timerSoundPreset !== "custom") {
+                          localStorage.setItem("lastTimerSoundPreset", timerSoundPreset);
+                        }
+                        setTimerSoundPreset("custom");
+                        localStorage.setItem("timerSoundPreset", "custom");
+                        window.dispatchEvent(new Event("storage"));
+                        playTimerSound("custom");
+                      }}
+                      style={{
+                        padding: "6px 14px",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        borderRadius: "7px",
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        background: timerSoundSource === "custom" ? "var(--accent-color, #38bdf8)" : "transparent",
+                        color: timerSoundSource === "custom" ? "#090d16" : "var(--text-secondary)",
+                        boxShadow: timerSoundSource === "custom" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
+                      }}
+                    >
+                      📁 {(t as any).timerSoundSourceCustom || "Özel Ses Dosyası"}
                     </button>
                   </div>
                 </div>
+
+                {/* Option A: System Sound Presets Dropdown */}
+                {timerSoundSource === "preset" && (
+                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0, marginTop: "4px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerSoundLabel || "Bitiş Zili Melodisi"}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
+                      <select
+                        className="premium-input"
+                        value={timerSoundPreset === "custom" ? "chime" : timerSoundPreset}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setTimerSoundPreset(val);
+                          localStorage.setItem("timerSoundPreset", val);
+                          localStorage.setItem("lastTimerSoundPreset", val);
+                          window.dispatchEvent(new Event("storage"));
+                          playTimerSound(val);
+                        }}
+                        style={{ width: "180px" }}
+                      >
+                        <option value="chime">{(t as any).timerSoundChime}</option>
+                        <option value="digital">{(t as any).timerSoundDigital}</option>
+                        <option value="bell">{(t as any).timerSoundBell}</option>
+                        <option value="classic">{(t as any).timerSoundClassic}</option>
+                      </select>
+                      <button
+                        className="premium-button"
+                        onClick={() => playTimerSound(timerSoundPreset === "custom" ? "chime" : timerSoundPreset)}
+                        style={{ padding: "6px 12px", fontSize: "0.85rem", whiteSpace: "nowrap" }}
+                        title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
+                      >
+                        <Volume2 size={14} />
+                        {(t as any).timerTestSound || "Sesi Dinle"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Option B: Custom Audio File Upload Card */}
+                {timerSoundSource === "custom" && (
+                  <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "12px", padding: "14px 16px", marginTop: "4px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", overflow: "hidden", flex: "1 1 auto" }}>
+                        <Music size={18} color="#38bdf8" />
+                        <span style={{ fontSize: "0.85rem", color: timerCustomAudioName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "260px" }}>
+                          {timerCustomAudioName || ((t as any).timerNoCustomSoundSelected || "Henüz özel ses dosyası seçilmedi")}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <input
+                          type="file"
+                          ref={customAudioInputRef}
+                          accept="audio/*"
+                          onChange={handleCustomAudioUpload}
+                          style={{ display: "none" }}
+                        />
+                        <button
+                          className="premium-button"
+                          onClick={() => customAudioInputRef.current?.click()}
+                          style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+                        >
+                          <Upload size={14} />
+                          {(t as any).timerCustomSoundSelect || "Ses Dosyası Seç"}
+                        </button>
+                        {timerCustomAudioName && (
+                          <button
+                            className="premium-button"
+                            onClick={handleRemoveCustomAudio}
+                            style={{ padding: "6px 10px", fontSize: "0.8rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+                            title="Özel sesi kaldır"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                        <button
+                          className="premium-button"
+                          onClick={() => playTimerSound("custom")}
+                          style={{ padding: "6px 12px", fontSize: "0.85rem", whiteSpace: "nowrap" }}
+                          title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
+                        >
+                          <Volume2 size={14} />
+                          {(t as any).timerTestSound || "Sesi Dinle"}
+                        </button>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: "0.78rem", color: "var(--text-tertiary)", lineHeight: 1.4 }}>
+                      {(t as any).timerCustomSoundDesc}
+                    </span>
+                  </div>
+                )}
 
                 {/* Sound Repeat Row */}
                 <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0, marginTop: "12px" }}>
