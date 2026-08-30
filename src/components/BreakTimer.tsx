@@ -277,9 +277,7 @@ export default function BreakTimer() {
 
   const minutes = isOvertime ? Math.floor(overtimeSeconds / 60) : Math.floor(currentSeconds / 60);
   const seconds = isOvertime ? overtimeSeconds % 60 : currentSeconds % 60;
-  const formattedTime = isOvertime
-    ? `+${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-    : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
   const progress = isOvertime
     ? 100
