@@ -428,6 +428,21 @@ async fn resume_native_recording(app_handle: AppHandle, state: State<'_, AppStat
 }
 
 
+#[cfg(target_os = "windows")]
+fn hide_from_alt_tab(window: &tauri::WebviewWindow) {
+    if let Ok(hwnd) = window.hwnd() {
+        unsafe {
+            use windows_sys::Win32::UI::WindowsAndMessaging::{
+                GetWindowLongW, SetWindowLongW, GWL_EXSTYLE, WS_EX_TOOLWINDOW, WS_EX_APPWINDOW
+            };
+            let mut ex_style = GetWindowLongW(hwnd.0 as _, GWL_EXSTYLE);
+            ex_style &= !(WS_EX_APPWINDOW as i32);
+            ex_style |= WS_EX_TOOLWINDOW as i32;
+            SetWindowLongW(hwnd.0 as _, GWL_EXSTYLE, ex_style);
+        }
+    }
+}
+
 #[tauri::command]
 fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), String> {
     use tauri::Manager;
@@ -458,6 +473,7 @@ fn resize_recorder_window(app_handle: AppHandle, compact: bool) -> Result<(), St
                     windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE
                 );
             }
+            hide_from_alt_tab(&window);
         }
     }
     Ok(())
@@ -496,6 +512,7 @@ fn open_recorder_view(app_handle: AppHandle, state: State<'_, AppState>) -> Resu
                         windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE
                     );
                 }
+                hide_from_alt_tab(&window);
             }
         }
     } else {
@@ -513,17 +530,21 @@ fn open_recorder_view(app_handle: AppHandle, state: State<'_, AppState>) -> Resu
             .decorations(false)
             .transparent(true)
             .always_on_top(true)
+            .skip_taskbar(true)
             .center();
             
             if let Ok(window) = builder.build() {
                 #[cfg(target_os = "windows")]
-                if let Ok(hwnd) = window.hwnd() {
-                    unsafe {
-                        windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
-                            hwnd.0 as _,
-                            windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE
-                        );
+                {
+                    if let Ok(hwnd) = window.hwnd() {
+                        unsafe {
+                            windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                                hwnd.0 as _,
+                                windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE
+                            );
+                        }
                     }
+                    hide_from_alt_tab(&window);
                 }
             }
         });
@@ -536,6 +557,8 @@ fn open_recorder_view(app_handle: AppHandle, state: State<'_, AppState>) -> Resu
 fn toggle_webcam(app_handle: AppHandle, show: bool) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("webcam") {
         if show {
+            #[cfg(target_os = "windows")]
+            hide_from_alt_tab(&window);
             let _ = window.emit("start-camera", ());
             let _ = window.show();
             let _ = window.set_focus();
@@ -608,17 +631,20 @@ fn show_status_overlay(app_handle: &AppHandle, message: &str) {
         }
 
         #[cfg(target_os = "windows")]
-        if let Ok(hwnd) = window.hwnd() {
-            unsafe {
-                windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
-                    hwnd.0 as _,
-                    windows_sys::Win32::UI::WindowsAndMessaging::WDA_NONE,
-                );
-                windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
-                    hwnd.0 as _,
-                    windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE,
-                );
+        {
+            if let Ok(hwnd) = window.hwnd() {
+                unsafe {
+                    windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                        hwnd.0 as _,
+                        windows_sys::Win32::UI::WindowsAndMessaging::WDA_NONE,
+                    );
+                    windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity(
+                        hwnd.0 as _,
+                        windows_sys::Win32::UI::WindowsAndMessaging::WDA_EXCLUDEFROMCAPTURE,
+                    );
+                }
             }
+            hide_from_alt_tab(&window);
         }
 
         let _ = window.emit("show-status", msg_string.clone());
@@ -2065,7 +2091,17 @@ pub fn run() {
                 log_app_event(handle, "ERROR", &format!("Failed to create system tray icon after 10 retries: {}", err));
             }
 
-            // 3. Prevent close on main settings window, hide instead
+            // 3. Hide all overlay/tool windows from Alt+Tab switcher on Windows
+            #[cfg(target_os = "windows")]
+            {
+                for (label, window) in app.webview_windows() {
+                    if label != "main" {
+                        hide_from_alt_tab(&window);
+                    }
+                }
+            }
+
+            // 4. Prevent close on main settings window, hide instead
             if let Some(window) = app.get_webview_window("main") {
                 let window_ = window.clone();
                 window.on_window_event(move |event| {
