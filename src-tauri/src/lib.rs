@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
-use tauri::menu::{Menu, MenuItem};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use base64::prelude::*;
 use chrono::Local;
@@ -1299,20 +1299,52 @@ fn update_tray_language(app_handle: AppHandle, state: State<'_, AppState>, lang:
     if let Ok(mut state_lang) = state.language.lock() {
         *state_lang = lang.clone();
     }
+    if let Some(main_win) = app_handle.get_webview_window("main") {
+        let win_title = match lang.as_str() {
+            "de" => "Shotera - Einstellungen",
+            "ru" => "Shotera - Настройки",
+            "az" => "Shotera - Tənzimləmələr",
+            "tr" => "Shotera - Ayarlar",
+            _ => "Shotera - Settings",
+        };
+        let _ = main_win.set_title(win_title);
+    }
     if let Some(tray) = app_handle.tray_by_id("main-tray") {
-        let (capture_label, settings_label, quit_label) = match lang.as_str() {
-            "de" => ("Screenshot erstellen", "Einstellungen", "Beenden"),
-            "ru" => ("Сделать снимок экрана", "Настройки", "Выход"),
-            "az" => ("Ekran Şəkli Al", "Tənzimləmələr", "Çıxış"),
-            "tr" => ("Ekran Görüntüsü Al", "Ayarlar", "Çıkış"),
-            _ => ("Take Screenshot", "Settings", "Quit"),
+        let (capture_label, record_label, timer_label, zoom_label, live_zoom_label, settings_label, quit_label) = match lang.as_str() {
+            "de" => ("Screenshot erstellen", "Bildschirmaufnahme", "Pause-Timer", "Bildschirm-Zoom", "Live-Zoom", "Einstellungen", "Beenden"),
+            "ru" => ("Сделать снимок экрана", "Запись экрана", "Таймер перерыва", "Экранная лупа", "Живой Zoom", "Настройки", "Выход"),
+            "az" => ("Ekran Şəkli Al", "Ekran Qeydi", "Fasilə Taymeri", "Ekran Böyüdücüsü", "Canlı Zoom", "Tənzimləmələr", "Çıxış"),
+            "tr" => ("Ekran Görüntüsü Al", "Ekran Kaydı", "Mola Sayacı", "Ekran Büyüteci", "Canlı Zoom", "Ayarlar", "Çıkış"),
+            _ => ("Take Screenshot", "Screen Record", "Break Timer", "Screen Zoom", "Live Zoom", "Settings", "Quit"),
         };
         
         if let Ok(quit_i) = MenuItem::with_id(&app_handle, "quit", quit_label, true, None::<&str>) {
             if let Ok(settings_i) = MenuItem::with_id(&app_handle, "settings", settings_label, true, None::<&str>) {
                 if let Ok(capture_i) = MenuItem::with_id(&app_handle, "capture", capture_label, true, None::<&str>) {
-                    if let Ok(menu) = Menu::with_items(&app_handle, &[&capture_i, &settings_i, &quit_i]) {
-                        let _ = tray.set_menu(Some(menu));
+                    if let Ok(record_i) = MenuItem::with_id(&app_handle, "record", record_label, true, None::<&str>) {
+                        if let Ok(timer_i) = MenuItem::with_id(&app_handle, "timer", timer_label, true, None::<&str>) {
+                            if let Ok(zoom_i) = MenuItem::with_id(&app_handle, "zoom", zoom_label, true, None::<&str>) {
+                                if let Ok(live_zoom_i) = MenuItem::with_id(&app_handle, "live_zoom", live_zoom_label, true, None::<&str>) {
+                                    if let Ok(sep1) = PredefinedMenuItem::separator(&app_handle) {
+                                        if let Ok(sep2) = PredefinedMenuItem::separator(&app_handle) {
+                                            if let Ok(menu) = Menu::with_items(&app_handle, &[
+                                                &capture_i,
+                                                &record_i,
+                                                &sep1,
+                                                &timer_i,
+                                                &zoom_i,
+                                                &live_zoom_i,
+                                                &sep2,
+                                                &settings_i,
+                                                &quit_i,
+                                            ]) {
+                                                let _ = tray.set_menu(Some(menu));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1950,10 +1982,23 @@ pub fn run() {
                 let quit_i = MenuItem::with_id(app_ref, "quit", "Quit", true, None::<&str>)?;
                 let settings_i = MenuItem::with_id(app_ref, "settings", "Settings", true, None::<&str>)?;
                 let capture_i = MenuItem::with_id(app_ref, "capture", "Take Screenshot", true, None::<&str>)?;
-                let timer_i = MenuItem::with_id(app_ref, "timer", "Break Timer (Ctrl+3)", true, None::<&str>)?;
-                let zoom_i = MenuItem::with_id(app_ref, "zoom", "Screen Zoom (Ctrl+1)", true, None::<&str>)?;
-                let live_zoom_i = MenuItem::with_id(app_ref, "live_zoom", "Live Zoom (Ctrl+4)", true, None::<&str>)?;
-                let menu = Menu::with_items(app_ref, &[&capture_i, &zoom_i, &live_zoom_i, &timer_i, &settings_i, &quit_i])?;
+                let record_i = MenuItem::with_id(app_ref, "record", "Screen Record", true, None::<&str>)?;
+                let timer_i = MenuItem::with_id(app_ref, "timer", "Break Timer", true, None::<&str>)?;
+                let zoom_i = MenuItem::with_id(app_ref, "zoom", "Screen Zoom", true, None::<&str>)?;
+                let live_zoom_i = MenuItem::with_id(app_ref, "live_zoom", "Live Zoom", true, None::<&str>)?;
+                let sep1 = PredefinedMenuItem::separator(app_ref)?;
+                let sep2 = PredefinedMenuItem::separator(app_ref)?;
+                let menu = Menu::with_items(app_ref, &[
+                    &capture_i,
+                    &record_i,
+                    &sep1,
+                    &timer_i,
+                    &zoom_i,
+                    &live_zoom_i,
+                    &sep2,
+                    &settings_i,
+                    &quit_i,
+                ])?;
 
 
                 TrayIconBuilder::with_id("main-tray")
@@ -1978,6 +2023,10 @@ pub fn run() {
                                     let state = app_handle_clone.state::<AppState>();
                                     let _ = trigger_screenshot(&app_handle_clone, &state);
                                 });
+                            }
+                            "record" => {
+                                let state = app_handle_tray.state::<AppState>();
+                                let _ = open_recorder_view(app_handle_tray.clone(), state);
                             }
                             "timer" => {
                                 let _ = open_break_timer(app_handle_tray.clone());

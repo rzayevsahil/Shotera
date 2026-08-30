@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
@@ -679,6 +680,18 @@ function SettingsWindow() {
       unlistenForceSync.then(f => f());
     };
   }, []);
+
+  // Sync window title with current language
+  useEffect(() => {
+    try {
+      const winTitle = lang === "tr" ? "Shotera - Ayarlar"
+        : lang === "az" ? "Shotera - Tənzimləmələr"
+        : lang === "de" ? "Shotera - Einstellungen"
+        : lang === "ru" ? "Shotera - Настройки"
+        : "Shotera - Settings";
+      getCurrentWindow().setTitle(winTitle).catch(() => {});
+    } catch (e) {}
+  }, [lang]);
 
   // Listen for global fullscreen screenshots and play shutter sound if enabled
   useEffect(() => {

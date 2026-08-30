@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Shotera Settings",
+        "title": "Shotera - Ayarlar",
         "width": 800,
         "height": 600,
         "resizable": true,
