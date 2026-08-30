@@ -17,6 +17,24 @@ import { sendNotification } from "@tauri-apps/plugin-notification";
 import ScreenRecorderModal from "./ScreenRecorderModal";
 import FeatureTour from "./FeatureTour";
 type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
+
+function resolveImageSrc(src: string | null | undefined): string {
+  if (!src) return "";
+  const trimmed = src.trim();
+  if (
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("http:") ||
+    trimmed.startsWith("https:") ||
+    trimmed.startsWith("asset:")
+  ) {
+    return trimmed;
+  }
+  try {
+    return convertFileSrc(trimmed);
+  } catch {
+    return trimmed;
+  }
+}
 const SYSTEM_FONTS = [
   "Arial", "Arial Black", "Bahnschrift", "Calibri", "Cambria", "Cambria Math",
   "Candara", "Comic Sans MS", "Consolas", "Constantia", "Corbel", "Courier New",
@@ -241,6 +259,73 @@ function SettingsWindow() {
       localStorage.setItem("timerSoundPreset", "chime");
     }
     window.dispatchEvent(new Event("storage"));
+  };
+
+  const [timerBgMode, setTimerBgMode] = useState<"color" | "desktop" | "image">(
+    () => (localStorage.getItem("timerBgMode") as "color" | "desktop" | "image") || "color"
+  );
+  const [timerBgCustomImage, setTimerBgCustomImage] = useState<string>(
+    () => localStorage.getItem("timerBgCustomImage") || ""
+  );
+  const [timerBgCustomImageName, setTimerBgCustomImageName] = useState<string>(
+    () => localStorage.getItem("timerBgCustomImageName") || ""
+  );
+  const [timerBgScale, setTimerBgScale] = useState<boolean>(
+    () => localStorage.getItem("timerBgScale") !== "false"
+  );
+  const customTimerBgInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleCustomTimerImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      try {
+        setTimerBgCustomImage(result);
+        setTimerBgCustomImageName(file.name);
+        setTimerBgMode("image");
+        localStorage.setItem("timerBgCustomImage", result);
+        localStorage.setItem("timerBgCustomImageName", file.name);
+        localStorage.setItem("timerBgMode", "image");
+        window.dispatchEvent(new Event("storage"));
+        emit("timer-settings-updated").catch(() => {});
+      } catch (err) {
+        console.error("Failed to save custom background image:", err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSelectTimerImageTauri = async () => {
+    try {
+      const filePath = await invoke<string | null>("select_image");
+      if (filePath) {
+        const fileSrc = convertFileSrc(filePath);
+        const fileName = filePath.split(/[/\\]/).pop() || "background.png";
+        setTimerBgCustomImage(fileSrc);
+        setTimerBgCustomImageName(fileName);
+        setTimerBgMode("image");
+        localStorage.setItem("timerBgCustomImage", filePath);
+        localStorage.setItem("timerBgCustomImageName", fileName);
+        localStorage.setItem("timerBgMode", "image");
+        window.dispatchEvent(new Event("storage"));
+        emit("timer-settings-updated").catch(() => {});
+      }
+    } catch (err) {
+      console.error("Failed to select image:", err);
+    }
+  };
+
+  const handleRemoveCustomTimerImage = () => {
+    setTimerBgCustomImage("");
+    setTimerBgCustomImageName("");
+    setTimerBgMode("color");
+    localStorage.removeItem("timerBgCustomImage");
+    localStorage.removeItem("timerBgCustomImageName");
+    localStorage.setItem("timerBgMode", "color");
+    window.dispatchEvent(new Event("storage"));
+    emit("timer-settings-updated").catch(() => {});
   };
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "pause_record" | "webcam" | "mic" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
@@ -1777,7 +1862,11 @@ function SettingsWindow() {
                   justifyContent: "center",
                   marginBottom: "20px",
                   background:
-                    timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate")
+                    timerBgMode === "image" && timerBgCustomImage
+                      ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
+                      : timerBgMode === "desktop"
+                      ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
+                      : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
                       ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
                       : timerBgStyle === "oled-black"
                         ? "#000000"
@@ -2134,6 +2223,120 @@ function SettingsWindow() {
                   <option value="frosted-dark">{(t as any).timerBgGlass}</option>
                   <option value="pomodoro-red">{(t as any).timerBgPomodoro}</option>
                 </select>
+              </div>
+
+              {/* Background Mode & Custom Image Section */}
+              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px", marginTop: "12px" }}>
+                <div className="setting-info" style={{ marginBottom: "12px" }}>
+                  <span className="setting-label">{(t as any).timerBgImageTitle || "Mola Ekranı Arka Plan Görseli"}</span>
+                  <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
+                </div>
+
+                {/* Background Source Selector */}
+                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "10px" }}>
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
+                  </div>
+                  <select
+                    className="premium-input"
+                    value={timerBgMode}
+                    onChange={(e) => {
+                      const val = e.target.value as "color" | "desktop" | "image";
+                      setTimerBgMode(val);
+                      localStorage.setItem("timerBgMode", val);
+                      window.dispatchEvent(new Event("storage"));
+                      emit("timer-settings-updated").catch(() => {});
+                    }}
+                    style={{ width: "240px" }}
+                  >
+                    <option value="color">{(t as any).timerBgModeColor || "Düz Renk / Gradyan"}</option>
+                    <option value="desktop">{(t as any).timerBgModeDesktop || "Soluk Masaüstü (Faded Desktop)"}</option>
+                    <option value="image">{(t as any).timerBgModeImage || "Özel Görsel Dosyası"}</option>
+                  </select>
+                </div>
+
+                {/* Option 1: Faded Desktop Description Box */}
+                {timerBgMode === "desktop" && (
+                  <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", marginBottom: "12px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                    <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.5, display: "block" }}>
+                      💡 {(t as any).timerBgFadedDesktopDesc || "Sayacın arkasına mevcut masaüstünüzün soluk/karartılmış bir görüntüsünü koyar."}
+                    </span>
+                  </div>
+                )}
+
+                {/* Option 2: Custom Image Selector Card */}
+                {timerBgMode === "image" && (
+                  <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "12px", padding: "14px 16px", marginBottom: "12px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", overflow: "hidden", flex: "1 1 auto" }}>
+                        <Camera size={18} color="#38bdf8" />
+                        <span style={{ fontSize: "0.85rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "240px" }}>
+                          {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <input
+                          type="file"
+                          ref={customTimerBgInputRef}
+                          accept="image/*"
+                          onChange={handleCustomTimerImageUpload}
+                          style={{ display: "none" }}
+                        />
+                        <button
+                          className="premium-button"
+                          onClick={() => {
+                            if ((window as any).__TAURI_INTERNALS__) {
+                              handleSelectTimerImageTauri();
+                            } else {
+                              customTimerBgInputRef.current?.click();
+                            }
+                          }}
+                          style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+                        >
+                          <Upload size={14} />
+                          {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
+                        </button>
+                        {timerBgCustomImage && (
+                          <button
+                            className="premium-button"
+                            onClick={handleRemoveCustomTimerImage}
+                            style={{ padding: "6px 10px", fontSize: "0.8rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+                            title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: "0.78rem", color: "var(--text-tertiary)", lineHeight: 1.4 }}>
+                      {(t as any).timerBgImageFileDesc || "Bilgisayarınızdan özel bir görsel (şirket logosu, mola afişi vb.) seçip arka plan yapmanızı sağlar."}
+                    </span>
+                  </div>
+                )}
+
+                {/* Scale to Screen Checkbox Row */}
+                {(timerBgMode === "desktop" || timerBgMode === "image") && (
+                  <div className="setting-row" style={{ borderBottom: "none", paddingTop: "4px", paddingBottom: "8px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
+                      <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={timerBgScale}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setTimerBgScale(checked);
+                          localStorage.setItem("timerBgScale", String(checked));
+                          window.dispatchEvent(new Event("storage"));
+                          emit("timer-settings-updated").catch(() => {});
+                        }}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Clock Font Style Row */}

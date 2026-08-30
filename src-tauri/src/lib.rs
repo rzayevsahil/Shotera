@@ -1452,13 +1452,14 @@ fn show_settings_window(app_handle: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn open_break_timer(app_handle: AppHandle) -> Result<(), String> {
+fn open_break_timer(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("timer") {
         if window.is_visible().unwrap_or(false) {
             let _ = window.hide();
             restore_focus(&app_handle, "timer");
             return Ok(());
         }
+        let _ = capture_screen_to_state(&app_handle, &state);
         let _ = window.set_fullscreen(true);
         let _ = window.show();
         let _ = window.set_focus();
@@ -1975,7 +1976,7 @@ pub fn run() {
                         
                         if let Ok(timer_sc) = timer_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &timer_sc {
-                                let _ = open_break_timer(app_handle_shortcut.clone());
+                                let _ = open_break_timer(app_handle_shortcut.clone(), state.clone());
                                 return;
                             }
                         }
@@ -2117,7 +2118,8 @@ pub fn run() {
                                 let _ = open_recorder_view(app_handle_tray.clone(), state);
                             }
                             "timer" => {
-                                let _ = open_break_timer(app_handle_tray.clone());
+                                let state = app_handle_tray.state::<AppState>();
+                                let _ = open_break_timer(app_handle_tray.clone(), state);
                             }
                             "zoom" => {
                                 let state = app_handle_tray.state::<AppState>();

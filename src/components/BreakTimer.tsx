@@ -1,11 +1,29 @@
 import { useEffect, useState, useRef } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX } from "lucide-react";
 import { translations, getLanguage, Language } from "../i18n";
 
 import { playTimerSound } from "../utils/audio";
+
+function resolveImageSrc(src: string | null | undefined): string {
+  if (!src) return "";
+  const trimmed = src.trim();
+  if (
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("http:") ||
+    trimmed.startsWith("https:") ||
+    trimmed.startsWith("asset:")
+  ) {
+    return trimmed;
+  }
+  try {
+    return convertFileSrc(trimmed);
+  } catch {
+    return trimmed;
+  }
+}
 
 export default function BreakTimer() {
   const [lang, setLang] = useState<Language>(getLanguage());
@@ -31,6 +49,18 @@ export default function BreakTimer() {
   const [lockOnStart, setLockOnStart] = useState<boolean>(() => localStorage.getItem("timerLockWorkstationOnStart") === "true");
   const [timerOpacity, setTimerOpacity] = useState<number>(() => Number(localStorage.getItem("timerOpacity") || "100") / 100);
   const [timerPosition, setTimerPosition] = useState<string>(() => localStorage.getItem("timerPosition") || "center");
+
+  const [timerBgMode, setTimerBgMode] = useState<"color" | "desktop" | "image">(() => {
+    return (localStorage.getItem("timerBgMode") as "color" | "desktop" | "image") || "color";
+  });
+  const [timerBgCustomImage, setTimerBgCustomImage] = useState<string>(() => {
+    return localStorage.getItem("timerBgCustomImage") || "";
+  });
+  const [timerBgScale, setTimerBgScale] = useState<boolean>(() => {
+    const saved = localStorage.getItem("timerBgScale");
+    return saved !== null ? saved === "true" : true;
+  });
+  const [desktopBgSrc, setDesktopBgSrc] = useState<string | null>(null);
 
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
@@ -81,6 +111,24 @@ export default function BreakTimer() {
       setTimerOpacity(Number(localStorage.getItem("timerOpacity") || "100") / 100);
       setTimerPosition(localStorage.getItem("timerPosition") || "center");
 
+      const bgMode = (localStorage.getItem("timerBgMode") as "color" | "desktop" | "image") || "color";
+      const customImg = localStorage.getItem("timerBgCustomImage") || "";
+      const bgScale = localStorage.getItem("timerBgScale") !== "false";
+
+      setTimerBgMode(bgMode);
+      setTimerBgCustomImage(resolveImageSrc(customImg));
+      setTimerBgScale(bgScale);
+
+      if (bgMode === "desktop") {
+        invoke<string>("get_last_screenshot")
+          .then((base64Data) => {
+            if (base64Data) {
+              setDesktopBgSrc(`data:image/png;base64,${base64Data}`);
+            }
+          })
+          .catch((err) => console.error("Failed to fetch desktop screenshot for timer background:", err));
+      }
+
       if (isTriggerEvent) {
         stopAlarm();
         setCurrentSeconds(dir === "down" ? defaultDuration : 0);
@@ -107,11 +155,15 @@ export default function BreakTimer() {
     const unlistenFocusPromise = listen("force-focus", () => {
       window.focus();
     });
+    const unlistenSettingsPromise = listen("timer-settings-updated", () => {
+      applySettings(false);
+    });
     window.addEventListener("storage", handleStorage);
 
     return () => {
       unlistenPromise.then((unlisten) => unlisten());
       unlistenFocusPromise.then((unlisten) => unlisten());
+      unlistenSettingsPromise.then((unlisten) => unlisten());
       window.removeEventListener("storage", handleStorage);
     };
   }, []);
@@ -140,7 +192,7 @@ export default function BreakTimer() {
   const playAlarm = async () => {
     stopAlarm();
     if (!soundEnabled) return;
-    
+
     const playOnce = async () => {
       try {
         const win = getCurrentWindow();
@@ -286,10 +338,10 @@ export default function BreakTimer() {
   const progress = isOvertime
     ? 100
     : totalSeconds > 0
-    ? (timerDirection === "down"
+      ? (timerDirection === "down"
         ? ((totalSeconds - currentSeconds) / totalSeconds) * 100
         : (currentSeconds / totalSeconds) * 100)
-    : 0;
+      : 0;
   const strokeDashoffset = 880 - (880 * progress) / 100;
 
   const handleReset = () => {
@@ -308,40 +360,40 @@ export default function BreakTimer() {
     timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate")
       ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
       : timerBgStyle === "oled-black"
-      ? "#000000"
-      : timerBgStyle === "frosted-dark"
-      ? "rgba(15, 23, 42, 0.95)"
-      : timerBgStyle === "pomodoro-red"
-      ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-      : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`;
+        ? "#000000"
+        : timerBgStyle === "frosted-dark"
+          ? "rgba(15, 23, 42, 0.95)"
+          : timerBgStyle === "pomodoro-red"
+            ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+            : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`;
 
   const fontFamilyCSS =
     timerFontStyle === "heading"
       ? "'Outfit', -apple-system, sans-serif"
       : timerFontStyle === "mono"
-      ? "monospace"
-      : timerFontStyle === "segoe-light"
-      ? "'Segoe UI Light', 'Segoe UI', -apple-system, sans-serif"
-      : timerFontStyle === "orbitron"
-      ? "'Orbitron', sans-serif"
-      : timerFontStyle === "chakra"
-      ? "'Chakra Petch', sans-serif"
-      : timerFontStyle === "share-tech"
-      ? "'Share Tech Mono', monospace"
-      : timerFontStyle === "rajdhani"
-      ? "'Rajdhani', sans-serif"
-      : timerFontStyle === "dseg"
-      ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
-      : "'Inter', -apple-system, sans-serif";
+        ? "monospace"
+        : timerFontStyle === "segoe-light"
+          ? "'Segoe UI Light', 'Segoe UI', -apple-system, sans-serif"
+          : timerFontStyle === "orbitron"
+            ? "'Orbitron', sans-serif"
+            : timerFontStyle === "chakra"
+              ? "'Chakra Petch', sans-serif"
+              : timerFontStyle === "share-tech"
+                ? "'Share Tech Mono', monospace"
+                : timerFontStyle === "rajdhani"
+                  ? "'Rajdhani', sans-serif"
+                  : timerFontStyle === "dseg"
+                    ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
+                    : "'Inter', -apple-system, sans-serif";
 
   const fontWeightCSS =
     timerFontStyle === "segoe-light"
       ? 300
       : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
-      ? 700
-      : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
-      ? 400
-      : 800;
+        ? 700
+        : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
+          ? 400
+          : 800;
 
   const getAlignmentStyle = (pos: string) => {
     switch (pos) {
@@ -372,7 +424,7 @@ export default function BreakTimer() {
       style={{
         width: "100vw",
         height: "100vh",
-        background: backgroundStyleCSS,
+        background: timerBgMode === "color" ? backgroundStyleCSS : "#020617",
         display: "flex",
         flexDirection: "column",
         opacity: timerOpacity,
@@ -383,6 +435,71 @@ export default function BreakTimer() {
         ...getAlignmentStyle(timerPosition)
       }}
     >
+      {/* Background Image Layer: Faded Desktop */}
+      {timerBgMode === "desktop" && desktopBgSrc && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: `url("${desktopBgSrc}")`,
+            backgroundSize: timerBgScale ? "cover" : "contain",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            zIndex: 0,
+          }}
+        />
+      )}
+
+      {/* Background Image Layer: Custom Image File */}
+      {timerBgMode === "image" && timerBgCustomImage && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: `url("${resolveImageSrc(timerBgCustomImage)}")`,
+            backgroundSize: timerBgScale ? "cover" : "contain",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            zIndex: 0,
+          }}
+        />
+      )}
+
+      {/* Dark Faded Overlay for Faded Desktop (Sharp & Darkened, No Blur) */}
+      {timerBgMode === "desktop" && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "radial-gradient(circle at center, rgba(9, 13, 22, 0.45) 0%, rgba(9, 13, 22, 0.7) 100%)",
+            zIndex: 1,
+          }}
+        />
+      )}
+
+      {/* Subtle Dark Vignette for Custom Image (Sharp & No Blur) */}
+      {timerBgMode === "image" && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "radial-gradient(circle at center, rgba(9, 13, 22, 0.15) 0%, rgba(9, 13, 22, 0.45) 100%)",
+            zIndex: 1,
+          }}
+        />
+      )}
       {/* Top Controls */}
       <div
         style={{
@@ -436,7 +553,7 @@ export default function BreakTimer() {
       </div>
 
       {/* Main Circular Timer Display */}
-      <div style={{ position: "relative", width: "340px", height: "340px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ position: "relative", width: "340px", height: "340px", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>
         <svg width="340" height="340" style={{ transform: "rotate(-90deg)" }}>
           {/* Track Circle */}
           <circle
@@ -498,10 +615,10 @@ export default function BreakTimer() {
             {isOvertime
               ? ((t as any).timerOvertimeStatus || "Süre Aşıldı")
               : isFinished
-              ? (t.breakTimerFinished || "Süre Bitti!")
-              : isRunning
-              ? (timerDirection === "up" ? ((t as any).timerCountingUp || "0'dan İleriye Sayılıyor") : (t.shortcutBreakTimer || "Mola Devam Ediyor"))
-              : ((t as any).timerPaused || "Duraklatıldı")}
+                ? (t.breakTimerFinished || "Süre Bitti!")
+                : isRunning
+                  ? (timerDirection === "up" ? ((t as any).timerCountingUp || "0'dan İleriye Sayılıyor") : (t.shortcutBreakTimer || "Mola Devam Ediyor"))
+                  : ((t as any).timerPaused || "Duraklatıldı")}
           </span>
         </div>
       </div>
@@ -513,13 +630,14 @@ export default function BreakTimer() {
           display: "flex",
           alignItems: "center",
           gap: "16px",
+          zIndex: 10,
         }}
       >
         <button
           onClick={() => setIsRunning((prev) => !prev)}
           style={{
-            background: isRunning ? "rgba(234, 179, 8, 0.2)" : "rgba(34, 197, 94, 0.2)",
-            border: `1px solid ${isRunning ? "rgba(234, 179, 8, 0.5)" : "rgba(34, 197, 94, 0.5)"}`,
+            background: isRunning ? "rgba(234, 179, 8, 0.25)" : "rgba(34, 197, 94, 0.25)",
+            border: `1px solid ${isRunning ? "rgba(234, 179, 8, 0.6)" : "rgba(34, 197, 94, 0.6)"}`,
             color: isRunning ? "#fef08a" : "#86efac",
             padding: "12px 28px",
             borderRadius: "30px",
@@ -529,7 +647,10 @@ export default function BreakTimer() {
             alignItems: "center",
             gap: "8px",
             cursor: "pointer",
-            backdropFilter: "blur(12px)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+            transition: "all 0.2s ease",
           }}
         >
           {isRunning ? <Pause size={18} /> : <Play size={18} />}
@@ -539,9 +660,9 @@ export default function BreakTimer() {
         <button
           onClick={handleReset}
           style={{
-            background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            color: "#fff",
+            background: "rgba(15, 23, 42, 0.65)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "#f8fafc",
             padding: "12px 24px",
             borderRadius: "30px",
             fontSize: "16px",
@@ -550,6 +671,10 @@ export default function BreakTimer() {
             alignItems: "center",
             gap: "8px",
             cursor: "pointer",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+            transition: "all 0.2s ease",
           }}
         >
           <RotateCcw size={18} />
@@ -563,9 +688,15 @@ export default function BreakTimer() {
           position: "absolute",
           bottom: "28px",
           fontSize: "13px",
-          color: "rgba(255, 255, 255, 0.4)",
+          color: "rgba(255, 255, 255, 0.7)",
+          background: "rgba(15, 23, 42, 0.4)",
+          backdropFilter: "blur(8px)",
+          padding: "6px 16px",
+          borderRadius: "20px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
           display: "flex",
           gap: "16px",
+          zIndex: 10,
         }}
       >
         <span>💡 <b>{(t as any).timerHintWheel || "Fare Tekerleği / Ok Tuşları:"}</b> {(t as any).timerHintAdjust1 || "Süre Ayarla (+/- 1 dk)"}</span>
