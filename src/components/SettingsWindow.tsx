@@ -289,7 +289,7 @@ function SettingsWindow() {
         localStorage.setItem("timerBgCustomImageName", file.name);
         localStorage.setItem("timerBgMode", "image");
         window.dispatchEvent(new Event("storage"));
-        emit("timer-settings-updated").catch(() => {});
+        emit("timer-settings-updated").catch(() => { });
       } catch (err) {
         console.error("Failed to save custom background image:", err);
       }
@@ -310,7 +310,7 @@ function SettingsWindow() {
         localStorage.setItem("timerBgCustomImageName", fileName);
         localStorage.setItem("timerBgMode", "image");
         window.dispatchEvent(new Event("storage"));
-        emit("timer-settings-updated").catch(() => {});
+        emit("timer-settings-updated").catch(() => { });
       }
     } catch (err) {
       console.error("Failed to select image:", err);
@@ -325,7 +325,7 @@ function SettingsWindow() {
     localStorage.removeItem("timerBgCustomImageName");
     localStorage.setItem("timerBgMode", "color");
     window.dispatchEvent(new Event("storage"));
-    emit("timer-settings-updated").catch(() => {});
+    emit("timer-settings-updated").catch(() => { });
   };
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "pause_record" | "webcam" | "mic" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
@@ -1926,16 +1926,16 @@ function SettingsWindow() {
                         timerBgMode === "image" && timerBgCustomImage
                           ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
                           : timerBgMode === "desktop"
-                          ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
-                          : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
-                          ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
-                          : timerBgStyle === "oled-black"
-                            ? "#000000"
-                            : timerBgStyle === "frosted-dark"
-                              ? "rgba(15, 23, 42, 0.95)"
-                              : timerBgStyle === "pomodoro-red"
-                                ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-                                : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`
+                            ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
+                            : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
+                              ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
+                              : timerBgStyle === "oled-black"
+                                ? "#000000"
+                                : timerBgStyle === "frosted-dark"
+                                  ? "rgba(15, 23, 42, 0.95)"
+                                  : timerBgStyle === "pomodoro-red"
+                                    ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+                                    : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`
                     }}
                   >
                     {/* Background Mesh Dots Grid */}
@@ -2315,7 +2315,7 @@ function SettingsWindow() {
                       setTimerBgMode(val);
                       localStorage.setItem("timerBgMode", val);
                       window.dispatchEvent(new Event("storage"));
-                      emit("timer-settings-updated").catch(() => {});
+                      emit("timer-settings-updated").catch(() => { });
                     }}
                     style={{ width: "240px" }}
                   >
@@ -2400,7 +2400,7 @@ function SettingsWindow() {
                           setTimerBgScale(checked);
                           localStorage.setItem("timerBgScale", String(checked));
                           window.dispatchEvent(new Event("storage"));
-                          emit("timer-settings-updated").catch(() => {});
+                          emit("timer-settings-updated").catch(() => { });
                         }}
                       />
                       <span className="slider"></span>
@@ -2795,7 +2795,7 @@ function SettingsWindow() {
           <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
             {/* SOL KOLON: Form elemanları, dropdown'lar, renk paleti ve yazı tipi ayarları */}
             <div style={{ flex: "1 1 0%", minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
-              
+
               {/* Kart 1: Kayıt ve Kısayol Ayarları */}
               <div className="settings-card">
                 <div className="setting-row" data-tour="shortcut-record">
@@ -3758,19 +3758,19 @@ function SettingsWindow() {
                   fontSize: "0.78rem"
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-muted)" }}>
-                    <Video size={13} color="#38bdf8" />
+                    <Video size={13} color="#38bdf8" style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordFps} FPS</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordWebcam ? "#4ade80" : "var(--text-muted)" }}>
-                    <Camera size={13} color={recordWebcam ? "#4ade80" : "#64748b"} />
+                    <Camera size={13} color={recordWebcam ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordWebcam ? "Kamera Kaydı" : "Kamera Kapalı"}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordMic ? "#4ade80" : "var(--text-muted)" }}>
-                    <Mic size={13} color={recordMic ? "#4ade80" : "#64748b"} />
+                    <Mic size={13} color={recordMic ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordMic ? "Mikrofon Kaydı" : "Mikrofon Kapalı"}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordAudio ? "#4ade80" : "var(--text-muted)" }}>
-                    <Volume2 size={13} color={recordAudio ? "#4ade80" : "#64748b"} />
+                    <Volume2 size={13} color={recordAudio ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordAudio ? "Sistem Ses Kaydı" : "Ses Kapalı"}</span>
                   </div>
                 </div>
