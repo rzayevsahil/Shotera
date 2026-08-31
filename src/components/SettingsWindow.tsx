@@ -270,6 +270,47 @@ function SettingsWindow() {
 
   const [previewPaused, setPreviewPaused] = useState(false);
 
+  const [previewTimerSeconds, setPreviewTimerSeconds] = useState(0);
+  const [previewTimerIsRunning, setPreviewTimerIsRunning] = useState(false);
+
+  // Sync preview timer with default duration changes when NOT running
+  useEffect(() => {
+    if (!previewTimerIsRunning) {
+      if (timerCountDirection === "up") {
+        setPreviewTimerSeconds(0);
+      } else {
+        setPreviewTimerSeconds(timerDefaultDuration);
+      }
+    }
+  }, [timerDefaultDuration, timerCountDirection, previewTimerIsRunning]);
+
+  // Tick the timer
+  useEffect(() => {
+    let interval: any = null;
+    if (previewTimerIsRunning) {
+      interval = setInterval(() => {
+        setPreviewTimerSeconds((prev) => {
+          if (timerCountDirection === "down") {
+            if (prev <= 1) {
+              setPreviewTimerIsRunning(false);
+              return 0;
+            }
+            return prev - 1;
+          } else {
+            if (prev >= timerDefaultDuration - 1) {
+              setPreviewTimerIsRunning(false);
+              return timerDefaultDuration;
+            }
+            return prev + 1;
+          }
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [previewTimerIsRunning, timerCountDirection, timerDefaultDuration]);
+
   const [timerBgMode, setTimerBgMode] = useState<"color" | "desktop" | "image">(
     () => (localStorage.getItem("timerBgMode") as "color" | "desktop" | "image") || "color"
   );
@@ -2875,13 +2916,19 @@ function SettingsWindow() {
                       >
                         {/* Mini Taymer Halkası */}
                         {(() => {
-                          const pMin = Math.floor(timerDefaultDuration / 60);
-                          const pSec = timerDefaultDuration % 60;
+                          const pMin = Math.floor(previewTimerSeconds / 60);
+                          const pSec = previewTimerSeconds % 60;
                           const pStr = `${String(pMin).padStart(2, "0")}:${String(pSec).padStart(2, "0")}`;
                           const isLongStr = pStr.length >= 6;
                           const isVeryLongStr = pStr.length >= 7;
                           const dynamicFontSize = isVeryLongStr ? "0.66rem" : isLongStr ? "0.82rem" : "1.08rem";
                           const dynamicLetterSpacing = isVeryLongStr ? "-0.75px" : isLongStr ? "0px" : "0.75px";
+
+                          const previewMaxDash = 213.63;
+                          const progress = timerCountDirection === "down" 
+                            ? (previewTimerSeconds / timerDefaultDuration) 
+                            : ((timerDefaultDuration - previewTimerSeconds) / timerDefaultDuration);
+                          const strokeDashoffset = isNaN(progress) ? 0 : previewMaxDash * progress;
 
                           return (
                             <div
@@ -2889,15 +2936,35 @@ function SettingsWindow() {
                                 width: "72px",
                                 height: "72px",
                                 borderRadius: "50%",
+                                position: "relative",
                                 background: "transparent",
-                                border: `2.5px solid ${timerRingColor || "#38bdf8"}`,
-                                boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
+                                boxShadow: `inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                fontSize: dynamicFontSize,
-                                lineHeight: 1,
-                                fontWeight:
+                                color: "#ffffff",
+                              }}
+                            >
+                              <svg width="72" height="72" style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}>
+                                <circle cx="36" cy="36" r="34" stroke="rgba(255, 255, 255, 0.08)" strokeWidth="2.5" fill="transparent" />
+                                <circle 
+                                  cx="36" cy="36" r="34" 
+                                  stroke={timerRingColor || "#38bdf8"} 
+                                  strokeWidth="2.5" 
+                                  fill="transparent" 
+                                  strokeDasharray={previewMaxDash} 
+                                  strokeDashoffset={strokeDashoffset} 
+                                  strokeLinecap="round" 
+                                  style={{ transition: "stroke-dashoffset 1s linear, stroke 0.3s ease", filter: `drop-shadow(0 0 6px ${timerRingColor || "#38bdf8"}aa)` }} 
+                                />
+                              </svg>
+                              <div
+                                style={{
+                                  position: "relative",
+                                  zIndex: 1,
+                                  fontSize: dynamicFontSize,
+                                  lineHeight: 1,
+                                  fontWeight:
                                   timerFontStyle === "segoe-light"
                                     ? 300
                                     : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
@@ -2943,16 +3010,22 @@ function SettingsWindow() {
                                 {pStr}
                               </span>
                             </div>
-                          );
+                          </div>
+                        );
                         })()}
 
                         {/* Mola Sayacı Butonları (Duraklat & Sıfırla) */}
                         {timerShowControls && (
                           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                             <div
+                              onClick={() => setPreviewTimerIsRunning(!previewTimerIsRunning)}
                               style={{
-                                background: "linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.9))",
-                                border: "0.5px solid rgba(254, 215, 170, 0.5)",
+                                background: previewTimerIsRunning
+                                  ? "linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.9))"
+                                  : "linear-gradient(135deg, rgba(34, 197, 94, 0.85), rgba(16, 185, 129, 0.9))",
+                                border: previewTimerIsRunning
+                                  ? "0.5px solid rgba(254, 215, 170, 0.5)"
+                                  : "0.5px solid rgba(187, 247, 208, 0.5)",
                                 color: "#ffffff",
                                 padding: "2px 6px",
                                 borderRadius: "6px",
@@ -2961,15 +3034,21 @@ function SettingsWindow() {
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "3px",
-                                boxShadow: "0 1px 3px rgba(245, 158, 11, 0.35)",
-                                whiteSpace: "nowrap"
+                                boxShadow: previewTimerIsRunning ? "0 1px 3px rgba(245, 158, 11, 0.35)" : "0 1px 3px rgba(34, 197, 94, 0.35)",
+                                whiteSpace: "nowrap",
+                                cursor: "pointer",
+                                pointerEvents: "auto"
                               }}
                             >
-                              <Pause size={6} />
-                              <span>{(t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat"}</span>
+                              {previewTimerIsRunning ? <Pause size={6} /> : <Play size={6} />}
+                              <span>{previewTimerIsRunning ? ((t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat") : ((t as any).timerStartBtn || "Başlat")}</span>
                             </div>
 
                             <div
+                              onClick={() => {
+                                setPreviewTimerIsRunning(false);
+                                setPreviewTimerSeconds(timerCountDirection === "up" ? 0 : timerDefaultDuration);
+                              }}
                               style={{
                                 background: "rgba(15, 23, 42, 0.65)",
                                 border: "0.5px solid rgba(255, 255, 255, 0.2)",
@@ -2982,7 +3061,9 @@ function SettingsWindow() {
                                 alignItems: "center",
                                 gap: "3px",
                                 boxShadow: "0 1px 3px rgba(0, 0, 0, 0.3)",
-                                whiteSpace: "nowrap"
+                                whiteSpace: "nowrap",
+                                cursor: "pointer",
+                                pointerEvents: "auto"
                               }}
                             >
                               <RotateCcw size={6} />
