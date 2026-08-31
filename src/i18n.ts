@@ -556,6 +556,8 @@ export const translations = {
     recordSubTabShortcuts: "Kısayollar",
     recordControlsPreviewTitle: "Kayıt Kontrol Çubuğu",
     recordControlsPreviewDesc: "Ekran kaydı esnasında ekranınızda yüzen bu çubuk üzerinden kaydı yönetebilirsiniz.",
+    badgeActive: "AÇIK",
+    badgeDisabled: "GİZLİ",
   },
 
   en: {
@@ -1025,6 +1027,8 @@ export const translations = {
     recordSubTabShortcuts: "Shortcuts",
     recordControlsPreviewTitle: "Recording Control Bar",
     recordControlsPreviewDesc: "Manage recording on screen via this floating control bar while recording.",
+    badgeActive: "ON",
+    badgeDisabled: "HIDDEN",
   },
 
 
@@ -1447,6 +1451,8 @@ export const translations = {
     recordSubTabShortcuts: "Qısayollar",
     recordControlsPreviewTitle: "Qeyd İdarəetmə Paneli",
     recordControlsPreviewDesc: "Qeyd zamanı ekran üzərində bu üzən panel vasitəsilə qeydi idarə edin.",
+    badgeActive: "AÇIQ",
+    badgeDisabled: "GİZLİ",
   },
 
   ru: {
@@ -1867,6 +1873,8 @@ export const translations = {
     recordSubTabShortcuts: "Горячие Клавиши",
     recordControlsPreviewTitle: "Панель Управления Записью",
     recordControlsPreviewDesc: "Управляйте записью прямо с экрана с помощью плавающей панели.",
+    badgeActive: "ВКЛ",
+    badgeDisabled: "СКРЫТО",
   },
 
   de: {
@@ -2286,6 +2294,8 @@ export const translations = {
     recordSubTabShortcuts: "Tastenkombinationen",
     recordControlsPreviewTitle: "Aufnahme-Steuerungsleiste",
     recordControlsPreviewDesc: "Steuern Sie die Aufnahme direkt auf dem Bildschirm über diese Schwebefunktionsleiste.",
+    badgeActive: "AN",
+    badgeDisabled: "VERSTECKT",
   }
 };
 
