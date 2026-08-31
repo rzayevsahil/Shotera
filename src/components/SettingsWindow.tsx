@@ -3763,15 +3763,15 @@ function SettingsWindow() {
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordWebcam ? "#4ade80" : "var(--text-muted)" }}>
                     <Camera size={13} color={recordWebcam ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
-                    <span>{recordWebcam ? "Kamera Kaydı" : "Kamera Kapalı"}</span>
+                    <span>{recordWebcam ? ((t as any).statusWebcamOn || "Kamera Kaydı") : ((t as any).statusWebcamOff || "Kamera Kapalı")}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordMic ? "#4ade80" : "var(--text-muted)" }}>
                     <Mic size={13} color={recordMic ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
-                    <span>{recordMic ? "Mikrofon Kaydı" : "Mikrofon Kapalı"}</span>
+                    <span>{recordMic ? ((t as any).statusMicOn || "Mikrofon Kaydı") : ((t as any).statusMicOff || "Mikrofon Kapalı")}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordAudio ? "#4ade80" : "var(--text-muted)" }}>
                     <Volume2 size={13} color={recordAudio ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
-                    <span>{recordAudio ? "Sistem Ses Kaydı" : "Ses Kapalı"}</span>
+                    <span>{recordAudio ? ((t as any).statusAudioOn || "Sistem Ses Kaydı") : ((t as any).statusAudioOff || "Ses Kapalı")}</span>
                   </div>
                 </div>
 

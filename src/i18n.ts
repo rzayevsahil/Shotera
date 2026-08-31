@@ -539,6 +539,12 @@ export const translations = {
     timerPositionDesc: "9 noktalı ızgara üzerinden sayacın ekranda nerede duracağını belirler.",
     timerOvertimeStatus: "Süre Aşıldı",
     timerOvertimeText: "Aşılan Süre",
+    statusWebcamOn: "Kamera Kaydı",
+    statusWebcamOff: "Kamera Kapalı",
+    statusMicOn: "Mikrofon Kaydı",
+    statusMicOff: "Mikrofon Kapalı",
+    statusAudioOn: "Sistem Ses Kaydı",
+    statusAudioOff: "Ses Kapalı",
   },
 
   en: {
@@ -991,6 +997,12 @@ export const translations = {
     timerOpacityDesc: "Determines the transparency of the timer on screen. Lowering the value makes the timer semi-transparent so the background area is more visible.",
     timerPositionLabel: "Screen Alignment (9-Point Grid)",
     timerPositionDesc: "Determines where the timer stays on screen using a 9-point grid.",
+    statusWebcamOn: "Webcam Recording",
+    statusWebcamOff: "Webcam Off",
+    statusMicOn: "Mic Recording",
+    statusMicOff: "Microphone Off",
+    statusAudioOn: "System Audio On",
+    statusAudioOff: "Audio Off",
   },
 
 
@@ -1396,6 +1408,12 @@ export const translations = {
     tourNext: "Növbəti →",
     tourFinish: "Anladım, Bitir ✨",
     tourSkip: "Turu Keç",
+    statusWebcamOn: "Kamera Yazılması",
+    statusWebcamOff: "Kamera Bağlıdır",
+    statusMicOn: "Mikrofon Yazılması",
+    statusMicOff: "Mikrofon Bağlıdır",
+    statusAudioOn: "Sistem Səsi Yazılması",
+    statusAudioOff: "Səs Bağlıdır",
   },
 
   ru: {
@@ -1799,6 +1817,12 @@ export const translations = {
     tourNext: "Далее →",
     tourFinish: "Понятно, Завершить ✨",
     tourSkip: "Пропустить",
+    statusWebcamOn: "Запись камеры",
+    statusWebcamOff: "Камера выкл.",
+    statusMicOn: "Запись микр.",
+    statusMicOff: "Микрофон выкл.",
+    statusAudioOn: "Системный звук вкл.",
+    statusAudioOff: "Звук выкл.",
   },
 
   de: {
@@ -2201,6 +2225,12 @@ export const translations = {
     tourNext: "Weiter →",
     tourFinish: "Verstanden, Beenden ✨",
     tourSkip: "Überspringen",
+    statusWebcamOn: "Kameraaufnahme",
+    statusWebcamOff: "Kamera aus",
+    statusMicOn: "Mikrofonaufnahme",
+    statusMicOff: "Mikrofon aus",
+    statusAudioOn: "Systemton an",
+    statusAudioOff: "Ton aus",
   }
 };
 
