@@ -244,6 +244,16 @@ export const TOUR_STEPS: TourStep[] = [
     requireClick: true,
   },
   {
+    id: "timer_subtab_general",
+    target: '[data-tour="timer-subtab-general"]',
+    tab: "timer",
+    subTab: "general",
+    titleKey: "tourTimerSubTabGeneralTitle",
+    descKey: "tourTimerSubTabGeneralDesc",
+    interactiveHintKey: "tourClickTimerSubTabGeneral",
+    requireClick: true,
+  },
+  {
     id: "shortcut_timer",
     target: '[data-tour="shortcut-timer"]',
     tab: "timer",

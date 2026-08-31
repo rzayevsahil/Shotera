@@ -1793,6 +1793,7 @@ function SettingsWindow() {
               >
                 <button
                   type="button"
+                  data-tour="timer-subtab-general"
                   onClick={() => setTimerSubTab("general")}
                   style={{
                     flex: 1,
