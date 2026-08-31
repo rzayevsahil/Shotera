@@ -1961,7 +1961,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Show Time Elapsed After Expiration Row */}
-                  <div className="setting-row">
+                  <div className="setting-row" data-tour="setting-timer-show-elapsed">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerShowElapsedAfterExpiration}</span>
                       <span className="setting-desc">{(t as any).timerShowElapsedAfterExpirationDesc}</span>
@@ -1982,7 +1982,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Lock Workstation Row */}
-                  <div className="setting-row" style={{ borderBottom: "none" }}>
+                  <div className="setting-row" data-tour="setting-timer-lock-workstation" style={{ borderBottom: "none" }}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerLockWorkstationOnStart}</span>
                       <span className="setting-desc">{(t as any).timerLockWorkstationOnStartDesc}</span>
@@ -2532,7 +2532,7 @@ function SettingsWindow() {
               {timerSubTab === "sound" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   {/* Kart 1: Ses Ayarları */}
-                  <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div className="settings-card" data-tour="setting-timer-sound" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     <div className="setting-row">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).timerSoundSourceLabel || "Ses Kaynağı"}</span>
