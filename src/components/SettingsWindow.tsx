@@ -175,8 +175,12 @@ function SettingsWindow() {
   useEffect(() => {
     const handleTourSubTab = (e: Event) => {
       const customEvent = e as CustomEvent<string>;
-      if (customEvent.detail === "theme" || customEvent.detail === "sound" || customEvent.detail === "general") {
-        setTimerSubTab(customEvent.detail as any);
+      const detail = customEvent.detail;
+      if (detail === "theme" || detail === "sound" || detail === "general") {
+        setTimerSubTab(detail as any);
+      }
+      if (detail === "record_general" || detail === "record_webcam" || detail === "record_shortcuts") {
+        setRecordSubTab(detail.replace("record_", "") as any);
       }
     };
     window.addEventListener("tour-subtab-change", handleTourSubTab);
@@ -3138,6 +3142,7 @@ function SettingsWindow() {
               >
                 <button
                   type="button"
+                  data-tour="record-subtab-general"
                   onClick={() => setRecordSubTab("general")}
                   style={{
                     flex: 1,
@@ -3162,6 +3167,7 @@ function SettingsWindow() {
 
                 <button
                   type="button"
+                  data-tour="record-subtab-webcam"
                   onClick={() => setRecordSubTab("webcam")}
                   style={{
                     flex: 1,
@@ -3186,6 +3192,7 @@ function SettingsWindow() {
 
                 <button
                   type="button"
+                  data-tour="record-subtab-shortcuts"
                   onClick={() => setRecordSubTab("shortcuts")}
                   style={{
                     flex: 1,
@@ -3466,7 +3473,7 @@ function SettingsWindow() {
                     </div>
 
                     {/* Kamera Çerçeve Rengi */}
-                    <div className="setting-row">
+                    <div className="setting-row" data-tour="setting-webcam-border-color">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamBorderColorLabel || "Kamera Çerçeve Rengi"}</span>
                       </div>
@@ -3575,7 +3582,7 @@ function SettingsWindow() {
                     </div>
 
                     {/* Çerçeve Stili */}
-                    <div className="setting-row">
+                    <div className="setting-row" data-tour="setting-webcam-border-style">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamBorderStyleLabel || "Çerçeve Stili"}</span>
                         <span className="setting-desc">{(t as any).webcamBorderStyleDesc || "Kamera çerçevesi için animasyon veya renk efekti seçin."}</span>
@@ -3612,7 +3619,7 @@ function SettingsWindow() {
                     </div>
 
                     {/* Kamera Altı Yazısı */}
-                    <div className="setting-row">
+                    <div className="setting-row" data-tour="setting-webcam-text">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamTextLabel || "Kamera Altı Yazısı"}</span>
                         <span className="setting-desc">{(t as any).webcamTextDesc || "Kameranın altında görünecek özel bir metin ekleyin (Kanal adı vb.)."}</span>
@@ -3632,7 +3639,7 @@ function SettingsWindow() {
                     </div>
 
                     {/* Yazı Tipi */}
-                    <div className="setting-row">
+                    <div className="setting-row" data-tour="setting-webcam-font">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"}</span>
                         <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) seçin."}</span>
@@ -3650,7 +3657,7 @@ function SettingsWindow() {
                     </div>
 
                     {/* Yazı Boyutu */}
-                    <div className="setting-row">
+                    <div className="setting-row" data-tour="setting-webcam-font-size">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamTextSizeLabel || "Yazı Boyutu"}</span>
                         <span className="setting-desc">{(t as any).webcamTextSizeDesc || "Kamera altındaki metnin boyutunu ayarlayın."}</span>
@@ -3674,7 +3681,7 @@ function SettingsWindow() {
                     </div>
 
                     {/* Yazı Rengi */}
-                    <div className="setting-row">
+                    <div className="setting-row" data-tour="setting-webcam-text-color">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamTextColorOnlyLabel || "Yazı Rengi"}</span>
                         <span className="setting-desc">{(t as any).webcamTextColorOnlyDesc || "Kamera yazısının rengini belirleyin."}</span>
