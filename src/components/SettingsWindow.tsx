@@ -2473,7 +2473,7 @@ function SettingsWindow() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   {/* Kart 1: Ses Ayarları */}
                   <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                    <div className="setting-row" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).timerSoundSourceLabel || "Ses Kaynağı"}</span>
                         <span className="setting-desc">{(t as any).timerSoundDesc}</span>
@@ -2541,7 +2541,7 @@ function SettingsWindow() {
                     </div>
 
                     {timerSoundSource === "preset" && (
-                      <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                      <div className="setting-row" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>
                         <div className="setting-info">
                           <span className="setting-label">{(t as any).timerSoundLabel || "Bitiş Zili Melodisi"}</span>
                         </div>
@@ -2578,7 +2578,7 @@ function SettingsWindow() {
                     )}
 
                     {timerSoundSource === "custom" && (
-                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
                             <Music size={16} color="#38bdf8" />
@@ -2658,8 +2658,8 @@ function SettingsWindow() {
                       <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
                     </div>
 
-                    <div className="responsive-shortcut-grid">
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <Play size={15} color="#38bdf8" />
                           {(t as any).timerToggleLabel}
@@ -2667,7 +2667,7 @@ function SettingsWindow() {
                         <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeSpace || "Boşluk"}</kbd>
                       </div>
 
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <Clock size={15} color="#10b981" />
                           {(t as any).timerAdjust1Label}
@@ -2679,7 +2679,7 @@ function SettingsWindow() {
                         </div>
                       </div>
 
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <Zap size={15} color="#eab308" />
                           {(t as any).timerAdjust5Label}
@@ -2691,7 +2691,7 @@ function SettingsWindow() {
                         </div>
                       </div>
 
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <RotateCcw size={15} color="#a855f7" />
                           {(t as any).timerResetKeyLabel}
@@ -2699,7 +2699,7 @@ function SettingsWindow() {
                         <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>R</kbd>
                       </div>
 
-                      <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", borderTop: "1px dashed rgba(255, 255, 255, 0.08)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <LogOut size={15} color="#f87171" />
                           {(t as any).timerExitLabel}
@@ -2707,7 +2707,7 @@ function SettingsWindow() {
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>ESC</kbd>
                           <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
-                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Q</kbd>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeRightClick || "Sağ Tık"}</kbd>
                         </div>
                       </div>
                     </div>
