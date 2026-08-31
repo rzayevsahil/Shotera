@@ -591,9 +591,9 @@ export default function BreakTimer() {
         >
           <span
             style={{
-              fontSize: "72px",
+              fontSize: formattedTime.length >= 7 ? "44px" : formattedTime.length >= 6 ? "54px" : "72px",
               fontWeight: fontWeightCSS,
-              letterSpacing: "2px",
+              letterSpacing: formattedTime.length >= 7 ? "-1px" : formattedTime.length >= 6 ? "0px" : "2px",
               fontVariantNumeric: "tabular-nums",
               fontFamily: fontFamilyCSS,
               color: isFinished ? "#f87171" : "#ffffff",
@@ -617,7 +617,7 @@ export default function BreakTimer() {
               : isFinished
                 ? (t.breakTimerFinished || "Süre Bitti!")
                 : isRunning
-                  ? (timerDirection === "up" ? ((t as any).timerCountingUp || "0'dan İleriye Sayılıyor") : (t.shortcutBreakTimer || "Mola Devam Ediyor"))
+                  ? (timerDirection === "up" ? ((t as any).timerCountingUp || "0'dan İleriye Sayılıyor") : ((t as any).timerActive || "Mola Devam Ediyor"))
                   : ((t as any).timerPaused || "Duraklatıldı")}
           </span>
         </div>

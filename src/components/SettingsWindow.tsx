@@ -2839,64 +2839,77 @@ function SettingsWindow() {
                         }}
                       >
                         {/* Mini Taymer Halkası */}
-                        <div
-                          style={{
-                            width: "48px",
-                            height: "48px",
-                            borderRadius: "50%",
-                            background: "rgba(15, 23, 42, 0.85)",
-                            border: `2px solid ${timerRingColor || "#38bdf8"}`,
-                            boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "0.72rem",
-                            lineHeight: 1,
-                            fontWeight:
-                              timerFontStyle === "segoe-light"
-                                ? 300
-                                : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
-                                  ? 700
-                                  : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
-                                    ? 400
-                                    : 800,
-                            color: "#ffffff",
-                            fontFamily:
-                              timerFontStyle === "heading"
-                                ? "'Outfit', sans-serif"
-                                : timerFontStyle === "mono"
-                                  ? "monospace"
-                                  : timerFontStyle === "segoe-light"
-                                    ? "'Segoe UI Light', 'Segoe UI', sans-serif"
-                                    : timerFontStyle === "orbitron"
-                                      ? "'Orbitron', sans-serif"
-                                      : timerFontStyle === "chakra"
-                                        ? "'Chakra Petch', sans-serif"
-                                        : timerFontStyle === "share-tech"
-                                          ? "'Share Tech Mono', monospace"
-                                          : timerFontStyle === "rajdhani"
-                                            ? "'Rajdhani', sans-serif"
-                                            : timerFontStyle === "dseg"
-                                              ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
-                                              : "'Inter', sans-serif",
-                            backdropFilter: "blur(6px)",
-                            textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
-                          }}
-                        >
-                          <span
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              lineHeight: 1,
-                              width: "100%",
-                              height: "100%",
-                              textAlign: "center",
-                            }}
-                          >
-                            {`${String(Math.floor(timerDefaultDuration / 60)).padStart(2, "0")}:${String(timerDefaultDuration % 60).padStart(2, "0")}`}
-                          </span>
-                        </div>
+                        {(() => {
+                          const pMin = Math.floor(timerDefaultDuration / 60);
+                          const pSec = timerDefaultDuration % 60;
+                          const pStr = `${String(pMin).padStart(2, "0")}:${String(pSec).padStart(2, "0")}`;
+                          const isLongStr = pStr.length >= 6;
+                          const isVeryLongStr = pStr.length >= 7;
+                          const dynamicFontSize = isVeryLongStr ? "0.44rem" : isLongStr ? "0.55rem" : "0.72rem";
+                          const dynamicLetterSpacing = isVeryLongStr ? "-0.5px" : isLongStr ? "0px" : "0.5px";
+
+                          return (
+                            <div
+                              style={{
+                                width: "48px",
+                                height: "48px",
+                                borderRadius: "50%",
+                                background: "rgba(15, 23, 42, 0.85)",
+                                border: `2px solid ${timerRingColor || "#38bdf8"}`,
+                                boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: dynamicFontSize,
+                                lineHeight: 1,
+                                fontWeight:
+                                  timerFontStyle === "segoe-light"
+                                    ? 300
+                                    : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
+                                      ? 700
+                                      : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
+                                        ? 400
+                                        : 800,
+                                color: "#ffffff",
+                                fontFamily:
+                                  timerFontStyle === "heading"
+                                    ? "'Outfit', sans-serif"
+                                    : timerFontStyle === "mono"
+                                      ? "monospace"
+                                      : timerFontStyle === "segoe-light"
+                                        ? "'Segoe UI Light', 'Segoe UI', sans-serif"
+                                        : timerFontStyle === "orbitron"
+                                          ? "'Orbitron', sans-serif"
+                                          : timerFontStyle === "chakra"
+                                            ? "'Chakra Petch', sans-serif"
+                                            : timerFontStyle === "share-tech"
+                                              ? "'Share Tech Mono', monospace"
+                                              : timerFontStyle === "rajdhani"
+                                                ? "'Rajdhani', sans-serif"
+                                                : timerFontStyle === "dseg"
+                                                  ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
+                                                  : "'Inter', sans-serif",
+                                backdropFilter: "blur(6px)",
+                                textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
+                              }}
+                            >
+                              <span
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  lineHeight: 1,
+                                  width: "100%",
+                                  height: "100%",
+                                  textAlign: "center",
+                                  letterSpacing: dynamicLetterSpacing,
+                                }}
+                              >
+                                {pStr}
+                              </span>
+                            </div>
+                          );
+                        })()}
 
                         {/* Mola Sayacı Butonları (Duraklat & Sıfırla) */}
                         <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
