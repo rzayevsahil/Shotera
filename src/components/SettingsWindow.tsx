@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders, Lightbulb } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -2259,9 +2259,12 @@ function SettingsWindow() {
 
                   {timerBgMode === "desktop" && (
                     <>
-                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "10px 12px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
-                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.5, display: "block" }}>
-                          💡 {(t as any).timerBgFadedDesktopDesc || "Sayacın arkasına mevcut masaüstünüzün soluk/karartılmış bir görüntüsünü koyar."}
+                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "10px 12px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ padding: "6px", background: "rgba(0, 242, 254, 0.1)", borderRadius: "8px", display: "flex" }}>
+                          <Lightbulb size={16} color="var(--accent-cyan)" />
+                        </div>
+                        <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.5, display: "block" }}>
+                          {(t as any).timerBgFadedDesktopDesc || "Sayacın arkasına mevcut masaüstünüzün soluk/karartılmış bir görüntüsünü koyar."}
                         </span>
                       </div>
                       <div style={{ width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.03)" }} />
