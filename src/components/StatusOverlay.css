@@ -13,51 +13,55 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 20px;
-  background: rgba(20, 20, 20, 0.95);
-  border-radius: 20px;
+  padding: 6px 14px;
+  background: rgba(15, 23, 42, 0.88);
+  border-radius: 30px;
   backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.15);
   animation: statusOverlayPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
 }
 
 .status-overlay-pill.paused {
-  border: 1px solid rgba(161, 161, 170, 0.4);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(161, 161, 170, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .status-overlay-pill.resumed {
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .status-indicator-dot {
-  width: 12px;
-  height: 12px;
-  min-width: 12px;
-  min-height: 12px;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  min-height: 8px;
   border-radius: 50%;
+  margin-top: -1px;
+  flex-shrink: 0;
   transition: all 0.2s ease-in-out;
 }
 
 .status-indicator-dot.paused {
-  background: #71717a;
+  background: #64748b;
   box-shadow: none;
   animation: none;
 }
 
 .status-indicator-dot.resumed {
   background: #ef4444;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
-  animation: pulse-recording 1.2s infinite ease-in-out;
+  box-shadow: 0 0 8px #ef4444;
+  animation: pulse-recording 1.5s infinite ease-in-out;
 }
 
 .status-overlay-text {
   color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
+  line-height: 1;
   white-space: nowrap;
 }
 
