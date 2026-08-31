@@ -405,3 +405,10 @@
     visibility: visible;
     transform: translateX(-50%) translateY(0);
 }
+
+.compact-bar-btn.mini-btn[data-tooltip]::after {
+    font-size: 0.63rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    bottom: calc(100% + 8px);
+}

@@ -15,6 +15,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 import ScreenRecorderModal from "./ScreenRecorderModal";
+import "./ScreenRecorderModal.css";
 import FeatureTour from "./FeatureTour";
 type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
 
@@ -3990,7 +3991,7 @@ function SettingsWindow() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  overflow: "hidden"
+                  overflow: "visible"
                 }}>
                   {/* Ekran Izgara Arka Planı */}
                   <div style={{
@@ -3998,7 +3999,8 @@ function SettingsWindow() {
                     inset: 0,
                     backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px)",
                     backgroundSize: "14px 14px",
-                    opacity: 0.4
+                    opacity: 0.4,
+                    borderRadius: "10px"
                   }} />
 
                   {/* Yüzen Kontrol Barı Mockup */}
@@ -4044,21 +4046,14 @@ function SettingsWindow() {
                       {/* 1. Duraklat / Devam Et */}
                       <button
                         type="button"
+                        className="compact-bar-btn mini-btn btn-pause"
                         onClick={() => setPreviewPaused(!previewPaused)}
-                        title={previewPaused ? ((t as any).recordTooltipResume || "Devam Et") : ((t as any).recordTooltipPause || "Duraklat")}
+                        data-tooltip={previewPaused ? ((t as any).recordTooltipResume || "Devam Et") : ((t as any).recordTooltipPause || "Duraklat")}
                         style={{
                           width: "22px",
                           height: "22px",
-                          borderRadius: "50%",
-                          background: previewPaused ? "rgba(234, 179, 8, 0.35)" : "rgba(234, 179, 8, 0.2)",
-                          border: "1px solid rgba(234, 179, 8, 0.4)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          padding: 0,
-                          outline: "none",
-                          transition: "all 0.2s ease"
+                          minWidth: "22px",
+                          minHeight: "22px"
                         }}
                       >
                         {previewPaused ? <Play size={10} color="#eab308" fill="#eab308" /> : <Pause size={10} color="#eab308" fill="#eab308" />}
@@ -4067,6 +4062,7 @@ function SettingsWindow() {
                       {/* 2. Kaydı Durdur */}
                       <button
                         type="button"
+                        className="compact-bar-btn mini-btn stop-btn"
                         onClick={() => {
                           const checked = !showRecordControls;
                           setShowRecordControls(checked);
@@ -4074,20 +4070,12 @@ function SettingsWindow() {
                           window.dispatchEvent(new Event("storage"));
                           emit("force_storage_sync").catch(console.error);
                         }}
-                        title={(t as any).showRecordControlsLabel || "Kayıt Kontrolcüsünü Göster"}
+                        data-tooltip={(t as any).modalStopRecording || "Kaydı Durdur"}
                         style={{
                           width: "22px",
                           height: "22px",
-                          borderRadius: "50%",
-                          background: "rgba(239, 68, 68, 0.2)",
-                          border: "1px solid rgba(239, 68, 68, 0.4)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          padding: 0,
-                          outline: "none",
-                          transition: "all 0.2s ease"
+                          minWidth: "22px",
+                          minHeight: "22px"
                         }}
                       >
                         <Square size={9} color="#ef4444" fill="#ef4444" />
@@ -4096,6 +4084,7 @@ function SettingsWindow() {
                       {/* 3. Kamera */}
                       <button
                         type="button"
+                        className={`compact-bar-btn mini-btn ${recordWebcam ? 'btn-webcam-active' : 'btn-webcam-inactive'}`}
                         onClick={() => {
                           const checked = !recordWebcam;
                           setRecordWebcam(checked);
@@ -4103,20 +4092,12 @@ function SettingsWindow() {
                           window.dispatchEvent(new Event("storage"));
                           emit("force_storage_sync").catch(console.error);
                         }}
-                        title={recordWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
+                        data-tooltip={recordWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
                         style={{
                           width: "22px",
                           height: "22px",
-                          borderRadius: "50%",
-                          background: recordWebcam ? "rgba(56, 189, 248, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                          border: recordWebcam ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          padding: 0,
-                          outline: "none",
-                          transition: "all 0.2s ease"
+                          minWidth: "22px",
+                          minHeight: "22px"
                         }}
                       >
                         <Camera size={10} color={recordWebcam ? "#38bdf8" : "#64748b"} />
@@ -4125,6 +4106,7 @@ function SettingsWindow() {
                       {/* 4. Mikrofon */}
                       <button
                         type="button"
+                        className={`compact-bar-btn mini-btn ${recordMic ? 'btn-mic-active' : 'btn-mic-muted'}`}
                         onClick={() => {
                           const checked = !recordMic;
                           setRecordMic(checked);
@@ -4132,20 +4114,12 @@ function SettingsWindow() {
                           window.dispatchEvent(new Event("storage"));
                           emit("force_storage_sync").catch(console.error);
                         }}
-                        title={recordMic ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
+                        data-tooltip={recordMic ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
                         style={{
                           width: "22px",
                           height: "22px",
-                          borderRadius: "50%",
-                          background: recordMic ? "rgba(74, 222, 128, 0.2)" : "rgba(239, 68, 68, 0.2)",
-                          border: recordMic ? "1px solid rgba(74, 222, 128, 0.4)" : "1px solid rgba(239, 68, 68, 0.4)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          padding: 0,
-                          outline: "none",
-                          transition: "all 0.2s ease"
+                          minWidth: "22px",
+                          minHeight: "22px"
                         }}
                       >
                         {recordMic ? <Mic size={10} color="#4ade80" /> : <MicOff size={10} color="#ef4444" />}
