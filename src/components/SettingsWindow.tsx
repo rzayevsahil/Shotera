@@ -232,6 +232,7 @@ function SettingsWindow() {
     () => localStorage.getItem("timerCustomAudioName") || ""
   );
   const [timerOpacity, setTimerOpacity] = useState<number>(() => Number(localStorage.getItem("timerOpacity") || "100"));
+  const [timerShowControls, setTimerShowControls] = useState<boolean>(() => localStorage.getItem("timerShowControls") !== "false");
   const [timerPosition, setTimerPosition] = useState<string>(() => localStorage.getItem("timerPosition") || "top-right");
   const customAudioInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -2388,6 +2389,27 @@ function SettingsWindow() {
                     </div>
                   </div>
 
+                  {/* Kontrol Butonlarını Göster Toggle */}
+                  <div className="setting-row">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerShowControls || "Kontrol Butonları"}</span>
+                      <span className="setting-desc">{(t as any).timerShowControlsDesc || "Mola ekranında Duraklat ve Sıfırla butonlarını göster."}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={timerShowControls}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setTimerShowControls(val);
+                          localStorage.setItem("timerShowControls", String(val));
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                      />
+                      <span className="slider round"></span>
+                    </label>
+                  </div>
+
                   {/* 9-Point Screen Grid Alignment Row */}
                   <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "10px" }}>
                     <div className="setting-info" style={{ width: "100%", maxWidth: "100%" }}>
@@ -2912,47 +2934,49 @@ function SettingsWindow() {
                         })()}
 
                         {/* Mola Sayacı Butonları (Duraklat & Sıfırla) */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                          <div
-                            style={{
-                              background: "rgba(34, 197, 94, 0.25)",
-                              border: "1px solid rgba(34, 197, 94, 0.6)",
-                              color: "#86efac",
-                              padding: "1px 5px",
-                              borderRadius: "10px",
-                              fontSize: "0.48rem",
-                              fontWeight: 600,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "2px",
-                              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
-                              whiteSpace: "nowrap"
-                            }}
-                          >
-                            <Pause size={7} />
-                            <span>{(t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat"}</span>
-                          </div>
+                        {timerShowControls && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                            <div
+                              style={{
+                                background: "linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.9))",
+                                border: "1px solid rgba(254, 215, 170, 0.5)",
+                                color: "#ffffff",
+                                padding: "2px 7px",
+                                borderRadius: "10px",
+                                fontSize: "0.48rem",
+                                fontWeight: 600,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "3px",
+                                boxShadow: "0 2px 6px rgba(245, 158, 11, 0.35)",
+                                whiteSpace: "nowrap"
+                              }}
+                            >
+                              <Pause size={7} />
+                              <span>{(t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat"}</span>
+                            </div>
 
-                          <div
-                            style={{
-                              background: "rgba(15, 23, 42, 0.65)",
-                              border: "1px solid rgba(255, 255, 255, 0.2)",
-                              color: "#f8fafc",
-                              padding: "1px 5px",
-                              borderRadius: "10px",
-                              fontSize: "0.48rem",
-                              fontWeight: 500,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "2px",
-                              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
-                              whiteSpace: "nowrap"
-                            }}
-                          >
-                            <RotateCcw size={7} />
-                            <span>{(t as any).timerResetBtn || "Sıfırla"}</span>
+                            <div
+                              style={{
+                                background: "rgba(15, 23, 42, 0.65)",
+                                border: "1px solid rgba(255, 255, 255, 0.2)",
+                                color: "#f8fafc",
+                                padding: "1px 5px",
+                                borderRadius: "10px",
+                                fontSize: "0.48rem",
+                                fontWeight: 500,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "2px",
+                                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+                                whiteSpace: "nowrap"
+                              }}
+                            >
+                              <RotateCcw size={7} />
+                              <span>{(t as any).timerResetBtn || "Sıfırla"}</span>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
 

@@ -48,6 +48,7 @@ export default function BreakTimer() {
   const [showElapsedAfter, setShowElapsedAfter] = useState<boolean>(() => localStorage.getItem("timerShowElapsedAfterExpiration") === "true");
   const [lockOnStart, setLockOnStart] = useState<boolean>(() => localStorage.getItem("timerLockWorkstationOnStart") === "true");
   const [timerOpacity, setTimerOpacity] = useState<number>(() => Number(localStorage.getItem("timerOpacity") || "100") / 100);
+  const [timerShowControls, setTimerShowControls] = useState<boolean>(() => localStorage.getItem("timerShowControls") !== "false");
   const [timerPosition, setTimerPosition] = useState<string>(() => localStorage.getItem("timerPosition") || "center");
 
   const [timerBgMode, setTimerBgMode] = useState<"color" | "desktop" | "image">(() => {
@@ -109,6 +110,7 @@ export default function BreakTimer() {
       setShowElapsedAfter(shouldShowElapsed);
       setLockOnStart(shouldLock);
       setTimerOpacity(Number(localStorage.getItem("timerOpacity") || "100") / 100);
+      setTimerShowControls(localStorage.getItem("timerShowControls") !== "false");
       setTimerPosition(localStorage.getItem("timerPosition") || "center");
 
       const bgMode = (localStorage.getItem("timerBgMode") as "color" | "desktop" | "image") || "color";
@@ -624,63 +626,71 @@ export default function BreakTimer() {
       </div>
 
       {/* Control Buttons & Hints */}
-      <div
-        style={{
-          marginTop: "36px",
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          zIndex: 10,
-        }}
-      >
-        <button
-          onClick={() => setIsRunning((prev) => !prev)}
+      {timerShowControls && (
+        <div
           style={{
-            background: isRunning ? "rgba(234, 179, 8, 0.25)" : "rgba(34, 197, 94, 0.25)",
-            border: `1px solid ${isRunning ? "rgba(234, 179, 8, 0.6)" : "rgba(34, 197, 94, 0.6)"}`,
-            color: isRunning ? "#fef08a" : "#86efac",
-            padding: "12px 28px",
-            borderRadius: "30px",
-            fontSize: "16px",
-            fontWeight: 600,
+            marginTop: "36px",
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            cursor: "pointer",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
-            transition: "all 0.2s ease",
+            gap: "16px",
+            zIndex: 10,
           }}
         >
-          {isRunning ? <Pause size={18} /> : <Play size={18} />}
-          {isRunning ? ((t as any).timerPauseBtn || "Duraklat (Space)") : ((t as any).timerStartBtn || "Başlat")}
-        </button>
+          <button
+            onClick={() => setIsRunning((prev) => !prev)}
+            style={{
+              background: isRunning
+                ? "linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.9))"
+                : "linear-gradient(135deg, rgba(34, 197, 94, 0.85), rgba(16, 185, 129, 0.9))",
+              border: isRunning
+                ? "1px solid rgba(254, 215, 170, 0.5)"
+                : "1px solid rgba(187, 247, 208, 0.5)",
+              color: "#ffffff",
+              padding: "12px 28px",
+              borderRadius: "30px",
+              fontSize: "16px",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              boxShadow: isRunning
+                ? "0 4px 16px rgba(245, 158, 11, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)"
+                : "0 4px 16px rgba(34, 197, 94, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)",
+              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            {isRunning ? <Pause size={18} /> : <Play size={18} />}
+            {isRunning ? ((t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat") : ((t as any).timerStartBtn || "Başlat")}
+          </button>
 
-        <button
-          onClick={handleReset}
-          style={{
-            background: "rgba(15, 23, 42, 0.65)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "#f8fafc",
-            padding: "12px 24px",
-            borderRadius: "30px",
-            fontSize: "16px",
-            fontWeight: 500,
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            cursor: "pointer",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
-            transition: "all 0.2s ease",
-          }}
-        >
-          <RotateCcw size={18} />
-          {(t as any).timerResetBtn || "Sıfırla"}
-        </button>
-      </div>
+          <button
+            onClick={handleReset}
+            style={{
+              background: "rgba(15, 23, 42, 0.65)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#f8fafc",
+              padding: "12px 24px",
+              borderRadius: "30px",
+              fontSize: "16px",
+              fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <RotateCcw size={18} />
+            {(t as any).timerResetBtn || "Sıfırla"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
