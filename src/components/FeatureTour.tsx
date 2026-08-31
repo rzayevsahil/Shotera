@@ -296,12 +296,12 @@ export const TOUR_STEPS: TourStep[] = [
     requireClick: true,
   },
   {
-    id: "setting_timer_theme",
-    target: '[data-tour="setting-timer-theme"]',
+    id: "timer_subtab_theme",
+    target: '[data-tour="timer-subtab-theme"]',
     tab: "timer",
-    titleKey: "tourTimerThemeTitle",
-    descKey: "tourTimerThemeDesc",
-    interactiveHintKey: "tourClickTimerTheme",
+    titleKey: "tourTimerSubTabThemeTitle",
+    descKey: "tourTimerSubTabThemeDesc",
+    interactiveHintKey: "tourClickTimerSubTabTheme",
     requireClick: true,
   },
   {
@@ -311,6 +311,15 @@ export const TOUR_STEPS: TourStep[] = [
     titleKey: "tourTimerPreviewTitle",
     descKey: "tourTimerPreviewDesc",
     interactiveHintKey: "tourClickTimerPreview",
+    requireClick: true,
+  },
+  {
+    id: "timer_subtab_sound",
+    target: '[data-tour="timer-subtab-sound"]',
+    tab: "timer",
+    titleKey: "tourTimerSubTabSoundTitle",
+    descKey: "tourTimerSubTabSoundDesc",
+    interactiveHintKey: "tourClickTimerSubTabSound",
     requireClick: true,
   },
   {

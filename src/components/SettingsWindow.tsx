@@ -1802,6 +1802,7 @@ function SettingsWindow() {
 
                 <button
                   type="button"
+                  data-tour="timer-subtab-theme"
                   onClick={() => setTimerSubTab("theme")}
                   style={{
                     flex: 1,
@@ -1826,6 +1827,7 @@ function SettingsWindow() {
 
                 <button
                   type="button"
+                  data-tour="timer-subtab-sound"
                   onClick={() => setTimerSubTab("sound")}
                   style={{
                     flex: 1,
