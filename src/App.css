@@ -247,6 +247,10 @@ h6 {
   max-width: 60%;
 }
 
+.settings-card > .setting-info {
+  max-width: 100%;
+}
+
 .setting-label {
   font-weight: 600;
   font-size: 0.95rem;

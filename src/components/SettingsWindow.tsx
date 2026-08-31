@@ -3106,7 +3106,7 @@ function SettingsWindow() {
 
               {/* Kart 2: Kamera & Tasarım Özelleştirme */}
               <div className="settings-card">
-                <div className="setting-info" style={{ marginBottom: "6px" }}>
+                <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
                   <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
                     <Camera size={18} color="var(--accent-cyan)" />
                     {(t as any).webcamStyleSectionTitle || "Kamera & Tasarım Özelleştirme"}
