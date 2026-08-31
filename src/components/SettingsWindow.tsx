@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -3088,14 +3088,14 @@ function SettingsWindow() {
               {/* SEKME 2: Kamera & Katman */}
               {recordSubTab === "webcam" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {/* Kart: Kamera & Tasarım Özelleştirme */}
+                  {/* Kart 1: Kamera & Çerçeve Özelleştirme */}
                   <div className="settings-card">
                     <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
                       <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
                         <Camera size={18} color="var(--accent-cyan)" />
-                        {(t as any).webcamStyleSectionTitle || "Kamera & Tasarım Özelleştirme"}
+                        {(t as any).webcamStyleSectionTitle || "Kamera & Çerçeve Özelleştirme"}
                       </span>
-                      <span className="setting-desc">{(t as any).webcamStyleSectionDesc || "Kamera çerçevesi, metin, renk paletleri ve animasyon tercihlerinizi ayarlayın."}</span>
+                      <span className="setting-desc">{(t as any).webcamStyleSectionDesc || "Kamera modu, çerçeve rengi ve animasyon tercihlerinizi ayarlayın."}</span>
                     </div>
 
                     {/* Webcam Mode */}
@@ -3274,6 +3274,17 @@ function SettingsWindow() {
                         <option value="spin-fire">{(t as any).animSpinFire || "Ateş Çemberi"}</option>
                         <option value="spin-cyber">{(t as any).animSpinCyber || "Neon Siber"}</option>
                       </select>
+                    </div>
+                  </div>
+
+                  {/* Kart 2: Kamera Metin Özelleştirme */}
+                  <div className="settings-card">
+                    <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
+                      <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
+                        <Type size={18} color="var(--accent-cyan)" />
+                        {(t as any).webcamTextSectionTitle || "Kamera Metin Özelleştirme"}
+                      </span>
+                      <span className="setting-desc">{(t as any).webcamTextSectionDesc || "Kamera altındaki metin, font, boyut, renk ve görsel efektlerini ayarlayın."}</span>
                     </div>
 
                     {/* Kamera Altı Yazısı */}
