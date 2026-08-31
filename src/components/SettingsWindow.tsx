@@ -2922,20 +2922,47 @@ function SettingsWindow() {
                     </select>
                   </div>
 
-                  {/* Sistem Sesini Kaydet */}
-                  <div className="setting-row" data-tour="setting-record-audio">
+                  {/* Kamera İzin Modu */}
+                  <div className="setting-row" data-tour="setting-webcam-permission">
                     <div className="setting-info">
-                      <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
-                      <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
+                      <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
+                      <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
+                    </div>
+                    <select
+                      className="premium-input"
+                      value={webcamPermissionMode}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWebcamPermissionMode(val);
+                        localStorage.setItem("webcamPermissionMode", val);
+                        if (val === "always") {
+                          localStorage.removeItem("webcamHasAllowed");
+                        }
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{ width: "180px" }}
+                    >
+                      <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
+                      <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
+                    </select>
+                  </div>
+
+                  {/* Kamerayı Kaydet */}
+                  <div className="setting-row" data-tour="setting-record-webcam">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
+                      <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
                     </div>
                     <label className="switch">
                       <input
                         type="checkbox"
-                        checked={recordAudio}
+                        checked={recordWebcam}
                         onChange={(e) => {
                           const checked = e.target.checked;
-                          setRecordAudio(checked);
-                          localStorage.setItem("recordAudio", checked.toString());
+                          setRecordWebcam(checked);
+                          localStorage.setItem("recordWebcam", checked.toString());
+                          window.dispatchEvent(new Event("storage"));
+                          emit("force_storage_sync").catch(console.error);
                         }}
                       />
                       <span className="slider"></span>
@@ -2964,6 +2991,26 @@ function SettingsWindow() {
                     </label>
                   </div>
 
+                  {/* Sistem Sesini Kaydet */}
+                  <div className="setting-row" data-tour="setting-record-audio">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
+                      <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={recordAudio}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setRecordAudio(checked);
+                          localStorage.setItem("recordAudio", checked.toString());
+                        }}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+
                   {/* Kayıt Kontrolcüsünü Göster */}
                   <div className="setting-row" data-tour="setting-record-controls">
                     <div className="setting-info">
@@ -2984,53 +3031,6 @@ function SettingsWindow() {
                       />
                       <span className="slider"></span>
                     </label>
-                  </div>
-
-                  {/* Kamerayı Kaydet */}
-                  <div className="setting-row" data-tour="setting-record-webcam">
-                    <div className="setting-info">
-                      <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
-                      <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
-                    </div>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        checked={recordWebcam}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setRecordWebcam(checked);
-                          localStorage.setItem("recordWebcam", checked.toString());
-                          window.dispatchEvent(new Event("storage"));
-                          emit("force_storage_sync").catch(console.error);
-                        }}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-
-                  {/* Kamera İzin Modu */}
-                  <div className="setting-row" data-tour="setting-webcam-permission">
-                    <div className="setting-info">
-                      <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
-                      <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
-                    </div>
-                    <select
-                      className="premium-input"
-                      value={webcamPermissionMode}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setWebcamPermissionMode(val);
-                        localStorage.setItem("webcamPermissionMode", val);
-                        if (val === "always") {
-                          localStorage.removeItem("webcamHasAllowed");
-                        }
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      style={{ width: "180px" }}
-                    >
-                      <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
-                      <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
-                    </select>
                   </div>
 
                   {/* Audio Ducking Fix - Standalone Banner Card */}
