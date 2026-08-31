@@ -7,6 +7,7 @@ export interface TourStep {
   id: string;
   target: string;
   tab?: string;
+  subTab?: string;
   titleKey: string;
   descKey: string;
   interactiveHintKey?: string;
@@ -299,6 +300,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "timer_subtab_theme",
     target: '[data-tour="timer-subtab-theme"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerSubTabThemeTitle",
     descKey: "tourTimerSubTabThemeDesc",
     interactiveHintKey: "tourClickTimerSubTabTheme",
@@ -308,6 +310,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_ring_color",
     target: '[data-tour="setting-timer-ring-color"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerRingColorTitle",
     descKey: "tourTimerRingColorDesc",
     interactiveHintKey: "tourClickTimerRingColor",
@@ -317,6 +320,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_bg_color",
     target: '[data-tour="setting-timer-bg-color"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerBgColorTitle",
     descKey: "tourTimerBgColorDesc",
     interactiveHintKey: "tourClickTimerBgColor",
@@ -326,6 +330,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_bg_style",
     target: '[data-tour="setting-timer-bg-style"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerBgStyleTitle",
     descKey: "tourTimerBgStyleDesc",
     interactiveHintKey: "tourClickTimerBgStyle",
@@ -335,6 +340,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_bg",
     target: '[data-tour="setting-timer-bg"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerBgTitle",
     descKey: "tourTimerBgDesc",
     interactiveHintKey: "tourClickTimerBg",
@@ -344,6 +350,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_bg_scale",
     target: '[data-tour="setting-timer-bg-scale"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerBgScaleTitle",
     descKey: "tourTimerBgScaleDesc",
     interactiveHintKey: "tourClickTimerBgScale",
@@ -353,6 +360,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_font",
     target: '[data-tour="setting-timer-font"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerFontTitle",
     descKey: "tourTimerFontDesc",
     interactiveHintKey: "tourClickTimerFont",
@@ -362,6 +370,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_opacity",
     target: '[data-tour="setting-timer-opacity"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerOpacityTitle",
     descKey: "tourTimerOpacityDesc",
     interactiveHintKey: "tourClickTimerOpacity",
@@ -371,6 +380,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_controls",
     target: '[data-tour="setting-timer-controls"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerControlsTitle",
     descKey: "tourTimerControlsDesc",
     interactiveHintKey: "tourClickTimerControls",
@@ -380,6 +390,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_position",
     target: '[data-tour="setting-timer-position"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerPositionTitle",
     descKey: "tourTimerPositionDesc",
     interactiveHintKey: "tourClickTimerPosition",
@@ -389,6 +400,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_preview",
     target: '[data-tour="setting-timer-preview"]',
     tab: "timer",
+    subTab: "theme",
     titleKey: "tourTimerPreviewTitle",
     descKey: "tourTimerPreviewDesc",
     interactiveHintKey: "tourClickTimerPreview",
@@ -398,6 +410,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "timer_subtab_sound",
     target: '[data-tour="timer-subtab-sound"]',
     tab: "timer",
+    subTab: "sound",
     titleKey: "tourTimerSubTabSoundTitle",
     descKey: "tourTimerSubTabSoundDesc",
     interactiveHintKey: "tourClickTimerSubTabSound",
@@ -407,6 +420,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_sound",
     target: '[data-tour="setting-timer-sound"]',
     tab: "timer",
+    subTab: "sound",
     titleKey: "tourTimerSoundTitle",
     descKey: "tourTimerSoundDesc",
     interactiveHintKey: "tourClickTimerSound",
@@ -416,6 +430,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "setting_timer_shortcuts",
     target: '[data-tour="setting-timer-shortcuts"]',
     tab: "timer",
+    subTab: "sound",
     titleKey: "tourTimerShortcutsTitle",
     descKey: "tourTimerShortcutsDesc",
     interactiveHintKey: "tourClickTimerShortcuts",
@@ -686,6 +701,10 @@ export default function FeatureTour({ isOpen, onClose, onSelectTab }: FeatureTou
 
     if (currentStep.tab && onSelectTab) {
       onSelectTab(currentStep.tab);
+    }
+    
+    if (currentStep.subTab) {
+      window.dispatchEvent(new CustomEvent("tour-subtab-change", { detail: currentStep.subTab }));
     }
 
     // Scroll to element & update rect with smooth animation sync ticks

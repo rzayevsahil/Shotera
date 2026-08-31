@@ -172,6 +172,17 @@ function SettingsWindow() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleTourSubTab = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail === "theme" || customEvent.detail === "sound" || customEvent.detail === "general") {
+        setTimerSubTab(customEvent.detail as any);
+      }
+    };
+    window.addEventListener("tour-subtab-change", handleTourSubTab);
+    return () => window.removeEventListener("tour-subtab-change", handleTourSubTab);
+  }, []);
+
   // Settings state synced with localStorage
   const [startAtBoot, setStartAtBoot] = useState(() => localStorage.getItem("startAtBoot") === "true");
   const [startInTray, setStartInTray] = useState(() => localStorage.getItem("startInTray") !== "false"); // default true
