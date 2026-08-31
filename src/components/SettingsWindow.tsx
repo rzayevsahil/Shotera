@@ -1967,7 +1967,7 @@ function SettingsWindow() {
               {timerSubTab === "theme" && (
                 <div className="settings-card" data-tour="setting-timer-theme" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                   {/* Ring Color Preset Row */}
-                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                  <div className="setting-row">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerRingColorLabel}</span>
                     </div>
@@ -2084,7 +2084,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Color Swatches Row */}
-                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                  <div className="setting-row">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgColorLabel || "Arka Plan Rengi"}</span>
                     </div>
@@ -2212,7 +2212,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Style Row */}
-                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                  <div className="setting-row">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgStyleLabel}</span>
                     </div>
@@ -2234,13 +2234,13 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Mode & Custom Image Section */}
-                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "12px", marginTop: "4px" }}>
-                    <div className="setting-info" style={{ marginBottom: "10px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div className="setting-info" style={{ marginBottom: "2px" }}>
                       <span className="setting-label">{(t as any).timerBgImageTitle || "Mola Ekranı Arka Plan Görseli"}</span>
                       <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
                     </div>
 
-                    <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                    <div className="setting-row">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
                       </div>
@@ -2317,7 +2317,7 @@ function SettingsWindow() {
                     )}
 
                     {(timerBgMode === "desktop" || timerBgMode === "image") && (
-                      <div className="setting-row" style={{ borderBottom: "none", paddingTop: "2px", paddingBottom: "4px" }}>
+                      <div className="setting-row">
                         <div className="setting-info">
                           <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
                           <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
@@ -2341,7 +2341,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Clock Font Style Row */}
-                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                  <div className="setting-row">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerFontStyleLabel}</span>
                     </div>
@@ -2368,7 +2368,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Timer Opacity Slider Row */}
-                  <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "12px", marginTop: "4px" }}>
+                  <div className="setting-row">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerOpacityLabel}</span>
                       <span className="setting-desc">{(t as any).timerOpacityDesc}</span>
@@ -2395,7 +2395,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* 9-Point Screen Grid Alignment Row */}
-                  <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "10px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "12px", marginTop: "4px" }}>
+                  <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "10px" }}>
                     <div className="setting-info" style={{ width: "100%" }}>
                       <span className="setting-label">{(t as any).timerPositionLabel}</span>
                       <span className="setting-desc" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>
@@ -2473,7 +2473,7 @@ function SettingsWindow() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   {/* Kart 1: Ses Ayarları */}
                   <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div className="setting-row" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>
+                    <div className="setting-row">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).timerSoundSourceLabel || "Ses Kaynağı"}</span>
                         <span className="setting-desc">{(t as any).timerSoundDesc}</span>
@@ -2541,7 +2541,7 @@ function SettingsWindow() {
                     </div>
 
                     {timerSoundSource === "preset" && (
-                      <div className="setting-row" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>
+                      <div className="setting-row">
                         <div className="setting-info">
                           <span className="setting-label">{(t as any).timerSoundLabel || "Bitiş Zili Melodisi"}</span>
                         </div>
@@ -2578,7 +2578,7 @@ function SettingsWindow() {
                     )}
 
                     {timerSoundSource === "custom" && (
-                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>
+                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px", marginBottom: "8px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
                             <Music size={16} color="#38bdf8" />
@@ -2630,7 +2630,7 @@ function SettingsWindow() {
                     )}
 
                     {/* Sound Repeat Row */}
-                    <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                    <div className="setting-row">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).timerSoundRepeatLabel}</span>
                       </div>
