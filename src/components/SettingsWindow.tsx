@@ -1879,12 +1879,11 @@ function SettingsWindow() {
                       <input
                         type="number"
                         min={1}
-                        max={360}
                         className="premium-input"
                         value={Math.round(timerDefaultDuration / 60)}
                         onChange={(e) => {
                           const val = Number(e.target.value);
-                          const mins = val <= 0 ? 1 : Math.min(360, val);
+                          const mins = val <= 0 ? 1 : val;
                           const secs = mins * 60;
                           setTimerDefaultDuration(secs);
                           localStorage.setItem("timerDefaultDuration", String(secs));

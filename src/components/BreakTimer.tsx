@@ -275,6 +275,8 @@ export default function BreakTimer() {
   timerDirectionRef.current = timerDirection;
   const totalSecondsRef = useRef(totalSeconds);
   totalSecondsRef.current = totalSeconds;
+  const currentSecondsRef = useRef(currentSeconds);
+  currentSecondsRef.current = currentSeconds;
 
   // Handle Keyboard & Scroll adjustments
   useEffect(() => {
@@ -289,15 +291,21 @@ export default function BreakTimer() {
         e.preventDefault();
         e.stopPropagation();
         const step = e.shiftKey ? 300 : 60;
-        setTotalSeconds((prev) => prev + step);
-        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? cur + step : cur));
+        const cur = currentSecondsRef.current;
+        if (timerDirectionRef.current === "down" && cur === 0) {
+          setTotalSeconds(step);
+          setCurrentSeconds(step);
+        } else {
+          setTotalSeconds((prev) => prev + step);
+          setCurrentSeconds((curVal) => (timerDirectionRef.current === "down" ? curVal + step : curVal));
+        }
         setIsFinished(false);
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         e.stopPropagation();
         const step = e.shiftKey ? 300 : 60;
         setTotalSeconds((prev) => Math.max(60, prev - step));
-        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? Math.max(0, cur - step) : cur));
+        setCurrentSeconds((curVal) => (timerDirectionRef.current === "down" ? Math.max(0, curVal - step) : curVal));
         setIsFinished(false);
       } else if (e.key.toLowerCase() === "r") {
         e.preventDefault();
@@ -308,12 +316,18 @@ export default function BreakTimer() {
 
     const handleWheel = (e: WheelEvent) => {
       const step = e.shiftKey ? 300 : 60;
+      const cur = currentSecondsRef.current;
       if (e.deltaY < 0) {
-        setTotalSeconds((prev) => prev + step);
-        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? cur + step : cur));
+        if (timerDirectionRef.current === "down" && cur === 0) {
+          setTotalSeconds(step);
+          setCurrentSeconds(step);
+        } else {
+          setTotalSeconds((prev) => prev + step);
+          setCurrentSeconds((curVal) => (timerDirectionRef.current === "down" ? curVal + step : curVal));
+        }
       } else if (e.deltaY > 0) {
         setTotalSeconds((prev) => Math.max(60, prev - step));
-        setCurrentSeconds((cur) => (timerDirectionRef.current === "down" ? Math.max(0, cur - step) : cur));
+        setCurrentSeconds((curVal) => (timerDirectionRef.current === "down" ? Math.max(0, curVal - step) : curVal));
       }
       setIsFinished(false);
     };
@@ -619,7 +633,7 @@ export default function BreakTimer() {
               : isFinished
                 ? (t.breakTimerFinished || "Süre Bitti!")
                 : isRunning
-                  ? (timerDirection === "up" ? ((t as any).timerCountingUp || "0'dan İleriye Sayılıyor") : ((t as any).timerActive || "Mola Devam Ediyor"))
+                  ? ((t as any).timerActive || "Mola Devam Ediyor")
                   : ((t as any).timerPaused || "Duraklatıldı")}
           </span>
         </div>
