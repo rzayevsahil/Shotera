@@ -2986,6 +2986,53 @@ function SettingsWindow() {
                     </label>
                   </div>
 
+                  {/* Kamerayı Kaydet */}
+                  <div className="setting-row" data-tour="setting-record-webcam">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
+                      <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={recordWebcam}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setRecordWebcam(checked);
+                          localStorage.setItem("recordWebcam", checked.toString());
+                          window.dispatchEvent(new Event("storage"));
+                          emit("force_storage_sync").catch(console.error);
+                        }}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+
+                  {/* Kamera İzin Modu */}
+                  <div className="setting-row" data-tour="setting-webcam-permission">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
+                      <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
+                    </div>
+                    <select
+                      className="premium-input"
+                      value={webcamPermissionMode}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWebcamPermissionMode(val);
+                        localStorage.setItem("webcamPermissionMode", val);
+                        if (val === "always") {
+                          localStorage.removeItem("webcamHasAllowed");
+                        }
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{ width: "180px" }}
+                    >
+                      <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
+                      <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
+                    </select>
+                  </div>
+
                   {/* Audio Ducking Fix - Standalone Banner Card */}
                   <div
                     data-tour="setting-audio-ducking"
@@ -3054,55 +3101,7 @@ function SettingsWindow() {
               {/* SEKME 2: Kamera & Katman */}
               {recordSubTab === "webcam" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {/* Kart 1: Kamera Aç/Kapat & İzin Modu */}
-                  <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div className="setting-row" data-tour="setting-record-webcam">
-                      <div className="setting-info">
-                        <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
-                        <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
-                      </div>
-                      <label className="switch">
-                        <input
-                          type="checkbox"
-                          checked={recordWebcam}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setRecordWebcam(checked);
-                            localStorage.setItem("recordWebcam", checked.toString());
-                            window.dispatchEvent(new Event("storage"));
-                            emit("force_storage_sync").catch(console.error);
-                          }}
-                        />
-                        <span className="slider"></span>
-                      </label>
-                    </div>
-
-                    <div className="setting-row" data-tour="setting-webcam-permission">
-                      <div className="setting-info">
-                        <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
-                        <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
-                      </div>
-                      <select
-                        className="premium-input"
-                        value={webcamPermissionMode}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setWebcamPermissionMode(val);
-                          localStorage.setItem("webcamPermissionMode", val);
-                          if (val === "always") {
-                            localStorage.removeItem("webcamHasAllowed");
-                          }
-                          window.dispatchEvent(new Event("storage"));
-                        }}
-                        style={{ width: "180px" }}
-                      >
-                        <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
-                        <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Kart 2: Kamera & Tasarım Özelleştirme */}
+                  {/* Kart: Kamera & Tasarım Özelleştirme */}
                   <div className="settings-card">
                     <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
                       <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
