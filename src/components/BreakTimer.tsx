@@ -568,143 +568,145 @@ export default function BreakTimer() {
         </button>
       </div>
 
-      {/* Main Circular Timer Display */}
-      <div style={{ position: "relative", width: "340px", height: "340px", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>
-        <svg width="340" height="340" style={{ transform: "rotate(-90deg)" }}>
-          {/* Track Circle */}
-          <circle
-            cx="170"
-            cy="170"
-            r="140"
-            stroke="rgba(255, 255, 255, 0.08)"
-            strokeWidth="12"
-            fill="transparent"
-          />
-          {/* Animated Progress Circle */}
-          <circle
-            cx="170"
-            cy="170"
-            r="140"
-            stroke={isFinished ? "#f87171" : timerRingColor}
-            strokeWidth="12"
-            fill="transparent"
-            strokeDasharray="880"
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.3s ease" }}
-          />
-        </svg>
+      {/* Timer and Controls Wrapper to keep them centered relative to each other */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", zIndex: 10 }}>
+        {/* Main Circular Timer Display */}
+        <div style={{ position: "relative", width: "340px", height: "340px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="340" height="340" style={{ transform: "rotate(-90deg)" }}>
+            {/* Track Circle */}
+            <circle
+              cx="170"
+              cy="170"
+              r="140"
+              stroke="rgba(255, 255, 255, 0.08)"
+              strokeWidth="12"
+              fill="transparent"
+            />
+            {/* Animated Progress Circle */}
+            <circle
+              cx="170"
+              cy="170"
+              r="140"
+              stroke={isFinished ? "#f87171" : timerRingColor}
+              strokeWidth="12"
+              fill="transparent"
+              strokeDasharray="880"
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.3s ease" }}
+            />
+          </svg>
 
-        {/* Digital Time Center Text */}
-        <div
-          style={{
-            position: "absolute",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span
+          {/* Digital Time Center Text */}
+          <div
             style={{
-              fontSize: formattedTime.length >= 7 ? "44px" : formattedTime.length >= 6 ? "54px" : "72px",
-              fontWeight: fontWeightCSS,
-              letterSpacing: formattedTime.length >= 7 ? "-1px" : formattedTime.length >= 6 ? "0px" : "2px",
-              fontVariantNumeric: "tabular-nums",
-              fontFamily: fontFamilyCSS,
-              color: isFinished ? "#f87171" : "#ffffff",
-              textShadow: isFinished
-                ? "0 0 30px rgba(248, 113, 113, 0.6)"
-                : `0 0 30px ${timerRingColor}80`,
+              position: "absolute",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            {formattedTime}
-          </span>
-          <span
-            style={{
-              fontSize: "14px",
-              color: isOvertime ? "#f87171" : "rgba(255, 255, 255, 0.5)",
-              fontWeight: 600,
-              marginTop: "4px",
-            }}
-          >
-            {isOvertime
-              ? ((t as any).timerOvertimeStatus || "Süre Aşıldı")
-              : isFinished
-                ? (t.breakTimerFinished || "Süre Bitti!")
-                : isRunning
-                  ? ((t as any).timerActive || "Mola Devam Ediyor")
-                  : ((t as any).timerPaused || "Duraklatıldı")}
-          </span>
+            <span
+              style={{
+                fontSize: formattedTime.length >= 7 ? "44px" : formattedTime.length >= 6 ? "54px" : "72px",
+                fontWeight: fontWeightCSS,
+                letterSpacing: formattedTime.length >= 7 ? "-1px" : formattedTime.length >= 6 ? "0px" : "2px",
+                fontVariantNumeric: "tabular-nums",
+                fontFamily: fontFamilyCSS,
+                color: isFinished ? "#f87171" : "#ffffff",
+                textShadow: isFinished
+                  ? "0 0 30px rgba(248, 113, 113, 0.6)"
+                  : `0 0 30px ${timerRingColor}80`,
+              }}
+            >
+              {formattedTime}
+            </span>
+            <span
+              style={{
+                fontSize: "14px",
+                color: isOvertime ? "#f87171" : "rgba(255, 255, 255, 0.5)",
+                fontWeight: 600,
+                marginTop: "4px",
+              }}
+            >
+              {isOvertime
+                ? ((t as any).timerOvertimeStatus || "Süre Aşıldı")
+                : isFinished
+                  ? (t.breakTimerFinished || "Süre Bitti!")
+                  : isRunning
+                    ? ((t as any).timerActive || "Mola Devam Ediyor")
+                    : ((t as any).timerPaused || "Duraklatıldı")}
+            </span>
+          </div>
         </div>
+
+        {/* Control Buttons & Hints */}
+        {timerShowControls && (
+          <div
+            style={{
+              marginTop: "36px",
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+            }}
+          >
+            <button
+              onClick={() => setIsRunning((prev) => !prev)}
+              style={{
+                background: isRunning
+                  ? "linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.9))"
+                  : "linear-gradient(135deg, rgba(34, 197, 94, 0.85), rgba(16, 185, 129, 0.9))",
+                border: isRunning
+                  ? "1px solid rgba(254, 215, 170, 0.5)"
+                  : "1px solid rgba(187, 247, 208, 0.5)",
+                color: "#ffffff",
+                padding: "12px 28px",
+                borderRadius: "30px",
+                fontSize: "16px",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                boxShadow: isRunning
+                  ? "0 4px 16px rgba(245, 158, 11, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)"
+                  : "0 4px 16px rgba(34, 197, 94, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)",
+                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {isRunning ? <Pause size={18} /> : <Play size={18} />}
+              {isRunning ? ((t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat") : ((t as any).timerStartBtn || "Başlat")}
+            </button>
+
+            <button
+              onClick={handleReset}
+              style={{
+                background: "rgba(15, 23, 42, 0.65)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#f8fafc",
+                padding: "12px 24px",
+                borderRadius: "30px",
+                fontSize: "16px",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <RotateCcw size={18} />
+              {(t as any).timerResetBtn || "Sıfırla"}
+            </button>
+          </div>
+        )}
       </div>
-
-      {/* Control Buttons & Hints */}
-      {timerShowControls && (
-        <div
-          style={{
-            marginTop: "36px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            zIndex: 10,
-          }}
-        >
-          <button
-            onClick={() => setIsRunning((prev) => !prev)}
-            style={{
-              background: isRunning
-                ? "linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.9))"
-                : "linear-gradient(135deg, rgba(34, 197, 94, 0.85), rgba(16, 185, 129, 0.9))",
-              border: isRunning
-                ? "1px solid rgba(254, 215, 170, 0.5)"
-                : "1px solid rgba(187, 247, 208, 0.5)",
-              color: "#ffffff",
-              padding: "12px 28px",
-              borderRadius: "30px",
-              fontSize: "16px",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              boxShadow: isRunning
-                ? "0 4px 16px rgba(245, 158, 11, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)"
-                : "0 4px 16px rgba(34, 197, 94, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)",
-              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
-          >
-            {isRunning ? <Pause size={18} /> : <Play size={18} />}
-            {isRunning ? ((t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat") : ((t as any).timerStartBtn || "Başlat")}
-          </button>
-
-          <button
-            onClick={handleReset}
-            style={{
-              background: "rgba(15, 23, 42, 0.65)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "#f8fafc",
-              padding: "12px 24px",
-              borderRadius: "30px",
-              fontSize: "16px",
-              fontWeight: 500,
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <RotateCcw size={18} />
-            {(t as any).timerResetBtn || "Sıfırla"}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
