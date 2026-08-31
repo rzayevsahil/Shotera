@@ -2234,7 +2234,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Mode & Custom Image Section */}
-                  <div className="setting-row">
+                  <div className="setting-row" style={(timerBgMode === "image" || timerBgMode === "desktop") ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
                       <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
@@ -2257,82 +2257,85 @@ function SettingsWindow() {
                     </select>
                   </div>
 
-                    {timerBgMode === "desktop" && (
-                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "10px 12px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                  {timerBgMode === "desktop" && (
+                    <>
+                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "10px 12px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
                         <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.5, display: "block" }}>
                           💡 {(t as any).timerBgFadedDesktopDesc || "Sayacın arkasına mevcut masaüstünüzün soluk/karartılmış bir görüntüsünü koyar."}
                         </span>
                       </div>
-                    )}
+                      <div style={{ width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.03)" }} />
+                    </>
+                  )}
 
-                    {timerBgMode === "image" && (
-                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
-                            <Camera size={16} color="#38bdf8" />
-                            <span style={{ fontSize: "0.82rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px" }}>
-                              {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
-                            </span>
-                          </div>
-                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                            <input
-                              type="file"
-                              ref={customTimerBgInputRef}
-                              accept="image/*"
-                              onChange={handleCustomTimerImageUpload}
-                              style={{ display: "none" }}
-                            />
+                  {timerBgMode === "image" && (
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
+                          <Camera size={16} color="#38bdf8" />
+                          <span style={{ fontSize: "0.82rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px" }}>
+                            {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
+                          </span>
+                        </div>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          <input
+                            type="file"
+                            ref={customTimerBgInputRef}
+                            accept="image/*"
+                            onChange={handleCustomTimerImageUpload}
+                            style={{ display: "none" }}
+                          />
+                          <button
+                            className="premium-button"
+                            onClick={() => {
+                              if ((window as any).__TAURI_INTERNALS__) {
+                                handleSelectTimerImageTauri();
+                              } else {
+                                customTimerBgInputRef.current?.click();
+                              }
+                            }}
+                            style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                          >
+                            <Upload size={13} />
+                            {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
+                          </button>
+                          {timerBgCustomImage && (
                             <button
                               className="premium-button"
-                              onClick={() => {
-                                if ((window as any).__TAURI_INTERNALS__) {
-                                  handleSelectTimerImageTauri();
-                                } else {
-                                  customTimerBgInputRef.current?.click();
-                                }
-                              }}
-                              style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                              onClick={handleRemoveCustomTimerImage}
+                              style={{ padding: "5px 8px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+                              title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
                             >
-                              <Upload size={13} />
-                              {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
+                              <Trash2 size={13} />
                             </button>
-                            {timerBgCustomImage && (
-                              <button
-                                className="premium-button"
-                                onClick={handleRemoveCustomTimerImage}
-                                style={{ padding: "5px 8px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
-                                title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {(timerBgMode === "desktop" || timerBgMode === "image") && (
-                      <div className="setting-row">
-                        <div className="setting-info">
-                          <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
-                          <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
-                        </div>
-                        <label className="switch">
-                          <input
-                            type="checkbox"
-                            checked={timerBgScale}
-                            onChange={(e) => {
-                              const checked = e.target.checked;
-                              setTimerBgScale(checked);
-                              localStorage.setItem("timerBgScale", String(checked));
-                              window.dispatchEvent(new Event("storage"));
-                              emit("timer-settings-updated").catch(() => { });
-                            }}
-                          />
-                          <span className="slider"></span>
-                        </label>
+                  {timerBgMode === "image" && (
+                    <div className="setting-row">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
+                        <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
                       </div>
-                    )}
+                      <label className="switch">
+                        <input
+                          type="checkbox"
+                          checked={timerBgScale}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setTimerBgScale(checked);
+                            localStorage.setItem("timerBgScale", String(checked));
+                            window.dispatchEvent(new Event("storage"));
+                            emit("timer-settings-updated").catch(() => { });
+                          }}
+                        />
+                        <span className="slider"></span>
+                      </label>
+                    </div>
+                  )}
 
                   {/* Clock Font Style Row */}
                   <div className="setting-row">
