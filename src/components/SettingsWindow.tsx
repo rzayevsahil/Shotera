@@ -2876,7 +2876,7 @@ function SettingsWindow() {
                                 width: "48px",
                                 height: "48px",
                                 borderRadius: "50%",
-                                background: "rgba(15, 23, 42, 0.85)",
+                                background: "transparent",
                                 border: `2px solid ${timerRingColor || "#38bdf8"}`,
                                 boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
                                 display: "flex",
