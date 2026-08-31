@@ -545,6 +545,12 @@ export const translations = {
     statusMicOff: "Mikrofon Kapalı",
     statusAudioOn: "Sistem Ses Kaydı",
     statusAudioOff: "Ses Kapalı",
+    recordWebcamLabel: "Kamerayı Kaydet",
+    recordWebcamDesc: "Ekran kaydı alırken kamera görüntünüzü de kaydedin.",
+    showRecordControlsLabel: "Kayıt Kontrolcüsünü Göster",
+    showRecordControlsDesc: "Kayıt sırasında duraklatma ve durdurma çubuğunu ekranda gösterin.",
+    webcamStyleSectionTitle: "Kamera & Tasarım Özelleştirme",
+    webcamStyleSectionDesc: "Kamera çerçevesi, metin, renk paletleri ve animasyon tercihlerinizi ayarlayın.",
   },
 
   en: {
@@ -1003,6 +1009,12 @@ export const translations = {
     statusMicOff: "Microphone Off",
     statusAudioOn: "System Audio On",
     statusAudioOff: "Audio Off",
+    recordWebcamLabel: "Record Webcam",
+    recordWebcamDesc: "Include webcam video overlay when recording screen.",
+    showRecordControlsLabel: "Show Recording Controls Bar",
+    showRecordControlsDesc: "Display floating pause and stop control bar on screen during recording.",
+    webcamStyleSectionTitle: "Webcam & Design Customization",
+    webcamStyleSectionDesc: "Adjust webcam border, text, color palettes, and animation preferences.",
   },
 
 
@@ -1414,6 +1426,12 @@ export const translations = {
     statusMicOff: "Mikrofon Bağlıdır",
     statusAudioOn: "Sistem Səsi Yazılması",
     statusAudioOff: "Səs Bağlıdır",
+    recordWebcamLabel: "Kameranı Qeydə Al",
+    recordWebcamDesc: "Ekran qeydi alarkən kamera görüntünüzü də qeydə alın.",
+    showRecordControlsLabel: "Qeyd İdarəetmə Panelini Göstər",
+    showRecordControlsDesc: "Qeyd zamanı ekran üzərində fasilə və dayandırma panelini göstərin.",
+    webcamStyleSectionTitle: "Kamera və Dizayn Fərdiləşdirilməsi",
+    webcamStyleSectionDesc: "Kamera çərçivəsi, mətn, rəng palitraları və animasiya tənzimləmələrinizi təyin edin.",
   },
 
   ru: {
@@ -1823,6 +1841,12 @@ export const translations = {
     statusMicOff: "Микрофон выкл.",
     statusAudioOn: "Системный звук вкл.",
     statusAudioOff: "Звук выкл.",
+    recordWebcamLabel: "Записывать Камеру",
+    recordWebcamDesc: "Включать видео с веб-камеры при записи экрана.",
+    showRecordControlsLabel: "Показывать Панель Управления Записью",
+    showRecordControlsDesc: "Отображать плавающую панель паузы и остановки на экране во время записи.",
+    webcamStyleSectionTitle: "Настройка Веб-Камеры и Дизайна",
+    webcamStyleSectionDesc: "Настройте рамку камеры, текст, цветовую палитру и анимацию.",
   },
 
   de: {
@@ -2231,6 +2255,12 @@ export const translations = {
     statusMicOff: "Mikrofon aus",
     statusAudioOn: "Systemton an",
     statusAudioOff: "Ton aus",
+    recordWebcamLabel: "Webcam Aufnehmen",
+    recordWebcamDesc: "Webcam-Kameraüberlagerung bei Bildschirmaufnahme einschließen.",
+    showRecordControlsLabel: "Aufnahme-Steuerungsleiste Anzeigen",
+    showRecordControlsDesc: "Schwebende Pause- und Stopp-Steuerungsleiste während der Aufnahme anzeigen.",
+    webcamStyleSectionTitle: "Webcam & Design-Anpassung",
+    webcamStyleSectionDesc: "Passen Sie Webcam-Rahmen, Text, Farbpaletten und Animationsoptionen an.",
   }
 };
 
