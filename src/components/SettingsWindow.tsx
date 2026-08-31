@@ -2825,6 +2825,7 @@ function SettingsWindow() {
                           gap: "4px",
                           zIndex: 5,
                           margin: "6px",
+                          opacity: timerOpacity / 100,
                           transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
                           ...(timerPosition === "top-left" ? { top: "6px", left: "6px" } :
                             timerPosition === "top-center" ? { top: "6px", left: "50%", transform: "translateX(-50%)" } :
@@ -2850,6 +2851,7 @@ function SettingsWindow() {
                             alignItems: "center",
                             justifyContent: "center",
                             fontSize: "0.72rem",
+                            lineHeight: 1,
                             fontWeight:
                               timerFontStyle === "segoe-light"
                                 ? 300
@@ -2881,7 +2883,19 @@ function SettingsWindow() {
                             textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
                           }}
                         >
-                          10:00
+                          <span
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              lineHeight: 1,
+                              width: "100%",
+                              height: "100%",
+                              textAlign: "center",
+                            }}
+                          >
+                            {`${String(Math.floor(timerDefaultDuration / 60)).padStart(2, "0")}:${String(timerDefaultDuration % 60).padStart(2, "0")}`}
+                          </span>
                         </div>
 
                         {/* Mola Sayacı Butonları (Duraklat & Sıfırla) */}
