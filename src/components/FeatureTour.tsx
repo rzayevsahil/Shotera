@@ -483,6 +483,16 @@ export const TOUR_STEPS: TourStep[] = [
     requireClick: true,
   },
   {
+    id: "record_subtab_general",
+    target: '[data-tour="record-subtab-general"]',
+    tab: "record",
+    subTab: "record_general",
+    titleKey: "tourRecordSubTabGeneralTitle",
+    descKey: "tourRecordSubTabGeneralDesc",
+    interactiveHintKey: "tourClickRecordSubTabGeneral",
+    requireClick: true,
+  },
+  {
     id: "setting_record_fps",
     target: '[data-tour="setting-record-fps"]',
     tab: "record",
