@@ -2578,54 +2578,56 @@ function SettingsWindow() {
                     )}
 
                     {timerSoundSource === "custom" && (
-                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px", marginBottom: "8px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
-                            <Music size={16} color="#38bdf8" />
-                            <span style={{ fontSize: "0.82rem", color: timerCustomAudioName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px" }}>
-                              {timerCustomAudioName || ((t as any).timerNoCustomSoundSelected || "Henüz özel ses dosyası seçilmedi")}
-                            </span>
-                          </div>
-                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                            <input
-                              type="file"
-                              ref={customAudioInputRef}
-                              accept="audio/*"
-                              onChange={handleCustomAudioUpload}
-                              style={{ display: "none" }}
-                            />
-                            <button
-                              className="premium-button"
-                              onClick={() => customAudioInputRef.current?.click()}
-                              style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
-                            >
-                              <Upload size={13} />
-                              {(t as any).timerCustomSoundSelect || "Ses Dosyası Seç"}
-                            </button>
-                            {timerCustomAudioName && (
+                      <div style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.03)", paddingBottom: "16px" }}>
+                        <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
+                              <Music size={16} color="#38bdf8" />
+                              <span style={{ fontSize: "0.82rem", color: timerCustomAudioName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px" }}>
+                                {timerCustomAudioName || ((t as any).timerNoCustomSoundSelected || "Henüz özel ses dosyası seçilmedi")}
+                              </span>
+                            </div>
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                              <input
+                                type="file"
+                                ref={customAudioInputRef}
+                                accept="audio/*"
+                                onChange={handleCustomAudioUpload}
+                                style={{ display: "none" }}
+                              />
                               <button
                                 className="premium-button"
-                                onClick={handleRemoveCustomAudio}
-                                style={{ padding: "5px 8px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
-                                title="Özel sesi kaldır"
+                                onClick={() => customAudioInputRef.current?.click()}
+                                style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
                               >
-                                <Trash2 size={13} />
+                                <Upload size={13} />
+                                {(t as any).timerCustomSoundSelect || "Ses Dosyası Seç"}
                               </button>
-                            )}
-                            <button
-                              className="premium-button"
-                              onClick={() => playTimerSound("custom")}
-                              style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
-                              title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
-                            >
-                              <Volume2 size={13} />
-                              {(t as any).timerTestSound || "Sesi Dinle"}
-                            </button>
+                              {timerCustomAudioName && (
+                                <button
+                                  className="premium-button"
+                                  onClick={handleRemoveCustomAudio}
+                                  style={{ padding: "5px 8px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+                                  title="Özel sesi kaldır"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                              <button
+                                className="premium-button"
+                                onClick={() => playTimerSound("custom")}
+                                style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                                title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
+                              >
+                                <Volume2 size={13} />
+                                {(t as any).timerTestSound || "Sesi Dinle"}
+                              </button>
+                            </div>
                           </div>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-tertiary)", lineHeight: 1.4 }}>
+                            {(t as any).timerCustomSoundDesc}
+                          </span>
                         </div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-tertiary)", lineHeight: 1.4 }}>
-                          {(t as any).timerCustomSoundDesc}
-                        </span>
                       </div>
                     )}
 
