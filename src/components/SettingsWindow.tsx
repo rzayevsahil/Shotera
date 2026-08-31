@@ -3891,6 +3891,132 @@ function SettingsWindow() {
                   {(t as any).recordOpenBtn || "Kayıt Modunu Aç"}
                 </button>
               </div>
+
+              {/* Kart 2: Kayıt Kontrol Çubuğu Önizleme (Floating Control Bar Mockup) */}
+              <div
+                className="settings-card"
+                data-tour="setting-record-controls-preview"
+                style={{
+                  padding: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  opacity: showRecordControls ? 1 : 0.6,
+                  transition: "all 0.3s ease"
+                }}
+              >
+                {/* Panel Başlığı */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <LayoutTemplate size={16} color={showRecordControls ? "var(--accent-cyan)" : "var(--text-muted)"} />
+                    <span style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text-main)" }}>
+                      {(t as any).recordControlsPreviewTitle || "Kayıt Kontrol Çubuğu"}
+                    </span>
+                  </div>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    background: showRecordControls ? "rgba(16, 185, 129, 0.12)" : "rgba(255, 255, 255, 0.06)",
+                    padding: "3px 8px",
+                    borderRadius: "12px",
+                    border: showRecordControls ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)"
+                  }}>
+                    <div style={{
+                      width: "6px",
+                      height: "6px",
+                      borderRadius: "50%",
+                      background: showRecordControls ? "#10b981" : "#64748b",
+                      boxShadow: showRecordControls ? "0 0 6px #10b981" : "none",
+                      animation: showRecordControls ? "breathe-border 2s infinite" : "none"
+                    }} />
+                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: showRecordControls ? "#10b981" : "var(--text-muted)", letterSpacing: "0.5px" }}>
+                      {showRecordControls ? ((t as any).badgeActive || "AÇIK") : ((t as any).badgeDisabled || "GİZLİ")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Yüzen Kontrol Çubuğu Görsel Simülasyonu */}
+                <div style={{
+                  width: "100%",
+                  height: "80px",
+                  background: "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: "10px",
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden"
+                }}>
+                  {/* Ekran Izgara Arka Planı */}
+                  <div style={{
+                    position: "absolute",
+                    inset: 0,
+                    backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px)",
+                    backgroundSize: "14px 14px",
+                    opacity: 0.4
+                  }} />
+
+                  {/* Yüzen Kontrol Barı Mockup */}
+                  <div style={{
+                    position: "relative",
+                    zIndex: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    background: "rgba(15, 23, 42, 0.88)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(255, 255, 255, 0.18)",
+                    borderRadius: "30px",
+                    padding: "6px 14px",
+                    boxShadow: showRecordControls ? "0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.15)" : "0 4px 12px rgba(0,0,0,0.3)"
+                  }}>
+                    {/* Canlı Kayıt Noktası & Sayaç */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <div style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        background: "#ef4444",
+                        boxShadow: "0 0 8px #ef4444",
+                        animation: "breathe-border 1.5s infinite"
+                      }} />
+                      <span style={{ fontFamily: "monospace", fontSize: "0.78rem", fontWeight: 700, color: "#ffffff", letterSpacing: "0.5px" }}>
+                        00:04:12
+                      </span>
+                    </div>
+
+                    {/* Dikey Ayrıştırıcı */}
+                    <div style={{ width: "1px", height: "14px", background: "rgba(255, 255, 255, 0.15)" }} />
+
+                    {/* Butonlar Simülasyonu */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Play size={10} color="#eab308" fill="#eab308" />
+                      </div>
+                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(239,68,68,0.2)", border: "1px solid rgba(239,68,68,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Square size={9} color="#ef4444" fill="#ef4444" />
+                      </div>
+                      {recordWebcam && (
+                        <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(56,189,248,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Camera size={10} color="#38bdf8" />
+                        </div>
+                      )}
+                      {recordMic && (
+                        <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(74,222,128,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Mic size={10} color="#4ade80" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Açıklama Metni */}
+                <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", lineHeight: "1.3", textAlign: "center" }}>
+                  {(t as any).recordControlsPreviewDesc || "Ekran kaydı esnasında ekranınızda yüzen bu çubuk üzerinden kaydı yönetebilirsiniz."}
+                </span>
+              </div>
             </div>
           </div>
         )}

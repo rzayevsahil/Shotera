@@ -554,6 +554,8 @@ export const translations = {
     recordSubTabGeneral: "Genel / Video",
     recordSubTabWebcam: "Kamera & Katman",
     recordSubTabShortcuts: "Kısayollar",
+    recordControlsPreviewTitle: "Kayıt Kontrol Çubuğu",
+    recordControlsPreviewDesc: "Ekran kaydı esnasında ekranınızda yüzen bu çubuk üzerinden kaydı yönetebilirsiniz.",
   },
 
   en: {
@@ -1021,6 +1023,8 @@ export const translations = {
     recordSubTabGeneral: "General / Video",
     recordSubTabWebcam: "Webcam & Overlay",
     recordSubTabShortcuts: "Shortcuts",
+    recordControlsPreviewTitle: "Recording Control Bar",
+    recordControlsPreviewDesc: "Manage recording on screen via this floating control bar while recording.",
   },
 
 
@@ -1441,6 +1445,8 @@ export const translations = {
     recordSubTabGeneral: "Ümumi / Video",
     recordSubTabWebcam: "Kamera və Qat",
     recordSubTabShortcuts: "Qısayollar",
+    recordControlsPreviewTitle: "Qeyd İdarəetmə Paneli",
+    recordControlsPreviewDesc: "Qeyd zamanı ekran üzərində bu üzən panel vasitəsilə qeydi idarə edin.",
   },
 
   ru: {
@@ -1859,6 +1865,8 @@ export const translations = {
     recordSubTabGeneral: "Общие / Видео",
     recordSubTabWebcam: "Камера и Слой",
     recordSubTabShortcuts: "Горячие Клавиши",
+    recordControlsPreviewTitle: "Панель Управления Записью",
+    recordControlsPreviewDesc: "Управляйте записью прямо с экрана с помощью плавающей панели.",
   },
 
   de: {
@@ -2276,6 +2284,8 @@ export const translations = {
     recordSubTabGeneral: "Allgemein / Video",
     recordSubTabWebcam: "Webcam & Overlay",
     recordSubTabShortcuts: "Tastenkombinationen",
+    recordControlsPreviewTitle: "Aufnahme-Steuerungsleiste",
+    recordControlsPreviewDesc: "Steuern Sie die Aufnahme direkt auf dem Bildschirm über diese Schwebefunktionsleiste.",
   }
 };
 
