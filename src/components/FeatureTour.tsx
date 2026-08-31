@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { X, ArrowLeft, ArrowRight, Check, MousePointerClick, Sparkles, Rocket, Settings, Camera, Save, ZoomIn, Timer, Video, Info } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
 import "./FeatureTour.css";
 
@@ -700,6 +701,21 @@ export default function FeatureTour({ isOpen, onClose, onSelectTab }: FeatureTou
   const descText = t[currentStep.descKey] || currentStep.descKey;
   const interactiveHintText = currentStep.interactiveHintKey ? (t[currentStep.interactiveHintKey] || currentStep.interactiveHintKey) : null;
 
+  const getTabIcon = (step: TourStep) => {
+    if (step.id === "welcome") return <Rocket size={20} style={{ color: "var(--accent-cyan)", marginLeft: "8px" }} />;
+    switch (step.tab) {
+      case "general": return <Settings size={18} style={{ color: "#a855f7", marginLeft: "8px" }} />;
+      case "capture": return <Camera size={18} style={{ color: "#ec4899", marginLeft: "8px" }} />;
+      case "save": return <Save size={18} style={{ color: "#22c55e", marginLeft: "8px" }} />;
+      case "zoom": 
+      case "live_zoom": return <ZoomIn size={18} style={{ color: "#f59e0b", marginLeft: "8px" }} />;
+      case "timer": return <Timer size={18} style={{ color: "#3b82f6", marginLeft: "8px" }} />;
+      case "record": return <Video size={18} style={{ color: "#ef4444", marginLeft: "8px" }} />;
+      case "about": return <Info size={18} style={{ color: "#8b5cf6", marginLeft: "8px" }} />;
+      default: return null;
+    }
+  };
+
   return (
     <div className="tour-overlay">
       {/* SVG Spotlight Cutout Mask */}
@@ -745,17 +761,20 @@ export default function FeatureTour({ isOpen, onClose, onSelectTab }: FeatureTou
           <span className="tour-badge">
             {currentStepIndex + 1} / {TOUR_STEPS.length}
           </span>
-          <button className="tour-skip-btn" onClick={handleFinish} title={t.tourSkip || "Turu Geç"}>
-            {t.tourSkip || "Turu Geç"} ✕
+          <button className="tour-skip-btn" onClick={handleFinish} title={t.tourSkip || "Turu Geç"} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            {t.tourSkip || "Turu Geç"} <X size={13} strokeWidth={2.5} />
           </button>
         </div>
 
-        <h3 className="tour-title">{titleText}</h3>
+        <h3 className="tour-title" style={{ display: "flex", alignItems: "center" }}>
+          {titleText}
+          {getTabIcon(currentStep)}
+        </h3>
         <p className="tour-desc">{descText}</p>
 
         {interactiveHintText && (
-          <div className="tour-interactive-hint" onClick={handleNext} style={{ cursor: "pointer" }}>
-            <span className="tour-hand-icon">👇</span> {interactiveHintText}
+          <div className="tour-interactive-hint" onClick={handleNext} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+            <MousePointerClick size={16} className="tour-hand-icon" /> {interactiveHintText}
           </div>
         )}
 
@@ -764,12 +783,17 @@ export default function FeatureTour({ isOpen, onClose, onSelectTab }: FeatureTou
             className="tour-btn secondary"
             onClick={handlePrev}
             disabled={currentStepIndex === 0}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
-            {t.tourPrev || "Önceki"}
+            <ArrowLeft size={15} strokeWidth={2.5} /> {(t.tourPrev || "Önceki")}
           </button>
 
-          <button className="tour-btn primary" onClick={handleNext}>
-            {currentStepIndex === TOUR_STEPS.length - 1 ? (t.tourFinish || "Anladım, Bitir ✨") : (t.tourNext || "Sonraki →")}
+          <button className="tour-btn primary" onClick={handleNext} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {currentStepIndex === TOUR_STEPS.length - 1 ? (
+              <>{(t.tourFinish || "Anladım, Bitir")} <Sparkles size={15} strokeWidth={2.5} /></>
+            ) : (
+              <>{(t.tourNext || "Sonraki")} <ArrowRight size={15} strokeWidth={2.5} /></>
+            )}
           </button>
         </div>
       </div>
