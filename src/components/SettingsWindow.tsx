@@ -2487,7 +2487,6 @@ function SettingsWindow() {
                             setTimerSoundPreset(lastPreset);
                             localStorage.setItem("timerSoundPreset", lastPreset);
                             window.dispatchEvent(new Event("storage"));
-                            playTimerSound(lastPreset);
                           }}
                           style={{
                             display: "inline-flex",
@@ -2518,7 +2517,6 @@ function SettingsWindow() {
                             setTimerSoundPreset("custom");
                             localStorage.setItem("timerSoundPreset", "custom");
                             window.dispatchEvent(new Event("storage"));
-                            playTimerSound("custom");
                           }}
                           style={{
                             display: "inline-flex",
