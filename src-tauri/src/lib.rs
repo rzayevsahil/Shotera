@@ -527,6 +527,7 @@ fn open_recorder_view(app_handle: AppHandle, state: State<'_, AppState>) -> Resu
             .title("Screen Recorder")
             .inner_size(620.0, 500.0)
             .resizable(false)
+            .shadow(false)
             .decorations(false)
             .transparent(true)
             .always_on_top(true)

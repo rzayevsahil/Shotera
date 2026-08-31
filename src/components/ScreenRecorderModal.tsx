@@ -357,7 +357,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     if (!isOpen) return null;
 
-    if (isRecording && isStandalone) {
+    if (isRecording) {
         return (
             <div
                 style={{

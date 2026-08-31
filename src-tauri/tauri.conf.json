@@ -71,6 +71,7 @@
         "height": 500,
         "resizable": true,
         "transparent": true,
+        "shadow": false,
         "decorations": false,
         "visible": false,
         "alwaysOnTop": true,
