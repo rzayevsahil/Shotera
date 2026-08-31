@@ -2127,7 +2127,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Color Swatches Row */}
-                  <div className="setting-row">
+                  <div className="setting-row" data-tour="setting-timer-bg-color">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgColorLabel || "Arka Plan Rengi"}</span>
                     </div>
@@ -2255,7 +2255,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Style Row */}
-                  <div className="setting-row">
+                  <div className="setting-row" data-tour="setting-timer-bg-style">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgStyleLabel}</span>
                     </div>
@@ -2361,7 +2361,7 @@ function SettingsWindow() {
                   )}
 
                   {timerBgMode === "image" && (
-                    <div className="setting-row">
+                    <div className="setting-row" data-tour="setting-timer-bg-scale">
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
                         <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
@@ -2411,7 +2411,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Timer Opacity Slider Row */}
-                  <div className="setting-row">
+                  <div className="setting-row" data-tour="setting-timer-opacity">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerOpacityLabel}</span>
                       <span className="setting-desc">{(t as any).timerOpacityDesc}</span>
@@ -2438,7 +2438,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Kontrol Butonlarını Göster Toggle */}
-                  <div className="setting-row">
+                  <div className="setting-row" data-tour="setting-timer-controls">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerShowControls || "Kontrol Butonları"}</span>
                       <span className="setting-desc">{(t as any).timerShowControlsDesc || "Mola ekranında Duraklat ve Sıfırla butonlarını göster."}</span>
