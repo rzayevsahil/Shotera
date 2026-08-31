@@ -2866,17 +2866,17 @@ function SettingsWindow() {
                           const pStr = `${String(pMin).padStart(2, "0")}:${String(pSec).padStart(2, "0")}`;
                           const isLongStr = pStr.length >= 6;
                           const isVeryLongStr = pStr.length >= 7;
-                          const dynamicFontSize = isVeryLongStr ? "0.44rem" : isLongStr ? "0.55rem" : "0.72rem";
-                          const dynamicLetterSpacing = isVeryLongStr ? "-0.5px" : isLongStr ? "0px" : "0.5px";
+                          const dynamicFontSize = isVeryLongStr ? "0.66rem" : isLongStr ? "0.82rem" : "1.08rem";
+                          const dynamicLetterSpacing = isVeryLongStr ? "-0.75px" : isLongStr ? "0px" : "0.75px";
 
                           return (
                             <div
                               style={{
-                                width: "48px",
-                                height: "48px",
+                                width: "72px",
+                                height: "72px",
                                 borderRadius: "50%",
                                 background: "transparent",
-                                border: `2px solid ${timerRingColor || "#38bdf8"}`,
+                                border: `2.5px solid ${timerRingColor || "#38bdf8"}`,
                                 boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
                                 display: "flex",
                                 alignItems: "center",
@@ -2934,44 +2934,44 @@ function SettingsWindow() {
 
                         {/* Mola Sayacı Butonları (Duraklat & Sıfırla) */}
                         {timerShowControls && (
-                          <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                             <div
                               style={{
                                 background: "linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.9))",
-                                border: "1px solid rgba(254, 215, 170, 0.5)",
+                                border: "0.5px solid rgba(254, 215, 170, 0.5)",
                                 color: "#ffffff",
-                                padding: "2px 7px",
-                                borderRadius: "10px",
-                                fontSize: "0.48rem",
+                                padding: "2px 6px",
+                                borderRadius: "6px",
+                                fontSize: "0.38rem",
                                 fontWeight: 600,
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "3px",
-                                boxShadow: "0 2px 6px rgba(245, 158, 11, 0.35)",
+                                boxShadow: "0 1px 3px rgba(245, 158, 11, 0.35)",
                                 whiteSpace: "nowrap"
                               }}
                             >
-                              <Pause size={7} />
+                              <Pause size={6} />
                               <span>{(t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat"}</span>
                             </div>
 
                             <div
                               style={{
                                 background: "rgba(15, 23, 42, 0.65)",
-                                border: "1px solid rgba(255, 255, 255, 0.2)",
+                                border: "0.5px solid rgba(255, 255, 255, 0.2)",
                                 color: "#f8fafc",
-                                padding: "1px 5px",
-                                borderRadius: "10px",
-                                fontSize: "0.48rem",
+                                padding: "2px 6px",
+                                borderRadius: "6px",
+                                fontSize: "0.38rem",
                                 fontWeight: 500,
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "2px",
-                                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+                                gap: "3px",
+                                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.3)",
                                 whiteSpace: "nowrap"
                               }}
                             >
-                              <RotateCcw size={7} />
+                              <RotateCcw size={6} />
                               <span>{(t as any).timerResetBtn || "Sıfırla"}</span>
                             </div>
                           </div>
