@@ -3162,7 +3162,7 @@ function SettingsWindow() {
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamBorderColorLabel || "Kamera Çerçeve Rengi"}</span>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", width: "240px" }}>
                         <div style={{ display: "flex", gap: "6px" }}>
                           {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map(c => (
                             <div
@@ -3255,7 +3255,7 @@ function SettingsWindow() {
                           }}
                           placeholder="#38BDF8"
                           style={{
-                            width: "100px",
+                            width: "240px",
                             padding: "8px 10px",
                             fontSize: "0.9rem",
                             fontFamily: "monospace",
@@ -3360,7 +3360,7 @@ function SettingsWindow() {
                         <span className="setting-label">{(t as any).webcamTextColorOnlyLabel || "Yazı Rengi"}</span>
                         <span className="setting-desc">{(t as any).webcamTextColorOnlyDesc || "Kamera yazısının rengini belirleyin."}</span>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", width: "240px" }}>
                         <div style={{ display: "flex", gap: "6px" }}>
                           {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map(c => (
                             <div
@@ -3454,7 +3454,7 @@ function SettingsWindow() {
                           }}
                           placeholder="#FFFFFF"
                           style={{
-                            width: "100px",
+                            width: "240px",
                             padding: "8px 10px",
                             fontSize: "0.9rem",
                             fontFamily: "monospace",
