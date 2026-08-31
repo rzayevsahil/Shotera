@@ -3704,7 +3704,7 @@ function SettingsWindow() {
                     </span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(0, 242, 254, 0.1)", padding: "3px 8px", borderRadius: "12px", border: "1px solid rgba(0, 242, 254, 0.2)" }}>
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--accent-cyan)", boxShadow: "0 0 6px var(--accent-cyan)", animation: "breathe-border 2s infinite" }} />
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--accent-cyan)", boxShadow: "0 0 6px var(--accent-cyan)", animation: "breathe-border 2s infinite", transform: "translateY(-1px)" }} />
                     <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-cyan)", letterSpacing: "0.5px" }}>{(t as any).liveBadge || "LIVE"}</span>
                   </div>
                 </div>
@@ -3975,7 +3975,8 @@ function SettingsWindow() {
                       borderRadius: "50%",
                       background: showRecordControls ? "#10b981" : "#64748b",
                       boxShadow: showRecordControls ? "0 0 6px #10b981" : "none",
-                      animation: showRecordControls ? "breathe-border 2s infinite" : "none"
+                      animation: showRecordControls ? "breathe-border 2s infinite" : "none",
+                      transform: "translateY(-1px)"
                     }} />
                     <span style={{ fontSize: "0.68rem", fontWeight: 700, color: showRecordControls ? "#10b981" : "var(--text-muted)", letterSpacing: "0.5px" }}>
                       {showRecordControls ? ((t as any).badgeActive || "AÇIK") : ((t as any).badgeDisabled || "GİZLİ")}
