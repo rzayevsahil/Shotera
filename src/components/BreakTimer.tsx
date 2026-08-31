@@ -681,29 +681,6 @@ export default function BreakTimer() {
           {(t as any).timerResetBtn || "Sıfırla"}
         </button>
       </div>
-
-      {/* Help Hint Banner */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "28px",
-          fontSize: "13px",
-          color: "rgba(255, 255, 255, 0.7)",
-          background: "rgba(15, 23, 42, 0.4)",
-          backdropFilter: "blur(8px)",
-          padding: "6px 16px",
-          borderRadius: "20px",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          display: "flex",
-          gap: "16px",
-          zIndex: 10,
-        }}
-      >
-        <span>💡 <b>{(t as any).timerHintWheel || "Fare Tekerleği / Ok Tuşları:"}</b> {(t as any).timerHintAdjust1 || "Süre Ayarla (+/- 1 dk)"}</span>
-        <span><b>{(t as any).timerHintShiftOk || "Shift + Ok:"}</b> {(t as any).timerHintAdjust5 || "(+/- 5 dk)"}</span>
-        <span><b>ESC:</b> {t.actionClose || "Kapat (ESC)"}</span>
-      </div>
-
     </div>
   );
 }

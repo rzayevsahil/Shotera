@@ -2390,11 +2390,9 @@ function SettingsWindow() {
 
                   {/* 9-Point Screen Grid Alignment Row */}
                   <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "10px" }}>
-                    <div className="setting-info" style={{ width: "100%" }}>
+                    <div className="setting-info" style={{ width: "100%", maxWidth: "100%" }}>
                       <span className="setting-label">{(t as any).timerPositionLabel}</span>
-                      <span className="setting-desc" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>
-                        {(t as any).timerPositionDesc}
-                      </span>
+                      <span className="setting-desc">{(t as any).timerPositionDesc}</span>
                     </div>
 
                     <div style={{ width: "100%", display: "flex", justifyContent: "center", marginTop: "2px" }}>
