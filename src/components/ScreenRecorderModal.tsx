@@ -397,11 +397,12 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 background: isPaused ? "#64748b" : "#ef4444",
                                 boxShadow: isPaused ? "none" : "0 0 8px #ef4444",
                                 animation: isPaused ? "none" : "pulse-recording 1.5s infinite",
-                                flexShrink: 0
+                                flexShrink: 0,
+                                marginTop: "-1px"
                             }}
                         />
                         {isPaused && (
-                            <span style={{ color: "#e2e8f0", fontWeight: 600, fontSize: "0.75rem" }} data-tauri-drag-region>
+                            <span style={{ color: "#e2e8f0", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }} data-tauri-drag-region>
                                 {(t as any).modalPaused || "Mola"}
                             </span>
                         )}
@@ -411,7 +412,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 fontSize: "0.78rem",
                                 fontWeight: 700,
                                 color: "#ffffff",
-                                letterSpacing: "0.5px"
+                                letterSpacing: "0.5px",
+                                lineHeight: 1
                             }}
                             data-tauri-drag-region
                         >

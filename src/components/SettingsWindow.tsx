@@ -3980,9 +3980,10 @@ function SettingsWindow() {
                         borderRadius: "50%",
                         background: "#ef4444",
                         boxShadow: "0 0 8px #ef4444",
-                        animation: "breathe-border 1.5s infinite"
+                        animation: "breathe-border 1.5s infinite",
+                        marginTop: "-1px"
                       }} />
-                      <span style={{ fontFamily: "monospace", fontSize: "0.78rem", fontWeight: 700, color: "#ffffff", letterSpacing: "0.5px" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: "0.78rem", fontWeight: 700, color: "#ffffff", letterSpacing: "0.5px", lineHeight: 1 }}>
                         00:04:12
                       </span>
                     </div>
