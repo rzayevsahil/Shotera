@@ -2815,52 +2815,17 @@ function SettingsWindow() {
                         }}
                       />
 
-                      {/* Canlı Hareketli Mini Taymer Halqası */}
+                      {/* Canlı Hareketli Mini Taymer ve Butonlar (Gerçek Mola Sayacı Tasarımı) */}
                       <div
                         style={{
                           position: "absolute",
-                          width: "52px",
-                          height: "52px",
-                          borderRadius: "50%",
-                          background: "rgba(15, 23, 42, 0.85)",
-                          border: `2px solid ${timerRingColor || "#38bdf8"}`,
-                          boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
                           display: "flex",
+                          flexDirection: "column",
                           alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "0.75rem",
-                          fontWeight:
-                            timerFontStyle === "segoe-light"
-                              ? 300
-                              : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
-                                ? 700
-                                : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
-                                  ? 400
-                                  : 800,
-                          color: "#ffffff",
-                          fontFamily:
-                            timerFontStyle === "heading"
-                              ? "'Outfit', sans-serif"
-                              : timerFontStyle === "mono"
-                                ? "monospace"
-                                : timerFontStyle === "segoe-light"
-                                  ? "'Segoe UI Light', 'Segoe UI', sans-serif"
-                                  : timerFontStyle === "orbitron"
-                                    ? "'Orbitron', sans-serif"
-                                    : timerFontStyle === "chakra"
-                                      ? "'Chakra Petch', sans-serif"
-                                      : timerFontStyle === "share-tech"
-                                        ? "'Share Tech Mono', monospace"
-                                        : timerFontStyle === "rajdhani"
-                                          ? "'Rajdhani', sans-serif"
-                                          : timerFontStyle === "dseg"
-                                            ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
-                                            : "'Inter', sans-serif",
-                          transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                          backdropFilter: "blur(6px)",
+                          gap: "4px",
                           zIndex: 5,
                           margin: "6px",
-                          textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
+                          transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
                           ...(timerPosition === "top-left" ? { top: "6px", left: "6px" } :
                             timerPosition === "top-center" ? { top: "6px", left: "50%", transform: "translateX(-50%)" } :
                               timerPosition === "top-right" ? { top: "6px", right: "6px" } :
@@ -2872,7 +2837,95 @@ function SettingsWindow() {
                                           { top: "50%", left: "50%", transform: "translate(-50%, -50%)" })
                         }}
                       >
-                        10:00
+                        {/* Mini Taymer Halkası */}
+                        <div
+                          style={{
+                            width: "48px",
+                            height: "48px",
+                            borderRadius: "50%",
+                            background: "rgba(15, 23, 42, 0.85)",
+                            border: `2px solid ${timerRingColor || "#38bdf8"}`,
+                            boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "0.72rem",
+                            fontWeight:
+                              timerFontStyle === "segoe-light"
+                                ? 300
+                                : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
+                                  ? 700
+                                  : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
+                                    ? 400
+                                    : 800,
+                            color: "#ffffff",
+                            fontFamily:
+                              timerFontStyle === "heading"
+                                ? "'Outfit', sans-serif"
+                                : timerFontStyle === "mono"
+                                  ? "monospace"
+                                  : timerFontStyle === "segoe-light"
+                                    ? "'Segoe UI Light', 'Segoe UI', sans-serif"
+                                    : timerFontStyle === "orbitron"
+                                      ? "'Orbitron', sans-serif"
+                                      : timerFontStyle === "chakra"
+                                        ? "'Chakra Petch', sans-serif"
+                                        : timerFontStyle === "share-tech"
+                                          ? "'Share Tech Mono', monospace"
+                                          : timerFontStyle === "rajdhani"
+                                            ? "'Rajdhani', sans-serif"
+                                            : timerFontStyle === "dseg"
+                                              ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
+                                              : "'Inter', sans-serif",
+                            backdropFilter: "blur(6px)",
+                            textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
+                          }}
+                        >
+                          10:00
+                        </div>
+
+                        {/* Mola Sayacı Butonları (Duraklat & Sıfırla) */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                          <div
+                            style={{
+                              background: "rgba(34, 197, 94, 0.25)",
+                              border: "1px solid rgba(34, 197, 94, 0.6)",
+                              color: "#86efac",
+                              padding: "1px 5px",
+                              borderRadius: "10px",
+                              fontSize: "0.48rem",
+                              fontWeight: 600,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "2px",
+                              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+                              whiteSpace: "nowrap"
+                            }}
+                          >
+                            <Pause size={7} />
+                            <span>{(t as any).timerPauseBtn ? (t as any).timerPauseBtn.split(" ")[0] : "Duraklat"}</span>
+                          </div>
+
+                          <div
+                            style={{
+                              background: "rgba(15, 23, 42, 0.65)",
+                              border: "1px solid rgba(255, 255, 255, 0.2)",
+                              color: "#f8fafc",
+                              padding: "1px 5px",
+                              borderRadius: "10px",
+                              fontSize: "0.48rem",
+                              fontWeight: 500,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "2px",
+                              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+                              whiteSpace: "nowrap"
+                            }}
+                          >
+                            <RotateCcw size={7} />
+                            <span>{(t as any).timerResetBtn || "Sıfırla"}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
