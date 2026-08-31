@@ -3279,32 +3279,38 @@ function SettingsWindow() {
                   />
                 </div>
 
-                {/* Webcam Font & Size */}
+                {/* Webcam Font */}
+                <div className="setting-row" data-tour="setting-webcam-font">
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"}</span>
+                    <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) seçin."}</span>
+                  </div>
+                  <div style={{ width: "240px" }}>
+                    <FontSelect
+                      value={webcamTextFont}
+                      onChange={setWebcamTextFont}
+                      placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
+                      searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
+                    />
+                  </div>
+                </div>
+
+                {/* Webcam Font Size */}
                 <div className="setting-row" data-tour="setting-webcam-font-size">
                   <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"} & {(t as any).webcamTextSizeLabel || "Boyut"}</span>
-                    <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) ve boyutunu seçin."}</span>
+                    <span className="setting-label">{(t as any).webcamTextSizeLabel || "Yazı Boyutu"}</span>
+                    <span className="setting-desc">{(t as any).webcamTextSizeDesc || "Kamera altındaki metnin boyutunu ayarlayın."}</span>
                   </div>
-                  <div style={{ display: "flex", gap: "12px", alignItems: "center", minWidth: "240px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "130px" }}>
-                      <input
-                        type="range"
-                        min="8"
-                        max="24"
-                        value={webcamTextSize}
-                        onChange={(e) => setWebcamTextSize(Number(e.target.value))}
-                        style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer", maxWidth: "110px" }}
-                      />
-                      <span style={{ fontSize: "12px", textAlign: "right", fontWeight: 600, fontFamily: "monospace", minWidth: "10px" }}>{webcamTextSize}</span>
-                    </div>
-                    <div style={{ flex: 1, minWidth: "120px" }}>
-                      <FontSelect
-                        value={webcamTextFont}
-                        onChange={setWebcamTextFont}
-                        placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
-                        searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
-                      />
-                    </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "240px", justifyContent: "flex-end" }}>
+                    <input
+                      type="range"
+                      min="8"
+                      max="24"
+                      value={webcamTextSize}
+                      onChange={(e) => setWebcamTextSize(Number(e.target.value))}
+                      style={{ flex: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                    />
+                    <span style={{ fontSize: "13px", fontWeight: 600, fontFamily: "monospace", minWidth: "32px", textAlign: "right", color: "var(--accent-cyan)" }}>{webcamTextSize}px</span>
                   </div>
                 </div>
 
