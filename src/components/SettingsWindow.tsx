@@ -2275,8 +2275,8 @@ function SettingsWindow() {
                     <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
-                          <Camera size={16} color="#38bdf8" />
-                          <span style={{ fontSize: "0.82rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px" }}>
+                          <Camera size={16} color="#38bdf8" style={{ flexShrink: 0, marginTop: "-2px" }} />
+                          <span style={{ fontSize: "0.82rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px", lineHeight: "16px", display: "flex", alignItems: "center" }}>
                             {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
                           </span>
                         </div>
