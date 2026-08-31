@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -158,6 +158,7 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
   const [recordSubTab, setRecordSubTab] = useState<"general" | "webcam" | "shortcuts">("general");
+  const [timerSubTab, setTimerSubTab] = useState<"general" | "theme" | "sound">("general");
   const [lang, setLang] = useState<Language>(getLanguage);
   const [appVersion, setAppVersion] = useState("v0.1.0");
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -199,6 +200,9 @@ function SettingsWindow() {
   );
   const [timerLockWorkstationOnStart, setTimerLockWorkstationOnStart] = useState<boolean>(
     () => localStorage.getItem("timerLockWorkstationOnStart") === "true"
+  );
+  const [timerResetOnTrigger, setTimerResetOnTrigger] = useState<boolean>(
+    () => localStorage.getItem("timerResetOnTrigger") !== "false"
   );
   const [timerRingColor, setTimerRingColor] = useState<string>(() => localStorage.getItem("timerRingColor") || "#38bdf8");
   const [customTimerRingColor, setCustomTimerRingColor] = useState<string>(() => {
@@ -1714,1082 +1718,1190 @@ function SettingsWindow() {
         )}
 
         {activeTab === "timer" && (
-          <div className="settings-card">
-            {/* Break Timer Row */}
-            <div className="setting-row" data-tour="shortcut-timer">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).shortcutBreakTimer}</span>
-                <span className="setting-desc">{(t as any).shortcutBreakTimerDesc}</span>
-              </div>
-              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <button
-                  className={`shortcut-badge customizable ${recordingType === "timer" ? "recording" : ""}`}
-                  onClick={() => setRecordingType(recordingType === "timer" ? null : "timer")}
-                  title={t.shortcutChangeHint}
-                  style={{
-                    cursor: "pointer",
-                    border: recordingType === "timer" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
-                    background: recordingType === "timer" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                    color: recordingType === "timer" ? "var(--accent-cyan)" : "white",
-                    fontWeight: 600,
-                    animation: recordingType === "timer" ? "pulse-border 1.5s infinite" : "none",
-                    outline: "none",
-                    minWidth: "100px",
-                    textAlign: "center"
-                  }}
-                >
-                  {recordingType === "timer" ? t.shortcutPressKeys : formatShortcut(timerShortcut)}
-                </button>
-                <button
-                  className="premium-button"
-                  onClick={() => invoke("open_break_timer").catch(console.error)}
-                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
-                >
-                  <Play size={14} />
-                  Test Timer
-                </button>
-              </div>
-            </div>
+          <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
+            {/* SOL KOLON: Sekmeli (Sub-Tabs) Form ve Ayar Alanı */}
+            <div style={{ flex: "1 1 0%", minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
 
-            {/* Default Break Duration Row */}
-            <div className="setting-row" data-tour="setting-timer-duration">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).timerDefaultDuration}</span>
-                <span className="setting-desc">{(t as any).timerDefaultDurationDesc}</span>
-              </div>
-              <div style={{ width: "240px", display: "flex", alignItems: "center", gap: "10px" }}>
-                <input
-                  type="number"
-                  min={1}
-                  max={360}
-                  className="premium-input"
-                  value={Math.round(timerDefaultDuration / 60)}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    const mins = val <= 0 ? 1 : Math.min(360, val);
-                    const secs = mins * 60;
-                    setTimerDefaultDuration(secs);
-                    localStorage.setItem("timerDefaultDuration", String(secs));
-                    window.dispatchEvent(new Event("storage"));
-                  }}
-                  style={{ flex: 1, minWidth: 0, padding: "8px 12px", textAlign: "center" }}
-                />
-                <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: 500, whiteSpace: "nowrap" }}>
-                  {(t as any).timerUnitMinutes || "Dakika"}
-                </span>
-              </div>
-            </div>
-
-            {/* Count Direction Row */}
-            <div className="setting-row" data-tour="setting-timer-direction">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).timerCountDirection}</span>
-                <span className="setting-desc">{(t as any).timerCountDirectionDesc}</span>
-              </div>
-              <select
-                className="premium-input"
-                value={timerCountDirection}
-                onChange={(e) => {
-                  const dir = e.target.value as "down" | "up";
-                  setTimerCountDirection(dir);
-                  localStorage.setItem("timerCountDirection", dir);
-                  window.dispatchEvent(new Event("storage"));
-                }}
-                style={{ width: "240px" }}
-              >
-                <option value="down">{(t as any).timerCountDirectionDown}</option>
-                <option value="up">{(t as any).timerCountDirectionUp}</option>
-              </select>
-            </div>
-
-            {/* Show Time Elapsed After Expiration Row */}
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).timerShowElapsedAfterExpiration}</span>
-                <span className="setting-desc">{(t as any).timerShowElapsedAfterExpirationDesc}</span>
-              </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={timerShowElapsedAfterExpiration}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setTimerShowElapsedAfterExpiration(checked);
-                    localStorage.setItem("timerShowElapsedAfterExpiration", String(checked));
-                    window.dispatchEvent(new Event("storage"));
-                  }}
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            {/* Lock Workstation During Break Row */}
-            <div className="setting-row">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).timerLockWorkstationOnStart}</span>
-                <span className="setting-desc">{(t as any).timerLockWorkstationOnStartDesc}</span>
-              </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={timerLockWorkstationOnStart}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setTimerLockWorkstationOnStart(checked);
-                    localStorage.setItem("timerLockWorkstationOnStart", String(checked));
-                    window.dispatchEvent(new Event("storage"));
-                  }}
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            {/* Theme & Ring Color Selection Section */}
-            <div data-tour="setting-timer-theme">
-              <div className="setting-info" style={{ marginBottom: "14px" }}>
-                <span className="setting-label">{(t as any).timerThemeTitle}</span>
-                <span className="setting-desc">{(t as any).timerThemeDesc}</span>
-              </div>
-
-              {/* Live Preview Box: Computer Monitor Simulation */}
+              {/* Mini Sekmeler (Sub-Tabs) */}
               <div
                 style={{
-                  width: "100%",
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "10px 0",
-                  marginBottom: "20px",
-                  position: "relative"
+                  gap: "6px",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  padding: "4px",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)"
                 }}
               >
-                {/* Monitor Screen Frame */}
-                <div
+                <button
+                  type="button"
+                  onClick={() => setTimerSubTab("general")}
                   style={{
-                    width: "100%",
-                    maxWidth: "380px",
-                    height: "210px",
-                    background: "#090d16",
-                    border: "3px solid #334155",
-                    borderRadius: "10px 10px 4px 4px",
-                    position: "relative",
-                    overflow: "hidden",
-                    boxShadow: "0 14px 36px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.9)",
+                    flex: 1,
                     display: "flex",
-                    flexDirection: "column"
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "9px 12px",
+                    borderRadius: "7px",
+                    border: timerSubTab === "general" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                    background: timerSubTab === "general" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                    color: timerSubTab === "general" ? "var(--accent-cyan)" : "var(--text-muted)",
+                    fontWeight: timerSubTab === "general" ? 600 : 500,
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
                   }}
                 >
-                  {/* Monitor Header / Window Control Dots Bar */}
-                  <div
-                    style={{
-                      height: "22px",
-                      background: "rgba(255, 255, 255, 0.04)",
-                      borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "0 10px",
-                      gap: "6px",
-                      zIndex: 6
-                    }}
-                  >
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444" }} />
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#eab308" }} />
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
+                  <Sliders size={15} />
+                  {(t as any).timerSubTabGeneral || "Genel / Süre"}
+                </button>
 
-                    {/* Live Preview Badge */}
-                    <span
-                      style={{
-                        fontSize: "0.62rem",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "1px",
-                        color: "rgba(255, 255, 255, 0.5)",
-                        background: "rgba(0, 0, 0, 0.4)",
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                        marginLeft: "8px",
-                        border: "1px solid rgba(255, 255, 255, 0.08)"
-                      }}
-                    >
-                      {(t as any).timerLivePreview || "Canlı Önizleme"}
-                    </span>
-
-                    <span style={{ fontSize: "0.65rem", color: "#38bdf8", marginLeft: "auto", fontWeight: 700, letterSpacing: "0.5px" }}>
-                      Shotera
-                    </span>
-                  </div>
-
-                  {/* Desktop Wallpaper Display Area */}
-                  <div
-                    style={{
-                      flex: 1,
-                      position: "relative",
-                      overflow: "hidden",
-                      background:
-                        timerBgMode === "image" && timerBgCustomImage
-                          ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
-                          : timerBgMode === "desktop"
-                            ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
-                            : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
-                              ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
-                              : timerBgStyle === "oled-black"
-                                ? "#000000"
-                                : timerBgStyle === "frosted-dark"
-                                  ? "rgba(15, 23, 42, 0.95)"
-                                  : timerBgStyle === "pomodoro-red"
-                                    ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-                                    : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`
-                    }}
-                  >
-                    {/* Background Mesh Dots Grid */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px)",
-                        backgroundSize: "14px 14px",
-                        opacity: timerBgMode === "color" ? 0.6 : 0.2,
-                        pointerEvents: "none"
-                      }}
-                    />
-
-                    {/* Live Moving Mini Break Timer Ring & Clock Display */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        width: "52px",
-                        height: "52px",
-                        borderRadius: "50%",
-                        background: "rgba(15, 23, 42, 0.85)",
-                        border: `2px solid ${timerRingColor || "#38bdf8"}`,
-                        boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "0.75rem",
-                        fontWeight:
-                          timerFontStyle === "segoe-light"
-                            ? 300
-                            : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
-                              ? 700
-                              : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
-                                ? 400
-                                : 800,
-                        color: "#ffffff",
-                        fontFamily:
-                          timerFontStyle === "heading"
-                            ? "'Outfit', sans-serif"
-                            : timerFontStyle === "mono"
-                              ? "monospace"
-                              : timerFontStyle === "segoe-light"
-                                ? "'Segoe UI Light', 'Segoe UI', sans-serif"
-                                : timerFontStyle === "orbitron"
-                                  ? "'Orbitron', sans-serif"
-                                  : timerFontStyle === "chakra"
-                                    ? "'Chakra Petch', sans-serif"
-                                    : timerFontStyle === "share-tech"
-                                      ? "'Share Tech Mono', monospace"
-                                      : timerFontStyle === "rajdhani"
-                                        ? "'Rajdhani', sans-serif"
-                                        : timerFontStyle === "dseg"
-                                          ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
-                                          : "'Inter', sans-serif",
-                        transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                        backdropFilter: "blur(6px)",
-                        zIndex: 5,
-                        margin: "6px",
-                        textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
-                        ...(timerPosition === "top-left" ? { top: "6px", left: "6px" } :
-                          timerPosition === "top-center" ? { top: "6px", left: "50%", transform: "translateX(-50%)" } :
-                            timerPosition === "top-right" ? { top: "6px", right: "6px" } :
-                              timerPosition === "center-left" ? { top: "50%", left: "6px", transform: "translateY(-50%)" } :
-                                timerPosition === "center-right" ? { top: "50%", right: "6px", transform: "translateY(-50%)" } :
-                                  timerPosition === "bottom-left" ? { bottom: "6px", left: "6px" } :
-                                    timerPosition === "bottom-center" ? { bottom: "6px", left: "50%", transform: "translateX(-50%)" } :
-                                      timerPosition === "bottom-right" ? { bottom: "6px", right: "6px" } :
-                                        { top: "50%", left: "50%", transform: "translate(-50%, -50%)" })
-                      }}
-                    >
-                      10:00
-                    </div>
-                  </div>
-
-                  {/* Monitor Bottom Bezel with Power Indicator LED */}
-                  <div style={{ height: "10px", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                    <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#38bdf8", boxShadow: "0 0 6px #38bdf8", position: "absolute", right: "10px" }} />
-                  </div>
-                </div>
-
-                {/* Monitor Stand Neck */}
-                <div style={{ width: "32px", height: "10px", background: "linear-gradient(to bottom, #334155, #1e293b)", borderLeft: "1px solid rgba(255, 255, 255, 0.1)", borderRight: "1px solid rgba(255, 255, 255, 0.1)" }} />
-
-                {/* Monitor Stand Base */}
-                <div style={{ width: "90px", height: "5px", background: "linear-gradient(to right, #1e293b, #475569, #1e293b)", borderRadius: "3px 3px 1px 1px", boxShadow: "0 4px 10px rgba(0,0,0,0.5)" }} />
-              </div>
-
-              {/* Ring Color Preset Row */}
-              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
-                <div className="setting-info">
-                  <span className="setting-label">{(t as any).timerRingColorLabel}</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
-                  {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => {
-                        setTimerRingColor(color);
-                        localStorage.setItem("timerRingColor", color);
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        background: color,
-                        border: timerRingColor === color ? "2px solid #ffffff" : "2px solid transparent",
-                        cursor: "pointer",
-                        boxShadow: timerRingColor === color ? `0 0 10px ${color}` : "none",
-                        transition: "all 0.2s ease"
-                      }}
-                    />
-                  ))}
-                  {/* Circular Custom Color Picker Swatch */}
-                  <div
-                    onClick={() => {
-                      const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor);
-                      if (isPreset) {
-                        const activeCustom = customTimerRingColor || "#06b6d4";
-                        setTimerRingColor(activeCustom);
-                        localStorage.setItem("timerRingColor", activeCustom);
-                        window.dispatchEvent(new Event("storage"));
-                      }
-                    }}
-                    style={{
-                      position: "relative",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
-                        ? customTimerRingColor
-                        : timerRingColor,
-                      border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
-                        ? "2px solid #ffffff"
-                        : "2px solid transparent",
-                      boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
-                        ? `0 0 10px ${timerRingColor}`
-                        : "none",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease"
-                    }}
-                    title={(t as any).timerPickCustomColor || "Özel Renk Seç"}
-                  >
-                    <input
-                      type="color"
-                      value={customTimerRingColor.startsWith("#") && customTimerRingColor.length === 7 ? customTimerRingColor : "#06b6d4"}
-                      onClick={() => {
-                        const activeCustom = customTimerRingColor || "#06b6d4";
-                        setTimerRingColor(activeCustom);
-                        localStorage.setItem("timerRingColor", activeCustom);
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setCustomTimerRingColor(val);
-                        setTimerRingColor(val);
-                        localStorage.setItem("customTimerRingColor", val);
-                        localStorage.setItem("timerRingColor", val);
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        opacity: 0,
-                        cursor: "pointer"
-                      }}
-                    />
-                    <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
-                  </div>
-
-                  {/* Hex Color Text Input */}
-                  <input
-                    type="text"
-                    className="premium-input"
-                    value={timerRingColor}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setTimerRingColor(val);
-                      if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                        if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(val)) {
-                          setCustomTimerRingColor(val);
-                          localStorage.setItem("customTimerRingColor", val);
-                        }
-                        localStorage.setItem("timerRingColor", val);
-                        window.dispatchEvent(new Event("storage"));
-                      }
-                    }}
-                    placeholder="#38BDF8"
-                    style={{
-                      width: "110px",
-                      padding: "10px 12px",
-                      fontSize: "0.9rem",
-                      fontFamily: "monospace",
-                      textTransform: "uppercase",
-                      textAlign: "center"
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Background Color Swatches Row */}
-              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
-                <div className="setting-info">
-                  <span className="setting-label">{(t as any).timerBgColorLabel || "Arka Plan Rengi"}</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
-                  {["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => {
-                        setTimerBgColor(color);
-                        localStorage.setItem("timerBgColor", color);
-                        localStorage.setItem("timerBgStyle", "custom");
-                        setTimerBgStyle("custom");
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      title={color}
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        background: color,
-                        border: timerBgColor === color ? "2px solid #ffffff" : "2px solid transparent",
-                        cursor: "pointer",
-                        boxShadow: timerBgColor === color ? `0 0 10px ${color}` : "none",
-                        transition: "all 0.2s ease"
-                      }}
-                    />
-                  ))}
-                  {/* Circular Custom Background Color Picker Swatch */}
-                  <div
-                    onClick={() => {
-                      const isPreset = ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor);
-                      if (isPreset) {
-                        const activeCustom = customTimerBgColor || "#1e1b4b";
-                        setTimerBgColor(activeCustom);
-                        setTimerBgStyle("custom");
-                        localStorage.setItem("timerBgColor", activeCustom);
-                        localStorage.setItem("timerBgStyle", "custom");
-                        window.dispatchEvent(new Event("storage"));
-                      }
-                    }}
-                    style={{
-                      position: "relative",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background: ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
-                        ? customTimerBgColor
-                        : timerBgColor,
-                      border: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
-                        ? "2px solid #ffffff"
-                        : "2px solid transparent",
-                      boxShadow: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
-                        ? `0 0 10px ${timerBgColor}`
-                        : "none",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease"
-                    }}
-                    title={(t as any).timerPickCustomBgColor || "Özel Arka Plan Rengi Seç"}
-                  >
-                    <input
-                      type="color"
-                      value={customTimerBgColor.startsWith("#") && customTimerBgColor.length === 7 ? customTimerBgColor : "#1e1b4b"}
-                      onClick={() => {
-                        const activeCustom = customTimerBgColor || "#1e1b4b";
-                        setTimerBgColor(activeCustom);
-                        setTimerBgStyle("custom");
-                        localStorage.setItem("timerBgColor", activeCustom);
-                        localStorage.setItem("timerBgStyle", "custom");
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setCustomTimerBgColor(val);
-                        setTimerBgColor(val);
-                        setTimerBgStyle("custom");
-                        localStorage.setItem("customTimerBgColor", val);
-                        localStorage.setItem("timerBgColor", val);
-                        localStorage.setItem("timerBgStyle", "custom");
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        opacity: 0,
-                        cursor: "pointer"
-                      }}
-                    />
-                    <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
-                  </div>
-
-                  {/* Hex Color Text Input for Background */}
-                  <input
-                    type="text"
-                    className="premium-input"
-                    value={timerBgColor}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setTimerBgColor(val);
-                      setTimerBgStyle("custom");
-                      if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                        if (!["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(val)) {
-                          setCustomTimerBgColor(val);
-                          localStorage.setItem("customTimerBgColor", val);
-                        }
-                        localStorage.setItem("timerBgColor", val);
-                        localStorage.setItem("timerBgStyle", "custom");
-                        window.dispatchEvent(new Event("storage"));
-                      }
-                    }}
-                    placeholder="#0F172A"
-                    style={{
-                      width: "110px",
-                      padding: "10px 12px",
-                      fontSize: "0.9rem",
-                      fontFamily: "monospace",
-                      textTransform: "uppercase",
-                      textAlign: "center"
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Background Style Row */}
-              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
-                <div className="setting-info">
-                  <span className="setting-label">{(t as any).timerBgStyleLabel}</span>
-                </div>
-                <select
-                  className="premium-input"
-                  value={timerBgStyle}
-                  onChange={(e) => {
-                    setTimerBgStyle(e.target.value);
-                    localStorage.setItem("timerBgStyle", e.target.value);
-                    window.dispatchEvent(new Event("storage"));
+                <button
+                  type="button"
+                  onClick={() => setTimerSubTab("theme")}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "9px 12px",
+                    borderRadius: "7px",
+                    border: timerSubTab === "theme" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                    background: timerSubTab === "theme" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                    color: timerSubTab === "theme" ? "var(--accent-cyan)" : "var(--text-muted)",
+                    fontWeight: timerSubTab === "theme" ? 600 : 500,
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
                   }}
-                  style={{ width: "240px" }}
                 >
-                  <option value="dark-slate">{(t as any).timerBgSlate}</option>
-                  <option value="oled-black">{(t as any).timerBgOled}</option>
-                  <option value="frosted-dark">{(t as any).timerBgGlass}</option>
-                  <option value="pomodoro-red">{(t as any).timerBgPomodoro}</option>
-                </select>
+                  <Palette size={15} />
+                  {(t as any).timerSubTabTheme || "Görünüm & Tema"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTimerSubTab("sound")}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "9px 12px",
+                    borderRadius: "7px",
+                    border: timerSubTab === "sound" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                    background: timerSubTab === "sound" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                    color: timerSubTab === "sound" ? "var(--accent-cyan)" : "var(--text-muted)",
+                    fontWeight: timerSubTab === "sound" ? 600 : 500,
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <Volume2 size={15} />
+                  {(t as any).timerSubTabSound || "Ses & Kısayollar"}
+                </button>
               </div>
 
-              {/* Background Mode & Custom Image Section */}
-              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px", marginTop: "12px" }}>
-                <div className="setting-info" style={{ marginBottom: "12px" }}>
-                  <span className="setting-label">{(t as any).timerBgImageTitle || "Mola Ekranı Arka Plan Görseli"}</span>
-                  <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
-                </div>
-
-                {/* Background Source Selector */}
-                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "10px" }}>
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
-                  </div>
-                  <select
-                    className="premium-input"
-                    value={timerBgMode}
-                    onChange={(e) => {
-                      const val = e.target.value as "color" | "desktop" | "image";
-                      setTimerBgMode(val);
-                      localStorage.setItem("timerBgMode", val);
-                      window.dispatchEvent(new Event("storage"));
-                      emit("timer-settings-updated").catch(() => { });
-                    }}
-                    style={{ width: "240px" }}
-                  >
-                    <option value="color">{(t as any).timerBgModeColor || "Düz Renk / Gradyan"}</option>
-                    <option value="desktop">{(t as any).timerBgModeDesktop || "Soluk Masaüstü (Faded Desktop)"}</option>
-                    <option value="image">{(t as any).timerBgModeImage || "Özel Görsel Dosyası"}</option>
-                  </select>
-                </div>
-
-                {/* Option 1: Faded Desktop Description Box */}
-                {timerBgMode === "desktop" && (
-                  <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", marginBottom: "12px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
-                    <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.5, display: "block" }}>
-                      💡 {(t as any).timerBgFadedDesktopDesc || "Sayacın arkasına mevcut masaüstünüzün soluk/karartılmış bir görüntüsünü koyar."}
-                    </span>
-                  </div>
-                )}
-
-                {/* Option 2: Custom Image Selector Card */}
-                {timerBgMode === "image" && (
-                  <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "12px", padding: "14px 16px", marginBottom: "12px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px", overflow: "hidden", flex: "1 1 auto" }}>
-                        <Camera size={18} color="#38bdf8" />
-                        <span style={{ fontSize: "0.85rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "240px" }}>
-                          {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                        <input
-                          type="file"
-                          ref={customTimerBgInputRef}
-                          accept="image/*"
-                          onChange={handleCustomTimerImageUpload}
-                          style={{ display: "none" }}
-                        />
-                        <button
-                          className="premium-button"
-                          onClick={() => {
-                            if ((window as any).__TAURI_INTERNALS__) {
-                              handleSelectTimerImageTauri();
-                            } else {
-                              customTimerBgInputRef.current?.click();
-                            }
-                          }}
-                          style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
-                        >
-                          <Upload size={14} />
-                          {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
-                        </button>
-                        {timerBgCustomImage && (
-                          <button
-                            className="premium-button"
-                            onClick={handleRemoveCustomTimerImage}
-                            style={{ padding: "6px 10px", fontSize: "0.8rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
-                            title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <span style={{ fontSize: "0.78rem", color: "var(--text-tertiary)", lineHeight: 1.4 }}>
-                      {(t as any).timerBgImageFileDesc || "Bilgisayarınızdan özel bir görsel (şirket logosu, mola afişi vb.) seçip arka plan yapmanızı sağlar."}
-                    </span>
-                  </div>
-                )}
-
-                {/* Scale to Screen Checkbox Row */}
-                {(timerBgMode === "desktop" || timerBgMode === "image") && (
-                  <div className="setting-row" style={{ borderBottom: "none", paddingTop: "4px", paddingBottom: "8px" }}>
+              {/* Sekme 1: Genel / Süre */}
+              {timerSubTab === "general" && (
+                <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {/* Break Timer Shortcut Row */}
+                  <div className="setting-row" data-tour="shortcut-timer">
                     <div className="setting-info">
-                      <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
-                      <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
+                      <span className="setting-label">{(t as any).shortcutBreakTimer}</span>
+                      <span className="setting-desc">{(t as any).shortcutBreakTimerDesc}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                      <button
+                        className={`shortcut-badge customizable ${recordingType === "timer" ? "recording" : ""}`}
+                        onClick={() => setRecordingType(recordingType === "timer" ? null : "timer")}
+                        title={t.shortcutChangeHint}
+                        style={{
+                          cursor: "pointer",
+                          border: recordingType === "timer" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                          background: recordingType === "timer" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                          color: recordingType === "timer" ? "var(--accent-cyan)" : "white",
+                          fontWeight: 600,
+                          animation: recordingType === "timer" ? "pulse-border 1.5s infinite" : "none",
+                          outline: "none",
+                          minWidth: "100px",
+                          textAlign: "center"
+                        }}
+                      >
+                        {recordingType === "timer" ? t.shortcutPressKeys : formatShortcut(timerShortcut)}
+                      </button>
+                      <button
+                        className="premium-button"
+                        onClick={() => invoke("open_break_timer").catch(console.error)}
+                        style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                      >
+                        <Play size={14} />
+                        Test Timer
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Reset vs Continue Row */}
+                  <div className="setting-row" data-tour="setting-timer-reset">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerResetOnTrigger}</span>
+                      <span className="setting-desc">{(t as any).timerResetOnTriggerDesc}</span>
+                    </div>
+                    <select
+                      className="premium-input"
+                      value={timerResetOnTrigger ? "reset" : "continue"}
+                      onChange={(e) => {
+                        const isReset = e.target.value === "reset";
+                        setTimerResetOnTrigger(isReset);
+                        localStorage.setItem("timerResetOnTrigger", String(isReset));
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{ width: "240px" }}
+                    >
+                      <option value="reset">{(t as any).timerResetOptionReset}</option>
+                      <option value="continue">{(t as any).timerResetOptionContinue}</option>
+                    </select>
+                  </div>
+
+                  {/* Default Duration Row */}
+                  <div className="setting-row" data-tour="setting-timer-duration">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerDefaultDuration}</span>
+                      <span className="setting-desc">{(t as any).timerDefaultDurationDesc}</span>
+                    </div>
+                    <div style={{ width: "240px", display: "flex", alignItems: "center", gap: "10px" }}>
+                      <input
+                        type="number"
+                        min={1}
+                        max={360}
+                        className="premium-input"
+                        value={Math.round(timerDefaultDuration / 60)}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          const mins = val <= 0 ? 1 : Math.min(360, val);
+                          const secs = mins * 60;
+                          setTimerDefaultDuration(secs);
+                          localStorage.setItem("timerDefaultDuration", String(secs));
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        style={{ flex: 1, minWidth: 0, padding: "8px 12px", textAlign: "center" }}
+                      />
+                      <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: 500, whiteSpace: "nowrap" }}>
+                        {(t as any).timerUnitMinutes || "Dakika"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Count Direction Row */}
+                  <div className="setting-row" data-tour="setting-timer-direction">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerCountDirection}</span>
+                      <span className="setting-desc">{(t as any).timerCountDirectionDesc}</span>
+                    </div>
+                    <select
+                      className="premium-input"
+                      value={timerCountDirection}
+                      onChange={(e) => {
+                        const dir = e.target.value as "down" | "up";
+                        setTimerCountDirection(dir);
+                        localStorage.setItem("timerCountDirection", dir);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{ width: "240px" }}
+                    >
+                      <option value="down">{(t as any).timerCountDirectionDown}</option>
+                      <option value="up">{(t as any).timerCountDirectionUp}</option>
+                    </select>
+                  </div>
+
+                  {/* Show Time Elapsed After Expiration Row */}
+                  <div className="setting-row">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerShowElapsedAfterExpiration}</span>
+                      <span className="setting-desc">{(t as any).timerShowElapsedAfterExpirationDesc}</span>
                     </div>
                     <label className="switch">
                       <input
                         type="checkbox"
-                        checked={timerBgScale}
+                        checked={timerShowElapsedAfterExpiration}
                         onChange={(e) => {
                           const checked = e.target.checked;
-                          setTimerBgScale(checked);
-                          localStorage.setItem("timerBgScale", String(checked));
+                          setTimerShowElapsedAfterExpiration(checked);
+                          localStorage.setItem("timerShowElapsedAfterExpiration", String(checked));
                           window.dispatchEvent(new Event("storage"));
-                          emit("timer-settings-updated").catch(() => { });
                         }}
                       />
                       <span className="slider"></span>
                     </label>
                   </div>
-                )}
-              </div>
 
-              {/* Clock Font Style Row */}
-              <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
-                <div className="setting-info">
-                  <span className="setting-label">{(t as any).timerFontStyleLabel}</span>
-                </div>
-                <select
-                  className="premium-input"
-                  value={timerFontStyle}
-                  onChange={(e) => {
-                    setTimerFontStyle(e.target.value);
-                    localStorage.setItem("timerFontStyle", e.target.value);
-                    window.dispatchEvent(new Event("storage"));
-                  }}
-                  style={{ width: "240px" }}
-                >
-                  <option value="sans">{(t as any).timerFontSans}</option>
-                  <option value="segoe-light">{(t as any).timerFontSegoeLight}</option>
-                  <option value="heading">{(t as any).timerFontHeading}</option>
-                  <option value="orbitron">{(t as any).timerFontOrbitron}</option>
-                  <option value="chakra">{(t as any).timerFontChakra}</option>
-                  <option value="share-tech">{(t as any).timerFontShareTech}</option>
-                  <option value="rajdhani">{(t as any).timerFontRajdhani}</option>
-                  <option value="dseg">{(t as any).timerFontDseg}</option>
-                  <option value="mono">{(t as any).timerFontMono}</option>
-                </select>
-              </div>
-
-              {/* Sound Ringtone Preset Section */}
-              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "18px", marginTop: "6px" }}>
-                {/* Dual Choice Audio Source Switch */}
-                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "12px" }}>
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).timerSoundSourceLabel || "Ses Kaynağı"}</span>
-                    <span className="setting-desc">{(t as any).timerSoundDesc}</span>
-                  </div>
-                  <div style={{ display: "flex", background: "rgba(255, 255, 255, 0.05)", padding: "3px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                    <button
-                      onClick={() => {
-                        setTimerSoundSource("preset");
-                        localStorage.setItem("timerSoundSource", "preset");
-                        const lastPreset = localStorage.getItem("lastTimerSoundPreset") || (timerSoundPreset === "custom" ? "chime" : timerSoundPreset);
-                        setTimerSoundPreset(lastPreset);
-                        localStorage.setItem("timerSoundPreset", lastPreset);
-                        window.dispatchEvent(new Event("storage"));
-                        playTimerSound(lastPreset);
-                      }}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        padding: "6px 14px",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        borderRadius: "7px",
-                        border: "none",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        background: timerSoundSource === "preset" ? "var(--accent-color, #38bdf8)" : "transparent",
-                        color: timerSoundSource === "preset" ? "#090d16" : "var(--text-secondary)",
-                        boxShadow: timerSoundSource === "preset" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
-                      }}
-                    >
-                      <Bell size={15} color={timerSoundSource === "preset" ? "#090d16" : "#38bdf8"} />
-                      {(t as any).timerSoundSourcePreset || "Hazır Melodiler"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setTimerSoundSource("custom");
-                        localStorage.setItem("timerSoundSource", "custom");
-                        if (timerSoundPreset !== "custom") {
-                          localStorage.setItem("lastTimerSoundPreset", timerSoundPreset);
-                        }
-                        setTimerSoundPreset("custom");
-                        localStorage.setItem("timerSoundPreset", "custom");
-                        window.dispatchEvent(new Event("storage"));
-                        playTimerSound("custom");
-                      }}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        padding: "6px 14px",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        borderRadius: "7px",
-                        border: "none",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        background: timerSoundSource === "custom" ? "var(--accent-color, #38bdf8)" : "transparent",
-                        color: timerSoundSource === "custom" ? "#090d16" : "var(--text-secondary)",
-                        boxShadow: timerSoundSource === "custom" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
-                      }}
-                    >
-                      <FileAudio size={15} color={timerSoundSource === "custom" ? "#090d16" : "#38bdf8"} />
-                      {(t as any).timerSoundSourceCustom || "Özel Ses Dosyası"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Option A: System Sound Presets Dropdown */}
-                {timerSoundSource === "preset" && (
-                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0, marginTop: "4px" }}>
+                  {/* Lock Workstation Row */}
+                  <div className="setting-row" style={{ borderBottom: "none" }}>
                     <div className="setting-info">
-                      <span className="setting-label">{(t as any).timerSoundLabel || "Bitiş Zili Melodisi"}</span>
+                      <span className="setting-label">{(t as any).timerLockWorkstationOnStart}</span>
+                      <span className="setting-desc">{(t as any).timerLockWorkstationOnStartDesc}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={timerLockWorkstationOnStart}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setTimerLockWorkstationOnStart(checked);
+                          localStorage.setItem("timerLockWorkstationOnStart", String(checked));
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Sekme 2: Görünüm & Tema */}
+              {timerSubTab === "theme" && (
+                <div className="settings-card" data-tour="setting-timer-theme" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {/* Ring Color Preset Row */}
+                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerRingColorLabel}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
-                      <select
+                      {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => {
+                            setTimerRingColor(color);
+                            localStorage.setItem("timerRingColor", color);
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            borderRadius: "50%",
+                            background: color,
+                            border: timerRingColor === color ? "2px solid #ffffff" : "2px solid transparent",
+                            cursor: "pointer",
+                            boxShadow: timerRingColor === color ? `0 0 10px ${color}` : "none",
+                            transition: "all 0.2s ease"
+                          }}
+                        />
+                      ))}
+                      <div
+                        onClick={() => {
+                          const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor);
+                          if (isPreset) {
+                            const activeCustom = customTimerRingColor || "#06b6d4";
+                            setTimerRingColor(activeCustom);
+                            localStorage.setItem("timerRingColor", activeCustom);
+                            window.dispatchEvent(new Event("storage"));
+                          }
+                        }}
+                        style={{
+                          position: "relative",
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "50%",
+                          background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                            ? customTimerRingColor
+                            : timerRingColor,
+                          border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                            ? "2px solid #ffffff"
+                            : "2px solid transparent",
+                          boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
+                            ? `0 0 10px ${timerRingColor}`
+                            : "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease"
+                        }}
+                        title={(t as any).timerPickCustomColor || "Özel Renk Seç"}
+                      >
+                        <input
+                          type="color"
+                          value={customTimerRingColor.startsWith("#") && customTimerRingColor.length === 7 ? customTimerRingColor : "#06b6d4"}
+                          onClick={() => {
+                            const activeCustom = customTimerRingColor || "#06b6d4";
+                            setTimerRingColor(activeCustom);
+                            localStorage.setItem("timerRingColor", activeCustom);
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCustomTimerRingColor(val);
+                            setTimerRingColor(val);
+                            localStorage.setItem("customTimerRingColor", val);
+                            localStorage.setItem("timerRingColor", val);
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            opacity: 0,
+                            cursor: "pointer"
+                          }}
+                        />
+                        <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                      </div>
+
+                      <input
+                        type="text"
                         className="premium-input"
-                        value={timerSoundPreset === "custom" ? "chime" : timerSoundPreset}
+                        value={timerRingColor}
                         onChange={(e) => {
                           const val = e.target.value;
-                          setTimerSoundPreset(val);
-                          localStorage.setItem("timerSoundPreset", val);
-                          localStorage.setItem("lastTimerSoundPreset", val);
-                          window.dispatchEvent(new Event("storage"));
-                          playTimerSound(val);
+                          setTimerRingColor(val);
+                          if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                            if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(val)) {
+                              setCustomTimerRingColor(val);
+                              localStorage.setItem("customTimerRingColor", val);
+                            }
+                            localStorage.setItem("timerRingColor", val);
+                            window.dispatchEvent(new Event("storage"));
+                          }
                         }}
-                        style={{ width: "180px" }}
-                      >
-                        <option value="chime">{(t as any).timerSoundChime}</option>
-                        <option value="digital">{(t as any).timerSoundDigital}</option>
-                        <option value="bell">{(t as any).timerSoundBell}</option>
-                        <option value="classic">{(t as any).timerSoundClassic}</option>
-                      </select>
-                      <button
-                        className="premium-button"
-                        onClick={() => playTimerSound(timerSoundPreset === "custom" ? "chime" : timerSoundPreset)}
-                        style={{ padding: "6px 12px", fontSize: "0.85rem", whiteSpace: "nowrap" }}
-                        title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
-                      >
-                        <Volume2 size={14} />
-                        {(t as any).timerTestSound || "Sesi Dinle"}
-                      </button>
+                        placeholder="#38BDF8"
+                        style={{
+                          width: "110px",
+                          padding: "8px 12px",
+                          fontSize: "0.88rem",
+                          fontFamily: "monospace",
+                          textTransform: "uppercase",
+                          textAlign: "center"
+                        }}
+                      />
                     </div>
                   </div>
-                )}
 
-                {/* Option B: Custom Audio File Upload Card */}
-                {timerSoundSource === "custom" && (
-                  <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "12px", padding: "14px 16px", marginTop: "4px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px", overflow: "hidden", flex: "1 1 auto" }}>
-                        <Music size={18} color="#38bdf8" />
-                        <span style={{ fontSize: "0.85rem", color: timerCustomAudioName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "260px" }}>
-                          {timerCustomAudioName || ((t as any).timerNoCustomSoundSelected || "Henüz özel ses dosyası seçilmedi")}
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                        <input
-                          type="file"
-                          ref={customAudioInputRef}
-                          accept="audio/*"
-                          onChange={handleCustomAudioUpload}
-                          style={{ display: "none" }}
+                  {/* Background Color Swatches Row */}
+                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerBgColorLabel || "Arka Plan Rengi"}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
+                      {["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => {
+                            setTimerBgColor(color);
+                            localStorage.setItem("timerBgColor", color);
+                            localStorage.setItem("timerBgStyle", "custom");
+                            setTimerBgStyle("custom");
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          title={color}
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            borderRadius: "50%",
+                            background: color,
+                            border: timerBgColor === color ? "2px solid #ffffff" : "2px solid transparent",
+                            cursor: "pointer",
+                            boxShadow: timerBgColor === color ? `0 0 10px ${color}` : "none",
+                            transition: "all 0.2s ease"
+                          }}
                         />
-                        <button
-                          className="premium-button"
-                          onClick={() => customAudioInputRef.current?.click()}
-                          style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
-                        >
-                          <Upload size={14} />
-                          {(t as any).timerCustomSoundSelect || "Ses Dosyası Seç"}
-                        </button>
-                        {timerCustomAudioName && (
-                          <button
-                            className="premium-button"
-                            onClick={handleRemoveCustomAudio}
-                            style={{ padding: "6px 10px", fontSize: "0.8rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
-                            title="Özel sesi kaldır"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                        <button
-                          className="premium-button"
-                          onClick={() => playTimerSound("custom")}
-                          style={{ padding: "6px 12px", fontSize: "0.85rem", whiteSpace: "nowrap" }}
-                          title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
-                        >
-                          <Volume2 size={14} />
-                          {(t as any).timerTestSound || "Sesi Dinle"}
-                        </button>
+                      ))}
+                      <div
+                        onClick={() => {
+                          const isPreset = ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor);
+                          if (isPreset) {
+                            const activeCustom = customTimerBgColor || "#1e1b4b";
+                            setTimerBgColor(activeCustom);
+                            setTimerBgStyle("custom");
+                            localStorage.setItem("timerBgColor", activeCustom);
+                            localStorage.setItem("timerBgStyle", "custom");
+                            window.dispatchEvent(new Event("storage"));
+                          }
+                        }}
+                        style={{
+                          position: "relative",
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "50%",
+                          background: ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
+                            ? customTimerBgColor
+                            : timerBgColor,
+                          border: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
+                            ? "2px solid #ffffff"
+                            : "2px solid transparent",
+                          boxShadow: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
+                            ? `0 0 10px ${timerBgColor}`
+                            : "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease"
+                        }}
+                        title={(t as any).timerPickCustomBgColor || "Özel Arka Plan Rengi Seç"}
+                      >
+                        <input
+                          type="color"
+                          value={customTimerBgColor.startsWith("#") && customTimerBgColor.length === 7 ? customTimerBgColor : "#1e1b4b"}
+                          onClick={() => {
+                            const activeCustom = customTimerBgColor || "#1e1b4b";
+                            setTimerBgColor(activeCustom);
+                            setTimerBgStyle("custom");
+                            localStorage.setItem("timerBgColor", activeCustom);
+                            localStorage.setItem("timerBgStyle", "custom");
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCustomTimerBgColor(val);
+                            setTimerBgColor(val);
+                            setTimerBgStyle("custom");
+                            localStorage.setItem("customTimerBgColor", val);
+                            localStorage.setItem("timerBgColor", val);
+                            localStorage.setItem("timerBgStyle", "custom");
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            opacity: 0,
+                            cursor: "pointer"
+                          }}
+                        />
+                        <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
                       </div>
+
+                      <input
+                        type="text"
+                        className="premium-input"
+                        value={timerBgColor}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setTimerBgColor(val);
+                          setTimerBgStyle("custom");
+                          if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                            if (!["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(val)) {
+                              setCustomTimerBgColor(val);
+                              localStorage.setItem("customTimerBgColor", val);
+                            }
+                            localStorage.setItem("timerBgColor", val);
+                            localStorage.setItem("timerBgStyle", "custom");
+                            window.dispatchEvent(new Event("storage"));
+                          }
+                        }}
+                        placeholder="#0F172A"
+                        style={{
+                          width: "110px",
+                          padding: "8px 12px",
+                          fontSize: "0.88rem",
+                          fontFamily: "monospace",
+                          textTransform: "uppercase",
+                          textAlign: "center"
+                        }}
+                      />
                     </div>
-                    <span style={{ fontSize: "0.78rem", color: "var(--text-tertiary)", lineHeight: 1.4 }}>
-                      {(t as any).timerCustomSoundDesc}
-                    </span>
                   </div>
-                )}
 
-                {/* Sound Repeat Row */}
-                <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0, marginTop: "12px" }}>
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).timerSoundRepeatLabel}</span>
-                  </div>
-                  <select
-                    className="premium-input"
-                    value={timerSoundRepeat}
-                    onChange={(e) => {
-                      setTimerSoundRepeat(e.target.value);
-                      localStorage.setItem("timerSoundRepeat", e.target.value);
-                      window.dispatchEvent(new Event("storage"));
-                    }}
-                    style={{ width: "240px" }}
-                  >
-                    <option value="1">{(t as any).timerSoundRepeat1}</option>
-                    <option value="3">{(t as any).timerSoundRepeat3}</option>
-                    <option value="loop">{(t as any).timerSoundRepeatLoop}</option>
-                  </select>
-                </div>
-
-                {/* Timer Opacity Slider Row */}
-                <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "14px", marginTop: "12px" }}>
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).timerOpacityLabel}</span>
-                    <span className="setting-desc">{(t as any).timerOpacityDesc}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <input
-                      type="range"
-                      min="20"
-                      max="100"
-                      step="5"
-                      value={timerOpacity}
+                  {/* Background Style Row */}
+                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerBgStyleLabel}</span>
+                    </div>
+                    <select
+                      className="premium-input"
+                      value={timerBgStyle}
                       onChange={(e) => {
-                        const val = Number(e.target.value);
-                        setTimerOpacity(val);
-                        localStorage.setItem("timerOpacity", String(val));
+                        setTimerBgStyle(e.target.value);
+                        localStorage.setItem("timerBgStyle", e.target.value);
                         window.dispatchEvent(new Event("storage"));
                       }}
-                      style={{ width: "130px", accentColor: "#38bdf8", cursor: "pointer" }}
-                    />
-                    <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "monospace", color: "#38bdf8", minWidth: "42px", textAlign: "right" }}>
-                      {timerOpacity}%
-                    </span>
-                  </div>
-                </div>
-
-                {/* 9-Point Screen Grid Alignment Row */}
-                <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "14px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "14px", marginTop: "12px" }}>
-                  <div className="setting-info" style={{ width: "100%" }}>
-                    <span className="setting-label">{(t as any).timerPositionLabel}</span>
-                    <span className="setting-desc" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>
-                      {(t as any).timerPositionDesc}
-                    </span>
+                      style={{ width: "240px" }}
+                    >
+                      <option value="dark-slate">{(t as any).timerBgSlate}</option>
+                      <option value="oled-black">{(t as any).timerBgOled}</option>
+                      <option value="frosted-dark">{(t as any).timerBgGlass}</option>
+                      <option value="pomodoro-red">{(t as any).timerBgPomodoro}</option>
+                    </select>
                   </div>
 
-                  <div style={{ width: "100%", display: "flex", justifyContent: "center", marginTop: "4px" }}>
-                    {/* 3x3 Grid Selector Box */}
-                    <div style={{
-                      width: "100%",
-                      maxWidth: "280px",
-                      aspectRatio: "16 / 10",
-                      background: "rgba(15, 23, 42, 0.6)",
-                      border: "1px solid rgba(255, 255, 255, 0.12)",
-                      borderRadius: "12px",
-                      padding: "10px",
-                      display: "grid",
-                      gridTemplateColumns: "repeat(3, 1fr)",
-                      gridTemplateRows: "repeat(3, 1fr)",
-                      gap: "8px",
-                      boxShadow: "inset 0 0 20px rgba(0,0,0,0.4)"
-                    }}>
-                      {[
-                        { id: "top-left", label: "Sol Üst" },
-                        { id: "top-center", label: "Üst Orta" },
-                        { id: "top-right", label: "Sağ Üst" },
-                        { id: "center-left", label: "Sol Orta" },
-                        { id: "center", label: "Tam Orta" },
-                        { id: "center-right", label: "Sağ Orta" },
-                        { id: "bottom-left", label: "Sol Alt" },
-                        { id: "bottom-center", label: "Alt Orta" },
-                        { id: "bottom-right", label: "Sağ Alt" }
-                      ].map((pos) => {
-                        const isActive = timerPosition === pos.id;
-                        return (
-                          <button
-                            key={pos.id}
-                            onClick={() => {
-                              setTimerPosition(pos.id);
-                              localStorage.setItem("timerPosition", pos.id);
+                  {/* Background Mode & Custom Image Section */}
+                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "12px", marginTop: "4px" }}>
+                    <div className="setting-info" style={{ marginBottom: "10px" }}>
+                      <span className="setting-label">{(t as any).timerBgImageTitle || "Mola Ekranı Arka Plan Görseli"}</span>
+                      <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
+                    </div>
+
+                    <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
+                      </div>
+                      <select
+                        className="premium-input"
+                        value={timerBgMode}
+                        onChange={(e) => {
+                          const val = e.target.value as "color" | "desktop" | "image";
+                          setTimerBgMode(val);
+                          localStorage.setItem("timerBgMode", val);
+                          window.dispatchEvent(new Event("storage"));
+                          emit("timer-settings-updated").catch(() => { });
+                        }}
+                        style={{ width: "240px" }}
+                      >
+                        <option value="color">{(t as any).timerBgModeColor || "Düz Renk / Gradyan"}</option>
+                        <option value="desktop">{(t as any).timerBgModeDesktop || "Soluk Masaüstü (Faded Desktop)"}</option>
+                        <option value="image">{(t as any).timerBgModeImage || "Özel Görsel Dosyası"}</option>
+                      </select>
+                    </div>
+
+                    {timerBgMode === "desktop" && (
+                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "10px 12px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.5, display: "block" }}>
+                          💡 {(t as any).timerBgFadedDesktopDesc || "Sayacın arkasına mevcut masaüstünüzün soluk/karartılmış bir görüntüsünü koyar."}
+                        </span>
+                      </div>
+                    )}
+
+                    {timerBgMode === "image" && (
+                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
+                            <Camera size={16} color="#38bdf8" />
+                            <span style={{ fontSize: "0.82rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px" }}>
+                              {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                            <input
+                              type="file"
+                              ref={customTimerBgInputRef}
+                              accept="image/*"
+                              onChange={handleCustomTimerImageUpload}
+                              style={{ display: "none" }}
+                            />
+                            <button
+                              className="premium-button"
+                              onClick={() => {
+                                if ((window as any).__TAURI_INTERNALS__) {
+                                  handleSelectTimerImageTauri();
+                                } else {
+                                  customTimerBgInputRef.current?.click();
+                                }
+                              }}
+                              style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                            >
+                              <Upload size={13} />
+                              {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
+                            </button>
+                            {timerBgCustomImage && (
+                              <button
+                                className="premium-button"
+                                onClick={handleRemoveCustomTimerImage}
+                                style={{ padding: "5px 8px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+                                title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {(timerBgMode === "desktop" || timerBgMode === "image") && (
+                      <div className="setting-row" style={{ borderBottom: "none", paddingTop: "2px", paddingBottom: "4px" }}>
+                        <div className="setting-info">
+                          <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
+                          <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
+                        </div>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={timerBgScale}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setTimerBgScale(checked);
+                              localStorage.setItem("timerBgScale", String(checked));
                               window.dispatchEvent(new Event("storage"));
+                              emit("timer-settings-updated").catch(() => { });
                             }}
-                            title={pos.label}
-                            style={{
-                              borderRadius: "8px",
-                              border: isActive ? "2px solid #38bdf8" : "1px dashed rgba(255, 255, 255, 0.15)",
-                              background: isActive ? "rgba(56, 189, 248, 0.25)" : "rgba(255, 255, 255, 0.02)",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              transition: "all 0.2s ease",
-                              boxShadow: isActive ? "0 0 12px rgba(56, 189, 248, 0.4)" : "none"
-                            }}
-                          >
-                            <div style={{
-                              width: isActive ? "12px" : "6px",
-                              height: isActive ? "12px" : "6px",
-                              borderRadius: "50%",
-                              background: isActive ? "#38bdf8" : "rgba(255, 255, 255, 0.3)",
-                              boxShadow: isActive ? "0 0 8px #38bdf8" : "none",
-                              transition: "all 0.2s ease"
-                            }} />
-                          </button>
-                        );
-                      })}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Clock Font Style Row */}
+                  <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerFontStyleLabel}</span>
+                    </div>
+                    <select
+                      className="premium-input"
+                      value={timerFontStyle}
+                      onChange={(e) => {
+                        setTimerFontStyle(e.target.value);
+                        localStorage.setItem("timerFontStyle", e.target.value);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{ width: "240px" }}
+                    >
+                      <option value="sans">{(t as any).timerFontSans}</option>
+                      <option value="segoe-light">{(t as any).timerFontSegoeLight}</option>
+                      <option value="heading">{(t as any).timerFontHeading}</option>
+                      <option value="orbitron">{(t as any).timerFontOrbitron}</option>
+                      <option value="chakra">{(t as any).timerFontChakra}</option>
+                      <option value="share-tech">{(t as any).timerFontShareTech}</option>
+                      <option value="rajdhani">{(t as any).timerFontRajdhani}</option>
+                      <option value="dseg">{(t as any).timerFontDseg}</option>
+                      <option value="mono">{(t as any).timerFontMono}</option>
+                    </select>
+                  </div>
+
+                  {/* Timer Opacity Slider Row */}
+                  <div className="setting-row" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "12px", marginTop: "4px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerOpacityLabel}</span>
+                      <span className="setting-desc">{(t as any).timerOpacityDesc}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <input
+                        type="range"
+                        min="20"
+                        max="100"
+                        step="5"
+                        value={timerOpacity}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setTimerOpacity(val);
+                          localStorage.setItem("timerOpacity", String(val));
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        style={{ width: "120px", accentColor: "#38bdf8", cursor: "pointer" }}
+                      />
+                      <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "monospace", color: "#38bdf8", minWidth: "40px", textAlign: "right" }}>
+                        {timerOpacity}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 9-Point Screen Grid Alignment Row */}
+                  <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "10px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "12px", marginTop: "4px" }}>
+                    <div className="setting-info" style={{ width: "100%" }}>
+                      <span className="setting-label">{(t as any).timerPositionLabel}</span>
+                      <span className="setting-desc" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>
+                        {(t as any).timerPositionDesc}
+                      </span>
+                    </div>
+
+                    <div style={{ width: "100%", display: "flex", justifyContent: "center", marginTop: "2px" }}>
+                      <div style={{
+                        width: "100%",
+                        maxWidth: "260px",
+                        aspectRatio: "16 / 10",
+                        background: "rgba(15, 23, 42, 0.6)",
+                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        borderRadius: "10px",
+                        padding: "8px",
+                        display: "grid",
+                        gridTemplateColumns: "repeat(3, 1fr)",
+                        gridTemplateRows: "repeat(3, 1fr)",
+                        gap: "6px",
+                        boxShadow: "inset 0 0 20px rgba(0,0,0,0.4)"
+                      }}>
+                        {[
+                          { id: "top-left", label: "Sol Üst" },
+                          { id: "top-center", label: "Üst Orta" },
+                          { id: "top-right", label: "Sağ Üst" },
+                          { id: "center-left", label: "Sol Orta" },
+                          { id: "center", label: "Tam Orta" },
+                          { id: "center-right", label: "Sağ Orta" },
+                          { id: "bottom-left", label: "Sol Alt" },
+                          { id: "bottom-center", label: "Alt Orta" },
+                          { id: "bottom-right", label: "Sağ Alt" }
+                        ].map((pos) => {
+                          const isActive = timerPosition === pos.id;
+                          return (
+                            <button
+                              key={pos.id}
+                              onClick={() => {
+                                setTimerPosition(pos.id);
+                                localStorage.setItem("timerPosition", pos.id);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              title={pos.label}
+                              style={{
+                                borderRadius: "6px",
+                                border: isActive ? "2px solid #38bdf8" : "1px dashed rgba(255, 255, 255, 0.15)",
+                                background: isActive ? "rgba(56, 189, 248, 0.25)" : "rgba(255, 255, 255, 0.02)",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                transition: "all 0.2s ease",
+                                boxShadow: isActive ? "0 0 12px rgba(56, 189, 248, 0.4)" : "none"
+                              }}
+                            >
+                              <div style={{
+                                width: isActive ? "10px" : "5px",
+                                height: isActive ? "10px" : "5px",
+                                borderRadius: "50%",
+                                background: isActive ? "#38bdf8" : "rgba(255, 255, 255, 0.3)",
+                                boxShadow: isActive ? "0 0 8px #38bdf8" : "none",
+                                transition: "all 0.2s ease"
+                              }} />
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Sekme 3: Ses & Kısayollar */}
+              {timerSubTab === "sound" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {/* Kart 1: Ses Ayarları */}
+                  <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div className="setting-row" style={{ borderBottom: "none", paddingBottom: "8px" }}>
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).timerSoundSourceLabel || "Ses Kaynağı"}</span>
+                        <span className="setting-desc">{(t as any).timerSoundDesc}</span>
+                      </div>
+                      <div style={{ display: "flex", background: "rgba(255, 255, 255, 0.05)", padding: "3px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                        <button
+                          onClick={() => {
+                            setTimerSoundSource("preset");
+                            localStorage.setItem("timerSoundSource", "preset");
+                            const lastPreset = localStorage.getItem("lastTimerSoundPreset") || (timerSoundPreset === "custom" ? "chime" : timerSoundPreset);
+                            setTimerSoundPreset(lastPreset);
+                            localStorage.setItem("timerSoundPreset", lastPreset);
+                            window.dispatchEvent(new Event("storage"));
+                            playTimerSound(lastPreset);
+                          }}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "6px 12px",
+                            fontSize: "0.82rem",
+                            fontWeight: 600,
+                            borderRadius: "7px",
+                            border: "none",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            background: timerSoundSource === "preset" ? "var(--accent-color, #38bdf8)" : "transparent",
+                            color: timerSoundSource === "preset" ? "#090d16" : "var(--text-secondary)",
+                            boxShadow: timerSoundSource === "preset" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
+                          }}
+                        >
+                          <Bell size={14} color={timerSoundSource === "preset" ? "#090d16" : "#38bdf8"} />
+                          {(t as any).timerSoundSourcePreset || "Hazır Melodiler"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setTimerSoundSource("custom");
+                            localStorage.setItem("timerSoundSource", "custom");
+                            if (timerSoundPreset !== "custom") {
+                              localStorage.setItem("lastTimerSoundPreset", timerSoundPreset);
+                            }
+                            setTimerSoundPreset("custom");
+                            localStorage.setItem("timerSoundPreset", "custom");
+                            window.dispatchEvent(new Event("storage"));
+                            playTimerSound("custom");
+                          }}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "6px 12px",
+                            fontSize: "0.82rem",
+                            fontWeight: 600,
+                            borderRadius: "7px",
+                            border: "none",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            background: timerSoundSource === "custom" ? "var(--accent-color, #38bdf8)" : "transparent",
+                            color: timerSoundSource === "custom" ? "#090d16" : "var(--text-secondary)",
+                            boxShadow: timerSoundSource === "custom" ? "0 2px 8px rgba(56, 189, 248, 0.3)" : "none"
+                          }}
+                        >
+                          <FileAudio size={14} color={timerSoundSource === "custom" ? "#090d16" : "#38bdf8"} />
+                          {(t as any).timerSoundSourceCustom || "Özel Ses Dosyası"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {timerSoundSource === "preset" && (
+                      <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                        <div className="setting-info">
+                          <span className="setting-label">{(t as any).timerSoundLabel || "Bitiş Zili Melodisi"}</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
+                          <select
+                            className="premium-input"
+                            value={timerSoundPreset === "custom" ? "chime" : timerSoundPreset}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setTimerSoundPreset(val);
+                              localStorage.setItem("timerSoundPreset", val);
+                              localStorage.setItem("lastTimerSoundPreset", val);
+                              window.dispatchEvent(new Event("storage"));
+                              playTimerSound(val);
+                            }}
+                            style={{ width: "170px" }}
+                          >
+                            <option value="chime">{(t as any).timerSoundChime}</option>
+                            <option value="digital">{(t as any).timerSoundDigital}</option>
+                            <option value="bell">{(t as any).timerSoundBell}</option>
+                            <option value="classic">{(t as any).timerSoundClassic}</option>
+                          </select>
+                          <button
+                            className="premium-button"
+                            onClick={() => playTimerSound(timerSoundPreset === "custom" ? "chime" : timerSoundPreset)}
+                            style={{ padding: "6px 12px", fontSize: "0.82rem", whiteSpace: "nowrap" }}
+                            title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
+                          >
+                            <Volume2 size={14} />
+                            {(t as any).timerTestSound || "Sesi Dinle"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {timerSoundSource === "custom" && (
+                      <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
+                            <Music size={16} color="#38bdf8" />
+                            <span style={{ fontSize: "0.82rem", color: timerCustomAudioName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px" }}>
+                              {timerCustomAudioName || ((t as any).timerNoCustomSoundSelected || "Henüz özel ses dosyası seçilmedi")}
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                            <input
+                              type="file"
+                              ref={customAudioInputRef}
+                              accept="audio/*"
+                              onChange={handleCustomAudioUpload}
+                              style={{ display: "none" }}
+                            />
+                            <button
+                              className="premium-button"
+                              onClick={() => customAudioInputRef.current?.click()}
+                              style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                            >
+                              <Upload size={13} />
+                              {(t as any).timerCustomSoundSelect || "Ses Dosyası Seç"}
+                            </button>
+                            {timerCustomAudioName && (
+                              <button
+                                className="premium-button"
+                                onClick={handleRemoveCustomAudio}
+                                style={{ padding: "5px 8px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+                                title="Özel sesi kaldır"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                            <button
+                              className="premium-button"
+                              onClick={() => playTimerSound("custom")}
+                              style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                              title={(t as any).timerTestSoundHint || "Seçilen zil sesini test et"}
+                            >
+                              <Volume2 size={13} />
+                              {(t as any).timerTestSound || "Sesi Dinle"}
+                            </button>
+                          </div>
+                        </div>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-tertiary)", lineHeight: 1.4 }}>
+                          {(t as any).timerCustomSoundDesc}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Sound Repeat Row */}
+                    <div className="setting-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).timerSoundRepeatLabel}</span>
+                      </div>
+                      <select
+                        className="premium-input"
+                        value={timerSoundRepeat}
+                        onChange={(e) => {
+                          setTimerSoundRepeat(e.target.value);
+                          localStorage.setItem("timerSoundRepeat", e.target.value);
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        style={{ width: "220px" }}
+                      >
+                        <option value="1">{(t as any).timerSoundRepeat1}</option>
+                        <option value="3">{(t as any).timerSoundRepeat3}</option>
+                        <option value="loop">{(t as any).timerSoundRepeatLoop}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Kart 2: Hızlı Kısayollar Rehberi */}
+                  <div className="settings-card" data-tour="setting-timer-shortcuts" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerShortcutsTitle}</span>
+                      <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
+                    </div>
+
+                    <div className="responsive-shortcut-grid">
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Play size={15} color="#38bdf8" />
+                          {(t as any).timerToggleLabel}
+                        </span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeSpace || "Boşluk"}</kbd>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Clock size={15} color="#10b981" />
+                          {(t as any).timerAdjust1Label}
+                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Zap size={15} color="#eab308" />
+                          {(t as any).timerAdjust5Label}
+                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Shift</kbd>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <RotateCcw size={15} color="#a855f7" />
+                          {(t as any).timerResetKeyLabel}
+                        </span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>R</kbd>
+                      </div>
+
+                      <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", borderTop: "1px dashed rgba(255, 255, 255, 0.08)" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <LogOut size={15} color="#f87171" />
+                          {(t as any).timerExitLabel}
+                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>ESC</kbd>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Q</kbd>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Break Timer Quick Shortcuts Card */}
-            <div data-tour="setting-timer-shortcuts" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "16px", marginTop: "8px" }}>
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).timerShortcutsTitle}</span>
-                <span className="setting-desc">{(t as any).timerShortcutsDesc}</span>
-              </div>
-
-              <div className="responsive-shortcut-grid">
-                {/* 1. Toggle Pause/Play */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <Play size={15} color="#38bdf8" />
-                    {(t as any).timerToggleLabel}
-                  </span>
-                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeSpace || "Boşluk"}</kbd>
-                </div>
-
-                {/* 2. Adjust +/- 1 min */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <Clock size={15} color="#10b981" />
-                    {(t as any).timerAdjust1Label}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+            {/* SAĞ KOLON: Canlı Önizleme Kartı (Sticky / Sabit Genişlik) */}
+            <div
+              style={{
+                width: "360px",
+                flexShrink: 0,
+                position: "sticky",
+                top: "0px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px"
+              }}
+            >
+              {/* Canlı Önizleme Monitör Simülasyonu Kartı */}
+              <div className="settings-card" data-tour="setting-timer-preview" style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "14px", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Sparkles size={16} color="var(--accent-cyan)" />
+                    <span style={{ fontWeight: 700, fontSize: "0.92rem", color: "var(--text-main)" }}>
+                      {(t as any).timerLivePreview || "Canlı Önizleme"}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(0, 242, 254, 0.1)", padding: "3px 8px", borderRadius: "12px", border: "1px solid rgba(0, 242, 254, 0.2)" }}>
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--accent-cyan)", boxShadow: "0 0 6px var(--accent-cyan)", animation: "breathe-border 2s infinite", transform: "translateY(-1px)" }} />
+                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-cyan)", letterSpacing: "0.5px" }}>{(t as any).liveBadge || "LIVE"}</span>
                   </div>
                 </div>
 
-                {/* 3. Adjust +/- 5 min */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <Zap size={15} color="#eab308" />
-                    {(t as any).timerAdjust5Label}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Shift</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>↑↓</kbd>
+                {/* Monitör Çerçeve Simülasyonu */}
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center"
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "210px",
+                      background: "#090d16",
+                      border: "3px solid #334155",
+                      borderRadius: "10px 10px 4px 4px",
+                      position: "relative",
+                      overflow: "hidden",
+                      boxShadow: "0 14px 36px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.9)",
+                      display: "flex",
+                      flexDirection: "column"
+                    }}
+                  >
+                    {/* Monitör Pencere Kontrol Çubuğu */}
+                    <div
+                      style={{
+                        height: "22px",
+                        background: "rgba(255, 255, 255, 0.04)",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "0 10px",
+                        gap: "6px",
+                        zIndex: 6
+                      }}
+                    >
+                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444" }} />
+                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#eab308" }} />
+                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
+
+                      <span style={{ fontSize: "0.65rem", color: "#38bdf8", marginLeft: "auto", fontWeight: 700, letterSpacing: "0.5px" }}>
+                        Shotera Break Timer
+                      </span>
+                    </div>
+
+                    {/* Masaüstü / Arka Plan Alanı */}
+                    <div
+                      style={{
+                        flex: 1,
+                        position: "relative",
+                        overflow: "hidden",
+                        background:
+                          timerBgMode === "image" && timerBgCustomImage
+                            ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
+                            : timerBgMode === "desktop"
+                              ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
+                              : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
+                                ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
+                                : timerBgStyle === "oled-black"
+                                  ? "#000000"
+                                  : timerBgStyle === "frosted-dark"
+                                    ? "rgba(15, 23, 42, 0.95)"
+                                    : timerBgStyle === "pomodoro-red"
+                                      ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+                                      : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px)",
+                          backgroundSize: "14px 14px",
+                          opacity: timerBgMode === "color" ? 0.6 : 0.2,
+                          pointerEvents: "none"
+                        }}
+                      />
+
+                      {/* Canlı Hareketli Mini Taymer Halqası */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          width: "52px",
+                          height: "52px",
+                          borderRadius: "50%",
+                          background: "rgba(15, 23, 42, 0.85)",
+                          border: `2px solid ${timerRingColor || "#38bdf8"}`,
+                          boxShadow: `0 0 16px ${timerRingColor || "#38bdf8"}aa, inset 0 0 8px ${timerRingColor || "#38bdf8"}40`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.75rem",
+                          fontWeight:
+                            timerFontStyle === "segoe-light"
+                              ? 300
+                              : timerFontStyle === "orbitron" || timerFontStyle === "chakra" || timerFontStyle === "rajdhani"
+                                ? 700
+                                : timerFontStyle === "dseg" || timerFontStyle === "share-tech"
+                                  ? 400
+                                  : 800,
+                          color: "#ffffff",
+                          fontFamily:
+                            timerFontStyle === "heading"
+                              ? "'Outfit', sans-serif"
+                              : timerFontStyle === "mono"
+                                ? "monospace"
+                                : timerFontStyle === "segoe-light"
+                                  ? "'Segoe UI Light', 'Segoe UI', sans-serif"
+                                  : timerFontStyle === "orbitron"
+                                    ? "'Orbitron', sans-serif"
+                                    : timerFontStyle === "chakra"
+                                      ? "'Chakra Petch', sans-serif"
+                                      : timerFontStyle === "share-tech"
+                                        ? "'Share Tech Mono', monospace"
+                                        : timerFontStyle === "rajdhani"
+                                          ? "'Rajdhani', sans-serif"
+                                          : timerFontStyle === "dseg"
+                                            ? "'DSEG7-Modern', 'DSEG7-Classic', 'DS-Digital', 'Digital-7', monospace"
+                                            : "'Inter', sans-serif",
+                          transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                          backdropFilter: "blur(6px)",
+                          zIndex: 5,
+                          margin: "6px",
+                          textShadow: `0 0 12px ${timerRingColor || "#38bdf8"}80`,
+                          ...(timerPosition === "top-left" ? { top: "6px", left: "6px" } :
+                            timerPosition === "top-center" ? { top: "6px", left: "50%", transform: "translateX(-50%)" } :
+                              timerPosition === "top-right" ? { top: "6px", right: "6px" } :
+                                timerPosition === "center-left" ? { top: "50%", left: "6px", transform: "translateY(-50%)" } :
+                                  timerPosition === "center-right" ? { top: "50%", right: "6px", transform: "translateY(-50%)" } :
+                                    timerPosition === "bottom-left" ? { bottom: "6px", left: "6px" } :
+                                      timerPosition === "bottom-center" ? { bottom: "6px", left: "50%", transform: "translateX(-50%)" } :
+                                        timerPosition === "bottom-right" ? { bottom: "6px", right: "6px" } :
+                                          { top: "50%", left: "50%", transform: "translate(-50%, -50%)" })
+                        }}
+                      >
+                        10:00
+                      </div>
+                    </div>
+
+                    <div style={{ height: "10px", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                      <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#38bdf8", boxShadow: "0 0 6px #38bdf8", position: "absolute", right: "10px" }} />
+                    </div>
                   </div>
+
+                  <div style={{ width: "32px", height: "10px", background: "linear-gradient(to bottom, #334155, #1e293b)", borderLeft: "1px solid rgba(255, 255, 255, 0.1)", borderRight: "1px solid rgba(255, 255, 255, 0.1)" }} />
+                  <div style={{ width: "90px", height: "5px", background: "linear-gradient(to right, #1e293b, #475569, #1e293b)", borderRadius: "3px 3px 1px 1px", boxShadow: "0 4px 10px rgba(0,0,0,0.5)" }} />
                 </div>
 
-                {/* 4. Reset Timer */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <RotateCcw size={15} color="#a855f7" />
-                    {(t as any).timerResetKeyLabel}
-                  </span>
-                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>R</kbd>
-                </div>
-
-                {/* 5. Exit Timer (Spans full row or stays neat) */}
-                <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", borderTop: "1px dashed rgba(255, 255, 255, 0.08)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <LogOut size={15} color="#f87171" />
-                    {(t as any).timerExitLabel}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>ESC</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>/</span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Q</kbd>
-                  </div>
-                </div>
+                {/* Hızlı Test Butonu */}
+                <button
+                  className="premium-button"
+                  onClick={() => invoke("open_break_timer").catch(console.error)}
+                  style={{ width: "100%", justifyContent: "center", padding: "10px 14px", fontSize: "0.88rem", marginTop: "4px" }}
+                >
+                  <Play size={15} />
+                  {(t as any).timerStartBtn || "Taymeri Başlat"} (Test)
+                </button>
               </div>
             </div>
           </div>
