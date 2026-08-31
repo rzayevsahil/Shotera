@@ -2888,22 +2888,6 @@ function SettingsWindow() {
               {/* SEKME 1: Genel / Video */}
               {recordSubTab === "general" && (
                 <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {/* Kayıt Başlatıcı / Aç */}
-                  <div className="setting-row" data-tour="shortcut-record">
-                    <div className="setting-info">
-                      <span className="setting-label">{(t as any).recordNativeTitle || "Yerel Ekran Kaydı"}</span>
-                      <span className="setting-desc">{(t as any).recordNativeDesc || "Donanım hızlandırmalı video kaydı alın."}</span>
-                    </div>
-                    <button
-                      className="premium-button"
-                      onClick={() => invoke("open_recorder_view")}
-                      style={{ padding: "8px 16px", fontSize: "0.88rem" }}
-                    >
-                      <Video size={15} />
-                      {(t as any).recordOpenBtn || "Kaydediciyi Aç"}
-                    </button>
-                  </div>
-
                   {/* FPS */}
                   <div className="setting-row" data-tour="setting-record-fps">
                     <div className="setting-info">
@@ -3505,6 +3489,14 @@ function SettingsWindow() {
                         <span className="setting-desc">{(t as any).recordNativeDesc || "Ekran kaydı başlatma ve durdurma kısayolu."}</span>
                       </div>
                       <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <button
+                          className="premium-button"
+                          onClick={() => invoke("open_recorder_view")}
+                          style={{ padding: "6px 14px", fontSize: "0.82rem", gap: "6px" }}
+                        >
+                          <Video size={14} />
+                          {(t as any).recordOpenBtn || "Kaydediciyi Aç"}
+                        </button>
                         <button
                           className={`shortcut-badge customizable ${recordingType === "record" ? "recording" : ""}`}
                           onClick={() => setRecordingType(recordingType === "record" ? null : "record")}
