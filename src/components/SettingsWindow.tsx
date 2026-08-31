@@ -2815,9 +2815,18 @@ function SettingsWindow() {
                         flex: 1,
                         position: "relative",
                         overflow: "hidden",
-                        background:
-                          timerBgMode === "image" && timerBgCustomImage
-                            ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
+                        background: "linear-gradient(135deg, #1e293b 0%, #0ea5e9 100%)"
+                      }}
+                    >
+                      {/* App Transparent Layer */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          opacity: timerOpacity / 100,
+                          background:
+                            timerBgMode === "image" && timerBgCustomImage
+                              ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
                             : timerBgMode === "desktop"
                               ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
                               : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
@@ -2852,7 +2861,6 @@ function SettingsWindow() {
                           gap: "4px",
                           zIndex: 5,
                           margin: "6px",
-                          opacity: timerOpacity / 100,
                           transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
                           ...(timerPosition === "top-left" ? { top: "6px", left: "6px" } :
                             timerPosition === "top-center" ? { top: "6px", left: "50%", transform: "translateX(-50%)" } :
@@ -2982,6 +2990,7 @@ function SettingsWindow() {
                             </div>
                           </div>
                         )}
+                      </div>
                       </div>
                     </div>
 
