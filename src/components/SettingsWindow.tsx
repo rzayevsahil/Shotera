@@ -262,6 +262,8 @@ function SettingsWindow() {
     window.dispatchEvent(new Event("storage"));
   };
 
+  const [previewPaused, setPreviewPaused] = useState(false);
+
   const [timerBgMode, setTimerBgMode] = useState<"color" | "desktop" | "image">(
     () => (localStorage.getItem("timerBgMode") as "color" | "desktop" | "image") || "color"
   );
@@ -3867,15 +3869,44 @@ function SettingsWindow() {
                     <Video size={13} color="#38bdf8" style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordFps} FPS</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordWebcam ? "#4ade80" : "var(--text-muted)" }}>
+                  <div
+                    onClick={() => {
+                      const checked = !recordWebcam;
+                      setRecordWebcam(checked);
+                      localStorage.setItem("recordWebcam", checked.toString());
+                      window.dispatchEvent(new Event("storage"));
+                      emit("force_storage_sync").catch(console.error);
+                    }}
+                    style={{ display: "flex", alignItems: "center", gap: "6px", color: recordWebcam ? "#4ade80" : "var(--text-muted)", cursor: "pointer", userSelect: "none" }}
+                    title={recordWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
+                  >
                     <Camera size={13} color={recordWebcam ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordWebcam ? ((t as any).statusWebcamOn || "Kamera Kaydı") : ((t as any).statusWebcamOff || "Kamera Kapalı")}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordMic ? "#4ade80" : "var(--text-muted)" }}>
+                  <div
+                    onClick={() => {
+                      const checked = !recordMic;
+                      setRecordMic(checked);
+                      localStorage.setItem("recordMic", checked.toString());
+                      window.dispatchEvent(new Event("storage"));
+                      emit("force_storage_sync").catch(console.error);
+                    }}
+                    style={{ display: "flex", alignItems: "center", gap: "6px", color: recordMic ? "#4ade80" : "var(--text-muted)", cursor: "pointer", userSelect: "none" }}
+                    title={recordMic ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
+                  >
                     <Mic size={13} color={recordMic ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordMic ? ((t as any).statusMicOn || "Mikrofon Kaydı") : ((t as any).statusMicOff || "Mikrofon Kapalı")}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: recordAudio ? "#4ade80" : "var(--text-muted)" }}>
+                  <div
+                    onClick={() => {
+                      const checked = !recordAudio;
+                      setRecordAudio(checked);
+                      localStorage.setItem("recordAudio", checked.toString());
+                      window.dispatchEvent(new Event("storage"));
+                      emit("force_storage_sync").catch(console.error);
+                    }}
+                    style={{ display: "flex", alignItems: "center", gap: "6px", color: recordAudio ? "#4ade80" : "var(--text-muted)", cursor: "pointer", userSelect: "none" }}
+                  >
                     <Volume2 size={13} color={recordAudio ? "#4ade80" : "#64748b"} style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
                     <span>{recordAudio ? ((t as any).statusAudioOn || "Sistem Ses Kaydı") : ((t as any).statusAudioOff || "Ses Kapalı")}</span>
                   </div>
@@ -3913,15 +3944,27 @@ function SettingsWindow() {
                       {(t as any).recordControlsPreviewTitle || "Kayıt Kontrol Çubuğu"}
                     </span>
                   </div>
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    background: showRecordControls ? "rgba(16, 185, 129, 0.12)" : "rgba(255, 255, 255, 0.06)",
-                    padding: "3px 8px",
-                    borderRadius: "12px",
-                    border: showRecordControls ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)"
-                  }}>
+                  <div
+                    onClick={() => {
+                      const checked = !showRecordControls;
+                      setShowRecordControls(checked);
+                      localStorage.setItem("showRecordControls", checked.toString());
+                      window.dispatchEvent(new Event("storage"));
+                      emit("force_storage_sync").catch(console.error);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: showRecordControls ? "rgba(16, 185, 129, 0.12)" : "rgba(255, 255, 255, 0.06)",
+                      padding: "3px 8px",
+                      borderRadius: "12px",
+                      border: showRecordControls ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)",
+                      cursor: "pointer",
+                      userSelect: "none"
+                    }}
+                    title={(t as any).showRecordControlsLabel || "Kayıt Kontrolcüsünü Göster"}
+                  >
                     <div style={{
                       width: "6px",
                       height: "6px",
@@ -3978,11 +4021,16 @@ function SettingsWindow() {
                         width: "8px",
                         height: "8px",
                         borderRadius: "50%",
-                        background: "#ef4444",
-                        boxShadow: "0 0 8px #ef4444",
-                        animation: "breathe-border 1.5s infinite",
+                        background: previewPaused ? "#eab308" : "#ef4444",
+                        boxShadow: previewPaused ? "0 0 8px #eab308" : "0 0 8px #ef4444",
+                        animation: previewPaused ? "none" : "breathe-border 1.5s infinite",
                         marginTop: "-1px"
                       }} />
+                      {previewPaused && (
+                        <span style={{ color: "#eab308", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }}>
+                          {(t as any).modalPaused || "Mola"}
+                        </span>
+                      )}
                       <span style={{ fontFamily: "monospace", fontSize: "0.78rem", fontWeight: 700, color: "#ffffff", letterSpacing: "0.5px", lineHeight: 1 }}>
                         00:04:12
                       </span>
@@ -3994,21 +4042,114 @@ function SettingsWindow() {
                     {/* 4 Adet Aksiyon Butonu Simülasyonu */}
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       {/* 1. Duraklat / Devam Et */}
-                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(234, 179, 8, 0.2)", border: "1px solid rgba(234, 179, 8, 0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Pause size={10} color="#eab308" fill="#eab308" />
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewPaused(!previewPaused)}
+                        title={previewPaused ? ((t as any).recordTooltipResume || "Devam Et") : ((t as any).recordTooltipPause || "Duraklat")}
+                        style={{
+                          width: "22px",
+                          height: "22px",
+                          borderRadius: "50%",
+                          background: previewPaused ? "rgba(234, 179, 8, 0.35)" : "rgba(234, 179, 8, 0.2)",
+                          border: "1px solid rgba(234, 179, 8, 0.4)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          padding: 0,
+                          outline: "none",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
+                        {previewPaused ? <Play size={10} color="#eab308" fill="#eab308" /> : <Pause size={10} color="#eab308" fill="#eab308" />}
+                      </button>
+
                       {/* 2. Kaydı Durdur */}
-                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.2)", border: "1px solid rgba(239, 68, 68, 0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const checked = !showRecordControls;
+                          setShowRecordControls(checked);
+                          localStorage.setItem("showRecordControls", checked.toString());
+                          window.dispatchEvent(new Event("storage"));
+                          emit("force_storage_sync").catch(console.error);
+                        }}
+                        title={(t as any).showRecordControlsLabel || "Kayıt Kontrolcüsünü Göster"}
+                        style={{
+                          width: "22px",
+                          height: "22px",
+                          borderRadius: "50%",
+                          background: "rgba(239, 68, 68, 0.2)",
+                          border: "1px solid rgba(239, 68, 68, 0.4)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          padding: 0,
+                          outline: "none",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
                         <Square size={9} color="#ef4444" fill="#ef4444" />
-                      </div>
+                      </button>
+
                       {/* 3. Kamera */}
-                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: recordWebcam ? "rgba(56, 189, 248, 0.2)" : "rgba(255, 255, 255, 0.05)", border: recordWebcam ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const checked = !recordWebcam;
+                          setRecordWebcam(checked);
+                          localStorage.setItem("recordWebcam", checked.toString());
+                          window.dispatchEvent(new Event("storage"));
+                          emit("force_storage_sync").catch(console.error);
+                        }}
+                        title={recordWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
+                        style={{
+                          width: "22px",
+                          height: "22px",
+                          borderRadius: "50%",
+                          background: recordWebcam ? "rgba(56, 189, 248, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                          border: recordWebcam ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          padding: 0,
+                          outline: "none",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
                         <Camera size={10} color={recordWebcam ? "#38bdf8" : "#64748b"} />
-                      </div>
+                      </button>
+
                       {/* 4. Mikrofon */}
-                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: recordMic ? "rgba(74, 222, 128, 0.2)" : "rgba(239, 68, 68, 0.2)", border: recordMic ? "1px solid rgba(74, 222, 128, 0.4)" : "1px solid rgba(239, 68, 68, 0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const checked = !recordMic;
+                          setRecordMic(checked);
+                          localStorage.setItem("recordMic", checked.toString());
+                          window.dispatchEvent(new Event("storage"));
+                          emit("force_storage_sync").catch(console.error);
+                        }}
+                        title={recordMic ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
+                        style={{
+                          width: "22px",
+                          height: "22px",
+                          borderRadius: "50%",
+                          background: recordMic ? "rgba(74, 222, 128, 0.2)" : "rgba(239, 68, 68, 0.2)",
+                          border: recordMic ? "1px solid rgba(74, 222, 128, 0.4)" : "1px solid rgba(239, 68, 68, 0.4)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          padding: 0,
+                          outline: "none",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
                         {recordMic ? <Mic size={10} color="#4ade80" /> : <MicOff size={10} color="#ef4444" />}
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>

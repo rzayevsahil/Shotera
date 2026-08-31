@@ -44,8 +44,8 @@
 }
 
 .status-indicator-dot.paused {
-  background: #64748b;
-  box-shadow: none;
+  background: #eab308;
+  box-shadow: 0 0 8px #eab308;
   animation: none;
 }
 

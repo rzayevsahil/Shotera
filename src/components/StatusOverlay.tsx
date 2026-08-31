@@ -47,7 +47,7 @@ export default function StatusOverlay() {
     <div className="status-overlay-container" data-tauri-drag-region>
       <div key={animKey} className={`status-overlay-pill ${isPaused ? "paused" : "resumed"}`} data-tauri-drag-region>
         <div className={`status-indicator-dot ${isPaused ? "paused" : "resumed"}`} />
-        <span className="status-overlay-text">{text}</span>
+        <span className="status-overlay-text" style={{ color: isPaused ? "#eab308" : "#ffffff" }}>{text}</span>
       </div>
     </div>
   );

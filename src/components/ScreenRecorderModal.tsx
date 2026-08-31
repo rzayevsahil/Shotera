@@ -394,15 +394,15 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                                 width: "8px",
                                 height: "8px",
                                 borderRadius: "50%",
-                                background: isPaused ? "#64748b" : "#ef4444",
-                                boxShadow: isPaused ? "none" : "0 0 8px #ef4444",
+                                background: isPaused ? "#eab308" : "#ef4444",
+                                boxShadow: isPaused ? "0 0 8px #eab308" : "0 0 8px #ef4444",
                                 animation: isPaused ? "none" : "pulse-recording 1.5s infinite",
                                 flexShrink: 0,
                                 marginTop: "-1px"
                             }}
                         />
                         {isPaused && (
-                            <span style={{ color: "#e2e8f0", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }} data-tauri-drag-region>
+                            <span style={{ color: "#eab308", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }} data-tauri-drag-region>
                                 {(t as any).modalPaused || "Mola"}
                             </span>
                         )}
@@ -489,9 +489,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 <div className="recorder-modal-content">
                     {isRecording ? (
                         <div className="recording-active-state">
-                            <div className="recording-indicator" style={{ background: isPaused ? 'gray' : 'red', animation: isPaused ? 'none' : 'pulse-recording 1s infinite' }}></div>
+                            <div className="recording-indicator" style={{ background: isPaused ? '#eab308' : '#ef4444', boxShadow: isPaused ? '0 0 12px #eab308' : '0 0 12px rgba(239, 68, 68, 0.6)', animation: isPaused ? 'none' : 'pulse-recording 1.5s infinite' }}></div>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                                <h2 style={{ margin: 0 }}>{isPaused ? 'Mola' : (t as any).modalRecording}</h2>
+                                <h2 style={{ margin: 0, color: isPaused ? '#eab308' : '#ffffff' }}>{isPaused ? 'Mola' : (t as any).modalRecording}</h2>
                                 <span style={{ color: '#a1a1aa', fontSize: '1.4rem', fontFamily: 'monospace', fontWeight: 600, letterSpacing: '1px' }}>{formatDuration(recordingDuration)}</span>
                             </div>
                             <p style={{ marginTop: '8px' }}>{(t as any).modalHwAccel}</p>
