@@ -3092,7 +3092,7 @@ function SettingsWindow() {
                   <div className="settings-card">
                     <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
                       <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
-                        <Camera size={18} color="var(--accent-cyan)" />
+                        <Camera size={18} color="var(--accent-cyan)" style={{ transform: "translateY(-1px)" }} />
                         {(t as any).webcamStyleSectionTitle || "Kamera & Çerçeve Özelleştirme"}
                       </span>
                       <span className="setting-desc">{(t as any).webcamStyleSectionDesc || "Kamera modu, çerçeve rengi ve animasyon tercihlerinizi ayarlayın."}</span>
@@ -3281,7 +3281,7 @@ function SettingsWindow() {
                   <div className="settings-card">
                     <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
                       <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
-                        <Type size={18} color="var(--accent-cyan)" />
+                        <Type size={18} color="var(--accent-cyan)" style={{ transform: "translateY(-1px)" }} />
                         {(t as any).webcamTextSectionTitle || "Kamera Metin Özelleştirme"}
                       </span>
                       <span className="setting-desc">{(t as any).webcamTextSectionDesc || "Kamera altındaki metin, font, boyut, renk ve görsel efektlerini ayarlayın."}</span>
