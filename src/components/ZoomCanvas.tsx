@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
 import { translations, getLanguage, Language } from "../i18n";
+import { Pen, Type, MousePointer2, Video } from "lucide-react";
 
 interface Shape {
   id: string;
@@ -408,47 +409,7 @@ export default function ZoomCanvas() {
       }
     }
 
-    // 3. Render Status Badge (Top Left Corner) - Auto-Hiding
-    if (badgeOpacity > 0.01) {
-      ctx.save();
-      ctx.globalAlpha = badgeOpacity;
-
-      const badgeText = isLiveMode && !isDrawMode
-        ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeLiveMode || "Canlı Zoom Modu [Fareyi Takip Eder | Sol Tık: Dondur & Çiz | ESC: Çık]"}`
-        : isDrawMode
-          ? activeTool === "text"
-            ? `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeTextMode || "🔤 Metin Modu"}`
-            : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeDrawMode}`
-          : `Zoom: ${zoomLevel.toFixed(1)}x | ${t.zoomBadgeStart}`;
-
-      ctx.font = "bold 13px Inter, sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-
-      const textMetrics = ctx.measureText(badgeText);
-      const badgeWidth = textMetrics.width + (isDrawMode ? 54 : 36);
-
-      ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-      ctx.beginPath();
-      ctx.roundRect(16, 16, badgeWidth, 36, 18);
-      ctx.fill();
-      ctx.strokeStyle = isDrawMode ? currentColor : "rgba(56, 189, 248, 0.5)";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Color Indicator Circle (If in Draw Mode)
-      if (isDrawMode) {
-        ctx.fillStyle = currentColor;
-        ctx.beginPath();
-        ctx.arc(36, 34, 7, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-
-      ctx.fillStyle = isDrawMode ? "#ffffff" : "#38bdf8";
-      ctx.fillText(badgeText, isDrawMode ? 52 : 32, 34);
-
-      ctx.restore();
-    }
+    // Status badge is now rendered in HTML overlay below
 
     ctx.restore();
   }, [imgElement, zoomLevel, panPos, boardMode, shapes, currentShape, isDrawMode, activeTool, currentColor, lang, badgeOpacity]);
@@ -754,6 +715,59 @@ export default function ZoomCanvas() {
           imageRendering: "pixelated",
         }}
       />
+
+      {/* Floating Status Badge */}
+      {badgeOpacity > 0.01 && (
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            left: "16px",
+            background: "rgba(15, 23, 42, 0.85)",
+            border: `1.5px solid ${isDrawMode ? currentColor : "rgba(56, 189, 248, 0.5)"}`,
+            borderRadius: "18px",
+            padding: "8px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            color: isDrawMode ? "#ffffff" : "#38bdf8",
+            fontFamily: "Inter, sans-serif",
+            fontSize: "13px",
+            fontWeight: "bold",
+            opacity: badgeOpacity,
+            pointerEvents: "none",
+            transition: "opacity 0.2s ease, transform 0.2s ease",
+            zIndex: 9999,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+            transform: badgeOpacity > 0.01 ? "translateY(0)" : "translateY(-10px)",
+          }}
+        >
+          {isLiveMode && !isDrawMode ? (
+            <Video size={16} />
+          ) : isDrawMode ? (
+            activeTool === "text" ? (
+              <Type size={16} color={currentColor} />
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <div style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: currentColor }} />
+                <Pen size={14} color={currentColor} />
+              </div>
+            )
+          ) : (
+            <MousePointer2 size={16} />
+          )}
+          <span>
+            Zoom: {zoomLevel.toFixed(1)}x |{" "}
+            {isLiveMode && !isDrawMode
+              ? (t.zoomBadgeLiveMode || "Canlı Zoom Modu [Fareyi Takip Eder | Sol Tık: Dondur & Çiz | ESC: Çık]")
+              : isDrawMode
+                ? activeTool === "text"
+                  ? (t.zoomBadgeTextMode || "Metin Modu")
+                  : t.zoomBadgeDrawMode
+                : t.zoomBadgeStart}
+          </span>
+        </div>
+      )}
 
       {/* Floating Text Input Box when typing */}
       {textInput && (
