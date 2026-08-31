@@ -3525,7 +3525,7 @@ function SettingsWindow() {
 
                     <div className="setting-row" data-tour="shortcut-pause-record">
                       <div className="setting-info">
-                        <span className="setting-label">{(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}</span>
+                        <span className="setting-label">{(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et"}</span>
                         <span className="setting-desc">{(t as any).shortcutPauseRecordDesc || "Aktif ekran kaydını duraklatmak veya devam ettirmek için kısayol."}</span>
                       </div>
                       <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -3552,7 +3552,7 @@ function SettingsWindow() {
 
                     <div className="setting-row" data-tour="shortcut-webcam">
                       <div className="setting-info">
-                        <span className="setting-label">{(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}</span>
+                        <span className="setting-label">{(t as any).shortcutWebcam || "Kamera Aç/Kapat"}</span>
                         <span className="setting-desc">{(t as any).shortcutWebcamDesc || "Kayıt sırasında kameranızı açıp kapatmak için kısayol."}</span>
                       </div>
                       <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -3579,7 +3579,7 @@ function SettingsWindow() {
 
                     <div className="setting-row" data-tour="shortcut-mic">
                       <div className="setting-info">
-                        <span className="setting-label">{(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}</span>
+                        <span className="setting-label">{(t as any).shortcutMic || "Mikrofon Aç/Kapat"}</span>
                         <span className="setting-desc">{(t as any).shortcutMicDesc || "Kayıt sırasında mikrofonunuzu açıp kapatmak için kısayol."}</span>
                       </div>
                       <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -3644,7 +3644,7 @@ function SettingsWindow() {
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <Play size={15} color="#eab308" />
-                          {(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}
+                          {(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et"}
                         </span>
                         <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
                           {formatShortcut(pauseRecordShortcut) || "Ctrl+6"}
@@ -3654,7 +3654,7 @@ function SettingsWindow() {
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <Camera size={15} color="var(--accent-cyan)" />
-                          {(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}
+                          {(t as any).shortcutWebcam || "Kamera Aç/Kapat"}
                         </span>
                         <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
                           {formatShortcut(webcamShortcut) || "Ctrl+7"}
@@ -3664,7 +3664,7 @@ function SettingsWindow() {
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
                         <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
                           <Mic size={15} color="var(--accent-cyan)" />
-                          {(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}
+                          {(t as any).shortcutMic || "Mikrofon Aç/Kapat"}
                         </span>
                         <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
                           {formatShortcut(micShortcut) || "Ctrl+8"}
