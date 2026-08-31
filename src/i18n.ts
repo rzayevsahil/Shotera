@@ -558,6 +558,8 @@ export const translations = {
     recordControlsPreviewDesc: "Ekran kaydı esnasında ekranınızda yüzen bu çubuk üzerinden kaydı yönetebilirsiniz.",
     badgeActive: "AÇIK",
     badgeDisabled: "GİZLİ",
+    liveBadge: "CANLI",
+    fpsLabel: "FPS",
   },
 
   en: {
@@ -1029,6 +1031,8 @@ export const translations = {
     recordControlsPreviewDesc: "Manage recording on screen via this floating control bar while recording.",
     badgeActive: "ON",
     badgeDisabled: "HIDDEN",
+    liveBadge: "LIVE",
+    fpsLabel: "FPS",
   },
 
 
@@ -1453,6 +1457,8 @@ export const translations = {
     recordControlsPreviewDesc: "Qeyd zamanı ekran üzərində bu üzən panel vasitəsilə qeydi idarə edin.",
     badgeActive: "AÇIQ",
     badgeDisabled: "GİZLİ",
+    liveBadge: "CANLI",
+    fpsLabel: "FPS",
   },
 
   ru: {
@@ -1875,6 +1881,8 @@ export const translations = {
     recordControlsPreviewDesc: "Управляйте записью прямо с экрана с помощью плавающей панели.",
     badgeActive: "ВКЛ",
     badgeDisabled: "СКРЫТО",
+    liveBadge: "В ЭФИРЕ",
+    fpsLabel: "ФПС",
   },
 
   de: {
@@ -2296,6 +2304,8 @@ export const translations = {
     recordControlsPreviewDesc: "Steuern Sie die Aufnahme direkt auf dem Bildschirm über diese Schwebefunktionsleiste.",
     badgeActive: "AN",
     badgeDisabled: "VERSTECKT",
+    liveBadge: "DIREKT",
+    fpsLabel: "FPS",
   }
 };
 

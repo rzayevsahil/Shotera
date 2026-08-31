@@ -3705,7 +3705,7 @@ function SettingsWindow() {
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(0, 242, 254, 0.1)", padding: "3px 8px", borderRadius: "12px", border: "1px solid rgba(0, 242, 254, 0.2)" }}>
                     <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--accent-cyan)", boxShadow: "0 0 6px var(--accent-cyan)", animation: "breathe-border 2s infinite" }} />
-                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-cyan)", letterSpacing: "0.5px" }}>LIVE</span>
+                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-cyan)", letterSpacing: "0.5px" }}>{(t as any).liveBadge || "LIVE"}</span>
                   </div>
                 </div>
 
@@ -3871,7 +3871,7 @@ function SettingsWindow() {
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-muted)" }}>
                     <Video size={13} color="#38bdf8" style={{ flexShrink: 0, transform: "translateY(-1px)" }} />
-                    <span>{recordFps} FPS</span>
+                    <span>{recordFps} {(t as any).fpsLabel || "FPS"}</span>
                   </div>
                   <div
                     onClick={() => {
