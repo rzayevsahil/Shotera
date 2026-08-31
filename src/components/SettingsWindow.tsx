@@ -2010,7 +2010,7 @@ function SettingsWindow() {
               {timerSubTab === "theme" && (
                 <div className="settings-card" data-tour="setting-timer-theme" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                   {/* Ring Color Preset Row */}
-                  <div className="setting-row">
+                  <div className="setting-row" data-tour="setting-timer-ring-color">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerRingColorLabel}</span>
                     </div>
@@ -2277,7 +2277,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Mode & Custom Image Section */}
-                  <div className="setting-row" style={(timerBgMode === "image" || timerBgMode === "desktop") ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
+                  <div className="setting-row" data-tour="setting-timer-bg" style={(timerBgMode === "image" || timerBgMode === "desktop") ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
                       <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
@@ -2384,7 +2384,7 @@ function SettingsWindow() {
                   )}
 
                   {/* Clock Font Style Row */}
-                  <div className="setting-row">
+                  <div className="setting-row" data-tour="setting-timer-font">
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerFontStyleLabel}</span>
                     </div>
@@ -2459,7 +2459,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* 9-Point Screen Grid Alignment Row */}
-                  <div className="setting-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: "10px" }}>
+                  <div className="setting-row" data-tour="setting-timer-position" style={{ flexDirection: "column", alignItems: "flex-start", gap: "10px" }}>
                     <div className="setting-info" style={{ width: "100%", maxWidth: "100%" }}>
                       <span className="setting-label">{(t as any).timerPositionLabel}</span>
                       <span className="setting-desc">{(t as any).timerPositionDesc}</span>
