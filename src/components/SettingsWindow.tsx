@@ -2234,33 +2234,28 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Mode & Custom Image Section */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div className="setting-info" style={{ marginBottom: "2px" }}>
-                      <span className="setting-label">{(t as any).timerBgImageTitle || "Mola Ekranı Arka Plan Görseli"}</span>
+                  <div className="setting-row">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
                       <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
                     </div>
-
-                    <div className="setting-row">
-                      <div className="setting-info">
-                        <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
-                      </div>
-                      <select
-                        className="premium-input"
-                        value={timerBgMode}
-                        onChange={(e) => {
-                          const val = e.target.value as "color" | "desktop" | "image";
-                          setTimerBgMode(val);
-                          localStorage.setItem("timerBgMode", val);
-                          window.dispatchEvent(new Event("storage"));
-                          emit("timer-settings-updated").catch(() => { });
-                        }}
-                        style={{ width: "240px" }}
-                      >
-                        <option value="color">{(t as any).timerBgModeColor || "Düz Renk / Gradyan"}</option>
-                        <option value="desktop">{(t as any).timerBgModeDesktop || "Soluk Masaüstü (Faded Desktop)"}</option>
-                        <option value="image">{(t as any).timerBgModeImage || "Özel Görsel Dosyası"}</option>
-                      </select>
-                    </div>
+                    <select
+                      className="premium-input"
+                      value={timerBgMode}
+                      onChange={(e) => {
+                        const val = e.target.value as "color" | "desktop" | "image";
+                        setTimerBgMode(val);
+                        localStorage.setItem("timerBgMode", val);
+                        window.dispatchEvent(new Event("storage"));
+                        emit("timer-settings-updated").catch(() => { });
+                      }}
+                      style={{ width: "240px" }}
+                    >
+                      <option value="color">{(t as any).timerBgModeColor || "Düz Renk / Gradyan"}</option>
+                      <option value="desktop">{(t as any).timerBgModeDesktop || "Soluk Masaüstü (Faded Desktop)"}</option>
+                      <option value="image">{(t as any).timerBgModeImage || "Özel Görsel Dosyası"}</option>
+                    </select>
+                  </div>
 
                     {timerBgMode === "desktop" && (
                       <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "10px 12px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
@@ -2338,7 +2333,6 @@ function SettingsWindow() {
                         </label>
                       </div>
                     )}
-                  </div>
 
                   {/* Clock Font Style Row */}
                   <div className="setting-row">
