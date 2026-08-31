@@ -54,10 +54,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
         const hrs = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
-        if (hrs > 0) {
-            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
     useEffect(() => {
@@ -362,47 +359,107 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
 
     if (isRecording && isStandalone) {
         return (
-            <div className="compact-recorder-bar" style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '12px 20px', background: 'rgba(20, 20, 20, 0.95)',
-                border: '1px solid rgba(239, 68, 68, 0.5)',
-                height: '100vh', boxSizing: 'border-box',
-                borderRadius: '0', overflow: 'visible'
-            }} data-tauri-drag-region>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-tauri-drag-region>
-                    <div className="recording-indicator" style={{ width: '14px', height: '14px', minWidth: '14px', minHeight: '14px', borderRadius: '50%', margin: 0, flexShrink: 0, animation: isPaused ? 'none' : 'pulse-recording 1s infinite', background: isPaused ? 'gray' : 'red' }}></div>
-                    {isPaused && <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }} data-tauri-drag-region>{(t as any).modalPaused}</span>}
-                    <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 500, letterSpacing: '1px', marginRight: '5px', marginLeft: '-5px' }}>{formatDuration(recordingDuration)}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                    <button
-                        className={`compact-bar-btn ${useWebcam ? 'active' : ''}`}
-                        onClick={handleWebcamToggle}
-                        data-tooltip={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
-                    >
-                        <Camera size={16} />
-                    </button>
-                    <button
-                        className={`compact-bar-btn ${!isMicMuted ? 'active' : 'active-muted'}`}
-                        onClick={handleMicToggle}
-                        data-tooltip={!isMicMuted ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
-                    >
-                        {isMicMuted ? <MicOff size={16} /> : <Mic size={16} />}
-                    </button>
-                    <button
-                        className="compact-bar-btn"
-                        onClick={handlePauseToggle}
-                        data-tooltip={isPaused ? "Devam Et" : "Duraklat"}
-                    >
-                        {isPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
-                    </button>
-                    <button
-                        className="compact-bar-btn stop-btn"
-                        onClick={handleStopRecording}
-                        data-tooltip={(t as any).modalStopRecording}
-                    >
-                        <Square size={15} fill="currentColor" />
-                    </button>
+            <div
+                style={{
+                    width: "100vw",
+                    height: "100vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "transparent",
+                    overflow: "hidden"
+                }}
+                data-tauri-drag-region
+            >
+                <div
+                    className="compact-recorder-bar"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        background: "rgba(15, 23, 42, 0.88)",
+                        backdropFilter: "blur(12px)",
+                        border: "1px solid rgba(255, 255, 255, 0.18)",
+                        borderRadius: "30px",
+                        padding: "6px 14px",
+                        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.15)",
+                        boxSizing: "border-box"
+                    }}
+                    data-tauri-drag-region
+                >
+                    {/* Canlı Kayıt Noktası & Sayaç */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }} data-tauri-drag-region>
+                        <div
+                            style={{
+                                width: "8px",
+                                height: "8px",
+                                borderRadius: "50%",
+                                background: isPaused ? "#64748b" : "#ef4444",
+                                boxShadow: isPaused ? "none" : "0 0 8px #ef4444",
+                                animation: isPaused ? "none" : "pulse-recording 1.5s infinite",
+                                flexShrink: 0
+                            }}
+                        />
+                        {isPaused && (
+                            <span style={{ color: "#e2e8f0", fontWeight: 600, fontSize: "0.75rem" }} data-tauri-drag-region>
+                                {(t as any).modalPaused || "Mola"}
+                            </span>
+                        )}
+                        <span
+                            style={{
+                                fontFamily: "monospace",
+                                fontSize: "0.78rem",
+                                fontWeight: 700,
+                                color: "#ffffff",
+                                letterSpacing: "0.5px"
+                            }}
+                            data-tauri-drag-region
+                        >
+                            {formatDuration(recordingDuration)}
+                        </span>
+                    </div>
+
+                    {/* Dikey Ayrıştırıcı */}
+                    <div style={{ width: "1px", height: "14px", background: "rgba(255, 255, 255, 0.15)" }} />
+
+                    {/* 4 Adet Aksiyon Butonu */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        {/* 1. Duraklat / Devam Et */}
+                        <button
+                            className="compact-bar-btn btn-pause"
+                            onClick={handlePauseToggle}
+                            data-tooltip={isPaused ? ((t as any).recordTooltipResume || "Devam Et") : ((t as any).recordTooltipPause || "Duraklat")}
+                        >
+                            {isPaused ? <Play size={11} color="#eab308" fill="#eab308" /> : <Pause size={11} color="#eab308" fill="#eab308" />}
+                        </button>
+
+                        {/* 2. Kaydı Durdur */}
+                        <button
+                            className="compact-bar-btn stop-btn"
+                            onClick={handleStopRecording}
+                            data-tooltip={(t as any).modalStopRecording || "Kaydı Durdur"}
+                        >
+                            <Square size={10} color="#ef4444" fill="#ef4444" />
+                        </button>
+
+                        {/* 3. Kamera */}
+                        <button
+                            className={`compact-bar-btn ${useWebcam ? 'btn-webcam-active' : 'btn-webcam-inactive'}`}
+                            onClick={handleWebcamToggle}
+                            data-tooltip={useWebcam ? ((t as any).recordTooltipWebcamHide || "Kamerayı Kapat") : ((t as any).recordTooltipWebcamShow || "Kamerayı Aç")}
+                        >
+                            <Camera size={11} color={useWebcam ? "#38bdf8" : "#64748b"} />
+                        </button>
+
+                        {/* 4. Mikrofon */}
+                        <button
+                            className={`compact-bar-btn ${!isMicMuted ? 'btn-mic-active' : 'btn-mic-muted'}`}
+                            onClick={handleMicToggle}
+                            data-tooltip={!isMicMuted ? ((t as any).recordTooltipMicHide || "Mikrofonu Kapat") : ((t as any).recordTooltipMicShow || "Mikrofonu Aç")}
+                        >
+                            {isMicMuted ? <MicOff size={11} color="#ef4444" /> : <Mic size={11} color="#4ade80" />}
+                        </button>
+                    </div>
                 </div>
             </div>
         );

@@ -302,59 +302,94 @@
 
 /* Compact Recorder Bar Controls */
 .compact-bar-btn {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    min-height: 34px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 50%;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #ffffff;
     cursor: pointer;
     transition: all 0.2s ease;
     outline: none;
+    position: relative;
 }
 
 .compact-bar-btn:hover {
     background: rgba(255, 255, 255, 0.16);
     border-color: rgba(255, 255, 255, 0.25);
-    transform: translateY(-1px);
+    transform: scale(1.08);
 }
 
-.compact-bar-btn.active {
-    background: rgba(0, 242, 254, 0.15);
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+.compact-bar-btn.btn-pause {
+    background: rgba(234, 179, 8, 0.2);
+    border-color: rgba(234, 179, 8, 0.4);
+    color: #eab308;
 }
 
-.compact-bar-btn.active-muted {
-    background: rgba(239, 68, 68, 0.15);
-    border-color: rgba(239, 68, 68, 0.5);
+.compact-bar-btn.btn-pause:hover {
+    background: rgba(234, 179, 8, 0.35);
+    border-color: rgba(234, 179, 8, 0.6);
+    box-shadow: 0 0 10px rgba(234, 179, 8, 0.4);
+}
+
+.compact-bar-btn.stop-btn {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
     color: #ef4444;
 }
 
-.compact-bar-btn {
-    position: relative;
+.compact-bar-btn.stop-btn:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+}
+
+.compact-bar-btn.btn-webcam-active {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.compact-bar-btn.btn-webcam-inactive {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #64748b;
+}
+
+.compact-bar-btn.btn-mic-active {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.4);
+    color: #4ade80;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.25);
+}
+
+.compact-bar-btn.btn-mic-muted {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
 }
 
 .compact-bar-btn[data-tooltip]::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: calc(100% + 1.5px);
+    bottom: calc(100% + 6px);
     left: 50%;
     transform: translateX(-50%) translateY(4px);
-    background: rgba(15, 17, 23, 0.95);
+    background: rgba(15, 23, 42, 0.95);
     color: #f1f5f9;
     font-size: 0.72rem;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.2;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     white-space: nowrap;
     pointer-events: none;
@@ -369,17 +404,4 @@
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
-}
-
-.compact-bar-btn.stop-btn {
-    background: rgba(239, 68, 68, 0.18);
-    border-color: rgba(239, 68, 68, 0.5);
-    color: #ef4444;
-}
-
-.compact-bar-btn.stop-btn:hover {
-    background: #ef4444;
-    border-color: #ef4444;
-    color: #ffffff;
-    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
 }

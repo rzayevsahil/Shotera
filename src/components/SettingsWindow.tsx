@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -3990,24 +3990,24 @@ function SettingsWindow() {
                     {/* Dikey Ayrıştırıcı */}
                     <div style={{ width: "1px", height: "14px", background: "rgba(255, 255, 255, 0.15)" }} />
 
-                    {/* Butonlar Simülasyonu */}
+                    {/* 4 Adet Aksiyon Butonu Simülasyonu */}
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Play size={10} color="#eab308" fill="#eab308" />
+                      {/* 1. Duraklat / Devam Et */}
+                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(234, 179, 8, 0.2)", border: "1px solid rgba(234, 179, 8, 0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Pause size={10} color="#eab308" fill="#eab308" />
                       </div>
-                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(239,68,68,0.2)", border: "1px solid rgba(239,68,68,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {/* 2. Kaydı Durdur */}
+                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.2)", border: "1px solid rgba(239, 68, 68, 0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Square size={9} color="#ef4444" fill="#ef4444" />
                       </div>
-                      {recordWebcam && (
-                        <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(56,189,248,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Camera size={10} color="#38bdf8" />
-                        </div>
-                      )}
-                      {recordMic && (
-                        <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(74,222,128,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Mic size={10} color="#4ade80" />
-                        </div>
-                      )}
+                      {/* 3. Kamera */}
+                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: recordWebcam ? "rgba(56, 189, 248, 0.2)" : "rgba(255, 255, 255, 0.05)", border: recordWebcam ? "1px solid rgba(56, 189, 248, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Camera size={10} color={recordWebcam ? "#38bdf8" : "#64748b"} />
+                      </div>
+                      {/* 4. Mikrofon */}
+                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: recordMic ? "rgba(74, 222, 128, 0.2)" : "rgba(239, 68, 68, 0.2)", border: recordMic ? "1px solid rgba(74, 222, 128, 0.4)" : "1px solid rgba(239, 68, 68, 0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {recordMic ? <Mic size={10} color="#4ade80" /> : <MicOff size={10} color="#ef4444" />}
+                      </div>
                     </div>
                   </div>
                 </div>
