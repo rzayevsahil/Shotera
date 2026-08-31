@@ -367,7 +367,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     alignItems: "center",
                     justifyContent: "center",
                     background: "transparent",
-                    overflow: "hidden"
+                    overflow: "visible"
                 }}
                 data-tauri-drag-region
             >
