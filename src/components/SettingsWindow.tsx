@@ -2898,7 +2898,7 @@ function SettingsWindow() {
                   style={{ width: "100%", justifyContent: "center", padding: "10px 14px", fontSize: "0.88rem", marginTop: "4px" }}
                 >
                   <Play size={15} />
-                  {(t as any).timerStartBtn || "Taymeri Başlat"} (Test)
+                  {(t as any).timerStartBtn || "Başlat"}
                 </button>
               </div>
             </div>
