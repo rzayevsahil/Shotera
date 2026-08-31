@@ -551,6 +551,9 @@ export const translations = {
     showRecordControlsDesc: "Kayıt sırasında duraklatma ve durdurma çubuğunu ekranda gösterin.",
     webcamStyleSectionTitle: "Kamera & Tasarım Özelleştirme",
     webcamStyleSectionDesc: "Kamera çerçevesi, metin, renk paletleri ve animasyon tercihlerinizi ayarlayın.",
+    recordSubTabGeneral: "Genel / Video",
+    recordSubTabWebcam: "Kamera & Katman",
+    recordSubTabShortcuts: "Kısayollar",
   },
 
   en: {
@@ -1015,6 +1018,9 @@ export const translations = {
     showRecordControlsDesc: "Display floating pause and stop control bar on screen during recording.",
     webcamStyleSectionTitle: "Webcam & Design Customization",
     webcamStyleSectionDesc: "Adjust webcam border, text, color palettes, and animation preferences.",
+    recordSubTabGeneral: "General / Video",
+    recordSubTabWebcam: "Webcam & Overlay",
+    recordSubTabShortcuts: "Shortcuts",
   },
 
 
@@ -1432,6 +1438,9 @@ export const translations = {
     showRecordControlsDesc: "Qeyd zamanı ekran üzərində fasilə və dayandırma panelini göstərin.",
     webcamStyleSectionTitle: "Kamera və Dizayn Fərdiləşdirilməsi",
     webcamStyleSectionDesc: "Kamera çərçivəsi, mətn, rəng palitraları və animasiya tənzimləmələrinizi təyin edin.",
+    recordSubTabGeneral: "Ümumi / Video",
+    recordSubTabWebcam: "Kamera və Qat",
+    recordSubTabShortcuts: "Qısayollar",
   },
 
   ru: {
@@ -1847,6 +1856,9 @@ export const translations = {
     showRecordControlsDesc: "Отображать плавающую панель паузы и остановки на экране во время записи.",
     webcamStyleSectionTitle: "Настройка Веб-Камеры и Дизайна",
     webcamStyleSectionDesc: "Настройте рамку камеры, текст, цветовую палитру и анимацию.",
+    recordSubTabGeneral: "Общие / Видео",
+    recordSubTabWebcam: "Камера и Слой",
+    recordSubTabShortcuts: "Горячие Клавиши",
   },
 
   de: {
@@ -2261,6 +2273,9 @@ export const translations = {
     showRecordControlsDesc: "Schwebende Pause- und Stopp-Steuerungsleiste während der Aufnahme anzeigen.",
     webcamStyleSectionTitle: "Webcam & Design-Anpassung",
     webcamStyleSectionDesc: "Passen Sie Webcam-Rahmen, Text, Farbpaletten und Animationsoptionen an.",
+    recordSubTabGeneral: "Allgemein / Video",
+    recordSubTabWebcam: "Webcam & Overlay",
+    recordSubTabShortcuts: "Tastenkombinationen",
   }
 };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles, Upload, Music, Trash2, Bell, FileAudio } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -156,6 +156,7 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
+  const [recordSubTab, setRecordSubTab] = useState<"general" | "webcam" | "shortcuts">("general");
   const [lang, setLang] = useState<Language>(getLanguage);
   const [appVersion, setAppVersion] = useState("v0.1.0");
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -2793,781 +2794,887 @@ function SettingsWindow() {
 
         {activeTab === "record" && (
           <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
-            {/* SOL KOLON: Form elemanları, dropdown'lar, renk paleti ve yazı tipi ayarları */}
-            <div style={{ flex: "1 1 0%", minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
+            {/* SOL KOLON: Sekmeli (Sub-Tabs) Form ve Ayar Alanı */}
+            <div style={{ flex: "1 1 0%", minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
 
-              {/* Kart 1: Kayıt ve Kısayol Ayarları */}
-              <div className="settings-card">
-                <div className="setting-row" data-tour="shortcut-record">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).recordNativeTitle}</span>
-                    <span className="setting-desc">{(t as any).recordNativeDesc}</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <button
-                      className={`shortcut-badge customizable ${recordingType === "record" ? "recording" : ""}`}
-                      onClick={() => setRecordingType(recordingType === "record" ? null : "record")}
-                      title={t.shortcutChangeHint}
-                      style={{
-                        cursor: "pointer",
-                        border: recordingType === "record" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
-                        background: recordingType === "record" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                        color: recordingType === "record" ? "var(--accent-cyan)" : "white",
-                        fontWeight: 600,
-                        animation: recordingType === "record" ? "pulse-border 1.5s infinite" : "none",
-                        outline: "none",
-                        minWidth: "100px",
-                        textAlign: "center"
-                      }}
-                    >
-                      {recordingType === "record" ? t.shortcutPressKeys : formatShortcut(recordShortcut)}
-                    </button>
+              {/* Mini Sekmeler (Sub-Tabs) */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  padding: "4px",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)"
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setRecordSubTab("general")}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "9px 12px",
+                    borderRadius: "7px",
+                    border: recordSubTab === "general" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                    background: recordSubTab === "general" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                    color: recordSubTab === "general" ? "var(--accent-cyan)" : "var(--text-muted)",
+                    fontWeight: recordSubTab === "general" ? 600 : 500,
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <Video size={15} />
+                  {(t as any).recordSubTabGeneral || "Genel / Video"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRecordSubTab("webcam")}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "9px 12px",
+                    borderRadius: "7px",
+                    border: recordSubTab === "webcam" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                    background: recordSubTab === "webcam" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                    color: recordSubTab === "webcam" ? "var(--accent-cyan)" : "var(--text-muted)",
+                    fontWeight: recordSubTab === "webcam" ? 600 : 500,
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <Camera size={15} />
+                  {(t as any).recordSubTabWebcam || "Kamera & Katman"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRecordSubTab("shortcuts")}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "9px 12px",
+                    borderRadius: "7px",
+                    border: recordSubTab === "shortcuts" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                    background: recordSubTab === "shortcuts" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                    color: recordSubTab === "shortcuts" ? "var(--accent-cyan)" : "var(--text-muted)",
+                    fontWeight: recordSubTab === "shortcuts" ? 600 : 500,
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <Keyboard size={15} />
+                  {(t as any).recordSubTabShortcuts || "Kısayollar"}
+                </button>
+              </div>
+
+              {/* SEKME 1: Genel / Video */}
+              {recordSubTab === "general" && (
+                <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {/* Kayıt Başlatıcı / Aç */}
+                  <div className="setting-row" data-tour="shortcut-record">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).recordNativeTitle || "Yerel Ekran Kaydı"}</span>
+                      <span className="setting-desc">{(t as any).recordNativeDesc || "Donanım hızlandırmalı video kaydı alın."}</span>
+                    </div>
                     <button
                       className="premium-button"
                       onClick={() => invoke("open_recorder_view")}
-                      style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                      style={{ padding: "8px 16px", fontSize: "0.88rem" }}
                     >
-                      <Video size={14} />
-                      {(t as any).recordOpenBtn}
+                      <Video size={15} />
+                      {(t as any).recordOpenBtn || "Kaydediciyi Aç"}
                     </button>
                   </div>
-                </div>
 
-                <div className="setting-row" data-tour="shortcut-pause-record">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}</span>
-                    <span className="setting-desc">{(t as any).shortcutPauseRecordDesc || "Aktif ekran kaydını duraklatmak veya devam ettirmek için kısayol."}</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <button
-                      className={`shortcut-badge customizable ${recordingType === "pause_record" ? "recording" : ""}`}
-                      onClick={() => setRecordingType(recordingType === "pause_record" ? null : "pause_record")}
-                      title={t.shortcutChangeHint}
-                      style={{
-                        cursor: "pointer",
-                        border: recordingType === "pause_record" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
-                        background: recordingType === "pause_record" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                        color: recordingType === "pause_record" ? "var(--accent-cyan)" : "white",
-                        fontWeight: 600,
-                        animation: recordingType === "pause_record" ? "pulse-border 1.5s infinite" : "none",
-                        outline: "none",
-                        minWidth: "100px",
-                        textAlign: "center"
-                      }}
-                    >
-                      {recordingType === "pause_record" ? t.shortcutPressKeys : formatShortcut(pauseRecordShortcut)}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="setting-row" data-tour="shortcut-webcam">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}</span>
-                    <span className="setting-desc">{(t as any).shortcutWebcamDesc || "Kayıt sırasında kameranızı açıp kapatmak için kısayol."}</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <button
-                      className={`shortcut-badge customizable ${recordingType === "webcam" ? "recording" : ""}`}
-                      onClick={() => setRecordingType(recordingType === "webcam" ? null : "webcam")}
-                      title={t.shortcutChangeHint}
-                      style={{
-                        cursor: "pointer",
-                        border: recordingType === "webcam" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
-                        background: recordingType === "webcam" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                        color: recordingType === "webcam" ? "var(--accent-cyan)" : "white",
-                        fontWeight: 600,
-                        animation: recordingType === "webcam" ? "pulse-border 1.5s infinite" : "none",
-                        outline: "none",
-                        minWidth: "100px",
-                        textAlign: "center"
-                      }}
-                    >
-                      {recordingType === "webcam" ? t.shortcutPressKeys : formatShortcut(webcamShortcut)}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="setting-row" data-tour="shortcut-mic">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}</span>
-                    <span className="setting-desc">{(t as any).shortcutMicDesc || "Kayıt sırasında mikrofonunuzu açıp kapatmak için kısayol."}</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <button
-                      className={`shortcut-badge customizable ${recordingType === "mic" ? "recording" : ""}`}
-                      onClick={() => setRecordingType(recordingType === "mic" ? null : "mic")}
-                      title={t.shortcutChangeHint}
-                      style={{
-                        cursor: "pointer",
-                        border: recordingType === "mic" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
-                        background: recordingType === "mic" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                        color: recordingType === "mic" ? "var(--accent-cyan)" : "white",
-                        fontWeight: 600,
-                        animation: recordingType === "mic" ? "pulse-border 1.5s infinite" : "none",
-                        outline: "none",
-                        minWidth: "100px",
-                        textAlign: "center"
-                      }}
-                    >
-                      {recordingType === "mic" ? t.shortcutPressKeys : formatShortcut(micShortcut)}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="setting-row" data-tour="setting-record-fps">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).recordFpsLabel || "Kare Hızı (FPS)"}</span>
-                    <span className="setting-desc">{(t as any).recordFpsDesc || "Akıcılık ve performans dengesini ayarlayın."}</span>
-                  </div>
-                  <select
-                    className="premium-input"
-                    value={recordFps}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      setRecordFps(val);
-                      localStorage.setItem("recordFps", val.toString());
-                    }}
-                    style={{ width: "120px" }}
-                  >
-                    <option value={30}>30 FPS</option>
-                    <option value={60}>60 FPS</option>
-                  </select>
-                </div>
-
-                <div className="setting-row" data-tour="setting-record-audio">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
-                    <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
-                  </div>
-                  <label className="switch">
-                    <input
-                      type="checkbox"
-                      checked={recordAudio}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setRecordAudio(checked);
-                        localStorage.setItem("recordAudio", checked.toString());
-                      }}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-
-                <div className="setting-row" data-tour="setting-record-mic">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).recordMicLabel || "Mikrofonu Kaydet"}</span>
-                    <span className="setting-desc">{(t as any).recordMicDesc || "Kendi sesinizi (mikrofon) video kaydına dahil edin."}</span>
-                  </div>
-                  <label className="switch">
-                    <input
-                      type="checkbox"
-                      checked={recordMic}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setRecordMic(checked);
-                        localStorage.setItem("recordMic", checked.toString());
-                        window.dispatchEvent(new Event("storage"));
-                        emit("force_storage_sync").catch(console.error);
-                      }}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-
-                <div className="setting-row" data-tour="setting-record-webcam">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
-                    <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
-                  </div>
-                  <label className="switch">
-                    <input
-                      type="checkbox"
-                      checked={recordWebcam}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setRecordWebcam(checked);
-                        localStorage.setItem("recordWebcam", checked.toString());
-                        window.dispatchEvent(new Event("storage"));
-                        emit("force_storage_sync").catch(console.error);
-                      }}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-
-                <div className="setting-row" data-tour="setting-record-controls">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).showRecordControlsLabel || "Kayıt Kontrolcüsünü Göster"}</span>
-                    <span className="setting-desc">{(t as any).showRecordControlsDesc || "Kayıt sırasında duraklatma ve durdurma çubuğunu ekranda gösterin."}</span>
-                  </div>
-                  <label className="switch">
-                    <input
-                      type="checkbox"
-                      checked={showRecordControls}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setShowRecordControls(checked);
-                        localStorage.setItem("showRecordControls", checked.toString());
-                        window.dispatchEvent(new Event("storage"));
-                        emit("force_storage_sync").catch(console.error);
-                      }}
-                    />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-
-                <div className="setting-row" data-tour="setting-webcam-permission">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
-                    <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
-                  </div>
-                  <select
-                    className="premium-input"
-                    value={webcamPermissionMode}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setWebcamPermissionMode(val);
-                      localStorage.setItem("webcamPermissionMode", val);
-                      if (val === "always") {
-                        localStorage.removeItem("webcamHasAllowed");
-                      }
-                      window.dispatchEvent(new Event("storage"));
-                    }}
-                    style={{ width: "180px" }}
-                  >
-                    <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
-                    <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
-                  </select>
-                </div>
-
-                {/* Audio Ducking Fix - Standalone Banner Card */}
-                <div
-                  data-tour="setting-audio-ducking"
-                  style={{
-                    background: "rgba(245, 158, 11, 0.07)",
-                    border: "1px solid rgba(245, 158, 11, 0.22)",
-                    borderRadius: "12px",
-                    padding: "14px 16px",
-                    marginTop: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "14px",
-                    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)"
-                  }}
-                >
-                  <div
-                    style={{
-                      background: "rgba(245, 158, 11, 0.15)",
-                      border: "1px solid rgba(245, 158, 11, 0.3)",
-                      borderRadius: "10px",
-                      width: "38px",
-                      height: "38px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0
-                    }}
-                  >
-                    <AlertTriangle size={20} color="#fbbf24" />
-                  </div>
-                  <div style={{ flex: "1 1 0%", minWidth: 0 }}>
-                    <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#fbbf24", display: "flex", alignItems: "center", gap: "6px" }}>
-                      {(t as any).fixAudioDucking || "Sistem Sesi Kısılmasını Önle"}
+                  {/* FPS */}
+                  <div className="setting-row" data-tour="setting-record-fps">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).recordFpsLabel || "Kare Hızı (FPS)"}</span>
+                      <span className="setting-desc">{(t as any).recordFpsDesc || "Akıcılık ve performans dengesini ayarlayın."}</span>
                     </div>
-                    <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: "1.35", marginTop: "2px" }}>
-                      {(t as any).fixAudioDuckingDesc || "Mikrofon açıldığında Windows'un diğer sesleri (video/müzik) %80 kısmasını (Ducking) engeller."}
-                    </div>
-                  </div>
-                  <button
-                    className="premium-button"
-                    style={{
-                      fontSize: "0.8rem",
-                      padding: "8px 14px",
-                      background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                      border: "none",
-                      boxShadow: "0 2px 10px rgba(245, 158, 11, 0.3)",
-                      whiteSpace: "nowrap",
-                      flexShrink: 0
-                    }}
-                    onClick={async () => {
-                      try {
-                        await invoke("disable_windows_audio_ducking");
-                        setWarningMessage("Windows ayarı güncellendi! Etkin olması için varsa açık olan videoları veya ekran kaydediciyi yeniden başlatın.");
-                        setTimeout(() => setWarningMessage(null), 5000);
-                      } catch (err) {
-                        console.error("Failed to update registry:", err);
-                      }
-                    }}
-                  >
-                    {(t as any).fixAudioDuckingBtn || "Windows Ayarını Düzelt"}
-                  </button>
-                </div>
-              </div>
-
-              {/* Kart 2: Kamera & Tasarım Özelleştirme */}
-              <div className="settings-card">
-                <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
-                  <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
-                    <Camera size={18} color="var(--accent-cyan)" />
-                    {(t as any).webcamStyleSectionTitle || "Kamera & Tasarım Özelleştirme"}
-                  </span>
-                  <span className="setting-desc">{(t as any).webcamStyleSectionDesc || "Kamera çerçevesi, metin, renk paletleri ve animasyon tercihlerinizi ayarlayın."}</span>
-                </div>
-
-                {/* Webcam Mode */}
-                <div className="setting-row" data-tour="setting-webcam-mode">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    {webcamMode === "image" && (
-                      <button
-                        className="premium-button secondary"
-                        style={{ padding: "6px 12px", fontSize: "0.8rem", gap: "6px", whiteSpace: "nowrap" }}
-                        onClick={async () => {
-                          try {
-                            const path = await invoke<string | null>("select_image");
-                            if (path) {
-                              setWebcamImagePath(path);
-                              localStorage.setItem("webcamImagePath", path);
-                              window.dispatchEvent(new Event("storage"));
-                            }
-                          } catch (err) {
-                            console.error("Görsel seçilemedi", err);
-                          }
-                        }}
-                      >
-                        <FolderOpen size={14} />
-                        {(t as any).webcamImageSelect || "Görsel Seç"}
-                      </button>
-                    )}
                     <select
                       className="premium-input"
-                      value={webcamMode}
+                      value={recordFps}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        setWebcamMode(val);
-                        localStorage.setItem("webcamMode", val);
-                        window.dispatchEvent(new Event("storage"));
+                        const val = Number(e.target.value);
+                        setRecordFps(val);
+                        localStorage.setItem("recordFps", val.toString());
                       }}
-                      style={{ width: "240px", padding: "8px 12px" }}
+                      style={{ width: "120px" }}
                     >
-                      <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
-                      <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
+                      <option value={30}>30 FPS</option>
+                      <option value={60}>60 FPS</option>
                     </select>
                   </div>
-                </div>
 
-                {/* Webcam Border Color */}
-                <div className="setting-row" data-tour="setting-webcam-border-color">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamBorderColorLabel || "Kamera Çerçeve Rengi"}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 50%" }}>
-                    {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => {
-                          setWebcamBorderColor(color);
-                          localStorage.setItem("webcamBorderColor", color);
-                          window.dispatchEvent(new Event("storage"));
-                        }}
-                        style={{
-                          width: "28px",
-                          height: "28px",
-                          borderRadius: "50%",
-                          background: color,
-                          border: webcamBorderColor === color ? "2px solid #ffffff" : "2px solid transparent",
-                          cursor: "pointer",
-                          boxShadow: webcamBorderColor === color ? `0 0 10px ${color}` : "none",
-                          transition: "all 0.2s ease"
+                  {/* Sistem Sesini Kaydet */}
+                  <div className="setting-row" data-tour="setting-record-audio">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
+                      <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={recordAudio}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setRecordAudio(checked);
+                          localStorage.setItem("recordAudio", checked.toString());
                         }}
                       />
-                    ))}
-                    <div
-                      onClick={() => {
-                        const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor);
-                        if (isPreset) {
-                          const activeCustom = customWebcamBorderColor || "#06b6d4";
-                          setWebcamBorderColor(activeCustom);
-                          localStorage.setItem("webcamBorderColor", activeCustom);
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+
+                  {/* Mikrofonu Kaydet */}
+                  <div className="setting-row" data-tour="setting-record-mic">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).recordMicLabel || "Mikrofonu Kaydet"}</span>
+                      <span className="setting-desc">{(t as any).recordMicDesc || "Kendi sesinizi (mikrofon) video kaydına dahil edin."}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={recordMic}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setRecordMic(checked);
+                          localStorage.setItem("recordMic", checked.toString());
                           window.dispatchEvent(new Event("storage"));
-                        }
-                      }}
+                          emit("force_storage_sync").catch(console.error);
+                        }}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+
+                  {/* Kayıt Kontrolcüsünü Göster */}
+                  <div className="setting-row" data-tour="setting-record-controls">
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).showRecordControlsLabel || "Kayıt Kontrolcüsünü Göster"}</span>
+                      <span className="setting-desc">{(t as any).showRecordControlsDesc || "Kayıt sırasında duraklatma ve durdurma çubuğunu ekranda gösterin."}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={showRecordControls}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setShowRecordControls(checked);
+                          localStorage.setItem("showRecordControls", checked.toString());
+                          window.dispatchEvent(new Event("storage"));
+                          emit("force_storage_sync").catch(console.error);
+                        }}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+
+                  {/* Audio Ducking Fix - Standalone Banner Card */}
+                  <div
+                    data-tour="setting-audio-ducking"
+                    style={{
+                      background: "rgba(245, 158, 11, 0.07)",
+                      border: "1px solid rgba(245, 158, 11, 0.22)",
+                      borderRadius: "12px",
+                      padding: "14px 16px",
+                      marginTop: "4px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "14px",
+                      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)"
+                    }}
+                  >
+                    <div
                       style={{
-                        position: "relative",
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
-                          ? customWebcamBorderColor
-                          : webcamBorderColor,
-                        border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
-                          ? "2px solid #ffffff"
-                          : "2px solid transparent",
-                        boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
-                          ? `0 0 10px ${webcamBorderColor}`
-                          : "none",
+                        background: "rgba(245, 158, 11, 0.15)",
+                        border: "1px solid rgba(245, 158, 11, 0.3)",
+                        borderRadius: "10px",
+                        width: "38px",
+                        height: "38px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease"
+                        flexShrink: 0
                       }}
-                      title={(t as any).webcamPickCustomColor || "Özel Renk Seç"}
                     >
-                      <input
-                        type="color"
-                        value={customWebcamBorderColor.startsWith("#") && customWebcamBorderColor.length === 7 ? customWebcamBorderColor : "#06b6d4"}
-                        onClick={() => {
-                          const activeCustom = customWebcamBorderColor || "#06b6d4";
-                          setWebcamBorderColor(activeCustom);
-                          localStorage.setItem("webcamBorderColor", activeCustom);
-                          window.dispatchEvent(new Event("storage"));
-                        }}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setCustomWebcamBorderColor(val);
-                          setWebcamBorderColor(val);
-                          localStorage.setItem("customWebcamBorderColor", val);
-                          localStorage.setItem("webcamBorderColor", val);
-                          window.dispatchEvent(new Event("storage"));
-                        }}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          opacity: 0,
-                          cursor: "pointer"
-                        }}
-                      />
-                      <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                      <AlertTriangle size={20} color="#fbbf24" />
                     </div>
-
-                    <input
-                      type="text"
-                      className="premium-input"
-                      value={webcamBorderColor}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setWebcamBorderColor(val);
-                        if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                          if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
-                            setCustomWebcamBorderColor(val);
-                            localStorage.setItem("customWebcamBorderColor", val);
-                          }
-                          localStorage.setItem("webcamBorderColor", val);
-                          window.dispatchEvent(new Event("storage"));
+                    <div style={{ flex: "1 1 0%", minWidth: 0 }}>
+                      <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#fbbf24", display: "flex", alignItems: "center", gap: "6px" }}>
+                        {(t as any).fixAudioDucking || "Sistem Sesi Kısılmasını Önle"}
+                      </div>
+                      <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: "1.35", marginTop: "2px" }}>
+                        {(t as any).fixAudioDuckingDesc || "Mikrofon açıldığında Windows'un diğer sesleri (video/müzik) %80 kısmasını (Ducking) engeller."}
+                      </div>
+                    </div>
+                    <button
+                      className="premium-button"
+                      style={{
+                        fontSize: "0.8rem",
+                        padding: "8px 14px",
+                        background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                        border: "none",
+                        boxShadow: "0 2px 10px rgba(245, 158, 11, 0.3)",
+                        whiteSpace: "nowrap",
+                        flexShrink: 0
+                      }}
+                      onClick={async () => {
+                        try {
+                          await invoke("disable_windows_audio_ducking");
+                          setWarningMessage("Windows ayarı güncellendi! Etkin olması için varsa açık olan videoları veya ekran kaydediciyi yeniden başlatın.");
+                          setTimeout(() => setWarningMessage(null), 5000);
+                        } catch (err) {
+                          console.error("Failed to update registry:", err);
                         }
                       }}
-                      placeholder="#38BDF8"
-                      style={{
-                        width: "100px",
-                        padding: "8px 10px",
-                        fontSize: "0.9rem",
-                        fontFamily: "monospace",
-                        textTransform: "uppercase",
-                        textAlign: "center"
-                      }}
-                    />
+                    >
+                      {(t as any).fixAudioDuckingBtn || "Windows Ayarını Düzelt"}
+                    </button>
                   </div>
                 </div>
+              )}
 
-                {/* Webcam Border Animation */}
-                <div className="setting-row" data-tour="setting-webcam-style">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamBorderStyleLabel || "Çerçeve Stili"}</span>
-                    <span className="setting-desc">{(t as any).webcamBorderStyleDesc || "Kamera çerçevesi için animasyon veya renk efekti seçin."}</span>
-                  </div>
-                  <select
-                    className="premium-input"
-                    value={webcamBorderAnimation}
-                    onChange={(e) => {
-                      setWebcamBorderAnimation(e.target.value);
-                      localStorage.setItem("webcamBorderAnimation", e.target.value);
-                      window.dispatchEvent(new Event("storage"));
-                    }}
-                    style={{ width: "240px" }}
-                  >
-                    <option value="solid">{(t as any).animSolid || "Sabit Renk"}</option>
-                    <option value="pulse">{(t as any).animPulse || "Yanıp Sönen"}</option>
-                    <option value="breathe">{(t as any).animBreathe || "Nefes Alan"}</option>
-                    <option value="spin-rainbow">{(t as any).animSpinRainbow || "Gökkuşağı Dönüşü"}</option>
-                    <option value="spin-ocean">{(t as any).animSpinOcean || "Okyanus Dalgası"}</option>
-                    <option value="spin-fire">{(t as any).animSpinFire || "Ateş Çemberi"}</option>
-                    <option value="spin-cyber">{(t as any).animSpinCyber || "Neon Siber"}</option>
-                  </select>
-                </div>
-
-                {/* Webcam Text */}
-                <div className="setting-row" data-tour="setting-webcam-text">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamTextLabel || "Kamera Altı Yazısı"}</span>
-                    <span className="setting-desc">{(t as any).webcamTextDesc || "Kameranın altında görünecek özel bir metin ekleyin (Kanal adı vb.)."}</span>
-                  </div>
-                  <input
-                    type="text"
-                    className="premium-input"
-                    value={webcamText}
-                    onChange={(e) => setWebcamText(e.target.value)}
-                    placeholder="Örn: Shotera"
-                    style={{ width: "240px", fontSize: "0.9rem" }}
-                    maxLength={30}
-                  />
-                </div>
-
-                {/* Webcam Font */}
-                <div className="setting-row" data-tour="setting-webcam-font">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"}</span>
-                    <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) seçin."}</span>
-                  </div>
-                  <div style={{ width: "240px" }}>
-                    <FontSelect
-                      value={webcamTextFont}
-                      onChange={setWebcamTextFont}
-                      placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
-                      searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
-                    />
-                  </div>
-                </div>
-
-                {/* Webcam Font Size */}
-                <div className="setting-row" data-tour="setting-webcam-font-size">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamTextSizeLabel || "Yazı Boyutu"}</span>
-                    <span className="setting-desc">{(t as any).webcamTextSizeDesc || "Kamera altındaki metnin boyutunu ayarlayın."}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "240px", justifyContent: "flex-end" }}>
-                    <input
-                      type="range"
-                      min="8"
-                      max="24"
-                      value={webcamTextSize}
-                      onChange={(e) => setWebcamTextSize(Number(e.target.value))}
-                      style={{ flex: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
-                    />
-                    <span style={{ fontSize: "13px", fontWeight: 600, fontFamily: "monospace", minWidth: "32px", textAlign: "right", color: "var(--accent-cyan)" }}>{webcamTextSize}px</span>
-                  </div>
-                </div>
-
-                {/* Webcam Text Color */}
-                <div className="setting-row" data-tour="setting-webcam-text-color">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamTextColorOnlyLabel || "Yazı Rengi"}</span>
-                    <span className="setting-desc">{(t as any).webcamTextColorOnlyDesc || "Kamera yazısının rengini belirleyin."}</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                      {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map((color) => (
-                        <button
-                          key={color}
-                          onClick={() => {
-                            setWebcamTextColor(color);
-                            localStorage.setItem("webcamTextColor", color);
-                            window.dispatchEvent(new Event("storage"));
-                          }}
-                          style={{
-                            width: "28px",
-                            height: "28px",
-                            borderRadius: "50%",
-                            background: color,
-                            border: webcamTextColor === color ? "2px solid #ffffff" : "2px solid transparent",
-                            cursor: "pointer",
-                            boxShadow: webcamTextColor === color ? `0 0 10px ${color}` : "none",
-                            transition: "all 0.2s ease"
-                          }}
-                        />
-                      ))}
-
-                      <div
-                        onClick={() => {
-                          const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor);
-                          if (isPreset) {
-                            const activeCustom = customWebcamTextColor || "#ffffff";
-                            setWebcamTextColor(activeCustom);
-                            localStorage.setItem("webcamTextColor", activeCustom);
-                            window.dispatchEvent(new Event("storage"));
-                          }
-                        }}
-                        style={{
-                          position: "relative",
-                          width: "28px",
-                          height: "28px",
-                          borderRadius: "50%",
-                          background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
-                            ? customWebcamTextColor
-                            : webcamTextColor,
-                          border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
-                            ? "2px solid #ffffff"
-                            : "2px solid transparent",
-                          boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
-                            ? `0 0 10px ${webcamTextColor}`
-                            : "none",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease"
-                        }}
-                        title={(t as any).webcamPickTextColor || "Yazı Rengi Seç"}
-                      >
+              {/* SEKME 2: Kamera & Katman */}
+              {recordSubTab === "webcam" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {/* Kart 1: Kamera Aç/Kapat & İzin Modu */}
+                  <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div className="setting-row" data-tour="setting-record-webcam">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).recordWebcamLabel || "Kamerayı Kaydet"}</span>
+                        <span className="setting-desc">{(t as any).recordWebcamDesc || "Ekran kaydı alırken kamera görüntünüzü de kaydedin."}</span>
+                      </div>
+                      <label className="switch">
                         <input
-                          type="color"
-                          value={customWebcamTextColor.startsWith("#") && customWebcamTextColor.length === 7 ? customWebcamTextColor : "#ffffff"}
-                          onClick={() => {
-                            const activeCustom = customWebcamTextColor || "#ffffff";
-                            setWebcamTextColor(activeCustom);
-                            localStorage.setItem("webcamTextColor", activeCustom);
-                            window.dispatchEvent(new Event("storage"));
-                          }}
+                          type="checkbox"
+                          checked={recordWebcam}
                           onChange={(e) => {
-                            const val = e.target.value;
-                            setCustomWebcamTextColor(val);
-                            setWebcamTextColor(val);
-                            localStorage.setItem("customWebcamTextColor", val);
-                            localStorage.setItem("webcamTextColor", val);
+                            const checked = e.target.checked;
+                            setRecordWebcam(checked);
+                            localStorage.setItem("recordWebcam", checked.toString());
                             window.dispatchEvent(new Event("storage"));
-                          }}
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            opacity: 0,
-                            cursor: "pointer"
+                            emit("force_storage_sync").catch(console.error);
                           }}
                         />
-                        <span style={{ fontSize: "11px", color: "white", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                        <span className="slider"></span>
+                      </label>
+                    </div>
+
+                    <div className="setting-row" data-tour="setting-webcam-permission">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamPermissionMode || "Kamera İzin Modu"}</span>
+                        <span className="setting-desc">{(t as any).webcamPermissionModeDesc || "Kamera açılırken gösterilecek izin arayüzünün davranışını belirleyin."}</span>
+                      </div>
+                      <select
+                        className="premium-input"
+                        value={webcamPermissionMode}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setWebcamPermissionMode(val);
+                          localStorage.setItem("webcamPermissionMode", val);
+                          if (val === "always") {
+                            localStorage.removeItem("webcamHasAllowed");
+                          }
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        style={{ width: "180px" }}
+                      >
+                        <option value="once">{(t as any).webcamPermissionOnce || "Sadece İlk Seferde Sor"}</option>
+                        <option value="always">{(t as any).webcamPermissionAlways || "Her Defasında Sor"}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Kart 2: Kamera & Tasarım Özelleştirme */}
+                  <div className="settings-card">
+                    <div className="setting-info" style={{ marginBottom: "6px", maxWidth: "100%" }}>
+                      <span className="setting-label" style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--accent-cyan)" }}>
+                        <Camera size={18} color="var(--accent-cyan)" />
+                        {(t as any).webcamStyleSectionTitle || "Kamera & Tasarım Özelleştirme"}
+                      </span>
+                      <span className="setting-desc">{(t as any).webcamStyleSectionDesc || "Kamera çerçevesi, metin, renk paletleri ve animasyon tercihlerinizi ayarlayın."}</span>
+                    </div>
+
+                    {/* Webcam Mode */}
+                    <div className="setting-row" data-tour="setting-webcam-mode">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        {webcamMode === "image" && (
+                          <button
+                            className="premium-button secondary"
+                            style={{ padding: "6px 14px", fontSize: "0.8rem", gap: "6px", whiteSpace: "nowrap" }}
+                            onClick={async () => {
+                              try {
+                                const path = await invoke<string | null>("select_image");
+                                if (path) {
+                                  setWebcamImagePath(path);
+                                  localStorage.setItem("webcamImagePath", path);
+                                  window.dispatchEvent(new Event("storage"));
+                                }
+                              } catch (err) {
+                                console.error("Görsel seçilemedi", err);
+                              }
+                            }}
+                          >
+                            <FolderOpen size={14} />
+                            {(t as any).webcamImageSelect || "Görsel Seç"}
+                          </button>
+                        )}
+                        <select
+                          className="premium-input"
+                          value={webcamMode}
+                          onChange={(e) => {
+                            setWebcamMode(e.target.value);
+                            localStorage.setItem("webcamMode", e.target.value);
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          style={{ width: "160px" }}
+                        >
+                          <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
+                          <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
+                        </select>
                       </div>
                     </div>
 
-                    <input
-                      type="text"
-                      className="premium-input"
-                      value={webcamTextColor}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setWebcamTextColor(val);
-                        if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                          if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
-                            setCustomWebcamTextColor(val);
-                            localStorage.setItem("customWebcamTextColor", val);
-                          }
-                          localStorage.setItem("webcamTextColor", val);
+                    {/* Kamera Çerçeve Rengi */}
+                    <div className="setting-row">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamBorderColorLabel || "Kamera Çerçeve Rengi"}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map(c => (
+                            <div
+                              key={c}
+                              onClick={() => {
+                                setWebcamBorderColor(c);
+                                localStorage.setItem("webcamBorderColor", c);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              style={{
+                                width: "22px",
+                                height: "22px",
+                                borderRadius: "50%",
+                                background: c,
+                                border: webcamBorderColor === c ? "2px solid white" : "2px solid transparent",
+                                boxShadow: webcamBorderColor === c ? `0 0 10px ${c}` : "none",
+                                cursor: "pointer",
+                                transition: "transform 0.2s"
+                              }}
+                            />
+                          ))}
+                          <div
+                            style={{
+                              position: "relative",
+                              width: "22px",
+                              height: "22px",
+                              borderRadius: "50%",
+                              background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
+                                ? customWebcamBorderColor
+                                : webcamBorderColor,
+                              border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
+                                ? "2px solid #ffffff"
+                                : "2px solid transparent",
+                              boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
+                                ? `0 0 10px ${webcamBorderColor}`
+                                : "none",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease"
+                            }}
+                            title={(t as any).webcamPickCustomColor || "Özel Renk Seç"}
+                          >
+                            <input
+                              type="color"
+                              value={customWebcamBorderColor.startsWith("#") && customWebcamBorderColor.length === 7 ? customWebcamBorderColor : "#38bdf8"}
+                              onClick={() => {
+                                const activeCustom = customWebcamBorderColor || "#38bdf8";
+                                setWebcamBorderColor(activeCustom);
+                                localStorage.setItem("webcamBorderColor", activeCustom);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setCustomWebcamBorderColor(val);
+                                setWebcamBorderColor(val);
+                                localStorage.setItem("customWebcamBorderColor", val);
+                                localStorage.setItem("webcamBorderColor", val);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                height: "100%",
+                                opacity: 0,
+                                cursor: "pointer"
+                              }}
+                            />
+                            <span style={{ fontSize: "11px", color: "white", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                          </div>
+                        </div>
+                        <input
+                          type="text"
+                          className="premium-input"
+                          value={webcamBorderColor}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setWebcamBorderColor(val);
+                            if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                              if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
+                                setCustomWebcamBorderColor(val);
+                                localStorage.setItem("customWebcamBorderColor", val);
+                              }
+                              localStorage.setItem("webcamBorderColor", val);
+                              window.dispatchEvent(new Event("storage"));
+                            }
+                          }}
+                          placeholder="#38BDF8"
+                          style={{
+                            width: "100px",
+                            padding: "8px 10px",
+                            fontSize: "0.9rem",
+                            fontFamily: "monospace",
+                            textTransform: "uppercase",
+                            textAlign: "center"
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Çerçeve Stili */}
+                    <div className="setting-row">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamBorderStyleLabel || "Çerçeve Stili"}</span>
+                        <span className="setting-desc">{(t as any).webcamBorderStyleDesc || "Kamera çerçevesi için animasyon veya renk efekti seçin."}</span>
+                      </div>
+                      <select
+                        className="premium-input"
+                        value={webcamBorderAnimation}
+                        onChange={(e) => {
+                          setWebcamBorderAnimation(e.target.value);
+                          localStorage.setItem("webcamBorderAnimation", e.target.value);
                           window.dispatchEvent(new Event("storage"));
-                        }
-                      }}
-                      placeholder="#FFFFFF"
-                      style={{
-                        width: "100px",
-                        padding: "8px 10px",
-                        fontSize: "0.9rem",
-                        fontFamily: "monospace",
-                        textTransform: "uppercase",
-                        textAlign: "center"
-                      }}
-                    />
+                        }}
+                        style={{ width: "240px" }}
+                      >
+                        <option value="solid">{(t as any).animSolid || "Sabit Renk"}</option>
+                        <option value="pulse">{(t as any).animPulse || "Yanıp Sönen"}</option>
+                        <option value="breathe">{(t as any).animBreathe || "Nefes Alan"}</option>
+                        <option value="spin-rainbow">{(t as any).animSpinRainbow || "Gökkuşağı Dönüşü"}</option>
+                        <option value="spin-ocean">{(t as any).animSpinOcean || "Okyanus Dalgası"}</option>
+                        <option value="spin-fire">{(t as any).animSpinFire || "Ateş Çemberi"}</option>
+                        <option value="spin-cyber">{(t as any).animSpinCyber || "Neon Siber"}</option>
+                      </select>
+                    </div>
+
+                    {/* Kamera Altı Yazısı */}
+                    <div className="setting-row">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamTextLabel || "Kamera Altı Yazısı"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextDesc || "Kameranın altında görünecek özel bir metin ekleyin (Kanal adı vb.)."}</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="premium-input"
+                        value={webcamText}
+                        onChange={(e) => {
+                          setWebcamText(e.target.value);
+                          localStorage.setItem("webcamText", e.target.value);
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        placeholder="Örn: Live Stream / Sahil"
+                        style={{ width: "240px" }}
+                      />
+                    </div>
+
+                    {/* Yazı Tipi */}
+                    <div className="setting-row">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamTextFontOnlyLabel || "Yazı Tipi"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextFontOnlyDesc || "Kamera altındaki metnin yazı tipini (font) seçin."}</span>
+                      </div>
+                      <FontSelect
+                        value={webcamTextFont}
+                        onChange={(font) => {
+                          setWebcamTextFont(font);
+                          localStorage.setItem("webcamTextFont", font);
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        placeholder={(t as any).webcamFontSelectPlaceholder || "Font seç..."}
+                        searchPlaceholder={(t as any).webcamFontSearchPlaceholder || "Font ara..."}
+                      />
+                    </div>
+
+                    {/* Yazı Boyutu */}
+                    <div className="setting-row">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamTextSizeLabel || "Yazı Boyutu"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextSizeDesc || "Kamera altındaki metnin boyutunu ayarlayın."}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "240px" }}>
+                        <input
+                          type="range"
+                          min="10"
+                          max="28"
+                          value={webcamTextSize}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setWebcamTextSize(val);
+                            localStorage.setItem("webcamTextSize", val.toString());
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          style={{ flex: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                        />
+                        <span style={{ fontSize: "0.9rem", color: "var(--accent-cyan)", fontWeight: 600, minWidth: "35px", textAlign: "right" }}>{webcamTextSize}px</span>
+                      </div>
+                    </div>
+
+                    {/* Yazı Rengi */}
+                    <div className="setting-row">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamTextColorOnlyLabel || "Yazı Rengi"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextColorOnlyDesc || "Kamera yazısının rengini belirleyin."}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          {["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].map(c => (
+                            <div
+                              key={c}
+                              onClick={() => {
+                                setWebcamTextColor(c);
+                                localStorage.setItem("webcamTextColor", c);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              style={{
+                                width: "22px",
+                                height: "22px",
+                                borderRadius: "50%",
+                                background: c,
+                                border: webcamTextColor === c ? "2px solid white" : "2px solid transparent",
+                                boxShadow: webcamTextColor === c ? `0 0 10px ${c}` : "none",
+                                cursor: "pointer",
+                                transition: "transform 0.2s"
+                              }}
+                            />
+                          ))}
+                          <div
+                            style={{
+                              position: "relative",
+                              width: "22px",
+                              height: "22px",
+                              borderRadius: "50%",
+                              background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
+                                ? customWebcamTextColor
+                                : webcamTextColor,
+                              border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
+                                ? "2px solid #ffffff"
+                                : "2px solid transparent",
+                              boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
+                                ? `0 0 10px ${webcamTextColor}`
+                                : "none",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease"
+                            }}
+                            title={(t as any).webcamPickTextColor || "Yazı Rengi Seç"}
+                          >
+                            <input
+                              type="color"
+                              value={customWebcamTextColor.startsWith("#") && customWebcamTextColor.length === 7 ? customWebcamTextColor : "#ffffff"}
+                              onClick={() => {
+                                const activeCustom = customWebcamTextColor || "#ffffff";
+                                setWebcamTextColor(activeCustom);
+                                localStorage.setItem("webcamTextColor", activeCustom);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setCustomWebcamTextColor(val);
+                                setWebcamTextColor(val);
+                                localStorage.setItem("customWebcamTextColor", val);
+                                localStorage.setItem("webcamTextColor", val);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                height: "100%",
+                                opacity: 0,
+                                cursor: "pointer"
+                              }}
+                            />
+                            <span style={{ fontSize: "11px", color: "white", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                          </div>
+                        </div>
+
+                        <input
+                          type="text"
+                          className="premium-input"
+                          value={webcamTextColor}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setWebcamTextColor(val);
+                            if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
+                              if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
+                                setCustomWebcamTextColor(val);
+                                localStorage.setItem("customWebcamTextColor", val);
+                              }
+                              localStorage.setItem("webcamTextColor", val);
+                              window.dispatchEvent(new Event("storage"));
+                            }
+                          }}
+                          placeholder="#FFFFFF"
+                          style={{
+                            width: "100px",
+                            padding: "8px 10px",
+                            fontSize: "0.9rem",
+                            fontFamily: "monospace",
+                            textTransform: "uppercase",
+                            textAlign: "center"
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Yazı Stili */}
+                    <div className="setting-row" data-tour="setting-webcam-text-style">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamTextStyleLabel || "Yazı Stili"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextStyleDesc || "Kamera yazısı için animasyon veya renk efekti seçin."}</span>
+                      </div>
+                      <select
+                        className="premium-input"
+                        value={webcamTextAnimation}
+                        onChange={(e) => {
+                          setWebcamTextAnimation(e.target.value);
+                          localStorage.setItem("webcamTextAnimation", e.target.value);
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        style={{ width: "240px" }}
+                      >
+                        <option value="solid">{(t as any).animSolid || "Sabit Renk"}</option>
+                        <option value="pulse">{(t as any).animPulse || "Yanıp Sönen"}</option>
+                        <option value="breathe">{(t as any).animBreathe || "Nefes Alan"}</option>
+                        <option value="spin-rainbow">{(t as any).animSpinRainbow || "Gökkuşağı Dönüşü"}</option>
+                        <option value="spin-ocean">{(t as any).animSpinOcean || "Okyanus Dalgası"}</option>
+                        <option value="spin-fire">{(t as any).animSpinFire || "Ateş Çemberi"}</option>
+                        <option value="spin-cyber">{(t as any).animSpinCyber || "Neon Siber"}</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                {/* Webcam Text Animation */}
-                <div className="setting-row" data-tour="setting-webcam-text-style">
-                  <div className="setting-info">
-                    <span className="setting-label">{(t as any).webcamTextStyleLabel || "Yazı Stili"}</span>
-                    <span className="setting-desc">{(t as any).webcamTextStyleDesc || "Kamera yazısı için animasyon veya renk efekti seçin."}</span>
-                  </div>
-                  <select
-                    className="premium-input"
-                    value={webcamTextAnimation}
-                    onChange={(e) => {
-                      setWebcamTextAnimation(e.target.value);
-                      localStorage.setItem("webcamTextAnimation", e.target.value);
-                      window.dispatchEvent(new Event("storage"));
-                    }}
-                    style={{ width: "240px" }}
-                  >
-                    <option value="solid">{(t as any).animSolid || "Sabit Renk"}</option>
-                    <option value="pulse">{(t as any).animPulse || "Yanıp Sönen"}</option>
-                    <option value="breathe">{(t as any).animBreathe || "Nefes Alan"}</option>
-                    <option value="spin-rainbow">{(t as any).animSpinRainbow || "Gökkuşağı Dönüşü"}</option>
-                    <option value="spin-ocean">{(t as any).animSpinOcean || "Okyanus Dalgası"}</option>
-                    <option value="spin-fire">{(t as any).animSpinFire || "Ateş Çemberi"}</option>
-                    <option value="spin-cyber">{(t as any).animSpinCyber || "Neon Siber"}</option>
-                  </select>
-                </div>
-              </div>
+              {/* SEKME 3: Kısayollar */}
+              {recordSubTab === "shortcuts" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {/* Kart 1: Tuş Atamaları Kısayol Tuşları */}
+                  <div className="settings-card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div className="setting-row" data-tour="shortcut-record">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).recordNativeTitle || "Yerel Ekran Kaydı"}</span>
+                        <span className="setting-desc">{(t as any).recordNativeDesc || "Ekran kaydı başlatma ve durdurma kısayolu."}</span>
+                      </div>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <button
+                          className={`shortcut-badge customizable ${recordingType === "record" ? "recording" : ""}`}
+                          onClick={() => setRecordingType(recordingType === "record" ? null : "record")}
+                          title={t.shortcutChangeHint}
+                          style={{
+                            cursor: "pointer",
+                            border: recordingType === "record" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                            background: recordingType === "record" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                            color: recordingType === "record" ? "var(--accent-cyan)" : "white",
+                            fontWeight: 600,
+                            animation: recordingType === "record" ? "pulse-border 1.5s infinite" : "none",
+                            outline: "none",
+                            minWidth: "100px",
+                            textAlign: "center"
+                          }}
+                        >
+                          {recordingType === "record" ? t.shortcutPressKeys : formatShortcut(recordShortcut)}
+                        </button>
+                      </div>
+                    </div>
 
-              {/* Kart 3: Kayıt İçi Kontroller ve Kısayollar Rehberi */}
-              <div className="settings-card" data-tour="setting-record-shortcuts-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div className="setting-info">
-                  <span className="setting-label">{(t as any).webcamControlsTitle || "Kayıt İçi Kontroller ve Kısayollar"}</span>
-                  <span className="setting-desc">{(t as any).webcamControlsDesc || "Ekran kaydı sırasında kamera, mikrofon ve temel özellikleri yönetin."}</span>
-                </div>
+                    <div className="setting-row" data-tour="shortcut-pause-record">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}</span>
+                        <span className="setting-desc">{(t as any).shortcutPauseRecordDesc || "Aktif ekran kaydını duraklatmak veya devam ettirmek için kısayol."}</span>
+                      </div>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <button
+                          className={`shortcut-badge customizable ${recordingType === "pause_record" ? "recording" : ""}`}
+                          onClick={() => setRecordingType(recordingType === "pause_record" ? null : "pause_record")}
+                          title={t.shortcutChangeHint}
+                          style={{
+                            cursor: "pointer",
+                            border: recordingType === "pause_record" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                            background: recordingType === "pause_record" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                            color: recordingType === "pause_record" ? "var(--accent-cyan)" : "white",
+                            fontWeight: 600,
+                            animation: recordingType === "pause_record" ? "pulse-border 1.5s infinite" : "none",
+                            outline: "none",
+                            minWidth: "100px",
+                            textAlign: "center"
+                          }}
+                        >
+                          {recordingType === "pause_record" ? t.shortcutPressKeys : formatShortcut(pauseRecordShortcut)}
+                        </button>
+                      </div>
+                    </div>
 
-                <div className="responsive-shortcut-grid">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                      <ZoomIn size={15} color="#38bdf8" />
-                      {(t as any).webcamResizeLabel || "Boyutlandır"}
-                    </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
+                    <div className="setting-row" data-tour="shortcut-webcam">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}</span>
+                        <span className="setting-desc">{(t as any).shortcutWebcamDesc || "Kayıt sırasında kameranızı açıp kapatmak için kısayol."}</span>
+                      </div>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <button
+                          className={`shortcut-badge customizable ${recordingType === "webcam" ? "recording" : ""}`}
+                          onClick={() => setRecordingType(recordingType === "webcam" ? null : "webcam")}
+                          title={t.shortcutChangeHint}
+                          style={{
+                            cursor: "pointer",
+                            border: recordingType === "webcam" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                            background: recordingType === "webcam" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                            color: recordingType === "webcam" ? "var(--accent-cyan)" : "white",
+                            fontWeight: 600,
+                            animation: recordingType === "webcam" ? "pulse-border 1.5s infinite" : "none",
+                            outline: "none",
+                            minWidth: "100px",
+                            textAlign: "center"
+                          }}
+                        >
+                          {recordingType === "webcam" ? t.shortcutPressKeys : formatShortcut(webcamShortcut)}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="setting-row" data-tour="shortcut-mic">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}</span>
+                        <span className="setting-desc">{(t as any).shortcutMicDesc || "Kayıt sırasında mikrofonunuzu açıp kapatmak için kısayol."}</span>
+                      </div>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <button
+                          className={`shortcut-badge customizable ${recordingType === "mic" ? "recording" : ""}`}
+                          onClick={() => setRecordingType(recordingType === "mic" ? null : "mic")}
+                          title={t.shortcutChangeHint}
+                          style={{
+                            cursor: "pointer",
+                            border: recordingType === "mic" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                            background: recordingType === "mic" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                            color: recordingType === "mic" ? "var(--accent-cyan)" : "white",
+                            fontWeight: 600,
+                            animation: recordingType === "mic" ? "pulse-border 1.5s infinite" : "none",
+                            outline: "none",
+                            minWidth: "100px",
+                            textAlign: "center"
+                          }}
+                        >
+                          {recordingType === "mic" ? t.shortcutPressKeys : formatShortcut(micShortcut)}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                      <Camera size={15} color="#10b981" />
-                      {(t as any).webcamMoveLabel || "Sürükle"}
-                    </span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
-                  </div>
+                  {/* Kart 2: Kayıt İçi Kontroller ve Kısayollar Rehberi */}
+                  <div className="settings-card" data-tour="setting-record-shortcuts-card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div className="setting-info">
+                      <span className="setting-label">{(t as any).webcamControlsTitle || "Kayıt İçi Kontroller ve Kısayollar"}</span>
+                      <span className="setting-desc">{(t as any).webcamControlsDesc || "Ekran kaydı sırasında kamera, mikrofon ve temel özellikleri yönetin."}</span>
+                    </div>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                      <Square size={15} color="#ef4444" />
-                      {(t as any).webcamExitLabel || "Çıkış (Kaydı Durdur)"}
-                    </span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
-                      {formatShortcut(recordShortcut) || "Ctrl+5"}
-                    </kbd>
-                  </div>
+                    <div className="responsive-shortcut-grid">
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <ZoomIn size={15} color="#38bdf8" />
+                          {(t as any).webcamResizeLabel || "Boyutlandır"}
+                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeWheel || "Tekerlek"}</kbd>
+                        </div>
+                      </div>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                      <Play size={15} color="#eab308" />
-                      {(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}
-                    </span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
-                      {formatShortcut(pauseRecordShortcut) || "Ctrl+6"}
-                    </kbd>
-                  </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Camera size={15} color="#10b981" />
+                          {(t as any).webcamMoveLabel || "Sürükle"}
+                        </span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>{(t as any).badgeLeftClick || "Sol Tık"}</kbd>
+                      </div>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                      <Camera size={15} color="var(--accent-cyan)" />
-                      {(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}
-                    </span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
-                      {formatShortcut(webcamShortcut) || "Ctrl+7"}
-                    </kbd>
-                  </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Square size={15} color="#ef4444" />
+                          {(t as any).webcamExitLabel || "Çıkış (Kaydı Durdur)"}
+                        </span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                          {formatShortcut(recordShortcut) || "Ctrl+5"}
+                        </kbd>
+                      </div>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                      <Mic size={15} color="var(--accent-cyan)" />
-                      {(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}
-                    </span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
-                      {formatShortcut(micShortcut) || "Ctrl+8"}
-                    </kbd>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Play size={15} color="#eab308" />
+                          {(t as any).shortcutPauseRecord || "Kaydı Duraklat/Devam Et Kısayolu"}
+                        </span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                          {formatShortcut(pauseRecordShortcut) || "Ctrl+6"}
+                        </kbd>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Camera size={15} color="var(--accent-cyan)" />
+                          {(t as any).shortcutWebcam || "Kamera Aç/Kapat Kısayolu"}
+                        </span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                          {formatShortcut(webcamShortcut) || "Ctrl+7"}
+                        </kbd>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)", gridColumn: "1 / -1" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                          <Mic size={15} color="var(--accent-cyan)" />
+                          {(t as any).shortcutMic || "Mikrofon Aç/Kapat Kısayolu"}
+                        </span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 8px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>
+                          {formatShortcut(micShortcut) || "Ctrl+8"}
+                        </kbd>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* SAĞ KOLON (Sabit Panel): Canlı Önizleme Alanı (Preview) */}
