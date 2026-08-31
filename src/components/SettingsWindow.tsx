@@ -2854,7 +2854,7 @@ function SettingsWindow() {
                   }}
                 >
                   <Camera size={15} />
-                  {(t as any).recordSubTabWebcam || "Kamera & Katman"}
+                  {(t as any).recordSubTabWebcam || "Kamera & Görünüm"}
                 </button>
 
                 <button
