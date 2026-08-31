@@ -289,7 +289,7 @@ function SettingsWindow() {
         localStorage.setItem("timerBgCustomImageName", file.name);
         localStorage.setItem("timerBgMode", "image");
         window.dispatchEvent(new Event("storage"));
-        emit("timer-settings-updated").catch(() => { });
+        emit("timer-settings-updated").catch(() => {});
       } catch (err) {
         console.error("Failed to save custom background image:", err);
       }
@@ -310,7 +310,7 @@ function SettingsWindow() {
         localStorage.setItem("timerBgCustomImageName", fileName);
         localStorage.setItem("timerBgMode", "image");
         window.dispatchEvent(new Event("storage"));
-        emit("timer-settings-updated").catch(() => { });
+        emit("timer-settings-updated").catch(() => {});
       }
     } catch (err) {
       console.error("Failed to select image:", err);
@@ -325,7 +325,7 @@ function SettingsWindow() {
     localStorage.removeItem("timerBgCustomImageName");
     localStorage.setItem("timerBgMode", "color");
     window.dispatchEvent(new Event("storage"));
-    emit("timer-settings-updated").catch(() => { });
+    emit("timer-settings-updated").catch(() => {});
   };
   const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "pause_record" | "webcam" | "mic" | "timer" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
@@ -1926,16 +1926,16 @@ function SettingsWindow() {
                         timerBgMode === "image" && timerBgCustomImage
                           ? `linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url("${resolveImageSrc(timerBgCustomImage)}") center / ${timerBgScale ? "cover" : "contain"} no-repeat`
                           : timerBgMode === "desktop"
-                            ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
-                            : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
-                              ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
-                              : timerBgStyle === "oled-black"
-                                ? "#000000"
-                                : timerBgStyle === "frosted-dark"
-                                  ? "rgba(15, 23, 42, 0.95)"
-                                  : timerBgStyle === "pomodoro-red"
-                                    ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
-                                    : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`
+                          ? "linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), radial-gradient(circle at center, #1e293b 0%, #020617 100%)"
+                          : (timerBgStyle === "custom" || (timerBgColor && timerBgStyle !== "oled-black" && timerBgStyle !== "frosted-dark" && timerBgStyle !== "pomodoro-red" && timerBgStyle !== "dark-slate"))
+                          ? (timerBgColor.startsWith("#") ? `radial-gradient(circle at center, ${timerBgColor} 0%, #020617 100%)` : timerBgColor)
+                          : timerBgStyle === "oled-black"
+                            ? "#000000"
+                            : timerBgStyle === "frosted-dark"
+                              ? "rgba(15, 23, 42, 0.95)"
+                              : timerBgStyle === "pomodoro-red"
+                                ? "radial-gradient(circle at center, #450a0a 0%, #09090b 100%)"
+                                : `radial-gradient(circle at center, ${timerBgColor || "#0f172a"} 0%, #020617 100%)`
                     }}
                   >
                     {/* Background Mesh Dots Grid */}
@@ -2315,7 +2315,7 @@ function SettingsWindow() {
                       setTimerBgMode(val);
                       localStorage.setItem("timerBgMode", val);
                       window.dispatchEvent(new Event("storage"));
-                      emit("timer-settings-updated").catch(() => { });
+                      emit("timer-settings-updated").catch(() => {});
                     }}
                     style={{ width: "240px" }}
                   >
@@ -2400,7 +2400,7 @@ function SettingsWindow() {
                           setTimerBgScale(checked);
                           localStorage.setItem("timerBgScale", String(checked));
                           window.dispatchEvent(new Event("storage"));
-                          emit("timer-settings-updated").catch(() => { });
+                          emit("timer-settings-updated").catch(() => {});
                         }}
                       />
                       <span className="slider"></span>
@@ -2795,7 +2795,7 @@ function SettingsWindow() {
           <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
             {/* SOL KOLON: Form elemanları, dropdown'lar, renk paleti ve yazı tipi ayarları */}
             <div style={{ flex: "1 1 0%", minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
-
+              
               {/* Kart 1: Kayıt ve Kısayol Ayarları */}
               <div className="settings-card">
                 <div className="setting-row" data-tour="shortcut-record">
@@ -3080,25 +3080,11 @@ function SettingsWindow() {
                   <div className="setting-info">
                     <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "240px", alignItems: "flex-end" }}>
-                    <select
-                      className="premium-input"
-                      value={webcamMode}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setWebcamMode(val);
-                        localStorage.setItem("webcamMode", val);
-                        window.dispatchEvent(new Event("storage"));
-                      }}
-                      style={{ width: "240px", padding: "8px 12px" }}
-                    >
-                      <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
-                      <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
-                    </select>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     {webcamMode === "image" && (
                       <button
                         className="premium-button secondary"
-                        style={{ width: "240px", padding: "6px 12px", fontSize: "0.8rem", gap: "6px", justifyContent: "center" }}
+                        style={{ padding: "6px 12px", fontSize: "0.8rem", gap: "6px", whiteSpace: "nowrap" }}
                         onClick={async () => {
                           try {
                             const path = await invoke<string | null>("select_image");
@@ -3116,6 +3102,20 @@ function SettingsWindow() {
                         {(t as any).webcamImageSelect || "Görsel Seç"}
                       </button>
                     )}
+                    <select
+                      className="premium-input"
+                      value={webcamMode}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWebcamMode(val);
+                        localStorage.setItem("webcamMode", val);
+                        window.dispatchEvent(new Event("storage"));
+                      }}
+                      style={{ width: "240px", padding: "8px 12px" }}
+                    >
+                      <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
+                      <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
+                    </select>
                   </div>
                 </div>
 
