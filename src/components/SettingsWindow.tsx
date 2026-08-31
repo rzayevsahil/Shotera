@@ -2805,7 +2805,7 @@ function SettingsWindow() {
                       <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
 
                       <span style={{ fontSize: "0.65rem", color: "#38bdf8", marginLeft: "auto", fontWeight: 700, letterSpacing: "0.5px" }}>
-                        Shotera Break Timer
+                        Shotera
                       </span>
                     </div>
 
