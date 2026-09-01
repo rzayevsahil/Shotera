@@ -433,7 +433,6 @@ function SettingsWindow() {
     return ["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(current) ? "#000000" : current;
   });
   const [webcamTextBgOpacity, setWebcamTextBgOpacity] = useState<number>(() => Number(localStorage.getItem("webcamTextBgOpacity") || "60"));
-  const [webcamTextBgBlur, setWebcamTextBgBlur] = useState<number>(() => Number(localStorage.getItem("webcamTextBgBlur") || "0"));
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -590,13 +589,12 @@ function SettingsWindow() {
     localStorage.setItem("webcamTextAnimation", webcamTextAnimation);
     localStorage.setItem("webcamTextBgColor", webcamTextBgColor);
     localStorage.setItem("webcamTextBgOpacity", webcamTextBgOpacity.toString());
-    localStorage.setItem("webcamTextBgBlur", webcamTextBgBlur.toString());
     localStorage.setItem("webcamMode", webcamMode);
     localStorage.setItem("webcamImagePath", webcamImagePath);
     localStorage.setItem("webcamBorderAnimation", webcamBorderAnimation);
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, micShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamTextBgColor, webcamTextBgOpacity, webcamTextBgBlur, webcamMode, webcamImagePath, webcamBorderAnimation]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, micShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamTextBgColor, webcamTextBgOpacity, webcamMode, webcamImagePath, webcamBorderAnimation]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -3859,19 +3857,6 @@ function SettingsWindow() {
                       </div>
                     </div>
 
-                    {/* Arkaplan Bulanıklığı */}
-                    <div className="setting-row" data-tour="setting-webcam-text-bg-blur">
-                      <div className="setting-info">
-                        <span className="setting-label">{(t as any).webcamTextBgBlurLabel || "Arkaplan Bulanıklığı (Blur)"}</span>
-                        <span className="setting-desc">{(t as any).webcamTextBgBlurDesc || "Yazının arkasındaki kamerayı veya görüntüyü bulanıklaştırın."}</span>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        <input type="range" min="0" max="20" step="1" className="premium-slider" style={{ width: "180px" }}
-                          value={webcamTextBgBlur} onChange={(e) => { const val = Number(e.target.value); setWebcamTextBgBlur(val); localStorage.setItem("webcamTextBgBlur", val.toString()); window.dispatchEvent(new Event("storage")); }} />
-                        <span style={{ fontSize: "0.9rem", color: "var(--accent-cyan)", fontWeight: 600, minWidth: "35px", textAlign: "right" }}>{webcamTextBgBlur}px</span>
-                      </div>
-                    </div>
-
                     {/* Yazı Stili */}
                     <div className="setting-row" data-tour="setting-webcam-text-style">
                       <div className="setting-info">
@@ -4243,8 +4228,6 @@ function SettingsWindow() {
                     {webcamText.trim() && (
                       <div style={{
                         backgroundColor: `${webcamTextBgColor}${Math.round((webcamTextBgOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
-                        backdropFilter: webcamTextBgBlur > 0 ? `blur(${webcamTextBgBlur}px)` : "none",
-                        WebkitBackdropFilter: webcamTextBgBlur > 0 ? `blur(${webcamTextBgBlur}px)` : "none",
                         border: "1px solid rgba(255, 255, 255, 0.1)",
                         padding: "3px 10px",
                         borderRadius: "12px",
