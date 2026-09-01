@@ -2533,7 +2533,7 @@ function SettingsWindow() {
                             <span style={{ fontSize: "0.95rem", color: "#f8fafc", fontWeight: 500 }}>
                               {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
                             </span>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                            <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)", marginTop: "2px", fontFamily: "var(--font-sans)", letterSpacing: "0.2px", fontWeight: 400 }}>
                               {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
                             </span>
                           </div>
@@ -2547,10 +2547,21 @@ function SettingsWindow() {
                           <button
                             className="premium-button"
                             onClick={handleRemoveCustomTimerImage}
-                            style={{ padding: "6px 12px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)", gap: "6px" }}
+                            style={{ 
+                              padding: "7px 12px", 
+                              fontSize: "0.78rem", 
+                              background: "rgba(239, 68, 68, 0.08)", 
+                              color: "#f87171", 
+                              border: "1px solid rgba(239, 68, 68, 0.2)", 
+                              borderRadius: "8px", 
+                              gap: "6px", 
+                              transition: "all 0.2s" 
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.4)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)"; }}
                             title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={14} />
                             {(t as any).timerBgRemoveImage || "Görseli Kaldır"}
                           </button>
                         </div>
@@ -3678,13 +3689,13 @@ function SettingsWindow() {
                             <span style={{ fontSize: "0.95rem", color: "#f8fafc", fontWeight: 500 }}>
                               {(t as any).webcamImageSelect || "Görsel Seç"}
                             </span>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                            <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)", marginTop: "2px", fontFamily: "var(--font-sans)", letterSpacing: "0.2px", fontWeight: 400 }}>
                               {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
                             </span>
                           </div>
                         </div>
                         <div style={{ fontSize: "0.8rem", color: webcamImagePath ? "var(--accent-cyan)" : "var(--text-secondary)", fontWeight: 500, marginTop: "4px", maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {webcamImagePath ? webcamImagePath.split(/[/\\]/).pop() : "Henüz özel bir görsel seçilmedi"}
+                          {webcamImagePath ? webcamImagePath.split(/[/\\]/).pop() : ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
                         </div>
                       </div>
                       {webcamImagePath && (
@@ -3696,10 +3707,21 @@ function SettingsWindow() {
                               localStorage.removeItem("webcamImagePath");
                               window.dispatchEvent(new Event("storage"));
                             }}
-                            style={{ padding: "6px 12px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)", gap: "6px" }}
+                            style={{ 
+                              padding: "7px 12px", 
+                              fontSize: "0.78rem", 
+                              background: "rgba(239, 68, 68, 0.08)", 
+                              color: "#f87171", 
+                              border: "1px solid rgba(239, 68, 68, 0.2)", 
+                              borderRadius: "8px", 
+                              gap: "6px", 
+                              transition: "all 0.2s" 
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.4)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)"; }}
                             title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={14} />
                             {(t as any).timerBgRemoveImage || "Görseli Kaldır"}
                           </button>
                         </div>
