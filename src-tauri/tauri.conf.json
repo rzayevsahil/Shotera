@@ -15,8 +15,10 @@
       {
         "label": "main",
         "title": "Shotera - Ayarlar",
-        "width": 800,
-        "height": 600,
+        "width": 1020,
+        "height": 660,
+        "minWidth": 950,
+        "minHeight": 600,
         "resizable": true,
         "visible": false
       },

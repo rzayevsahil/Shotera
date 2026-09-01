@@ -604,7 +604,7 @@ function SettingsWindow() {
         if (!dataUrl) return;
         const base64Str = dataUrl.split(",")[1];
         const ext = file.name.split('.').pop() || file.type.split('/')[1] || "png";
-        
+
         try {
           const savedPath = await invoke<string>("save_settings_image", {
             base64Str,
@@ -639,7 +639,7 @@ function SettingsWindow() {
       if (document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement) {
         return;
       }
-      
+
       const items = e.clipboardData?.items;
       if (!items) return;
       for (let i = 0; i < items.length; i++) {
@@ -1098,15 +1098,15 @@ function SettingsWindow() {
       {/* Sidebar */}
       <aside className="sidebar" style={{ padding: isSidebarCollapsed ? "24px 12px" : "24px", transition: "padding 0.3s ease" }}>
         <div>
-          <div className="brand" data-tour="brand-logo" 
-               style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px", justifyContent: "space-between", width: "100%" }}>
-            
+          <div className="brand" data-tour="brand-logo"
+            style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px", justifyContent: "space-between", width: "100%" }}>
+
             {!isSidebarCollapsed && (
               <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: isSidebarCollapsed ? "pointer" : "default" }}
-                   onClick={isSidebarCollapsed ? () => {
-                     setIsSidebarCollapsed(false);
-                     localStorage.setItem("sidebarCollapsed", "false");
-                   } : undefined}>
+                onClick={isSidebarCollapsed ? () => {
+                  setIsSidebarCollapsed(false);
+                  localStorage.setItem("sidebarCollapsed", "false");
+                } : undefined}>
                 <img src={logo} alt="Shotera Logo" style={{ width: "32px", height: "32px", objectFit: "contain", minWidth: "32px" }} />
                 <span className="brand-name" style={{
                   fontFamily: "var(--font-title)",
@@ -1123,29 +1123,29 @@ function SettingsWindow() {
             )}
 
             <button
-               onClick={() => {
-                 const newState = !isSidebarCollapsed;
-                 setIsSidebarCollapsed(newState);
-                 localStorage.setItem("sidebarCollapsed", String(newState));
-               }} 
-               style={{
-                 background: "transparent",
-                 border: "none",
-                 color: "var(--text-muted)",
-                 cursor: "pointer",
-                 display: "flex",
-                 alignItems: "center",
-                 justifyContent: "center",
-                 padding: "6px",
-                 borderRadius: "6px",
-                 transition: "all 0.2s",
-                 width: isSidebarCollapsed ? "100%" : "auto"
-               }}
-               onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-main)"; e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
-               onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "transparent" }}
-               title={(t as any).toggleSidebar || "Menüyü Daralt/Genişlet"}
+              onClick={() => {
+                const newState = !isSidebarCollapsed;
+                setIsSidebarCollapsed(newState);
+                localStorage.setItem("sidebarCollapsed", String(newState));
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "6px",
+                borderRadius: "6px",
+                transition: "all 0.2s",
+                width: isSidebarCollapsed ? "100%" : "auto"
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-main)"; e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "transparent" }}
+              title={(t as any).toggleSidebar || "Menüyü Daralt/Genişlet"}
             >
-               {isSidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+              {isSidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
             </button>
           </div>
 
@@ -2541,7 +2541,7 @@ function SettingsWindow() {
 
                   {timerBgMode === "image" && (
                     <>
-                      <div 
+                      <div
                         onClick={() => {
                           if ((window as any).__TAURI_INTERNALS__) {
                             handleSelectTimerImageTauri();
@@ -2549,15 +2549,15 @@ function SettingsWindow() {
                             customTimerBgInputRef.current?.click();
                           }
                         }}
-                        style={{ 
-                          background: "rgba(255, 255, 255, 0.02)", 
-                          borderRadius: "12px", 
-                          padding: "16px", 
-                          marginBottom: "8px", 
-                          border: "2px dashed rgba(255, 255, 255, 0.15)", 
-                          display: "flex", 
-                          flexDirection: "column", 
-                          alignItems: "center", 
+                        style={{
+                          background: "rgba(255, 255, 255, 0.02)",
+                          borderRadius: "12px",
+                          padding: "16px",
+                          marginBottom: "8px",
+                          border: "2px dashed rgba(255, 255, 255, 0.15)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
                           justifyContent: "center",
                           gap: "8px",
                           cursor: "pointer",
@@ -2600,15 +2600,15 @@ function SettingsWindow() {
                           <button
                             className="premium-button"
                             onClick={handleRemoveCustomTimerImage}
-                            style={{ 
-                              padding: "7px 12px", 
-                              fontSize: "0.78rem", 
-                              background: "rgba(239, 68, 68, 0.08)", 
-                              color: "#f87171", 
-                              border: "1px solid rgba(239, 68, 68, 0.2)", 
-                              borderRadius: "8px", 
-                              gap: "6px", 
-                              transition: "all 0.2s" 
+                            style={{
+                              padding: "7px 12px",
+                              fontSize: "0.78rem",
+                              background: "rgba(239, 68, 68, 0.08)",
+                              color: "#f87171",
+                              border: "1px solid rgba(239, 68, 68, 0.2)",
+                              borderRadius: "8px",
+                              gap: "6px",
+                              transition: "all 0.2s"
                             }}
                             onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.4)"; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)"; }}
@@ -3699,87 +3699,87 @@ function SettingsWindow() {
 
                     {webcamMode === "image" && (
                       <>
-                        <div 
-                        onClick={async () => {
-                          try {
-                            const path = await invoke<string | null>("select_image");
-                            if (path) {
-                              setWebcamImagePath(path);
-                              localStorage.setItem("webcamImagePath", path);
-                              window.dispatchEvent(new Event("storage"));
+                        <div
+                          onClick={async () => {
+                            try {
+                              const path = await invoke<string | null>("select_image");
+                              if (path) {
+                                setWebcamImagePath(path);
+                                localStorage.setItem("webcamImagePath", path);
+                                window.dispatchEvent(new Event("storage"));
+                              }
+                            } catch (err) {
+                              console.error("Görsel seçilemedi", err);
                             }
-                          } catch (err) {
-                            console.error("Görsel seçilemedi", err);
-                          }
-                        }}
-                        style={{ 
-                          background: "rgba(255, 255, 255, 0.02)", 
-                          borderRadius: "12px", 
-                          padding: "16px", 
-                          marginBottom: "16px", 
-                          border: "2px dashed rgba(255, 255, 255, 0.15)", 
-                          display: "flex", 
-                          flexDirection: "column", 
-                          alignItems: "center", 
-                          justifyContent: "center",
-                          gap: "8px",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                          textAlign: "center"
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.border = "2px dashed var(--accent-cyan)";
-                          e.currentTarget.style.background = "rgba(56, 189, 248, 0.03)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.border = "2px dashed rgba(255, 255, 255, 0.15)";
-                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)";
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <FolderOpen size={22} color="var(--accent-cyan)" />
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                            <span style={{ fontSize: "0.95rem", color: "#f8fafc", fontWeight: 500 }}>
-                              {(t as any).webcamImageSelect || "Görsel Seç"}
-                            </span>
-                            <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)", marginTop: "2px", fontFamily: "var(--font-sans)", letterSpacing: "0.2px", fontWeight: 400 }}>
-                              {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
-                            </span>
+                          }}
+                          style={{
+                            background: "rgba(255, 255, 255, 0.02)",
+                            borderRadius: "12px",
+                            padding: "16px",
+                            marginBottom: "16px",
+                            border: "2px dashed rgba(255, 255, 255, 0.15)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            textAlign: "center"
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.border = "2px dashed var(--accent-cyan)";
+                            e.currentTarget.style.background = "rgba(56, 189, 248, 0.03)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.border = "2px dashed rgba(255, 255, 255, 0.15)";
+                            e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)";
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <FolderOpen size={22} color="var(--accent-cyan)" />
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                              <span style={{ fontSize: "0.95rem", color: "#f8fafc", fontWeight: 500 }}>
+                                {(t as any).webcamImageSelect || "Görsel Seç"}
+                              </span>
+                              <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.4)", marginTop: "2px", fontFamily: "var(--font-sans)", letterSpacing: "0.2px", fontWeight: 400 }}>
+                                {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: "0.8rem", color: webcamImagePath ? "var(--accent-cyan)" : "var(--text-secondary)", fontWeight: 500, marginTop: "4px", maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {webcamImagePath ? webcamImagePath.split(/[/\\]/).pop() : ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
                           </div>
                         </div>
-                        <div style={{ fontSize: "0.8rem", color: webcamImagePath ? "var(--accent-cyan)" : "var(--text-secondary)", fontWeight: 500, marginTop: "4px", maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {webcamImagePath ? webcamImagePath.split(/[/\\]/).pop() : ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
-                        </div>
-                      </div>
-                      {webcamImagePath && (
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px", marginTop: "-8px" }}>
-                          <button
-                            className="premium-button"
-                            onClick={() => {
-                              setWebcamImagePath("");
-                              localStorage.removeItem("webcamImagePath");
-                              window.dispatchEvent(new Event("storage"));
-                            }}
-                            style={{ 
-                              padding: "7px 12px", 
-                              fontSize: "0.78rem", 
-                              background: "rgba(239, 68, 68, 0.08)", 
-                              color: "#f87171", 
-                              border: "1px solid rgba(239, 68, 68, 0.2)", 
-                              borderRadius: "8px", 
-                              gap: "6px", 
-                              transition: "all 0.2s" 
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.4)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)"; }}
-                            title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
-                          >
-                            <Trash2 size={14} />
-                            {(t as any).timerBgRemoveImage || "Görseli Kaldır"}
-                          </button>
-                        </div>
-                      )}
-                    </>
+                        {webcamImagePath && (
+                          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px", marginTop: "-8px" }}>
+                            <button
+                              className="premium-button"
+                              onClick={() => {
+                                setWebcamImagePath("");
+                                localStorage.removeItem("webcamImagePath");
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              style={{
+                                padding: "7px 12px",
+                                fontSize: "0.78rem",
+                                background: "rgba(239, 68, 68, 0.08)",
+                                color: "#f87171",
+                                border: "1px solid rgba(239, 68, 68, 0.2)",
+                                borderRadius: "8px",
+                                gap: "6px",
+                                transition: "all 0.2s"
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.4)"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)"; }}
+                              title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
+                            >
+                              <Trash2 size={14} />
+                              {(t as any).timerBgRemoveImage || "Görseli Kaldır"}
+                            </button>
+                          </div>
+                        )}
+                      </>
                     )}
                     {/* Kamera Çerçeve Rengi */}
                     <div className="setting-row" data-tour="setting-webcam-border-color">
@@ -4124,14 +4124,16 @@ function SettingsWindow() {
                               }}
                             />
                           ))}
-                          <div style={{ position: "relative", width: "24px", height: "24px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                              background: ["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
-                                ? customWebcamTextBgColor : webcamTextBgColor,
-                              border: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
-                                ? "2px solid white" : "2px solid rgba(255,255,255,0.2)",
-                              boxShadow: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
-                                ? `0 0 10px rgba(255,255,255,0.5)` : "none",
-                              transition: "all 0.2s", overflow: "hidden" }}>
+                          <div style={{
+                            position: "relative", width: "24px", height: "24px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                            background: ["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
+                              ? customWebcamTextBgColor : webcamTextBgColor,
+                            border: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
+                              ? "2px solid white" : "2px solid rgba(255,255,255,0.2)",
+                            boxShadow: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
+                              ? `0 0 10px rgba(255,255,255,0.5)` : "none",
+                            transition: "all 0.2s", overflow: "hidden"
+                          }}>
                             <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                             <input type="color" value={customWebcamTextBgColor.startsWith("#") && customWebcamTextBgColor.length === 7 ? customWebcamTextBgColor : "#000000"}
                               onClick={() => { const activeCustom = customWebcamTextBgColor || "#000000"; setWebcamTextBgColor(activeCustom); localStorage.setItem("webcamTextBgColor", activeCustom); window.dispatchEvent(new Event("storage")); }}
@@ -4141,11 +4143,11 @@ function SettingsWindow() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="setting-row" data-tour="setting-webcam-text-bg-opacity">
                       <div className="setting-info">
-                         <span className="setting-label">{(t as any).webcamTextBgOpacityLabel || "Arkaplan Opaklığı"}</span>
-                         <span className="setting-desc">{(t as any).webcamTextBgOpacityDesc || "Arka planın saydamlık (görünürlük) derecesini ayarlayın."}</span>
+                        <span className="setting-label">{(t as any).webcamTextBgOpacityLabel || "Arkaplan Opaklığı"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextBgOpacityDesc || "Arka planın saydamlık (görünürlük) derecesini ayarlayın."}</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                         <input type="range" min="0" max="100" step="1" className="premium-slider" style={{ width: "180px" }}
