@@ -33,8 +33,13 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
     const isMicMutedRef = useRef(false);
     const [showControls, setShowControls] = useState(() => localStorage.getItem("showRecordControls") !== "false");
     const [recordingDuration, setRecordingDuration] = useState(0);
+    const isOpenRef = useRef(isOpen);
 
     const t = translations[getLanguage()];
+
+    useEffect(() => {
+        isOpenRef.current = isOpen;
+    }, [isOpen]);
 
     useEffect(() => {
         let interval: number | null = null;
@@ -95,6 +100,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             const unlistenOpened = listen("recorder-opened", () => {
                 if (isOpen) {
                     loadSources();
+                    if (useWebcamRef.current) {
+                        invoke("toggle_webcam", { show: true }).catch(console.error);
+                    }
                 }
             });
             const unlistenShortcut = listen("recorder-shortcut-pressed", async () => {
@@ -103,6 +111,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                 } else {
                     // Replicate the X button close logic exactly to prevent transparent window artifacts
                     if (isStandalone) {
+                        if (useWebcamRef.current) {
+                            invoke("toggle_webcam", { show: false }).catch(console.error);
+                        }
                         invoke("hide_recorder_window").catch(console.error);
                     } else {
                         onClose();
@@ -142,14 +153,44 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             if (isMicMutedRef.current !== newMicMuted) {
                 setIsMicMuted(newMicMuted);
                 isMicMutedRef.current = newMicMuted;
-                invoke("toggle_mic", { muted: newMicMuted }).catch(console.error);
+                const checkAndToggleMic = async () => {
+                    let shouldToggle = isOpenRef.current || isRecordingRef.current;
+                    if (isStandalone) {
+                        try {
+                            const { getCurrentWindow } = await import("@tauri-apps/api/window");
+                            const visible = await getCurrentWindow().isVisible();
+                            shouldToggle = visible || isRecordingRef.current;
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                    if (shouldToggle) {
+                        invoke("toggle_mic", { muted: newMicMuted }).catch(console.error);
+                    }
+                };
+                checkAndToggleMic();
             }
 
             const savedWebcam = localStorage.getItem("recordWebcam") === "true";
             if (useWebcamRef.current !== savedWebcam) {
                 setUseWebcam(savedWebcam);
                 useWebcamRef.current = savedWebcam;
-                invoke("toggle_webcam", { show: savedWebcam }).catch(console.error);
+                const checkAndToggleWebcam = async () => {
+                    let shouldToggle = isOpenRef.current || isRecordingRef.current;
+                    if (isStandalone) {
+                        try {
+                            const { getCurrentWindow } = await import("@tauri-apps/api/window");
+                            const visible = await getCurrentWindow().isVisible();
+                            shouldToggle = visible || isRecordingRef.current;
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                    if (shouldToggle) {
+                        invoke("toggle_webcam", { show: savedWebcam }).catch(console.error);
+                    }
+                };
+                checkAndToggleWebcam();
             }
 
             const savedShowControls = localStorage.getItem("showRecordControls") !== "false";
@@ -477,6 +518,9 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     <h3 data-tauri-drag-region>{(t as any).modalSelectSource}</h3>
                     <button className="close-btn" onClick={() => {
                         if (isStandalone) {
+                            if (useWebcamRef.current) {
+                                invoke("toggle_webcam", { show: false }).catch(console.error);
+                            }
                             invoke("hide_recorder_window").catch(console.error);
                         } else {
                             onClose();
