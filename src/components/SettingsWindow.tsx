@@ -157,6 +157,7 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
+  const [isDragging, setIsDragging] = useState(false);
   const [recordSubTab, setRecordSubTab] = useState<"general" | "webcam" | "shortcuts">("general");
   const [timerSubTab, setTimerSubTab] = useState<"general" | "theme" | "sound">("general");
   const [lang, setLang] = useState<Language>(getLanguage);
@@ -385,10 +386,8 @@ function SettingsWindow() {
   const handleRemoveCustomTimerImage = () => {
     setTimerBgCustomImage("");
     setTimerBgCustomImageName("");
-    setTimerBgMode("color");
     localStorage.removeItem("timerBgCustomImage");
     localStorage.removeItem("timerBgCustomImageName");
-    localStorage.setItem("timerBgMode", "color");
     window.dispatchEvent(new Event("storage"));
     emit("timer-settings-updated").catch(() => { });
   };
@@ -660,7 +659,10 @@ function SettingsWindow() {
 
     let unlistenTauriDrop: (() => void) | undefined;
     getCurrentWindow().onDragDropEvent(async (event) => {
-      if (event.payload.type === 'drop') {
+      if (event.payload.type === 'over') {
+        if (activeTab === "record" || activeTab === "timer") setIsDragging(true);
+      } else if (event.payload.type === 'drop') {
+        setIsDragging(false);
         const paths = (event.payload as any).paths;
         if (paths && paths.length > 0 && (activeTab === "record" || activeTab === "timer")) {
           const path = paths[0];
@@ -686,15 +688,56 @@ function SettingsWindow() {
             }
           }
         }
+      } else {
+        setIsDragging(false);
       }
     }).then((un) => {
       unlistenTauriDrop = un;
     });
 
+    let dragCounter = 0;
+    const handleDragEnter = (e: DragEvent) => {
+      if (activeTab === "record" || activeTab === "timer") {
+        e.preventDefault(); e.stopPropagation();
+        dragCounter++;
+        setIsDragging(true);
+      }
+    };
+    const handleDragLeave = (e: DragEvent) => {
+      if (activeTab === "record" || activeTab === "timer") {
+        e.preventDefault(); e.stopPropagation();
+        dragCounter--;
+        if (dragCounter <= 0) {
+          dragCounter = 0;
+          setIsDragging(false);
+        }
+      }
+    };
+    const handleDragOver = (e: DragEvent) => {
+      if (activeTab === "record" || activeTab === "timer") {
+        e.preventDefault(); e.stopPropagation();
+      }
+    };
+    const handleDrop = (e: DragEvent) => {
+      if (activeTab === "record" || activeTab === "timer") {
+        e.preventDefault(); e.stopPropagation();
+        dragCounter = 0;
+        setIsDragging(false);
+      }
+    };
+
     window.addEventListener("paste", handlePaste);
+    window.addEventListener("dragenter", handleDragEnter);
+    window.addEventListener("dragleave", handleDragLeave);
+    window.addEventListener("dragover", handleDragOver);
+    window.addEventListener("drop", handleDrop);
 
     return () => {
       window.removeEventListener("paste", handlePaste);
+      window.removeEventListener("dragenter", handleDragEnter);
+      window.removeEventListener("dragleave", handleDragLeave);
+      window.removeEventListener("dragover", handleDragOver);
+      window.removeEventListener("drop", handleDrop);
       if (unlistenTauriDrop) unlistenTauriDrop();
     };
   }, [activeTab]);
@@ -2444,59 +2487,77 @@ function SettingsWindow() {
                   )}
 
                   {timerBgMode === "image" && (
-                    <div style={{ background: "rgba(255, 255, 255, 0.03)", borderRadius: "10px", padding: "12px 14px", marginBottom: "8px", border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "8px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", flex: "1 1 auto" }}>
-                          <Camera size={16} color="#38bdf8" style={{ flexShrink: 0, marginTop: "-2px" }} />
-                          <span style={{ fontSize: "0.82rem", color: timerBgCustomImageName ? "#f8fafc" : "var(--text-secondary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px", lineHeight: "16px", display: "flex", alignItems: "center" }}>
-                            {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
-                          </span>
+                    <>
+                      <div 
+                        onClick={() => {
+                          if ((window as any).__TAURI_INTERNALS__) {
+                            handleSelectTimerImageTauri();
+                          } else {
+                            customTimerBgInputRef.current?.click();
+                          }
+                        }}
+                        style={{ 
+                          background: "rgba(255, 255, 255, 0.02)", 
+                          borderRadius: "12px", 
+                          padding: "16px", 
+                          marginBottom: "8px", 
+                          border: "2px dashed rgba(255, 255, 255, 0.15)", 
+                          display: "flex", 
+                          flexDirection: "column", 
+                          alignItems: "center", 
+                          justifyContent: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          textAlign: "center"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.border = "2px dashed var(--accent-cyan)";
+                          e.currentTarget.style.background = "rgba(56, 189, 248, 0.03)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.border = "2px dashed rgba(255, 255, 255, 0.15)";
+                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)";
+                        }}
+                      >
+                        <input
+                          type="file"
+                          ref={customTimerBgInputRef}
+                          accept="image/*"
+                          onChange={handleCustomTimerImageUpload}
+                          style={{ display: "none" }}
+                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <Upload size={22} color="var(--accent-cyan)" />
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <span style={{ fontSize: "0.95rem", color: "#f8fafc", fontWeight: 500 }}>
+                              {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
+                            </span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                              {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
+                            </span>
+                          </div>
                         </div>
-                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                          <input
-                            type="file"
-                            ref={customTimerBgInputRef}
-                            accept="image/*"
-                            onChange={handleCustomTimerImageUpload}
-                            style={{ display: "none" }}
-                          />
+                        <div style={{ fontSize: "0.8rem", color: timerBgCustomImageName ? "var(--accent-cyan)" : "var(--text-secondary)", fontWeight: 500, marginTop: "4px", maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {timerBgCustomImageName || ((t as any).timerBgNoImageSelected || "Henüz özel bir görsel seçilmedi")}
+                        </div>
+                      </div>
+                      {timerBgCustomImage && (
+                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>
                           <button
                             className="premium-button"
-                            onClick={() => {
-                              if ((window as any).__TAURI_INTERNALS__) {
-                                handleSelectTimerImageTauri();
-                              } else {
-                                customTimerBgInputRef.current?.click();
-                              }
-                            }}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              const file = e.dataTransfer.files?.[0];
-                              if (file) handleImageFile(file, false);
-                            }}
-                            style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                            onClick={handleRemoveCustomTimerImage}
+                            style={{ padding: "6px 12px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)", gap: "6px" }}
+                            title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
                           >
-                            <Upload size={13} />
-                            {(t as any).timerBgSelectImageBtn || "Görsel Seç"}
+                            <Trash2 size={13} />
+                            {(t as any).timerBgRemoveImage || "Görseli Kaldır"}
                           </button>
-                          {timerBgCustomImage && (
-                            <button
-                              className="premium-button"
-                              onClick={handleRemoveCustomTimerImage}
-                              style={{ padding: "5px 8px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
-                              title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          )}
                         </div>
-                      </div>
-                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontStyle: "italic", alignSelf: "flex-end", marginTop: "-4px" }}>
-                        {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
-                      </div>
-                    </div>
+                      )}
+                    </>
                   )}
+
 
                   {timerBgMode === "image" && (
                     <div className="setting-row" data-tour="setting-timer-bg-scale">
@@ -3553,61 +3614,98 @@ function SettingsWindow() {
                     </div>
 
                     {/* Webcam Mode */}
-                    <div className="setting-row" data-tour="setting-webcam-mode">
+                    <div className="setting-row" data-tour="setting-webcam-mode" style={webcamMode === "image" ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          {webcamMode === "image" && (
-                            <button
-                              className="premium-button secondary"
-                              style={{ padding: "6px 14px", fontSize: "0.8rem", gap: "6px", whiteSpace: "nowrap" }}
-                              onClick={async () => {
-                                try {
-                                  const path = await invoke<string | null>("select_image");
-                                  if (path) {
-                                    setWebcamImagePath(path);
-                                    localStorage.setItem("webcamImagePath", path);
-                                    window.dispatchEvent(new Event("storage"));
-                                  }
-                                } catch (err) {
-                                  console.error("Görsel seçilemedi", err);
-                                }
-                              }}
-                              onDragOver={(e) => e.preventDefault()}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                const file = e.dataTransfer.files?.[0];
-                                if (file) handleImageFile(file, true);
-                              }}
-                            >
-                              <FolderOpen size={14} />
-                              {(t as any).webcamImageSelect || "Görsel Seç"}
-                            </button>
-                          )}
-                          <select
-                            className="premium-input"
-                            value={webcamMode}
-                            onChange={(e) => {
-                              setWebcamMode(e.target.value);
-                              localStorage.setItem("webcamMode", e.target.value);
-                              window.dispatchEvent(new Event("storage"));
-                            }}
-                            style={{ width: "160px" }}
-                          >
-                            <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
-                            <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
-                          </select>
-                        </div>
-                        {webcamMode === "image" && (
-                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontStyle: "italic", marginRight: "2px" }}>
-                            {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
-                          </span>
-                        )}
-                      </div>
+                      <select
+                        className="premium-input"
+                        value={webcamMode}
+                        onChange={(e) => {
+                          setWebcamMode(e.target.value);
+                          localStorage.setItem("webcamMode", e.target.value);
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        style={{ width: "160px" }}
+                      >
+                        <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
+                        <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
+                      </select>
                     </div>
 
+                    {webcamMode === "image" && (
+                      <>
+                        <div 
+                        onClick={async () => {
+                          try {
+                            const path = await invoke<string | null>("select_image");
+                            if (path) {
+                              setWebcamImagePath(path);
+                              localStorage.setItem("webcamImagePath", path);
+                              window.dispatchEvent(new Event("storage"));
+                            }
+                          } catch (err) {
+                            console.error("Görsel seçilemedi", err);
+                          }
+                        }}
+                        style={{ 
+                          background: "rgba(255, 255, 255, 0.02)", 
+                          borderRadius: "12px", 
+                          padding: "16px", 
+                          marginBottom: "16px", 
+                          border: "2px dashed rgba(255, 255, 255, 0.15)", 
+                          display: "flex", 
+                          flexDirection: "column", 
+                          alignItems: "center", 
+                          justifyContent: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          textAlign: "center"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.border = "2px dashed var(--accent-cyan)";
+                          e.currentTarget.style.background = "rgba(56, 189, 248, 0.03)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.border = "2px dashed rgba(255, 255, 255, 0.15)";
+                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)";
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <FolderOpen size={22} color="var(--accent-cyan)" />
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <span style={{ fontSize: "0.95rem", color: "#f8fafc", fontWeight: 500 }}>
+                              {(t as any).webcamImageSelect || "Görsel Seç"}
+                            </span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                              {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
+                            </span>
+                          </div>
+                        </div>
+                        <div style={{ fontSize: "0.8rem", color: webcamImagePath ? "var(--accent-cyan)" : "var(--text-secondary)", fontWeight: 500, marginTop: "4px", maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {webcamImagePath ? webcamImagePath.split(/[/\\]/).pop() : "Henüz özel bir görsel seçilmedi"}
+                        </div>
+                      </div>
+                      {webcamImagePath && (
+                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px", marginTop: "-8px" }}>
+                          <button
+                            className="premium-button"
+                            onClick={() => {
+                              setWebcamImagePath("");
+                              localStorage.removeItem("webcamImagePath");
+                              window.dispatchEvent(new Event("storage"));
+                            }}
+                            style={{ padding: "6px 12px", fontSize: "0.78rem", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)", gap: "6px" }}
+                            title={(t as any).timerBgRemoveImage || "Görseli Kaldır"}
+                          >
+                            <Trash2 size={13} />
+                            {(t as any).timerBgRemoveImage || "Görseli Kaldır"}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                    )}
                     {/* Kamera Çerçeve Rengi */}
                     <div className="setting-row" data-tour="setting-webcam-border-color">
                       <div className="setting-info">
@@ -4986,6 +5084,7 @@ function SettingsWindow() {
           </button>
         </div>
       )}
+
 
       <FeatureTour
         isOpen={isTourOpen}
