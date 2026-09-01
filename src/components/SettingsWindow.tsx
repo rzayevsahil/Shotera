@@ -4184,7 +4184,7 @@ function SettingsWindow() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "10px",
+                    gap: "5px",
                     zIndex: 2
                   }}>
                     <div style={{
@@ -4230,14 +4230,14 @@ function SettingsWindow() {
                       <div style={{
                         backgroundColor: `${webcamTextBgColor}${Math.round((webcamTextBgOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
                         border: "1px solid rgba(255, 255, 255, 0.1)",
-                        padding: "3px 10px",
-                        borderRadius: "12px",
+                        padding: "2px 6px",
+                        borderRadius: "8px",
                         maxWidth: "180px",
                         display: "flex"
                       }}>
                         <span className={`webcam-text-anim-${webcamTextAnimation}`} style={{
                           fontFamily: webcamTextFont === "sans" ? "sans-serif" : webcamTextFont === "serif" ? "serif" : webcamTextFont === "monospace" ? "monospace" : webcamTextFont,
-                          fontSize: `${webcamTextSize}px`,
+                          fontSize: `${Math.max(8, Math.round(webcamTextSize * 0.625))}px`,
                           fontWeight: "bold",
                           textShadow: webcamTextAnimation.startsWith("spin-") ? "none" : (webcamTextAnimation === "pulse" ? undefined : "0 1px 3px rgba(0,0,0,0.8)"),
                           overflow: "hidden",
