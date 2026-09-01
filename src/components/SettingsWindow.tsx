@@ -596,6 +596,71 @@ function SettingsWindow() {
     window.dispatchEvent(new Event("storage"));
   }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, micShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamTextBgColor, webcamTextBgOpacity, webcamMode, webcamImagePath, webcamBorderAnimation]);
 
+  const handleImageFile = async (file: File, isWebcam: boolean) => {
+    if (!file.type.startsWith("image/")) return;
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target?.result as string;
+        if (!dataUrl) return;
+        const base64Str = dataUrl.split(",")[1];
+        const ext = file.name.split('.').pop() || file.type.split('/')[1] || "png";
+        
+        try {
+          const savedPath = await invoke<string>("save_settings_image", {
+            base64Str,
+            ext
+          });
+          if (isWebcam) {
+            setWebcamImagePath(savedPath);
+            setWebcamMode("image");
+            localStorage.setItem("webcamImagePath", savedPath);
+            localStorage.setItem("webcamMode", "image");
+          } else {
+            setTimerBgCustomImage(savedPath);
+            setTimerBgCustomImageName(file.name);
+            setTimerBgMode("image");
+            localStorage.setItem("timerBgCustomImage", savedPath);
+            localStorage.setItem("timerBgCustomImageName", file.name);
+            localStorage.setItem("timerBgMode", "image");
+          }
+          window.dispatchEvent(new Event("storage"));
+        } catch (err) {
+          console.error("Error saving via invoke:", err);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (e) {
+      console.error("Error reading image:", e);
+    }
+  };
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            if (activeTab === "record") {
+              handleImageFile(file, true);
+            } else if (activeTab === "timer") {
+              handleImageFile(file, false);
+            }
+          }
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [activeTab]);
+
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
     invoke("update_shortcuts", {
@@ -2366,6 +2431,12 @@ function SettingsWindow() {
                                 customTimerBgInputRef.current?.click();
                               }
                             }}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const file = e.dataTransfer.files?.[0];
+                              if (file) handleImageFile(file, false);
+                            }}
                             style={{ padding: "5px 10px", fontSize: "0.78rem", whiteSpace: "nowrap" }}
                           >
                             <Upload size={13} />
@@ -3461,6 +3532,12 @@ function SettingsWindow() {
                               } catch (err) {
                                 console.error("Görsel seçilemedi", err);
                               }
+                            }}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const file = e.dataTransfer.files?.[0];
+                              if (file) handleImageFile(file, true);
                             }}
                           >
                             <FolderOpen size={14} />

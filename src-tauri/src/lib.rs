@@ -1820,6 +1820,27 @@ fn write_log_entry(app_handle: AppHandle, level: String, message: String) {
 }
 
 #[tauri::command]
+fn save_settings_image(
+    app_handle: AppHandle, 
+    base64_str: String,
+    ext: String,
+) -> Result<String, String> {
+    use base64::prelude::*;
+    let bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
+    
+    let now = chrono::Local::now();
+    let filename = format!("CustomImage_{}.{}", now.format("%Y%m%d_%H%M%S"), ext);
+    
+    let mut path = app_handle.path().app_data_dir().map_err(|e| e.to_string())?;
+    path.push("custom_images");
+    std::fs::create_dir_all(&path).map_err(|e| e.to_string())?;
+    path.push(filename);
+    
+    std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
+    Ok(path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
 fn is_autostart_launch() -> bool {
     std::env::args().any(|arg| arg == "--autostart")
 }
@@ -2196,6 +2217,7 @@ pub fn run() {
             trigger_capture_command,
             trigger_fullscreen_capture_command,
             save_base64_image,
+            save_settings_image,
             copy_base64_image_to_clipboard,
             update_tray_language,
             update_save_settings,
