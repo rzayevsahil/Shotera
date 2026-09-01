@@ -3834,9 +3834,7 @@ function SettingsWindow() {
                               boxShadow: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
                                 ? `0 0 10px rgba(255,255,255,0.5)` : "none",
                               transition: "all 0.2s", overflow: "hidden" }}>
-                            {!["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor) ? null : (
-                              <Palette size={12} color="#fff" style={{ opacity: 0.8 }} />
-                            )}
+                            <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                             <input type="color" value={customWebcamTextBgColor.startsWith("#") && customWebcamTextBgColor.length === 7 ? customWebcamTextBgColor : "#000000"}
                               onClick={() => { const activeCustom = customWebcamTextBgColor || "#000000"; setWebcamTextBgColor(activeCustom); localStorage.setItem("webcamTextBgColor", activeCustom); window.dispatchEvent(new Event("storage")); }}
                               onChange={(e) => { const val = e.target.value; setCustomWebcamTextBgColor(val); setWebcamTextBgColor(val); localStorage.setItem("customWebcamTextBgColor", val); localStorage.setItem("webcamTextBgColor", val); window.dispatchEvent(new Event("storage")); }}
