@@ -3805,8 +3805,8 @@ function SettingsWindow() {
                     {/* Arkaplan Rengi */}
                     <div className="setting-row" data-tour="setting-webcam-text-bg-color">
                       <div className="setting-info">
-                        <span className="setting-label">{(t as any).webcamTextBgColorLabel || "Arkaplan Rengi & Opaklık"}</span>
-                        <span className="setting-desc">{(t as any).webcamTextBgColorDesc || "Kamera yazısının arka plan rengini ve görünürlüğünü ayarlayın."}</span>
+                        <span className="setting-label">{(t as any).webcamTextBgColorLabel || "Arkaplan Rengi"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextBgColorDesc || "Kamera yazısının arka plan rengini ayarlayın."}</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <div style={{ display: "flex", gap: "6px" }}>
@@ -3849,6 +3849,7 @@ function SettingsWindow() {
                     <div className="setting-row" data-tour="setting-webcam-text-bg-opacity">
                       <div className="setting-info">
                          <span className="setting-label">{(t as any).webcamTextBgOpacityLabel || "Arkaplan Opaklığı"}</span>
+                         <span className="setting-desc">{(t as any).webcamTextBgOpacityDesc || "Arka planın saydamlık (görünürlük) derecesini ayarlayın."}</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                         <input type="range" min="0" max="100" step="1" className="premium-slider" style={{ width: "180px" }}
