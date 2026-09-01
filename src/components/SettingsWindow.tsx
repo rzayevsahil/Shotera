@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders, Lightbulb } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders, Lightbulb, PanelLeftClose, PanelLeft } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -163,7 +163,7 @@ function SettingsWindow() {
   const [lang, setLang] = useState<Language>(getLanguage);
   const [appVersion, setAppVersion] = useState("v0.1.0");
   const [isTourOpen, setIsTourOpen] = useState(false);
-
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem("sidebarCollapsed") === "true");
   useEffect(() => {
     getVersion().then(v => setAppVersion(`v${v}`)).catch(() => { });
     const tourCompleted = localStorage.getItem("shotera_tour_completed");
@@ -1094,21 +1094,59 @@ function SettingsWindow() {
   };
 
   return (
-    <div className="settings-container">
+    <div className="settings-container" style={{ gridTemplateColumns: isSidebarCollapsed ? "84px 1fr" : "240px 1fr", transition: "grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className="sidebar" style={{ padding: isSidebarCollapsed ? "24px 12px" : "24px", transition: "padding 0.3s ease" }}>
         <div>
-          <div className="brand" data-tour="brand-logo" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px" }}>
-            <img src={logo} alt="Shotera Logo" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
-            <span className="brand-name" style={{
-              fontFamily: "var(--font-title)",
-              fontWeight: 800,
-              fontSize: "1.45rem",
-              color: "#ffffff",
-              background: "none",
-              WebkitTextFillColor: "initial",
-              WebkitBackgroundClip: "initial"
-            }}>Shotera</span>
+          <div className="brand" data-tour="brand-logo" 
+               style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px", justifyContent: "space-between", width: "100%" }}>
+            
+            {!isSidebarCollapsed && (
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: isSidebarCollapsed ? "pointer" : "default" }}
+                   onClick={isSidebarCollapsed ? () => {
+                     setIsSidebarCollapsed(false);
+                     localStorage.setItem("sidebarCollapsed", "false");
+                   } : undefined}>
+                <img src={logo} alt="Shotera Logo" style={{ width: "32px", height: "32px", objectFit: "contain", minWidth: "32px" }} />
+                <span className="brand-name" style={{
+                  fontFamily: "var(--font-title)",
+                  fontWeight: 800,
+                  fontSize: "1.45rem",
+                  color: "#ffffff",
+                  background: "none",
+                  WebkitTextFillColor: "initial",
+                  WebkitBackgroundClip: "initial",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden"
+                }}>Shotera</span>
+              </div>
+            )}
+
+            <button
+               onClick={() => {
+                 const newState = !isSidebarCollapsed;
+                 setIsSidebarCollapsed(newState);
+                 localStorage.setItem("sidebarCollapsed", String(newState));
+               }} 
+               style={{
+                 background: "transparent",
+                 border: "none",
+                 color: "var(--text-muted)",
+                 cursor: "pointer",
+                 display: "flex",
+                 alignItems: "center",
+                 justifyContent: "center",
+                 padding: "6px",
+                 borderRadius: "6px",
+                 transition: "all 0.2s",
+                 width: isSidebarCollapsed ? "100%" : "auto"
+               }}
+               onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-main)"; e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
+               onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "transparent" }}
+               title={(t as any).toggleSidebar || "Menüyü Daralt/Genişlet"}
+            >
+               {isSidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+            </button>
           </div>
 
           <nav className="nav-links">
@@ -1116,73 +1154,88 @@ function SettingsWindow() {
               className={`nav-item ${activeTab === "general" ? "active" : ""}`}
               data-tour="nav-general"
               onClick={() => setActiveTab("general")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? t.sidebarGeneral : undefined}
             >
               <Settings className="nav-icon" />
-              <span>{t.sidebarGeneral}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{t.sidebarGeneral}</span>}
             </div>
             <div
               className={`nav-item ${activeTab === "capture" ? "active" : ""}`}
               data-tour="nav-capture"
               onClick={() => setActiveTab("capture")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? t.sidebarCapture : undefined}
             >
               <Camera className="nav-icon" />
-              <span>{t.sidebarCapture}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{t.sidebarCapture}</span>}
             </div>
             <div
               className={`nav-item ${activeTab === "save" ? "active" : ""}`}
               data-tour="nav-save"
               onClick={() => setActiveTab("save")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? t.sidebarSave : undefined}
             >
               <FolderOpen className="nav-icon" />
-              <span>{t.sidebarSave}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{t.sidebarSave}</span>}
             </div>
             <div
               className={`nav-item ${activeTab === "zoom" ? "active" : ""}`}
               data-tour="nav-zoom"
               onClick={() => setActiveTab("zoom")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? (t as any).sidebarZoom : undefined}
             >
               <ZoomIn className="nav-icon" />
-              <span>{(t as any).sidebarZoom}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{(t as any).sidebarZoom}</span>}
             </div>
             <div
               className={`nav-item ${activeTab === "timer" ? "active" : ""}`}
               data-tour="nav-timer"
               onClick={() => setActiveTab("timer")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? (t as any).sidebarTimer : undefined}
             >
               <Timer className="nav-icon" />
-              <span>{(t as any).sidebarTimer}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{(t as any).sidebarTimer}</span>}
             </div>
             <div
               className={`nav-item ${activeTab === "live_zoom" ? "active" : ""}`}
               data-tour="nav-live_zoom"
               onClick={() => setActiveTab("live_zoom")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? (t as any).sidebarLiveZoom : undefined}
             >
               <Video className="nav-icon" />
-              <span>{(t as any).sidebarLiveZoom}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{(t as any).sidebarLiveZoom}</span>}
             </div>
             <div
               className={`nav-item ${activeTab === "record" ? "active" : ""}`}
               data-tour="nav-record"
               onClick={() => setActiveTab("record")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? (t as any).sidebarRecord : undefined}
             >
               <Play className="nav-icon" />
-              <span>{(t as any).sidebarRecord}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{(t as any).sidebarRecord}</span>}
             </div>
 
             <div
               className={`nav-item ${activeTab === "about" ? "active" : ""}`}
               data-tour="nav-about"
               onClick={() => setActiveTab("about")}
-              style={{ position: "relative" }}
+              style={{ position: "relative", justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px" }}
+              title={isSidebarCollapsed ? t.sidebarAbout : undefined}
             >
               <Info className="nav-icon" />
-              <span>{t.sidebarAbout}</span>
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{t.sidebarAbout}</span>}
               {updateStatus === "available" && (
                 <div style={{
                   position: "absolute",
-                  right: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
+                  right: isSidebarCollapsed ? "6px" : "12px",
+                  top: isSidebarCollapsed ? "6px" : "50%",
+                  transform: isSidebarCollapsed ? "none" : "translateY(-50%)",
                   width: "8px",
                   height: "8px",
                   borderRadius: "50%",
@@ -1196,7 +1249,7 @@ function SettingsWindow() {
         </div>
 
         <div className="sidebar-footer" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}>
-          <span>{appVersion}</span>
+          {!isSidebarCollapsed && <span>{appVersion}</span>}
           {updateStatus === "available" && (
             <div style={{
               width: "6px",
