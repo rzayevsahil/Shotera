@@ -657,8 +657,46 @@ function SettingsWindow() {
         }
       }
     };
+
+    let unlistenTauriDrop: (() => void) | undefined;
+    getCurrentWindow().onDragDropEvent(async (event) => {
+      if (event.payload.type === 'drop') {
+        const paths = (event.payload as any).paths;
+        if (paths && paths.length > 0 && (activeTab === "record" || activeTab === "timer")) {
+          const path = paths[0];
+          if (path.toLowerCase().match(/\.(png|jpg|jpeg|webp|gif|bmp)$/)) {
+            try {
+              const savedPath = await invoke<string>("copy_settings_image", { sourcePath: path });
+              if (activeTab === "record") {
+                setWebcamImagePath(savedPath);
+                setWebcamMode("image");
+                localStorage.setItem("webcamImagePath", savedPath);
+                localStorage.setItem("webcamMode", "image");
+              } else {
+                setTimerBgCustomImage(savedPath);
+                setTimerBgCustomImageName(path.split(/[/\\]/).pop() || "dropped.png");
+                setTimerBgMode("image");
+                localStorage.setItem("timerBgCustomImage", savedPath);
+                localStorage.setItem("timerBgCustomImageName", path.split(/[/\\]/).pop() || "dropped.png");
+                localStorage.setItem("timerBgMode", "image");
+              }
+              window.dispatchEvent(new Event("storage"));
+            } catch (err) {
+              console.error("Failed to copy dropped image:", err);
+            }
+          }
+        }
+      }
+    }).then((un) => {
+      unlistenTauriDrop = un;
+    });
+
     window.addEventListener("paste", handlePaste);
-    return () => window.removeEventListener("paste", handlePaste);
+
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+      if (unlistenTauriDrop) unlistenTauriDrop();
+    };
   }, [activeTab]);
 
   // Sync keyboard shortcuts with Rust backend
@@ -2454,6 +2492,9 @@ function SettingsWindow() {
                           )}
                         </div>
                       </div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontStyle: "italic", alignSelf: "flex-end", marginTop: "-4px" }}>
+                        {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
+                      </div>
                     </div>
                   )}
 
@@ -3516,47 +3557,54 @@ function SettingsWindow() {
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        {webcamMode === "image" && (
-                          <button
-                            className="premium-button secondary"
-                            style={{ padding: "6px 14px", fontSize: "0.8rem", gap: "6px", whiteSpace: "nowrap" }}
-                            onClick={async () => {
-                              try {
-                                const path = await invoke<string | null>("select_image");
-                                if (path) {
-                                  setWebcamImagePath(path);
-                                  localStorage.setItem("webcamImagePath", path);
-                                  window.dispatchEvent(new Event("storage"));
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          {webcamMode === "image" && (
+                            <button
+                              className="premium-button secondary"
+                              style={{ padding: "6px 14px", fontSize: "0.8rem", gap: "6px", whiteSpace: "nowrap" }}
+                              onClick={async () => {
+                                try {
+                                  const path = await invoke<string | null>("select_image");
+                                  if (path) {
+                                    setWebcamImagePath(path);
+                                    localStorage.setItem("webcamImagePath", path);
+                                    window.dispatchEvent(new Event("storage"));
+                                  }
+                                } catch (err) {
+                                  console.error("Görsel seçilemedi", err);
                                 }
-                              } catch (err) {
-                                console.error("Görsel seçilemedi", err);
-                              }
+                              }}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const file = e.dataTransfer.files?.[0];
+                                if (file) handleImageFile(file, true);
+                              }}
+                            >
+                              <FolderOpen size={14} />
+                              {(t as any).webcamImageSelect || "Görsel Seç"}
+                            </button>
+                          )}
+                          <select
+                            className="premium-input"
+                            value={webcamMode}
+                            onChange={(e) => {
+                              setWebcamMode(e.target.value);
+                              localStorage.setItem("webcamMode", e.target.value);
+                              window.dispatchEvent(new Event("storage"));
                             }}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              const file = e.dataTransfer.files?.[0];
-                              if (file) handleImageFile(file, true);
-                            }}
+                            style={{ width: "160px" }}
                           >
-                            <FolderOpen size={14} />
-                            {(t as any).webcamImageSelect || "Görsel Seç"}
-                          </button>
+                            <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
+                            <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
+                          </select>
+                        </div>
+                        {webcamMode === "image" && (
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontStyle: "italic", marginRight: "2px" }}>
+                            {(t as any).dragDropHint || "veya sürükle-bırak / Ctrl+V"}
+                          </span>
                         )}
-                        <select
-                          className="premium-input"
-                          value={webcamMode}
-                          onChange={(e) => {
-                            setWebcamMode(e.target.value);
-                            localStorage.setItem("webcamMode", e.target.value);
-                            window.dispatchEvent(new Event("storage"));
-                          }}
-                          style={{ width: "160px" }}
-                        >
-                          <option value="camera">{(t as any).webcamModeCamera || "Canlı Kamera"}</option>
-                          <option value="image">{(t as any).webcamModeImage || "Sabit Görsel"}</option>
-                        </select>
                       </div>
                     </div>
 

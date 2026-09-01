@@ -1841,6 +1841,29 @@ fn save_settings_image(
 }
 
 #[tauri::command]
+fn copy_settings_image(
+    app_handle: AppHandle, 
+    source_path: String,
+) -> Result<String, String> {
+    let source = std::path::Path::new(&source_path);
+    if !source.exists() {
+        return Err("Source file does not exist".to_string());
+    }
+    
+    let ext = source.extension().and_then(|e| e.to_str()).unwrap_or("png");
+    let now = chrono::Local::now();
+    let filename = format!("CustomImage_{}.{}", now.format("%Y%m%d_%H%M%S"), ext);
+    
+    let mut dest = app_handle.path().app_data_dir().map_err(|e| e.to_string())?;
+    dest.push("custom_images");
+    std::fs::create_dir_all(&dest).map_err(|e| e.to_string())?;
+    dest.push(filename);
+    
+    std::fs::copy(source, &dest).map_err(|e| e.to_string())?;
+    Ok(dest.to_string_lossy().to_string())
+}
+
+#[tauri::command]
 fn is_autostart_launch() -> bool {
     std::env::args().any(|arg| arg == "--autostart")
 }
@@ -2218,6 +2241,7 @@ pub fn run() {
             trigger_fullscreen_capture_command,
             save_base64_image,
             save_settings_image,
+            copy_settings_image,
             copy_base64_image_to_clipboard,
             update_tray_language,
             update_save_settings,
