@@ -2120,7 +2120,7 @@ function SettingsWindow() {
                             cursor: "pointer"
                           }}
                         />
-                        <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                        <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                       </div>
 
                       <input
@@ -2246,7 +2246,7 @@ function SettingsWindow() {
                             cursor: "pointer"
                           }}
                         />
-                        <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                        <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                       </div>
 
                       <input
@@ -3560,7 +3560,7 @@ function SettingsWindow() {
                                 cursor: "pointer"
                               }}
                             />
-                            <span style={{ fontSize: "11px", color: "white", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                            <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                           </div>
                         </div>
                         <input
@@ -3769,7 +3769,7 @@ function SettingsWindow() {
                                 cursor: "pointer"
                               }}
                             />
-                            <span style={{ fontSize: "11px", color: "white", fontWeight: "bold", pointerEvents: "none", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>+</span>
+                            <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                           </div>
                         </div>
 
