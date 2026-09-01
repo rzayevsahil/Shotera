@@ -23,6 +23,9 @@ export default function WebcamOverlay() {
   const [webcamBorderAnimation, setWebcamBorderAnimation] = useState(() => localStorage.getItem("webcamBorderAnimation") || "solid");
   const [webcamMode, setWebcamMode] = useState(() => localStorage.getItem("webcamMode") || "camera");
   const [webcamImagePath, setWebcamImagePath] = useState(() => localStorage.getItem("webcamImagePath") || "");
+  const [webcamTextBgColor, setWebcamTextBgColor] = useState(() => localStorage.getItem("webcamTextBgColor") || "#000000");
+  const [webcamTextBgOpacity, setWebcamTextBgOpacity] = useState(() => Number(localStorage.getItem("webcamTextBgOpacity") || "60"));
+  const [webcamTextBgBlur, setWebcamTextBgBlur] = useState(() => Number(localStorage.getItem("webcamTextBgBlur") || "0"));
 
   useEffect(() => {
     // Listen for language changes from localStorage
@@ -37,6 +40,9 @@ export default function WebcamOverlay() {
       setWebcamBorderAnimation(localStorage.getItem("webcamBorderAnimation") || "solid");
       setWebcamMode(localStorage.getItem("webcamMode") || "camera");
       setWebcamImagePath(localStorage.getItem("webcamImagePath") || "");
+      setWebcamTextBgColor(localStorage.getItem("webcamTextBgColor") || "#000000");
+      setWebcamTextBgOpacity(Number(localStorage.getItem("webcamTextBgOpacity") || "60"));
+      setWebcamTextBgBlur(Number(localStorage.getItem("webcamTextBgBlur") || "0"));
     };
     window.addEventListener("storage", handleStorageChange);
     
@@ -353,7 +359,9 @@ export default function WebcamOverlay() {
       </div>
       {webcamText.trim() && (
         <div style={{
-          background: "rgba(0,0,0,0.6)",
+          backgroundColor: `${webcamTextBgColor}${Math.round((webcamTextBgOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
+          backdropFilter: webcamTextBgBlur > 0 ? `blur(${webcamTextBgBlur}px)` : "none",
+          WebkitBackdropFilter: webcamTextBgBlur > 0 ? `blur(${webcamTextBgBlur}px)` : "none",
           padding: "2px 8px",
           borderRadius: "12px",
           maxWidth: "100%",

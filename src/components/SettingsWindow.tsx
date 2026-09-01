@@ -425,6 +425,15 @@ function SettingsWindow() {
   const [webcamTextFont, setWebcamTextFont] = useState<string>(() => localStorage.getItem("webcamTextFont") || "sans");
   const [webcamTextSize, setWebcamTextSize] = useState<number>(() => Number(localStorage.getItem("webcamTextSize") || "11"));
   const [webcamTextAnimation, setWebcamTextAnimation] = useState<string>(() => localStorage.getItem("webcamTextAnimation") || "solid");
+  const [webcamTextBgColor, setWebcamTextBgColor] = useState<string>(() => localStorage.getItem("webcamTextBgColor") || "#000000");
+  const [customWebcamTextBgColor, setCustomWebcamTextBgColor] = useState<string>(() => {
+    const savedCustom = localStorage.getItem("customWebcamTextBgColor");
+    if (savedCustom) return savedCustom;
+    const current = localStorage.getItem("webcamTextBgColor") || "#000000";
+    return ["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(current) ? "#000000" : current;
+  });
+  const [webcamTextBgOpacity, setWebcamTextBgOpacity] = useState<number>(() => Number(localStorage.getItem("webcamTextBgOpacity") || "60"));
+  const [webcamTextBgBlur, setWebcamTextBgBlur] = useState<number>(() => Number(localStorage.getItem("webcamTextBgBlur") || "0"));
 
   // Updater state
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "up-to-date" | "available" | "downloading" | "downloaded" | "error">("idle");
@@ -579,12 +588,15 @@ function SettingsWindow() {
     localStorage.setItem("webcamTextFont", webcamTextFont);
     localStorage.setItem("webcamTextSize", webcamTextSize.toString());
     localStorage.setItem("webcamTextAnimation", webcamTextAnimation);
+    localStorage.setItem("webcamTextBgColor", webcamTextBgColor);
+    localStorage.setItem("webcamTextBgOpacity", webcamTextBgOpacity.toString());
+    localStorage.setItem("webcamTextBgBlur", webcamTextBgBlur.toString());
     localStorage.setItem("webcamMode", webcamMode);
     localStorage.setItem("webcamImagePath", webcamImagePath);
     localStorage.setItem("webcamBorderAnimation", webcamBorderAnimation);
 
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, micShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamMode, webcamImagePath, webcamBorderAnimation]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, micShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamTextBgColor, webcamTextBgOpacity, webcamTextBgBlur, webcamMode, webcamImagePath, webcamBorderAnimation]);
 
   // Sync keyboard shortcuts with Rust backend
   useEffect(() => {
@@ -3792,6 +3804,74 @@ function SettingsWindow() {
                       </div>
                     </div>
 
+                    {/* Arkaplan Rengi */}
+                    <div className="setting-row" data-tour="setting-webcam-text-bg-color">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamTextBgColorLabel || "Arkaplan Rengi & Opaklık"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextBgColorDesc || "Kamera yazısının arka plan rengini ve görünürlüğünü ayarlayın."}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          {["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].map((c) => (
+                            <div
+                              key={c}
+                              onClick={() => {
+                                setWebcamTextBgColor(c);
+                                localStorage.setItem("webcamTextBgColor", c);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              style={{
+                                width: "24px", height: "24px", borderRadius: "50%", background: c, cursor: "pointer",
+                                border: webcamTextBgColor === c ? "2px solid white" : "2px solid transparent",
+                                boxShadow: webcamTextBgColor === c ? `0 0 10px rgba(255,255,255,0.5)` : "none",
+                                transition: "all 0.2s"
+                              }}
+                            />
+                          ))}
+                          <div style={{ position: "relative", width: "24px", height: "24px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                              background: ["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
+                                ? customWebcamTextBgColor : webcamTextBgColor,
+                              border: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
+                                ? "2px solid white" : "2px solid rgba(255,255,255,0.2)",
+                              boxShadow: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
+                                ? `0 0 10px rgba(255,255,255,0.5)` : "none",
+                              transition: "all 0.2s", overflow: "hidden" }}>
+                            {!["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor) ? null : (
+                              <Palette size={12} color="#fff" style={{ opacity: 0.8 }} />
+                            )}
+                            <input type="color" value={customWebcamTextBgColor.startsWith("#") && customWebcamTextBgColor.length === 7 ? customWebcamTextBgColor : "#000000"}
+                              onClick={() => { const activeCustom = customWebcamTextBgColor || "#000000"; setWebcamTextBgColor(activeCustom); localStorage.setItem("webcamTextBgColor", activeCustom); window.dispatchEvent(new Event("storage")); }}
+                              onChange={(e) => { const val = e.target.value; setCustomWebcamTextBgColor(val); setWebcamTextBgColor(val); localStorage.setItem("customWebcamTextBgColor", val); localStorage.setItem("webcamTextBgColor", val); window.dispatchEvent(new Event("storage")); }}
+                              style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%", cursor: "pointer" }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="setting-row" data-tour="setting-webcam-text-bg-opacity">
+                      <div className="setting-info">
+                         <span className="setting-label">{(t as any).webcamTextBgOpacityLabel || "Arkaplan Opaklığı"}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <input type="range" min="0" max="100" step="1" className="premium-slider" style={{ width: "180px" }}
+                          value={webcamTextBgOpacity} onChange={(e) => { const val = Number(e.target.value); setWebcamTextBgOpacity(val); localStorage.setItem("webcamTextBgOpacity", val.toString()); window.dispatchEvent(new Event("storage")); }} />
+                        <span style={{ fontSize: "0.9rem", color: "var(--accent-cyan)", fontWeight: 600, minWidth: "35px", textAlign: "right" }}>{webcamTextBgOpacity}%</span>
+                      </div>
+                    </div>
+
+                    {/* Arkaplan Bulanıklığı */}
+                    <div className="setting-row" data-tour="setting-webcam-text-bg-blur">
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).webcamTextBgBlurLabel || "Arkaplan Bulanıklığı (Blur)"}</span>
+                        <span className="setting-desc">{(t as any).webcamTextBgBlurDesc || "Yazının arkasındaki kamerayı veya görüntüyü bulanıklaştırın."}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <input type="range" min="0" max="20" step="1" className="premium-slider" style={{ width: "180px" }}
+                          value={webcamTextBgBlur} onChange={(e) => { const val = Number(e.target.value); setWebcamTextBgBlur(val); localStorage.setItem("webcamTextBgBlur", val.toString()); window.dispatchEvent(new Event("storage")); }} />
+                        <span style={{ fontSize: "0.9rem", color: "var(--accent-cyan)", fontWeight: 600, minWidth: "35px", textAlign: "right" }}>{webcamTextBgBlur}px</span>
+                      </div>
+                    </div>
+
                     {/* Yazı Stili */}
                     <div className="setting-row" data-tour="setting-webcam-text-style">
                       <div className="setting-info">
@@ -4162,8 +4242,9 @@ function SettingsWindow() {
 
                     {webcamText.trim() && (
                       <div style={{
-                        background: "rgba(0,0,0,0.75)",
-                        backdropFilter: "blur(4px)",
+                        backgroundColor: `${webcamTextBgColor}${Math.round((webcamTextBgOpacity / 100) * 255).toString(16).padStart(2, '0')}`,
+                        backdropFilter: webcamTextBgBlur > 0 ? `blur(${webcamTextBgBlur}px)` : "none",
+                        WebkitBackdropFilter: webcamTextBgBlur > 0 ? `blur(${webcamTextBgBlur}px)` : "none",
                         border: "1px solid rgba(255, 255, 255, 0.1)",
                         padding: "3px 10px",
                         borderRadius: "12px",
