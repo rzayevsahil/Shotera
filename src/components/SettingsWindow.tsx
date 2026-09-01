@@ -157,7 +157,7 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
-  const [isDragging, setIsDragging] = useState(false);
+
   const [recordSubTab, setRecordSubTab] = useState<"general" | "webcam" | "shortcuts">("general");
   const [timerSubTab, setTimerSubTab] = useState<"general" | "theme" | "sound">("general");
   const [lang, setLang] = useState<Language>(getLanguage);
@@ -660,9 +660,8 @@ function SettingsWindow() {
     let unlistenTauriDrop: (() => void) | undefined;
     getCurrentWindow().onDragDropEvent(async (event) => {
       if (event.payload.type === 'over') {
-        if (activeTab === "record" || activeTab === "timer") setIsDragging(true);
+        // do nothing
       } else if (event.payload.type === 'drop') {
-        setIsDragging(false);
         const paths = (event.payload as any).paths;
         if (paths && paths.length > 0 && (activeTab === "record" || activeTab === "timer")) {
           const path = paths[0];
@@ -689,7 +688,7 @@ function SettingsWindow() {
           }
         }
       } else {
-        setIsDragging(false);
+        // do nothing
       }
     }).then((un) => {
       unlistenTauriDrop = un;
@@ -700,7 +699,6 @@ function SettingsWindow() {
       if (activeTab === "record" || activeTab === "timer") {
         e.preventDefault(); e.stopPropagation();
         dragCounter++;
-        setIsDragging(true);
       }
     };
     const handleDragLeave = (e: DragEvent) => {
@@ -709,7 +707,6 @@ function SettingsWindow() {
         dragCounter--;
         if (dragCounter <= 0) {
           dragCounter = 0;
-          setIsDragging(false);
         }
       }
     };
@@ -722,7 +719,6 @@ function SettingsWindow() {
       if (activeTab === "record" || activeTab === "timer") {
         e.preventDefault(); e.stopPropagation();
         dragCounter = 0;
-        setIsDragging(false);
       }
     };
 

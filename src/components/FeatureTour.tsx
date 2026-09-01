@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, ArrowLeft, ArrowRight, Check, MousePointerClick, Sparkles, Rocket, Settings, Camera, Save, ZoomIn, Timer, Video, Info } from "lucide-react";
+import { X, ArrowLeft, ArrowRight, MousePointerClick, Sparkles, Rocket, Settings, Camera, Save, ZoomIn, Timer, Video, Info } from "lucide-react";
 import { translations, getLanguage } from "../i18n";
 import "./FeatureTour.css";
 
