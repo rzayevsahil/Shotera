@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
@@ -1470,7 +1470,7 @@ function ScreenshotCapture() {
                   cursor: "pointer"
                 }}
               />
-              <span style={{ fontSize: "11px", color: "#fff", fontWeight: "bold", pointerEvents: "none", lineHeight: 1 }}>+</span>
+              <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
             </div>
 
             {/* Direct Hex Code input */}
