@@ -4463,9 +4463,6 @@ function SettingsWindow() {
                             animation: webcamMode === "image" && webcamImagePath ? "none" : "webcam-logo-gif 3.5s infinite ease-in-out"
                           }}
                         />
-                        <div style={{ position: "absolute", bottom: "6px", left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.65)", borderRadius: "50%", padding: "4px", display: "flex" }}>
-                          <Camera size={12} color={webcamBorderColor} style={{ transition: "color 0.3s ease" }} />
-                        </div>
                       </div>
                     </div>
 
