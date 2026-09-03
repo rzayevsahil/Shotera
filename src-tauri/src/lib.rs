@@ -226,6 +226,7 @@ async fn start_native_recording(
         };
 
         let (tx, rx) = tokio::sync::oneshot::channel();
+        let (ready_tx, ready_rx) = tokio::sync::oneshot::channel::<Result<(), String>>();
         let app_handle_clone = app_handle.clone();
         
         tauri::async_runtime::spawn(async move {
@@ -246,6 +247,7 @@ async fn start_native_recording(
 
                     match start_res {
                         Ok(_) => {
+                            let _ = ready_tx.send(Ok(()));
                             println!("Native recording pipeline started successfully.");
                             let _ = rx.await; // wait for stop signal
                             
@@ -265,22 +267,34 @@ async fn start_native_recording(
                             }
                         },
                         Err(e) => {
-                            eprintln!("Failed to start recording pipeline: {}", e);
+                            let err_msg = format!("Failed to start recording pipeline: {}", e);
+                            eprintln!("{}", err_msg);
+                            let _ = ready_tx.send(Err(err_msg));
+                            if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
+                                *pipe_lock = None;
+                            }
                         }
                     }
                 },
                 Err(e) => {
-                    eprintln!("Failed to create recording pipeline: {}", e);
+                    let err_msg = format!("Failed to create recording pipeline: {}", e);
+                    eprintln!("{}", err_msg);
+                    let _ = ready_tx.send(Err(err_msg));
                 }
             }
         });
 
-        let state2 = app_handle.state::<AppState>();
-        if let Ok(mut stop_tx) = state2.recorder_stop_tx.lock() {
-            *stop_tx = Some(tx);
+        match ready_rx.await {
+            Ok(Ok(())) => {
+                let state2 = app_handle.state::<AppState>();
+                if let Ok(mut stop_tx) = state2.recorder_stop_tx.lock() {
+                    *stop_tx = Some(tx);
+                }
+                Ok(output_path_str)
+            },
+            Ok(Err(e)) => Err(e),
+            Err(_) => Err("Worker thread died before reporting ready".into()),
         }
-
-        Ok(output_path_str)
     }
 
     #[cfg(not(target_os = "windows"))]

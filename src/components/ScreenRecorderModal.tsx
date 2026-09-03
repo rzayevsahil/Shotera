@@ -292,6 +292,7 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             }
         } catch (error) {
             console.error("Failed to start recording:", error);
+            alert("Kayıt başlatılamadı:\n\n" + error);
             stopAudioKeepAlive();
             setIsRecording(false);
             if (isStandalone) {
