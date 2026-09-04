@@ -287,29 +287,6 @@ async fn start_native_recording(
     }
 }
 
-#[tauri::command]
-fn disable_windows_audio_ducking() -> Result<bool, String> {
-    #[cfg(target_os = "windows")]
-    {
-        use std::process::Command;
-        // Set UserDuckingPreference to 3 (Do nothing)
-        let output = Command::new("reg")
-            .args(["add", r"HKCU\Software\Microsoft\Multimedia\Audio", "/v", "UserDuckingPreference", "/t", "REG_DWORD", "/d", "3", "/f"])
-            .output()
-            .map_err(|e| e.to_string())?;
-
-        if output.status.success() {
-            Ok(true)
-        } else {
-            Err(String::from_utf8_lossy(&output.stderr).to_string())
-        }
-    }
-    
-    #[cfg(not(target_os = "windows"))]
-    {
-        Ok(true)
-    }
-}
 
 #[tauri::command]
 fn hide_recorder_window(app_handle: AppHandle) {
@@ -2287,7 +2264,6 @@ pub fn run() {
             resize_recorder_window,
             hide_recorder_window,
             open_recorder_view,
-            disable_windows_audio_ducking,
             hide_status_overlay,
             lock_workstation
         ])

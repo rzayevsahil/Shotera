@@ -3594,69 +3594,6 @@ function SettingsWindow() {
                       <span className="slider"></span>
                     </label>
                   </div>
-
-                  {/* Audio Ducking Fix - Standalone Banner Card */}
-                  <div
-                    data-tour="setting-audio-ducking"
-                    style={{
-                      background: "rgba(245, 158, 11, 0.07)",
-                      border: "1px solid rgba(245, 158, 11, 0.22)",
-                      borderRadius: "12px",
-                      padding: "14px 16px",
-                      marginTop: "4px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "14px",
-                      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)"
-                    }}
-                  >
-                    <div
-                      style={{
-                        background: "rgba(245, 158, 11, 0.15)",
-                        border: "1px solid rgba(245, 158, 11, 0.3)",
-                        borderRadius: "10px",
-                        width: "38px",
-                        height: "38px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0
-                      }}
-                    >
-                      <AlertTriangle size={20} color="#fbbf24" />
-                    </div>
-                    <div style={{ flex: "1 1 0%", minWidth: 0 }}>
-                      <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#fbbf24", display: "flex", alignItems: "center", gap: "6px" }}>
-                        {(t as any).fixAudioDucking || "Sistem Sesi Kısılmasını Önle"}
-                      </div>
-                      <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: "1.35", marginTop: "2px" }}>
-                        {(t as any).fixAudioDuckingDesc || "Mikrofon açıldığında Windows'un diğer sesleri (video/müzik) %80 kısmasını (Ducking) engeller."}
-                      </div>
-                    </div>
-                    <button
-                      className="premium-button"
-                      style={{
-                        fontSize: "0.8rem",
-                        padding: "8px 14px",
-                        background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                        border: "none",
-                        boxShadow: "0 2px 10px rgba(245, 158, 11, 0.3)",
-                        whiteSpace: "nowrap",
-                        flexShrink: 0
-                      }}
-                      onClick={async () => {
-                        try {
-                          await invoke("disable_windows_audio_ducking");
-                          setWarningMessage("Windows ayarı güncellendi! Etkin olması için varsa açık olan videoları veya ekran kaydediciyi yeniden başlatın.");
-                          setTimeout(() => setWarningMessage(null), 5000);
-                        } catch (err) {
-                          console.error("Failed to update registry:", err);
-                        }
-                      }}
-                    >
-                      {(t as any).fixAudioDuckingBtn || "Windows Ayarını Düzelt"}
-                    </button>
-                  </div>
                 </div>
               )}
 
