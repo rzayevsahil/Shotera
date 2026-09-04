@@ -250,6 +250,9 @@ function SettingsWindow() {
   const [timerOpacity, setTimerOpacity] = useState<number>(() => Number(localStorage.getItem("timerOpacity") || "100"));
   const [timerShowControls, setTimerShowControls] = useState<boolean>(() => localStorage.getItem("timerShowControls") !== "false");
   const [timerPosition, setTimerPosition] = useState<string>(() => localStorage.getItem("timerPosition") || "top-right");
+
+  const [recordAudioVolume, setRecordAudioVolume] = useState<number>(() => Number(localStorage.getItem("recordAudioVolume") ?? "100"));
+  const [recordMicVolume, setRecordMicVolume] = useState<number>(() => Number(localStorage.getItem("recordMicVolume") ?? "100"));
   const customAudioInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleCustomAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -3553,6 +3556,30 @@ function SettingsWindow() {
                     </label>
                   </div>
 
+                  {/* Mikrofon Ses Seviyesi */}
+                  {recordMic && (
+                    <div className="setting-row" style={{ marginTop: "-8px", borderBottom: "none", paddingTop: 0 }}>
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).recordMicVolumeLabel || "Mikrofon Ses Seviyesi"}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "240px" }}>
+                        <input
+                          type="range"
+                          min="0"
+                          max="200"
+                          value={recordMicVolume}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setRecordMicVolume(val);
+                            localStorage.setItem("recordMicVolume", val.toString());
+                          }}
+                          style={{ flex: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                        />
+                        <span style={{ fontSize: "0.9rem", color: "var(--accent-cyan)", fontWeight: 600, minWidth: "35px", textAlign: "right" }}>{recordMicVolume}%</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Sistem Sesini Kaydet */}
                   <div className="setting-row" data-tour="setting-record-audio">
                     <div className="setting-info">
@@ -3572,6 +3599,30 @@ function SettingsWindow() {
                       <span className="slider"></span>
                     </label>
                   </div>
+
+                  {/* Sistem Ses Seviyesi */}
+                  {recordAudio && (
+                    <div className="setting-row" style={{ marginTop: "-8px", borderBottom: "none", paddingTop: 0 }}>
+                      <div className="setting-info">
+                        <span className="setting-label">{(t as any).recordAudioVolumeLabel || "Sistem Ses Seviyesi"}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "240px" }}>
+                        <input
+                          type="range"
+                          min="0"
+                          max="200"
+                          value={recordAudioVolume}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setRecordAudioVolume(val);
+                            localStorage.setItem("recordAudioVolume", val.toString());
+                          }}
+                          style={{ flex: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                        />
+                        <span style={{ fontSize: "0.9rem", color: "var(--accent-cyan)", fontWeight: 600, minWidth: "35px", textAlign: "right" }}>{recordAudioVolume}%</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Kayıt Kontrolcüsünü Göster */}
                   <div className="setting-row" data-tour="setting-record-controls">

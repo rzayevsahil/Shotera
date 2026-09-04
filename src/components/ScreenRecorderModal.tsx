@@ -281,8 +281,11 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
                     await invoke("hide_recorder_window").catch(console.error);
                 }
             }
+            
+            const audioVolume = (Number(localStorage.getItem("recordAudioVolume")) || 100) / 100.0;
+            const micVolume = (Number(localStorage.getItem("recordMicVolume")) || 100) / 100.0;
 
-            await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio, recordMic, videoSavePath });
+            await invoke("start_native_recording", { sourceId: selectedId, fps, recordAudio, recordMic, videoSavePath, audioVolume, micVolume });
 
             // If the user selected to start with mic muted, apply it immediately
             if (isMicMuted) {

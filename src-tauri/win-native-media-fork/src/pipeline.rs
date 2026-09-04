@@ -42,11 +42,15 @@ pub struct AudioConfig {
     pub microphone: bool,
     /// AAC bitrate in bits/sec (e.g. 128_000).
     pub bitrate: u32,
+    /// System audio volume multiplier (0.0 to 1.0+)
+    pub loopback_volume: f32,
+    /// Microphone audio volume multiplier (0.0 to 1.0+)
+    pub mic_volume: f32,
 }
 
 impl Default for AudioConfig {
     fn default() -> Self {
-        Self { loopback: true, microphone: true, bitrate: 128_000 }
+        Self { loopback: true, microphone: true, bitrate: 128_000, loopback_volume: 1.0, mic_volume: 1.0 }
     }
 }
 
@@ -489,14 +493,14 @@ fn record_consumer(
             }
         }
         let mic_muted = is_mic_muted.load(Ordering::Relaxed);
-        let frames = drain_mixed_audio(&loop_cap, &mic_cap, &mut mix_enc, mic_muted, &mut mixer_state)?;
+        let frames = drain_mixed_audio(&loop_cap, &mic_cap, &mut mix_enc, mic_muted, &mut mixer_state, &audio_cfg)?;
         for f in frames {
             recorder.write_audio(0, &f.data, f.timestamp)?;
         }
     }
     // Final audio drain.
     let mic_muted = is_mic_muted.load(Ordering::Relaxed);
-    let frames = drain_mixed_audio(&loop_cap, &mic_cap, &mut mix_enc, mic_muted, &mut mixer_state)?;
+    let frames = drain_mixed_audio(&loop_cap, &mic_cap, &mut mix_enc, mic_muted, &mut mixer_state, &audio_cfg)?;
     for f in frames {
         recorder.write_audio(0, &f.data, f.timestamp)?;
     }
@@ -524,12 +528,16 @@ fn drain_mixed_audio(
     mix_enc: &mut Option<AacEncoder>,
     mic_muted: bool,
     mixer: &mut MixerState,
+    audio_cfg: &Option<AudioConfig>,
 ) -> Result<Vec<crate::audio::EncodedAudio>> {
     let mut encoded_frames = Vec::new();
     let enc = match mix_enc {
         Some(e) => e,
         None => return Ok(encoded_frames),
     };
+    
+    let loop_vol = audio_cfg.as_ref().map(|c| c.loopback_volume).unwrap_or(1.0);
+    let mic_vol = audio_cfg.as_ref().map(|c| c.mic_volume).unwrap_or(1.0);
 
     if let Some(lrx) = loop_cap {
         while let Ok(buf) = lrx.try_recv() {
@@ -562,8 +570,8 @@ fn drain_mixed_audio(
         let mix_len = min_len - (min_len % 4); // Align to 4 bytes (stereo 16-bit)
         if mix_len > 0 {
             let mixed = crate::audio::mix::mix_pcm16(
-                &mixer.loop_leftover[..mix_len], 
-                &mixer.mic_leftover[..mix_len]
+                &mixer.loop_leftover[..mix_len], loop_vol,
+                &mixer.mic_leftover[..mix_len], mic_vol
             );
             enc.encode(&mixed, mixer.last_timestamp, &mut encoded_frames)?;
             mixer.loop_leftover.drain(..mix_len);
@@ -573,14 +581,16 @@ fn drain_mixed_audio(
         let len = mixer.loop_leftover.len();
         let mix_len = len - (len % 4);
         if mix_len > 0 {
-            enc.encode(&mixer.loop_leftover[..mix_len], mixer.last_timestamp, &mut encoded_frames)?;
+            let scaled = crate::audio::mix::scale_pcm16(&mixer.loop_leftover[..mix_len], loop_vol);
+            enc.encode(&scaled, mixer.last_timestamp, &mut encoded_frames)?;
             mixer.loop_leftover.drain(..mix_len);
         }
     } else if mic_cap.is_some() {
         let len = mixer.mic_leftover.len();
         let mix_len = len - (len % 4);
         if mix_len > 0 {
-            enc.encode(&mixer.mic_leftover[..mix_len], mixer.last_timestamp, &mut encoded_frames)?;
+            let scaled = crate::audio::mix::scale_pcm16(&mixer.mic_leftover[..mix_len], mic_vol);
+            enc.encode(&scaled, mixer.last_timestamp, &mut encoded_frames)?;
             mixer.mic_leftover.drain(..mix_len);
         }
     }
@@ -661,7 +671,7 @@ async fn stream_consumer(
 
         // Mix + send any pending audio using robust drain_mixed_audio
         let mic_muted = is_mic_muted.load(Ordering::Relaxed);
-        if let Ok(frames) = drain_mixed_audio(&loop_rx, &mic_rx, &mut mix_enc, mic_muted, &mut mixer_state) {
+        if let Ok(frames) = drain_mixed_audio(&loop_rx, &mic_rx, &mut mix_enc, mic_muted, &mut mixer_state, &audio_cfg) {
             for f in frames {
                 let _ = publisher.send_audio(&f.data, f.timestamp).await;
             }
