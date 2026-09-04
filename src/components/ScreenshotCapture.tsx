@@ -1728,34 +1728,6 @@ function ScreenshotCapture() {
               />
               <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
             </div>
-
-            {/* Direct Hex Code input */}
-            <input
-              type="text"
-              value={drawColor}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
-                  setDrawColor(val);
-                }
-              }}
-              style={{
-                width: "60px",
-                height: "22px",
-                fontSize: "0.75rem",
-                background: "rgba(0, 0, 0, 0.4)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                borderRadius: "4px",
-                color: "#ffffff",
-                padding: "2px 4px",
-                outline: "none",
-                fontFamily: "monospace",
-                textAlign: "center",
-                marginLeft: "2px"
-              }}
-              placeholder="#FF0000"
-              maxLength={7}
-            />
           </div>
 
           <div className="toolbar-divider" />
