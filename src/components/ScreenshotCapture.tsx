@@ -1559,13 +1559,6 @@ function ScreenshotCapture() {
             <Pencil size={16} />
           </button>
 
-          <button
-            className={`toolbar-btn ${activeTool === "eraser" ? "active" : ""}`}
-            onClick={() => setActiveTool("eraser")}
-            title={(t as any).toolEraser || "Silgi (Erase)"}
-          >
-            <Eraser size={16} />
-          </button>
 
           <button
             className={`toolbar-btn ${activeTool === "line" ? "active" : ""}`}
@@ -1623,6 +1616,14 @@ function ScreenshotCapture() {
             title={t.toolBlur}
           >
             <Droplets size={16} />
+          </button>
+
+          <button
+            className={`toolbar-btn ${activeTool === "eraser" ? "active" : ""}`}
+            onClick={() => setActiveTool("eraser")}
+            title={(t as any).toolEraser || "Silgi (Erase)"}
+          >
+            <Eraser size={16} />
           </button>
 
           <button
