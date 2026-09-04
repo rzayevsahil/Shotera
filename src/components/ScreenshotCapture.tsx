@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette, Eraser } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
@@ -14,7 +14,7 @@ interface SelectionRect {
   h: number;
 }
 
-type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur" | "step";
+type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur" | "step" | "eraser";
 
 interface Point {
   x: number;
@@ -35,7 +35,11 @@ interface DrawingAction {
   strikethrough?: boolean;
   stepNumber?: number;
   blurAmount?: number;
+  erasingStart?: number; // for soft delete animation
 }
+
+// Custom eraser cursor matching the lucide icon, scaled down to 16x16
+const ERASER_CURSOR = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m7%2021-4.3-4.3c-1-1-1-2.5%200-3.4l9.6-9.6c1-1%202.5-1%203.4%200l5.6%205.6c1%201%201%202.5%200%203.4L13%2021%22%20%2F%3E%3Cpath%20d%3D%22M22%2021H7%22%20%2F%3E%3Cpath%20d%3D%22m5%2011%209%209%22%20%2F%3E%3C%2Fsvg%3E") 4 14, crosshair`;
 
 // Helpers for selection resizing and cursor changes
 const getResizeHandle = (x: number, y: number, rect: SelectionRect): string | null => {
@@ -83,6 +87,96 @@ const getCursorForHandle = (handle: string | null, tool: Tool): string => {
   }
 };
 
+// Math helpers for eraser
+const distPointToSegment = (px: number, py: number, x1: number, y1: number, x2: number, y2: number) => {
+  const l2 = (x1 - x2) ** 2 + (y1 - y2) ** 2;
+  if (l2 === 0) return Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
+  let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.sqrt((px - (x1 + t * (x2 - x1))) ** 2 + (py - (y1 + t * (y2 - y1))) ** 2);
+};
+
+const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): number => {
+  if (act.type === "pencil" && act.points && act.points.length > 0) {
+    let minDist = Infinity;
+    for (let i = 0; i < act.points.length - 1; i++) {
+      const p1 = act.points[i];
+      const p2 = act.points[i + 1];
+      minDist = Math.min(minDist, distPointToSegment(px, py, p1.x, p1.y, p2.x, p2.y));
+    }
+    // If only one point
+    if (act.points.length === 1) {
+      minDist = Math.sqrt((px - act.points[0].x) ** 2 + (py - act.points[0].y) ** 2);
+    }
+    return minDist;
+  }
+  
+  if (act.type === "line" || act.type === "arrow") {
+    if (act.start && act.end) {
+      return distPointToSegment(px, py, act.start.x, act.start.y, act.end.x, act.end.y);
+    }
+  }
+
+  if (act.type === "rect" && act.start && act.end) {
+    const minX = Math.min(act.start.x, act.end.x);
+    const maxX = Math.max(act.start.x, act.end.x);
+    const minY = Math.min(act.start.y, act.end.y);
+    const maxY = Math.max(act.start.y, act.end.y);
+    
+    const d1 = distPointToSegment(px, py, minX, minY, maxX, minY); // top
+    const d2 = distPointToSegment(px, py, maxX, minY, maxX, maxY); // right
+    const d3 = distPointToSegment(px, py, minX, maxY, maxX, maxY); // bottom
+    const d4 = distPointToSegment(px, py, minX, minY, minX, maxY); // left
+    return Math.min(d1, d2, d3, d4);
+  }
+
+  if (act.type === "circle" && act.start && act.end) {
+    const rx = Math.abs(act.end.x - act.start.x) / 2;
+    const ry = Math.abs(act.end.y - act.start.y) / 2;
+    const cx = act.start.x + (act.end.x - act.start.x) / 2;
+    const cy = act.start.y + (act.end.y - act.start.y) / 2;
+    
+    if (rx === 0 || ry === 0) return Infinity;
+    
+    // Approximation for ellipse: transform point to circle space
+    const dx = (px - cx) / rx;
+    const dy = (py - cy) / ry;
+    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+    // Rough distance to perimeter
+    const avgR = (rx + ry) / 2;
+    return Math.abs(distFromCenter - 1) * avgR;
+  }
+
+  if (act.type === "text" && act.start && act.text) {
+    const estWidth = act.text.length * 10; // rough estimation
+    const estHeight = 20;
+    if (px >= act.start.x - 5 && px <= act.start.x + estWidth + 5 && 
+        py >= act.start.y - 5 && py <= act.start.y + estHeight + 5) {
+      return 0;
+    }
+    return Infinity;
+  }
+
+  if (act.type === "step" && act.start) {
+    const dist = Math.sqrt((px - act.start.x) ** 2 + (py - act.start.y) ** 2);
+    if (dist <= 14) return 0;
+    return dist - 14;
+  }
+  
+  if (act.type === "blur" && act.start && act.end) {
+    const minX = Math.min(act.start.x, act.end.x);
+    const maxX = Math.max(act.start.x, act.end.x);
+    const minY = Math.min(act.start.y, act.end.y);
+    const maxY = Math.max(act.start.y, act.end.y);
+    if (px >= minX && px <= maxX && py >= minY && py <= maxY) {
+      return 0; // inside blur area
+    }
+    return Infinity;
+  }
+
+  return Infinity;
+};
+
 function ScreenshotCapture() {
   const [lang, setLang] = useState<Language>(getLanguage);
 
@@ -114,11 +208,32 @@ function ScreenshotCapture() {
   const [drawColor, setDrawColor] = useState("#ef4444"); // Red by default
   const [boardMode, setBoardMode] = useState<"normal" | "white" | "black">("normal");
   const [drawings, setDrawings] = useState<DrawingAction[]>([]);
+  const [hoveredDrawingIndex, setHoveredDrawingIndex] = useState<number | null>(null);
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPencilPoints, setCurrentPencilPoints] = useState<Point[]>([]);
+  const [currentEraserPoints, setCurrentEraserPoints] = useState<Point[]>([]);
   const [drawingStart, setDrawingStart] = useState<Point | null>(null);
   const [drawingEnd, setDrawingEnd] = useState<Point | null>(null);
+
+  const [animFrame, setAnimFrame] = useState(0);
+
+  useEffect(() => {
+    const hasErasing = drawings.some(d => d.erasingStart !== undefined);
+    if (hasErasing) {
+      const frame = requestAnimationFrame(() => {
+        setAnimFrame(f => f + 1);
+        
+        // Purge fully erased items from state so we don't leak memory or keep rendering them invisible
+        const now = Date.now();
+        const shouldPurge = drawings.some(d => d.erasingStart && now - d.erasingStart > 400);
+        if (shouldPurge) {
+          setDrawings(prev => prev.filter(d => !d.erasingStart || now - d.erasingStart <= 400));
+        }
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [drawings, animFrame]);
 
   // Text tool state
   const [textInput, setTextInput] = useState({ visible: false, x: 0, y: 0, val: "" });
@@ -222,7 +337,8 @@ function ScreenshotCapture() {
         else if (k === "w") setBoardMode((prev) => (prev === "white" ? "normal" : "white"));
         else if (k === "k") setBoardMode((prev) => (prev === "black" ? "normal" : "black"));
         else if (k === "t") setActiveTool("text");
-        else if (k === "e") setDrawings([]);
+        else if (k === "e") setActiveTool("eraser");
+        else if (k === "c") setDrawings([]);
       }
     };
 
@@ -325,10 +441,20 @@ function ScreenshotCapture() {
       ctx.rect(selection.x, selection.y, selection.w, selection.h);
       ctx.clip();
 
-      const drawAction = (act: DrawingAction) => {
-        ctx.strokeStyle = act.color;
-        ctx.fillStyle = act.color;
-        ctx.lineWidth = act.width;
+      const drawAction = (act: DrawingAction, index: number) => {
+        let alpha = 1.0;
+        if (act.erasingStart) {
+          const elapsed = Date.now() - act.erasingStart;
+          if (elapsed > 400) return; // fully erased
+          alpha = 1.0 - (elapsed / 400);
+        }
+
+        const isHovered = index === hoveredDrawingIndex;
+        
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = (isHovered || act.erasingStart) ? "rgba(156, 163, 175, 0.7)" : act.color;
+        ctx.fillStyle = (isHovered || act.erasingStart) ? "rgba(156, 163, 175, 0.7)" : act.color;
+        ctx.lineWidth = isHovered ? act.width + 2 : act.width;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
@@ -467,7 +593,7 @@ function ScreenshotCapture() {
         }
       };
 
-      drawings.forEach(drawAction);
+      drawings.forEach((act, idx) => drawAction(act, idx));
 
       if (isDrawing) {
         if (activeTool === "pencil" && currentPencilPoints.length > 0) {
@@ -476,7 +602,7 @@ function ScreenshotCapture() {
             points: currentPencilPoints,
             color: drawColor,
             width: 3,
-          });
+          }, -1);
         } else if (activeTool === "rect" && drawingStart && drawingEnd) {
           drawAction({
             type: "rect",
@@ -484,7 +610,7 @@ function ScreenshotCapture() {
             end: drawingEnd,
             color: drawColor,
             width: 3,
-          });
+          }, -1);
         } else if (activeTool === "line" && drawingStart && drawingEnd) {
           drawAction({
             type: "line",
@@ -492,7 +618,7 @@ function ScreenshotCapture() {
             end: drawingEnd,
             color: drawColor,
             width: 3,
-          });
+          }, -1);
         } else if (activeTool === "circle" && drawingStart && drawingEnd) {
           drawAction({
             type: "circle",
@@ -500,7 +626,7 @@ function ScreenshotCapture() {
             end: drawingEnd,
             color: drawColor,
             width: 3,
-          });
+          }, -1);
         } else if (activeTool === "arrow" && drawingStart && drawingEnd) {
           drawAction({
             type: "arrow",
@@ -508,7 +634,7 @@ function ScreenshotCapture() {
             end: drawingEnd,
             color: drawColor,
             width: 3,
-          });
+          }, -1);
         } else if (activeTool === "blur" && drawingStart && drawingEnd) {
           drawAction({
             type: "blur",
@@ -517,13 +643,28 @@ function ScreenshotCapture() {
             color: drawColor, // not used
             width: 3,
             blurAmount: blurAmount,
-          });
+          }, -1);
         }
+      }
+
+      // Draw eraser trail
+      if (currentEraserPoints.length > 0) {
+        ctx.globalAlpha = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(currentEraserPoints[0].x, currentEraserPoints[0].y);
+        for (let i = 1; i < currentEraserPoints.length; i++) {
+          ctx.lineTo(currentEraserPoints[i].x, currentEraserPoints[i].y);
+        }
+        ctx.strokeStyle = "rgba(156, 163, 175, 0.5)";
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.stroke();
       }
 
       ctx.restore();
     }
-  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough, blurAmount]);
+  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, currentEraserPoints, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough, blurAmount, animFrame]);
 
   useEffect(() => {
     if (textInput.visible && textInputRef.current) {
@@ -540,6 +681,8 @@ function ScreenshotCapture() {
     if (canvasRef.current) {
       if (activeTool === "text") {
         canvasRef.current.style.cursor = "text";
+      } else if (activeTool === "eraser") {
+        canvasRef.current.style.cursor = ERASER_CURSOR;
       } else if (activeTool === "select" && selection) {
         // Handled dynamically by handleMouseMove
       } else {
@@ -619,7 +762,21 @@ function ScreenshotCapture() {
         y >= selection.y &&
         y <= selection.y + selection.h
       ) {
-        if (activeTool === "step") {
+        if (activeTool === "eraser") {
+          e.preventDefault();
+          setIsDrawing(true);
+          setCurrentEraserPoints([{ x, y }]);
+          if (hoveredDrawingIndex !== null) {
+            setDrawings((prev) => {
+              const next = [...prev];
+              if (next[hoveredDrawingIndex] && !next[hoveredDrawingIndex].erasingStart) {
+                next[hoveredDrawingIndex] = { ...next[hoveredDrawingIndex], erasingStart: Date.now() };
+              }
+              return next;
+            });
+            setHoveredDrawingIndex(null);
+          }
+        } else if (activeTool === "step") {
           e.preventDefault();
           const nextStep = drawings.filter((d) => d.type === "step").length + 1;
           setDrawings((prev) => [
@@ -713,13 +870,57 @@ function ScreenshotCapture() {
 
       if (activeTool === "pencil") {
         setCurrentPencilPoints((prev) => [...prev, { x: clampedX, y: clampedY }]);
+      } else if (activeTool === "eraser") {
+        setCurrentEraserPoints((prev) => [...prev, { x: clampedX, y: clampedY }]);
+        
+        let minDistance = 15;
+        let foundIndex = -1;
+        for (let i = drawings.length - 1; i >= 0; i--) {
+          if (drawings[i].erasingStart) continue; // Already erasing
+          const dist = getDistanceToDrawing(drawings[i], clampedX, clampedY);
+          if (dist <= minDistance) {
+            foundIndex = i;
+            break;
+          }
+        }
+        
+        if (foundIndex !== -1) {
+          setDrawings((prev) => {
+            const next = [...prev];
+            if (next[foundIndex] && !next[foundIndex].erasingStart) {
+              next[foundIndex] = { ...next[foundIndex], erasingStart: Date.now() };
+            }
+            return next;
+          });
+          setHoveredDrawingIndex(null);
+        }
       } else {
         setDrawingEnd({ x: clampedX, y: clampedY });
       }
     } else {
+      // Hover logic (for eraser or cursors)
+      if (activeTool === "eraser" && selection) {
+        let foundIndex: number | null = null;
+        let minDistance = 10; // Threshold of 10px
+
+        for (let i = drawings.length - 1; i >= 0; i--) {
+          const dist = getDistanceToDrawing(drawings[i], x, y);
+          if (dist <= minDistance) {
+            foundIndex = i;
+            break;
+          }
+        }
+        
+        if (foundIndex !== hoveredDrawingIndex) {
+          setHoveredDrawingIndex(foundIndex);
+        }
+      } else if (hoveredDrawingIndex !== null) {
+        setHoveredDrawingIndex(null);
+      }
+
       if (canvasRef.current) {
         if (activeTool !== "select") {
-          canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "step" ? "crosshair" : "crosshair");
+          canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "step" ? "crosshair" : "crosshair"));
         } else if (selection) {
           const handle = getResizeHandle(x, y, selection);
           canvasRef.current.style.cursor = getCursorForHandle(handle, activeTool);
@@ -759,7 +960,9 @@ function ScreenshotCapture() {
     } else if (isDrawing) {
       setIsDrawing(false);
 
-      if (activeTool === "pencil" && currentPencilPoints.length > 0) {
+      if (activeTool === "eraser") {
+        setCurrentEraserPoints([]);
+      } else if (activeTool === "pencil" && currentPencilPoints.length > 0) {
         setDrawings((prev) => [
           ...prev,
           {
@@ -828,6 +1031,7 @@ function ScreenshotCapture() {
       }
 
       setCurrentPencilPoints([]);
+      setCurrentEraserPoints([]);
       setDrawingStart(null);
       setDrawingEnd(null);
     }
@@ -1288,6 +1492,14 @@ function ScreenshotCapture() {
             title={t.toolPencil}
           >
             <Pencil size={16} />
+          </button>
+
+          <button
+            className={`toolbar-btn ${activeTool === "eraser" ? "active" : ""}`}
+            onClick={() => setActiveTool("eraser")}
+            title={(t as any).toolEraser || "Silgi (Erase)"}
+          >
+            <Eraser size={16} />
           </button>
 
           <button
