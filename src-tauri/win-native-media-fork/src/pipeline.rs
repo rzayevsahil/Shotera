@@ -397,9 +397,8 @@ fn record_consumer(
     // AudioCapture handles (`_loop_h`/`_mic_h`) must stay alive for the whole
     // function — dropping one stops its capture thread.
     let mut loop_cap = None;
-    let mut loop_enc = None;
     let mut mic_cap = None;
-    let mut mic_enc = None;
+    let mut mix_enc = None;
     let mut _loop_h = None;
     let mut _mic_h = None;
     let mut tracks: Vec<AudioTrack> = Vec::new();
@@ -418,7 +417,7 @@ fn record_consumer(
                             });
                             _loop_h = Some(cap);
                             loop_cap = Some(rx);
-                            loop_enc = Some(enc);
+                            mix_enc = Some(enc);
                         },
                         Err(e) => {
                             write_debug_log(&format!("[record_consumer] WARNING: loopback AAC encoder failed: {}. Audio disabled.", e));
@@ -435,21 +434,25 @@ fn record_consumer(
         if acfg.microphone {
             match acap::start(AudioSource::Microphone, 64, base_time_100ns.clone(), is_paused.clone()) {
                 Ok((cap, rx)) => {
-                    match AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate) {
-                        Ok(enc) => {
-                            tracks.push(AudioTrack {
-                                sample_rate: cap.sample_rate,
-                                channels: cap.channels,
-                                asc: enc.audio_specific_config().to_vec(),
-                                bitrate: acfg.bitrate,
-                            });
-                            _mic_h = Some(cap);
-                            mic_cap = Some(rx);
-                            mic_enc = Some(enc);
-                        },
-                        Err(e) => {
-                            write_debug_log(&format!("[record_consumer] WARNING: microphone AAC encoder failed: {}. Microphone disabled.", e));
-                            tracing::warn!("microphone AAC encoder failed: {e}");
+                    let sr = cap.sample_rate;
+                    let ch = cap.channels;
+                    _mic_h = Some(cap);
+                    mic_cap = Some(rx);
+                    if mix_enc.is_none() {
+                        match AacEncoder::new(sr, ch, acfg.bitrate) {
+                            Ok(enc) => {
+                                tracks.push(AudioTrack {
+                                    sample_rate: sr,
+                                    channels: ch,
+                                    asc: enc.audio_specific_config().to_vec(),
+                                    bitrate: acfg.bitrate,
+                                });
+                                mix_enc = Some(enc);
+                            },
+                            Err(e) => {
+                                write_debug_log(&format!("[record_consumer] WARNING: microphone AAC encoder failed: {}. Microphone disabled.", e));
+                                tracing::warn!("microphone AAC encoder failed: {e}");
+                            }
                         }
                     }
                 },
@@ -461,15 +464,13 @@ fn record_consumer(
         }
     }
 
-    // Track indices: loopback first (0) if present, then mic.
-    let loop_track = if loop_enc.is_some() { Some(0usize) } else { None };
-    let mic_track = if mic_enc.is_some() {
-        Some(if loop_track.is_some() { 1 } else { 0 })
-    } else {
-        None
-    };
-
     let mut recorder = Mp4Recorder::with_audio(&rec.output_path, &vcfg, &params, &tracks)?;
+
+    let mut mixer_state = MixerState {
+        loop_leftover: Vec::new(),
+        mic_leftover: Vec::new(),
+        last_timestamp: std::time::Duration::ZERO,
+    };
 
     // Poll video (blocking with timeout) + audio (non-blocking) until the video
     // channel closes (pipeline stop drops the fork sender).
@@ -488,13 +489,17 @@ fn record_consumer(
             }
         }
         let mic_muted = is_mic_muted.load(Ordering::Relaxed);
-        drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut(), false)?;
-        drain_audio(&mut recorder, mic_track, &mic_cap, mic_enc.as_mut(), mic_muted)?;
+        let frames = drain_mixed_audio(&loop_cap, &mic_cap, &mut mix_enc, mic_muted, &mut mixer_state)?;
+        for f in frames {
+            recorder.write_audio(0, &f.data, f.timestamp)?;
+        }
     }
     // Final audio drain.
     let mic_muted = is_mic_muted.load(Ordering::Relaxed);
-    drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut(), false)?;
-    drain_audio(&mut recorder, mic_track, &mic_cap, mic_enc.as_mut(), mic_muted)?;
+    let frames = drain_mixed_audio(&loop_cap, &mic_cap, &mut mix_enc, mic_muted, &mut mixer_state)?;
+    for f in frames {
+        recorder.write_audio(0, &f.data, f.timestamp)?;
+    }
 
     write_debug_log("[record_consumer] Finalizing MP4 file...");
     if let Err(e) = recorder.finalize() {
@@ -506,28 +511,81 @@ fn record_consumer(
     Ok(())
 }
 
-/// Encode any pending PCM from `cap` and write the AAC frames to `track`.
-fn drain_audio(
-    recorder: &mut Mp4Recorder,
-    track: Option<usize>,
-    cap: &Option<std::sync::mpsc::Receiver<crate::AudioBuffer>>,
-    enc: Option<&mut AacEncoder>,
-    muted: bool,
-) -> Result<()> {
-    let (Some(track), Some(rx), Some(enc)) = (track, cap.as_ref(), enc) else {
-        return Ok(());
+struct MixerState {
+    loop_leftover: Vec<u8>,
+    mic_leftover: Vec<u8>,
+    last_timestamp: std::time::Duration,
+}
+
+/// Mix pending PCM from `loop_cap` and `mic_cap` (handling silence/muting) and returns the encoded AAC frames.
+fn drain_mixed_audio(
+    loop_cap: &Option<std::sync::mpsc::Receiver<crate::AudioBuffer>>,
+    mic_cap: &Option<std::sync::mpsc::Receiver<crate::AudioBuffer>>,
+    mix_enc: &mut Option<AacEncoder>,
+    mic_muted: bool,
+    mixer: &mut MixerState,
+) -> Result<Vec<crate::audio::EncodedAudio>> {
+    let mut encoded_frames = Vec::new();
+    let enc = match mix_enc {
+        Some(e) => e,
+        None => return Ok(encoded_frames),
     };
-    while let Ok(mut buf) = rx.try_recv() {
-        if muted {
-            buf.data.fill(0);
-        }
-        let mut out = Vec::new();
-        enc.encode(&buf.data, buf.timestamp, &mut out)?;
-        for f in &out {
-            recorder.write_audio(track, &f.data, f.timestamp)?;
+
+    if let Some(lrx) = loop_cap {
+        while let Ok(buf) = lrx.try_recv() {
+            mixer.loop_leftover.extend_from_slice(&buf.data);
+            mixer.last_timestamp = buf.timestamp;
         }
     }
-    Ok(())
+    if let Some(mrx) = mic_cap {
+        while let Ok(mut buf) = mrx.try_recv() {
+            if mic_muted {
+                buf.data.fill(0);
+            }
+            mixer.mic_leftover.extend_from_slice(&buf.data);
+            if loop_cap.is_none() {
+                mixer.last_timestamp = buf.timestamp;
+            }
+        }
+    }
+
+    // Safety valve: prevent unbounded memory growth if one channel dies permanently.
+    if mixer.loop_leftover.len() > 48000 * 4 * 2 {
+        mixer.loop_leftover.clear();
+    }
+    if mixer.mic_leftover.len() > 48000 * 4 * 2 {
+        mixer.mic_leftover.clear();
+    }
+
+    if loop_cap.is_some() && mic_cap.is_some() {
+        let min_len = mixer.loop_leftover.len().min(mixer.mic_leftover.len());
+        let mix_len = min_len - (min_len % 4); // Align to 4 bytes (stereo 16-bit)
+        if mix_len > 0 {
+            let mixed = crate::audio::mix::mix_pcm16(
+                &mixer.loop_leftover[..mix_len], 
+                &mixer.mic_leftover[..mix_len]
+            );
+            enc.encode(&mixed, mixer.last_timestamp, &mut encoded_frames)?;
+            mixer.loop_leftover.drain(..mix_len);
+            mixer.mic_leftover.drain(..mix_len);
+        }
+    } else if loop_cap.is_some() {
+        let len = mixer.loop_leftover.len();
+        let mix_len = len - (len % 4);
+        if mix_len > 0 {
+            enc.encode(&mixer.loop_leftover[..mix_len], mixer.last_timestamp, &mut encoded_frames)?;
+            mixer.loop_leftover.drain(..mix_len);
+        }
+    } else if mic_cap.is_some() {
+        let len = mixer.mic_leftover.len();
+        let mix_len = len - (len % 4);
+        if mix_len > 0 {
+            enc.encode(&mixer.mic_leftover[..mix_len], mixer.last_timestamp, &mut encoded_frames)?;
+            mixer.mic_leftover.drain(..mix_len);
+        }
+    }
+
+    Ok(encoded_frames)
 }
 
 /// Streamer task body: publishes video + a single AAC track mixed from loopback
@@ -582,6 +640,12 @@ async fn stream_consumer(
         }
     }
 
+    let mut mixer_state = MixerState {
+        loop_leftover: Vec::new(),
+        mic_leftover: Vec::new(),
+        last_timestamp: std::time::Duration::ZERO,
+    };
+
     loop {
         match stream_rx.recv_timeout(std::time::Duration::from_millis(5)) {
             Ok(sample) => {
@@ -595,23 +659,11 @@ async fn stream_consumer(
             Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
         }
 
-        // Mix + send any pending audio.
-        if let (Some(lrx), Some(enc)) = (&loop_rx, mix_enc.as_mut()) {
-            while let Ok(buf) = lrx.try_recv() {
-                let mixed = match mic_rx.as_ref().and_then(|r| r.try_recv().ok()) {
-                    Some(mut m) => {
-                        if is_mic_muted.load(Ordering::Relaxed) {
-                            m.data.fill(0);
-                        }
-                        mix::mix_pcm16(&buf.data, &m.data)
-                    }
-                    None => buf.data.clone(),
-                };
-                let mut out = Vec::new();
-                enc.encode(&mixed, buf.timestamp, &mut out)?;
-                for f in &out {
-                    let _ = publisher.send_audio(&f.data, f.timestamp).await;
-                }
+        // Mix + send any pending audio using robust drain_mixed_audio
+        let mic_muted = is_mic_muted.load(Ordering::Relaxed);
+        if let Ok(frames) = drain_mixed_audio(&loop_rx, &mic_rx, &mut mix_enc, mic_muted, &mut mixer_state) {
+            for f in frames {
+                let _ = publisher.send_audio(&f.data, f.timestamp).await;
             }
         }
     }
