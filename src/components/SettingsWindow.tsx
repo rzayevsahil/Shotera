@@ -3535,7 +3535,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Mikrofonu Kaydet */}
-                  <div className="setting-row" data-tour="setting-record-mic">
+                  <div className="setting-row" data-tour="setting-record-mic" style={{ borderBottom: recordMic ? "none" : undefined, paddingBottom: recordMic ? "8px" : undefined }}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).recordMicLabel || "Mikrofonu Kaydet"}</span>
                       <span className="setting-desc">{(t as any).recordMicDesc || "Kendi sesinizi (mikrofon) video kaydına dahil edin."}</span>
@@ -3558,7 +3558,7 @@ function SettingsWindow() {
 
                   {/* Mikrofon Ses Seviyesi */}
                   {recordMic && (
-                    <div className="setting-row" style={{ marginTop: "-8px", borderBottom: "none", paddingTop: 0 }}>
+                    <div className="setting-row" style={{ marginTop: "-8px", paddingTop: 0 }}>
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).recordMicVolumeLabel || "Mikrofon Ses Seviyesi"}</span>
                       </div>
@@ -3581,7 +3581,7 @@ function SettingsWindow() {
                   )}
 
                   {/* Sistem Sesini Kaydet */}
-                  <div className="setting-row" data-tour="setting-record-audio">
+                  <div className="setting-row" data-tour="setting-record-audio" style={{ borderBottom: recordAudio ? "none" : undefined, paddingBottom: recordAudio ? "8px" : undefined }}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
                       <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
@@ -3602,7 +3602,7 @@ function SettingsWindow() {
 
                   {/* Sistem Ses Seviyesi */}
                   {recordAudio && (
-                    <div className="setting-row" style={{ marginTop: "-8px", borderBottom: "none", paddingTop: 0 }}>
+                    <div className="setting-row" style={{ marginTop: "-8px", paddingTop: 0 }}>
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).recordAudioVolumeLabel || "Sistem Ses Seviyesi"}</span>
                       </div>
