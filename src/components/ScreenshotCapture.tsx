@@ -19,6 +19,7 @@ type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text" 
 interface Point {
   x: number;
   y: number;
+  time?: number;
 }
 
 interface DrawingAction {
@@ -227,13 +228,23 @@ function ScreenshotCapture() {
   useEffect(() => {
     const hasErasing = drawings.some(d => d.erasingStart !== undefined);
     const hasFadingTrails = fadingEraserTrails.length > 0;
+    const hasActiveEraser = currentEraserPoints.length > 0;
     
-    if (hasErasing || hasFadingTrails) {
+    if (hasErasing || hasFadingTrails || hasActiveEraser) {
       const frame = requestAnimationFrame(() => {
         setAnimFrame(f => f + 1);
         
-        // Purge fully erased items from state so we don't leak memory or keep rendering them invisible
         const now = Date.now();
+
+        // Shrink the current eraser points (comet tail effect, e.g. 250ms long)
+        if (currentEraserPoints.length > 0) {
+          const validPoints = currentEraserPoints.filter(p => p.time && now - p.time <= 250);
+          if (validPoints.length !== currentEraserPoints.length) {
+            setCurrentEraserPoints(validPoints);
+          }
+        }
+
+        // Purge fully erased items from state so we don't leak memory or keep rendering them invisible
         const shouldPurge = drawings.some(d => d.erasingStart && now - d.erasingStart > 400);
         if (shouldPurge) {
           setDrawings(prev => prev.filter(d => !d.erasingStart || now - d.erasingStart <= 400));
@@ -246,7 +257,7 @@ function ScreenshotCapture() {
       });
       return () => cancelAnimationFrame(frame);
     }
-  }, [drawings, fadingEraserTrails, animFrame]);
+  }, [drawings, fadingEraserTrails, currentEraserPoints, animFrame]);
 
   // Text tool state
   const [textInput, setTextInput] = useState({ visible: false, x: 0, y: 0, val: "" });
@@ -795,7 +806,7 @@ function ScreenshotCapture() {
         if (activeTool === "eraser") {
           e.preventDefault();
           setIsDrawing(true);
-          setCurrentEraserPoints([{ x, y }]);
+          setCurrentEraserPoints([{ x, y, time: Date.now() }]);
           if (hoveredDrawingIndex !== null) {
             setDrawings((prev) => {
               const next = [...prev];
@@ -901,7 +912,7 @@ function ScreenshotCapture() {
       if (activeTool === "pencil") {
         setCurrentPencilPoints((prev) => [...prev, { x: clampedX, y: clampedY }]);
       } else if (activeTool === "eraser") {
-        setCurrentEraserPoints((prev) => [...prev, { x: clampedX, y: clampedY }]);
+        setCurrentEraserPoints((prev) => [...prev, { x: clampedX, y: clampedY, time: Date.now() }]);
         
         let minDistance = 15;
         let foundIndex = -1;
