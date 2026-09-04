@@ -47,6 +47,9 @@ interface FadingEraserTrail {
 // Custom eraser cursor matching the lucide icon, scaled down to 16x16
 const ERASER_CURSOR = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m7%2021-4.3-4.3c-1-1-1-2.5%200-3.4l9.6-9.6c1-1%202.5-1%203.4%200l5.6%205.6c1%201%201%202.5%200%203.4L13%2021%22%20%2F%3E%3Cpath%20d%3D%22M22%2021H7%22%20%2F%3E%3Cpath%20d%3D%22m5%2011%209%209%22%20%2F%3E%3C%2Fsvg%3E") 4 14, crosshair`;
 
+// Custom pencil cursor matching the lucide icon, scaled down to 16x16
+const PENCIL_CURSOR = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21.174%206.812a1%201%200%200%200-3.986-3.987L3.842%2016.174a2%202%200%200%200-.5.83l-1.321%204.352a.5.5%200%200%200%20.623.622l4.353-1.32a2%202%200%200%200%20.83-.497z%22%20%2F%3E%3Cpath%20d%3D%22m15%205%204%204%22%20%2F%3E%3C%2Fsvg%3E") 0 16, crosshair`;
+
 // Helpers for selection resizing and cursor changes
 const getResizeHandle = (x: number, y: number, rect: SelectionRect): string | null => {
   const t = 8; // threshold in pixels
@@ -724,6 +727,8 @@ function ScreenshotCapture() {
         canvasRef.current.style.cursor = "text";
       } else if (activeTool === "eraser") {
         canvasRef.current.style.cursor = ERASER_CURSOR;
+      } else if (activeTool === "pencil") {
+        canvasRef.current.style.cursor = PENCIL_CURSOR;
       } else if (activeTool === "select" && selection) {
         // Handled dynamically by handleMouseMove
       } else {
@@ -961,7 +966,7 @@ function ScreenshotCapture() {
 
       if (canvasRef.current) {
         if (activeTool !== "select") {
-          canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "step" ? "crosshair" : "crosshair"));
+          canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "pencil" ? PENCIL_CURSOR : (activeTool === "step" ? "crosshair" : "crosshair")));
         } else if (selection) {
           const handle = getResizeHandle(x, y, selection);
           canvasRef.current.style.cursor = getCursorForHandle(handle, activeTool);
