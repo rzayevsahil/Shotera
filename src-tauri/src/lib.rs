@@ -7,6 +7,15 @@ use base64::prelude::*;
 use chrono::Local;
 // use tauri_plugin_notification::NotificationExt;
 
+// DEBUG LOGGING HELPER
+fn write_debug_log(msg: &str) {
+    if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(std::env::temp_dir().join("Shotera_debug_log.txt")) {
+        let time = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+        use std::io::Write;
+        let _ = writeln!(file, "[{}] {}", time, msg);
+    }
+}
+
 struct AppState {
     last_screenshot: Mutex<Option<image::RgbaImage>>,
     language: Mutex<String>,
@@ -197,10 +206,19 @@ async fn start_native_recording(
             p.push("Shotera");
             p
         };
-        let _ = std::fs::create_dir_all(&path);
-        path.push(&filename);
+        
+        write_debug_log(&format!("--- NEW RECORDING REQUEST ---"));
+        write_debug_log(&format!("Original Save Directory: {:?}", path));
 
+        if let Err(e) = std::fs::create_dir_all(&path) {
+            write_debug_log(&format!("Failed to create directory: {}", e));
+        } else {
+            write_debug_log("Directory exists or created successfully.");
+        }
+        
+        path.push(&filename);
         let output_path_str = path.to_string_lossy().to_string();
+        write_debug_log(&format!("Final MP4 Path: {}", output_path_str));
 
         let config = PipelineConfig {
             capture_target: target,
@@ -242,16 +260,19 @@ async fn start_native_recording(
                     
                     let start_res = {
                         let mut p = pipeline_arc.lock().await;
+                        write_debug_log("Calling p.start().await...");
                         p.start().await
                     };
 
                     match start_res {
                         Ok(_) => {
+                            write_debug_log("p.start() SUCCEEDED. Pipeline running.");
                             let _ = ready_tx.send(Ok(()));
                             println!("Native recording pipeline started successfully.");
                             let _ = rx.await; // wait for stop signal
                             
                             let elapsed = start_time.elapsed();
+                            write_debug_log(&format!("Stop signal received after {}ms", elapsed.as_millis()));
                             if elapsed.as_millis() < 2500 {
                                 let delay = 2500 - elapsed.as_millis() as u64;
                                 println!("Recording was too short, delaying stop by {}ms to prevent Media Foundation deadlock...", delay);
@@ -261,13 +282,16 @@ async fn start_native_recording(
                             println!("Stop signal received, stopping pipeline...");
                             let mut p = pipeline_arc.lock().await;
                             if let Err(e) = p.stop().await {
+                                write_debug_log(&format!("Pipeline stop error: {}", e));
                                 eprintln!("Error stopping pipeline: {}", e);
                             } else {
+                                write_debug_log("Pipeline stop SUCCEEDED.");
                                 println!("Pipeline stopped successfully.");
                             }
                         },
                         Err(e) => {
                             let err_msg = format!("Failed to start recording pipeline: {}", e);
+                            write_debug_log(&format!("ERROR: {}", err_msg));
                             eprintln!("{}", err_msg);
                             let _ = ready_tx.send(Err(err_msg));
                             if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
@@ -278,6 +302,7 @@ async fn start_native_recording(
                 },
                 Err(e) => {
                     let err_msg = format!("Failed to create recording pipeline: {}", e);
+                    write_debug_log(&format!("ERROR: {}", err_msg));
                     eprintln!("{}", err_msg);
                     let _ = ready_tx.send(Err(err_msg));
                 }

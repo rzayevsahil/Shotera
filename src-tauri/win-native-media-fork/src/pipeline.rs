@@ -375,6 +375,13 @@ fn run_worker(
 /// Recorder thread body: writes video + (optionally) two separate AAC audio
 /// tracks (loopback = track 0, mic = track 1). Each audio source is captured
 /// and encoded here so no audio crosses the video fork.
+fn write_debug_log(msg: &str) {
+    if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(std::env::temp_dir().join("Shotera_debug_log.txt")) {
+        use std::io::Write;
+        let _ = writeln!(file, "{}", msg);
+    }
+}
+
 fn record_consumer(
     rec: RecordConfig,
     vcfg: VideoConfig,
@@ -385,6 +392,7 @@ fn record_consumer(
     is_paused: Arc<AtomicBool>,
     is_mic_muted: Arc<AtomicBool>,
 ) -> Result<()> {
+    write_debug_log(&format!("[record_consumer] Starting on thread. Output path: {:?}", rec.output_path));
     // Set up audio captures + encoders + MP4 track descriptors. The
     // AudioCapture handles (`_loop_h`/`_mic_h`) must stay alive for the whole
     // function — dropping one stops its capture thread.
@@ -441,9 +449,17 @@ fn record_consumer(
     // channel closes (pipeline stop drops the fork sender).
     loop {
         match record_rx.recv_timeout(std::time::Duration::from_millis(5)) {
-            Ok(sample) => recorder.write(&sample)?,
+            Ok(sample) => {
+                if let Err(e) = recorder.write(&sample) {
+                    write_debug_log(&format!("[record_consumer] ERROR writing sample: {}", e));
+                    return Err(e);
+                }
+            }
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
-            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                write_debug_log("[record_consumer] Channel disconnected, breaking loop.");
+                break;
+            }
         }
         let mic_muted = is_mic_muted.load(Ordering::Relaxed);
         drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut(), false)?;
@@ -454,7 +470,13 @@ fn record_consumer(
     drain_audio(&mut recorder, loop_track, &loop_cap, loop_enc.as_mut(), false)?;
     drain_audio(&mut recorder, mic_track, &mic_cap, mic_enc.as_mut(), mic_muted)?;
 
-    recorder.finalize()?;
+    write_debug_log("[record_consumer] Finalizing MP4 file...");
+    if let Err(e) = recorder.finalize() {
+        write_debug_log(&format!("[record_consumer] ERROR during finalize: {}", e));
+        return Err(e);
+    }
+    
+    write_debug_log("[record_consumer] Finalize successful. File should be valid.");
     Ok(())
 }
 
