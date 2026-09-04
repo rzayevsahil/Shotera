@@ -306,7 +306,8 @@ export default function ScreenRecorderModal({ isOpen, onClose, isStandalone }: S
             await invoke("stop_native_recording");
             console.log("Stopping native recording");
         } catch (error) {
-            console.error(error);
+            console.error("Failed to stop recording cleanly:", error);
+            alert("Kayıt sonlandırılırken hata oluştu:\n\n" + error);
         } finally {
             stopAudioKeepAlive();
             setIsRecording(false);

@@ -406,31 +406,57 @@ fn record_consumer(
 
     if let Some(acfg) = &audio_cfg {
         if acfg.loopback {
-            if let Ok((cap, rx)) = acap::start(AudioSource::SystemLoopback, 64, base_time_100ns.clone(), is_paused.clone()) {
-                let enc = AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate)?;
-                tracks.push(AudioTrack {
-                    sample_rate: cap.sample_rate,
-                    channels: cap.channels,
-                    asc: enc.audio_specific_config().to_vec(),
-                    bitrate: acfg.bitrate,
-                });
-                _loop_h = Some(cap);
-                loop_cap = Some(rx);
-                loop_enc = Some(enc);
+            match acap::start(AudioSource::SystemLoopback, 64, base_time_100ns.clone(), is_paused.clone()) {
+                Ok((cap, rx)) => {
+                    match AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate) {
+                        Ok(enc) => {
+                            tracks.push(AudioTrack {
+                                sample_rate: cap.sample_rate,
+                                channels: cap.channels,
+                                asc: enc.audio_specific_config().to_vec(),
+                                bitrate: acfg.bitrate,
+                            });
+                            _loop_h = Some(cap);
+                            loop_cap = Some(rx);
+                            loop_enc = Some(enc);
+                        },
+                        Err(e) => {
+                            write_debug_log(&format!("[record_consumer] WARNING: loopback AAC encoder failed: {}. Audio disabled.", e));
+                            tracing::warn!("loopback AAC encoder failed: {e}");
+                        }
+                    }
+                },
+                Err(e) => {
+                    write_debug_log(&format!("[record_consumer] WARNING: loopback capture failed: {}. Audio disabled.", e));
+                    tracing::warn!("loopback capture failed: {e}");
+                }
             }
         }
         if acfg.microphone {
-            if let Ok((cap, rx)) = acap::start(AudioSource::Microphone, 64, base_time_100ns.clone(), is_paused.clone()) {
-                let enc = AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate)?;
-                tracks.push(AudioTrack {
-                    sample_rate: cap.sample_rate,
-                    channels: cap.channels,
-                    asc: enc.audio_specific_config().to_vec(),
-                    bitrate: acfg.bitrate,
-                });
-                _mic_h = Some(cap);
-                mic_cap = Some(rx);
-                mic_enc = Some(enc);
+            match acap::start(AudioSource::Microphone, 64, base_time_100ns.clone(), is_paused.clone()) {
+                Ok((cap, rx)) => {
+                    match AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate) {
+                        Ok(enc) => {
+                            tracks.push(AudioTrack {
+                                sample_rate: cap.sample_rate,
+                                channels: cap.channels,
+                                asc: enc.audio_specific_config().to_vec(),
+                                bitrate: acfg.bitrate,
+                            });
+                            _mic_h = Some(cap);
+                            mic_cap = Some(rx);
+                            mic_enc = Some(enc);
+                        },
+                        Err(e) => {
+                            write_debug_log(&format!("[record_consumer] WARNING: microphone AAC encoder failed: {}. Microphone disabled.", e));
+                            tracing::warn!("microphone AAC encoder failed: {e}");
+                        }
+                    }
+                },
+                Err(e) => {
+                    write_debug_log(&format!("[record_consumer] WARNING: microphone capture failed: {}. Microphone disabled.", e));
+                    tracing::warn!("microphone capture failed: {e}");
+                }
             }
         }
     }
@@ -529,19 +555,29 @@ async fn stream_consumer(
     if let Some(acfg) = &audio_cfg {
         if acfg.loopback {
             if let Ok((cap, rx)) = acap::start(AudioSource::SystemLoopback, 64, base_time_100ns.clone(), is_paused.clone()) {
-                let enc = AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate)?;
-                publisher
-                    .send_audio_sequence_header(enc.audio_specific_config())
-                    .await?;
-                mix_enc = Some(enc);
-                _loop_h = Some(cap);
-                loop_rx = Some(rx);
+                match AacEncoder::new(cap.sample_rate, cap.channels, acfg.bitrate) {
+                    Ok(enc) => {
+                        let _ = publisher.send_audio_sequence_header(enc.audio_specific_config()).await;
+                        mix_enc = Some(enc);
+                        _loop_h = Some(cap);
+                        loop_rx = Some(rx);
+                    },
+                    Err(e) => tracing::warn!("stream loopback AAC encoder failed: {e}")
+                }
             }
         }
         if acfg.microphone {
             if let Ok((cap, rx)) = acap::start(AudioSource::Microphone, 64, base_time_100ns.clone(), is_paused.clone()) {
+                let sr = cap.sample_rate;
+                let ch = cap.channels;
                 _mic_h = Some(cap);
                 mic_rx = Some(rx);
+                if mix_enc.is_none() {
+                    match AacEncoder::new(sr, ch, acfg.bitrate) {
+                        Ok(enc) => mix_enc = Some(enc),
+                        Err(e) => tracing::warn!("stream microphone AAC encoder failed: {e}")
+                    }
+                }
             }
         }
     }

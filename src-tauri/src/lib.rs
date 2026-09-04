@@ -34,7 +34,7 @@ struct AppState {
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
     status_overlay_token: std::sync::atomic::AtomicU64,
-    recorder_stop_tx: Mutex<Option<tokio::sync::oneshot::Sender<()>>>,
+    recorder_start_time: Mutex<Option<std::time::Instant>>,
     #[cfg(target_os = "windows")]
     recorder_pipeline: Mutex<Option<std::sync::Arc<tokio::sync::Mutex<win_native_media::Pipeline>>>>,
 }
@@ -243,83 +243,42 @@ async fn start_native_recording(
             stream: None,
         };
 
-        let (tx, rx) = tokio::sync::oneshot::channel();
-        let (ready_tx, ready_rx) = tokio::sync::oneshot::channel::<Result<(), String>>();
-        let app_handle_clone = app_handle.clone();
+        let pipeline = Pipeline::new(config).map_err(|e| {
+            let err_msg = format!("Failed to create recording pipeline: {}", e);
+            write_debug_log(&format!("ERROR: {}", err_msg));
+            eprintln!("{}", err_msg);
+            err_msg
+        })?;
         
-        tauri::async_runtime::spawn(async move {
-            let state = app_handle_clone.state::<AppState>();
-            let start_time = std::time::Instant::now();
-            match Pipeline::new(config) {
-                Ok(pipeline) => {
-                    let pipeline_arc = std::sync::Arc::new(tokio::sync::Mutex::new(pipeline));
-                    
-                    if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
-                        *pipe_lock = Some(pipeline_arc.clone());
-                    }
-                    
-                    let start_res = {
-                        let mut p = pipeline_arc.lock().await;
-                        write_debug_log("Calling p.start().await...");
-                        p.start().await
-                    };
-
-                    match start_res {
-                        Ok(_) => {
-                            write_debug_log("p.start() SUCCEEDED. Pipeline running.");
-                            let _ = ready_tx.send(Ok(()));
-                            println!("Native recording pipeline started successfully.");
-                            let _ = rx.await; // wait for stop signal
-                            
-                            let elapsed = start_time.elapsed();
-                            write_debug_log(&format!("Stop signal received after {}ms", elapsed.as_millis()));
-                            if elapsed.as_millis() < 2500 {
-                                let delay = 2500 - elapsed.as_millis() as u64;
-                                println!("Recording was too short, delaying stop by {}ms to prevent Media Foundation deadlock...", delay);
-                                tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
-                            }
-
-                            println!("Stop signal received, stopping pipeline...");
-                            let mut p = pipeline_arc.lock().await;
-                            if let Err(e) = p.stop().await {
-                                write_debug_log(&format!("Pipeline stop error: {}", e));
-                                eprintln!("Error stopping pipeline: {}", e);
-                            } else {
-                                write_debug_log("Pipeline stop SUCCEEDED.");
-                                println!("Pipeline stopped successfully.");
-                            }
-                        },
-                        Err(e) => {
-                            let err_msg = format!("Failed to start recording pipeline: {}", e);
-                            write_debug_log(&format!("ERROR: {}", err_msg));
-                            eprintln!("{}", err_msg);
-                            let _ = ready_tx.send(Err(err_msg));
-                            if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
-                                *pipe_lock = None;
-                            }
-                        }
-                    }
-                },
-                Err(e) => {
-                    let err_msg = format!("Failed to create recording pipeline: {}", e);
-                    write_debug_log(&format!("ERROR: {}", err_msg));
-                    eprintln!("{}", err_msg);
-                    let _ = ready_tx.send(Err(err_msg));
-                }
+        let pipeline_arc = std::sync::Arc::new(tokio::sync::Mutex::new(pipeline));
+        
+        {
+            if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
+                *pipe_lock = Some(pipeline_arc.clone());
             }
-        });
-
-        match ready_rx.await {
-            Ok(Ok(())) => {
-                let state2 = app_handle.state::<AppState>();
-                if let Ok(mut stop_tx) = state2.recorder_stop_tx.lock() {
-                    *stop_tx = Some(tx);
-                }
-                Ok(output_path_str)
-            },
-            Ok(Err(e)) => Err(e),
-            Err(_) => Err("Worker thread died before reporting ready".into()),
         }
+        
+        {
+            let mut p = pipeline_arc.lock().await;
+            write_debug_log("Calling p.start().await...");
+            if let Err(e) = p.start().await {
+                let err_msg = format!("Failed to start recording pipeline: {}", e);
+                write_debug_log(&format!("ERROR: {}", err_msg));
+                eprintln!("{}", err_msg);
+                if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
+                    *pipe_lock = None;
+                }
+                return Err(err_msg);
+            }
+            write_debug_log("p.start() SUCCEEDED. Pipeline running.");
+            println!("Native recording pipeline started successfully.");
+        }
+        
+        if let Ok(mut st) = state.recorder_start_time.lock() {
+            *st = Some(std::time::Instant::now());
+        }
+
+        Ok(output_path_str)
     }
 
     #[cfg(not(target_os = "windows"))]
@@ -361,38 +320,58 @@ fn hide_recorder_window(app_handle: AppHandle) {
 }
 
 #[tauri::command]
-fn stop_native_recording(#[allow(unused_variables)] app_handle: AppHandle, state: State<'_, AppState>) -> Result<String, String> {
+async fn stop_native_recording(#[allow(unused_variables)] app_handle: AppHandle, state: State<'_, AppState>) -> Result<String, String> {
     println!("Stopping native hardware-accelerated recording.");
     
-    let mut stopped_now = false;
-    if let Ok(mut stop_tx) = state.recorder_stop_tx.lock() {
-        if let Some(tx) = stop_tx.take() {
-            let _ = tx.send(());
-            stopped_now = true;
+    #[cfg(target_os = "windows")]
+    {
+        let pipe = {
+            let mut pipe_lock = state.recorder_pipeline.lock().unwrap();
+            pipe_lock.take()
+        };
+        
+        if let Some(pipeline_arc) = pipe {
+            let start_time = {
+                let mut st_lock = state.recorder_start_time.lock().unwrap();
+                st_lock.take()
+            };
+            
+            if let Some(st) = start_time {
+                let elapsed = st.elapsed();
+                write_debug_log(&format!("Stop signal received after {}ms", elapsed.as_millis()));
+                if elapsed.as_millis() < 2500 {
+                    let delay = 2500 - elapsed.as_millis() as u64;
+                    println!("Recording was too short, delaying stop by {}ms to prevent Media Foundation deadlock...", delay);
+                    tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
+                }
+            }
+            
+            let mut p = pipeline_arc.lock().await;
+            if let Err(e) = p.stop().await {
+                write_debug_log(&format!("Pipeline stop error: {}", e));
+                eprintln!("Error stopping pipeline: {}", e);
+                return Err(format!("Dosya kaydedilirken hata oluştu: {}", e));
+            }
+            write_debug_log("Pipeline stop SUCCEEDED.");
+            println!("Pipeline stopped successfully.");
+            
+            let lang = {
+                let state_lang = state.language.lock().map_err(|e| e.to_string())?;
+                state_lang.clone()
+            };
+            let body = match lang.as_str() {
+                "de" => "Bildschirmaufnahme erfolgreich gespeichert!",
+                "ru" => "Запись экрана успешно сохранена!",
+                "az" => "Ekran qeydi uğurla yadda saxlanıldı!",
+                "tr" => "Ekran kaydı başarıyla kaydedildi!",
+                _ => "Screen recording saved successfully!",
+            };
+            show_app_notification(&state, "Shotera", body, None);
+            return Ok("Recording stopped and saved to MP4.".into());
         }
     }
-
-    #[cfg(target_os = "windows")]
-    if let Ok(mut pipe_lock) = state.recorder_pipeline.lock() {
-        *pipe_lock = None;
-    }
     
-    if stopped_now {
-        let lang = {
-            let state_lang = state.language.lock().map_err(|e| e.to_string())?;
-            state_lang.clone()
-        };
-        let body = match lang.as_str() {
-            "de" => "Bildschirmaufnahme erfolgreich gespeichert!",
-            "ru" => "Запись экрана успешно сохранена!",
-            "az" => "Ekran qeydi uğurla yadda saxlanıldı!",
-            "tr" => "Ekran kaydı başarıyla kaydedildi!",
-            _ => "Screen recording saved successfully!",
-        };
-        show_app_notification(&state, "Shotera", body, None);
-    }
-
-    Ok("Recording stopped and saved to MP4.".into())
+    Err("Kayıt durdurulamadı veya kayıt bulunamadı.".into())
 }
 
 #[tauri::command]
@@ -2006,7 +1985,7 @@ pub fn run() {
 
             show_notifications: Mutex::new(true),
             status_overlay_token: std::sync::atomic::AtomicU64::new(0),
-            recorder_stop_tx: Mutex::new(None),
+            recorder_start_time: Mutex::new(None),
             #[cfg(target_os = "windows")]
             recorder_pipeline: Mutex::new(None),
         })
