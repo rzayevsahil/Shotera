@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette, Eraser } from "lucide-react";
 import Tesseract from "tesseract.js";
+import { HexColorPicker } from "react-colorful";
 import { translations, getLanguage, Language } from "../i18n";
 import shutterSoundUrl from "../assets/shutter.mp3";
 
@@ -270,6 +271,24 @@ function ScreenshotCapture() {
   const [textItalic, setTextItalic] = useState(false);
   const [textUnderline, setTextUnderline] = useState(false);
   const [textStrikethrough, setTextStrikethrough] = useState(false);
+
+  // Color picker popover state
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorPickerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+        setShowColorPicker(false);
+      }
+    };
+    if (showColorPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showColorPicker]);
 
   // Blur intensity / sharpness state (default 8px)
   const [blurAmount, setBlurAmount] = useState<number>(() => Number(localStorage.getItem("defaultBlurAmount") || "8"));
@@ -1704,34 +1723,72 @@ function ScreenshotCapture() {
               />
             ))}
 
-            {/* Custom Color Picker Dot */}
-            <div
-              className="color-option"
-              style={{
-                position: "relative",
-                backgroundColor: drawColor,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px dashed rgba(255,255,255,0.6)"
-              }}
-              title={t.colorPicker}
-            >
-              <input
-                type="color"
-                value={drawColor.startsWith("#") && drawColor.length === 7 ? drawColor : "#ef4444"}
-                onChange={(e) => setDrawColor(e.target.value)}
+            {/* Custom Color Picker Popover */}
+            <div style={{ position: "relative" }} ref={colorPickerRef}>
+              <div
+                className={`color-option ${showColorPicker ? "active" : ""}`}
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  opacity: 0,
+                  backgroundColor: drawColor,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px dashed rgba(255,255,255,0.6)",
                   cursor: "pointer"
                 }}
-              />
-              <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                title={t.colorPicker}
+              >
+                <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
+              </div>
+              
+              {showColorPicker && (
+                <div style={{
+                  position: "absolute",
+                  bottom: "100%",
+                  left: "50%",
+                  transform: "translate(-50%, -10px)",
+                  zIndex: 10000,
+                  backgroundColor: "#1f2937",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  alignItems: "center"
+                }}>
+                  <HexColorPicker 
+                    color={drawColor.startsWith("#") && drawColor.length === 7 ? drawColor : "#ef4444"} 
+                    onChange={setDrawColor} 
+                  />
+                  <input
+                    type="text"
+                    value={drawColor}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
+                        setDrawColor(val);
+                      }
+                    }}
+                    style={{
+                      width: "100%",
+                      height: "30px",
+                      fontSize: "0.85rem",
+                      background: "rgba(0, 0, 0, 0.4)",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: "4px",
+                      color: "#ffffff",
+                      padding: "4px 8px",
+                      outline: "none",
+                      fontFamily: "monospace",
+                      textAlign: "center"
+                    }}
+                    placeholder="#FF0000"
+                    maxLength={7}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

@@ -17,6 +17,7 @@ import { sendNotification } from "@tauri-apps/plugin-notification";
 import ScreenRecorderModal from "./ScreenRecorderModal";
 import "./ScreenRecorderModal.css";
 import FeatureTour from "./FeatureTour";
+import { HexColorPicker } from "react-colorful";
 type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
 
 function resolveImageSrc(src: string | null | undefined): string {
@@ -154,6 +155,92 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
   );
 }
 
+function CustomColorPicker({ color, onChange, onClick, title, style }: { color: string, onChange: (c: string) => void, onClick?: () => void, title?: string, style?: React.CSSProperties }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  const isValidHex = color && color.startsWith("#") && color.length === 7;
+  const displayColor = isValidHex ? color : "#000000";
+
+  return (
+    <div style={{ position: "relative" }} ref={popoverRef}>
+      <div
+        style={{
+          width: "24px",
+          height: "24px",
+          borderRadius: "50%",
+          backgroundColor: displayColor,
+          cursor: "pointer",
+          border: "2px solid rgba(255, 255, 255, 0.2)",
+          boxShadow: "0 2px 5px rgba(0,0,0,0.3)",
+          ...style
+        }}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen && onClick) onClick();
+        }}
+        title={title}
+      />
+      {isOpen && (
+        <div style={{
+          position: "absolute",
+          top: "100%",
+          left: "0",
+          marginTop: "10px",
+          zIndex: 10000,
+          backgroundColor: "#1f2937",
+          padding: "12px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          alignItems: "center"
+        }}>
+          <HexColorPicker color={displayColor} onChange={onChange} />
+          <input
+            type="text"
+            value={color}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
+                onChange(val);
+              }
+            }}
+            style={{
+              width: "100%",
+              height: "30px",
+              fontSize: "0.85rem",
+              background: "rgba(0, 0, 0, 0.4)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: "4px",
+              color: "#ffffff",
+              padding: "4px 8px",
+              outline: "none",
+              fontFamily: "monospace",
+              textAlign: "center"
+            }}
+            placeholder="#000000"
+            maxLength={7}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
@@ -2259,94 +2346,31 @@ function SettingsWindow() {
                           }}
                         />
                       ))}
-                      <div
-                        onClick={() => {
-                          const isPreset = ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor);
-                          if (isPreset) {
-                            const activeCustom = customTimerRingColor || "#06b6d4";
-                            setTimerRingColor(activeCustom);
-                            localStorage.setItem("timerRingColor", activeCustom);
-                            window.dispatchEvent(new Event("storage"));
-                          }
-                        }}
-                        style={{
-                          position: "relative",
-                          width: "28px",
-                          height: "28px",
-                          borderRadius: "50%",
-                          background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
-                            ? customTimerRingColor
-                            : timerRingColor,
-                          border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
-                            ? "2px solid #ffffff"
-                            : "2px solid transparent",
-                          boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor)
-                            ? `0 0 10px ${timerRingColor}`
-                            : "none",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease"
-                        }}
-                        title={(t as any).timerPickCustomColor || "Özel Renk Seç"}
-                      >
-                        <input
-                          type="color"
-                          value={customTimerRingColor.startsWith("#") && customTimerRingColor.length === 7 ? customTimerRingColor : "#06b6d4"}
+                      <div style={{ position: "relative", zIndex: 10 }}>
+                        <CustomColorPicker
+                          color={customTimerRingColor.startsWith("#") && customTimerRingColor.length === 7 ? customTimerRingColor : "#06b6d4"}
                           onClick={() => {
                             const activeCustom = customTimerRingColor || "#06b6d4";
                             setTimerRingColor(activeCustom);
                             localStorage.setItem("timerRingColor", activeCustom);
                             window.dispatchEvent(new Event("storage"));
                           }}
-                          onChange={(e) => {
-                            const val = e.target.value;
+                          onChange={(val) => {
                             setCustomTimerRingColor(val);
                             setTimerRingColor(val);
                             localStorage.setItem("customTimerRingColor", val);
                             localStorage.setItem("timerRingColor", val);
                             window.dispatchEvent(new Event("storage"));
                           }}
+                          title={(t as any).timerPickCustomColor || "Özel Renk Seç"}
                           style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            opacity: 0,
-                            cursor: "pointer"
+                            width: "28px", height: "28px",
+                            boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor) ? `0 0 10px ${timerRingColor}` : "none",
+                            border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(timerRingColor) ? "2px solid #ffffff" : "2px solid transparent"
                           }}
                         />
-                        <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
+                        <Palette size={12} color="#fff" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                       </div>
-
-                      <input
-                        type="text"
-                        className="premium-input"
-                        value={timerRingColor}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setTimerRingColor(val);
-                          if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                            if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899"].includes(val)) {
-                              setCustomTimerRingColor(val);
-                              localStorage.setItem("customTimerRingColor", val);
-                            }
-                            localStorage.setItem("timerRingColor", val);
-                            window.dispatchEvent(new Event("storage"));
-                          }
-                        }}
-                        placeholder="#38BDF8"
-                        style={{
-                          width: "110px",
-                          padding: "8px 12px",
-                          fontSize: "0.88rem",
-                          fontFamily: "monospace",
-                          textTransform: "uppercase",
-                          textAlign: "center"
-                        }}
-                      />
                     </div>
                   </div>
 
@@ -2379,43 +2403,9 @@ function SettingsWindow() {
                           }}
                         />
                       ))}
-                      <div
-                        onClick={() => {
-                          const isPreset = ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor);
-                          if (isPreset) {
-                            const activeCustom = customTimerBgColor || "#1e1b4b";
-                            setTimerBgColor(activeCustom);
-                            setTimerBgStyle("custom");
-                            localStorage.setItem("timerBgColor", activeCustom);
-                            localStorage.setItem("timerBgStyle", "custom");
-                            window.dispatchEvent(new Event("storage"));
-                          }
-                        }}
-                        style={{
-                          position: "relative",
-                          width: "28px",
-                          height: "28px",
-                          borderRadius: "50%",
-                          background: ["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
-                            ? customTimerBgColor
-                            : timerBgColor,
-                          border: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
-                            ? "2px solid #ffffff"
-                            : "2px solid transparent",
-                          boxShadow: !["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(timerBgColor)
-                            ? `0 0 10px ${timerBgColor}`
-                            : "none",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease"
-                        }}
-                        title={(t as any).timerPickCustomBgColor || "Özel Arka Plan Rengi Seç"}
-                      >
-                        <input
-                          type="color"
-                          value={customTimerBgColor.startsWith("#") && customTimerBgColor.length === 7 ? customTimerBgColor : "#1e1b4b"}
+                      <div style={{ position: "relative", zIndex: 10 }}>
+                        <CustomColorPicker
+                          color={customTimerBgColor.startsWith("#") && customTimerBgColor.length === 7 ? customTimerBgColor : "#1e1b4b"}
                           onClick={() => {
                             const activeCustom = customTimerBgColor || "#1e1b4b";
                             setTimerBgColor(activeCustom);
@@ -2424,8 +2414,7 @@ function SettingsWindow() {
                             localStorage.setItem("timerBgStyle", "custom");
                             window.dispatchEvent(new Event("storage"));
                           }}
-                          onChange={(e) => {
-                            const val = e.target.value;
+                          onChange={(val) => {
                             setCustomTimerBgColor(val);
                             setTimerBgColor(val);
                             setTimerBgStyle("custom");
@@ -2434,47 +2423,15 @@ function SettingsWindow() {
                             localStorage.setItem("timerBgStyle", "custom");
                             window.dispatchEvent(new Event("storage"));
                           }}
+                          title={(t as any).timerPickCustomBgColor || "Özel Arka Plan Rengi Seç"}
                           style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            opacity: 0,
-                            cursor: "pointer"
+                            width: "28px", height: "28px",
+                            boxShadow: !["#1e1b4b", "#0f172a", "#3f0e0e", "#0f2e1a", "#291334", "#000000"].includes(timerBgColor) ? `0 0 10px rgba(255,255,255,0.3)` : "none",
+                            border: !["#1e1b4b", "#0f172a", "#3f0e0e", "#0f2e1a", "#291334", "#000000"].includes(timerBgColor) ? "2px solid #ffffff" : "2px solid rgba(255,255,255,0.2)"
                           }}
                         />
-                        <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
+                        <Palette size={12} color="#fff" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                       </div>
-
-                      <input
-                        type="text"
-                        className="premium-input"
-                        value={timerBgColor}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setTimerBgColor(val);
-                          setTimerBgStyle("custom");
-                          if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                            if (!["#0f172a", "#000000", "#1e1b4b", "#06202a", "#1c0d24", "#3f0e0e"].includes(val)) {
-                              setCustomTimerBgColor(val);
-                              localStorage.setItem("customTimerBgColor", val);
-                            }
-                            localStorage.setItem("timerBgColor", val);
-                            localStorage.setItem("timerBgStyle", "custom");
-                            window.dispatchEvent(new Event("storage"));
-                          }
-                        }}
-                        placeholder="#0F172A"
-                        style={{
-                          width: "110px",
-                          padding: "8px 12px",
-                          fontSize: "0.88rem",
-                          fontFamily: "monospace",
-                          textTransform: "uppercase",
-                          textAlign: "center"
-                        }}
-                      />
                     </div>
                   </div>
 
@@ -3792,85 +3749,32 @@ function SettingsWindow() {
                               }}
                             />
                           ))}
-                          <div
-                            style={{
-                              position: "relative",
-                              width: "22px",
-                              height: "22px",
-                              borderRadius: "50%",
-                              background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
-                                ? customWebcamBorderColor
-                                : webcamBorderColor,
-                              border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
-                                ? "2px solid #ffffff"
-                                : "2px solid transparent",
-                              boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor)
-                                ? `0 0 10px ${webcamBorderColor}`
-                                : "none",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: "pointer",
-                              transition: "all 0.2s ease"
-                            }}
-                            title={(t as any).webcamPickCustomColor || "Özel Renk Seç"}
-                          >
-                            <input
-                              type="color"
-                              value={customWebcamBorderColor.startsWith("#") && customWebcamBorderColor.length === 7 ? customWebcamBorderColor : "#38bdf8"}
+                          <div style={{ position: "relative", zIndex: 10 }}>
+                            <CustomColorPicker
+                              color={customWebcamBorderColor.startsWith("#") && customWebcamBorderColor.length === 7 ? customWebcamBorderColor : "#38bdf8"}
                               onClick={() => {
                                 const activeCustom = customWebcamBorderColor || "#38bdf8";
                                 setWebcamBorderColor(activeCustom);
                                 localStorage.setItem("webcamBorderColor", activeCustom);
                                 window.dispatchEvent(new Event("storage"));
                               }}
-                              onChange={(e) => {
-                                const val = e.target.value;
+                              onChange={(val) => {
                                 setCustomWebcamBorderColor(val);
                                 setWebcamBorderColor(val);
                                 localStorage.setItem("customWebcamBorderColor", val);
                                 localStorage.setItem("webcamBorderColor", val);
                                 window.dispatchEvent(new Event("storage"));
                               }}
+                              title={(t as any).webcamPickCustomColor || "Özel Renk Seç"}
                               style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                width: "100%",
-                                height: "100%",
-                                opacity: 0,
-                                cursor: "pointer"
+                                width: "22px", height: "22px",
+                                boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor) ? `0 0 10px ${webcamBorderColor}` : "none",
+                                border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamBorderColor) ? "2px solid #ffffff" : "2px solid transparent"
                               }}
                             />
-                            <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
+                            <Palette size={12} color="#fff" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                           </div>
                         </div>
-                        <input
-                          type="text"
-                          className="premium-input"
-                          value={webcamBorderColor}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setWebcamBorderColor(val);
-                            if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                              if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
-                                setCustomWebcamBorderColor(val);
-                                localStorage.setItem("customWebcamBorderColor", val);
-                              }
-                              localStorage.setItem("webcamBorderColor", val);
-                              window.dispatchEvent(new Event("storage"));
-                            }
-                          }}
-                          placeholder="#38BDF8"
-                          style={{
-                            width: "240px",
-                            padding: "8px 10px",
-                            fontSize: "0.9rem",
-                            fontFamily: "monospace",
-                            textTransform: "uppercase",
-                            textAlign: "center"
-                          }}
-                        />
                       </div>
                     </div>
 
@@ -4001,86 +3905,32 @@ function SettingsWindow() {
                               }}
                             />
                           ))}
-                          <div
-                            style={{
-                              position: "relative",
-                              width: "22px",
-                              height: "22px",
-                              borderRadius: "50%",
-                              background: ["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
-                                ? customWebcamTextColor
-                                : webcamTextColor,
-                              border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
-                                ? "2px solid #ffffff"
-                                : "2px solid transparent",
-                              boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor)
-                                ? `0 0 10px ${webcamTextColor}`
-                                : "none",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: "pointer",
-                              transition: "all 0.2s ease"
-                            }}
-                            title={(t as any).webcamPickTextColor || "Yazı Rengi Seç"}
-                          >
-                            <input
-                              type="color"
-                              value={customWebcamTextColor.startsWith("#") && customWebcamTextColor.length === 7 ? customWebcamTextColor : "#ffffff"}
+                          <div style={{ position: "relative", zIndex: 10 }}>
+                            <CustomColorPicker
+                              color={customWebcamTextColor.startsWith("#") && customWebcamTextColor.length === 7 ? customWebcamTextColor : "#ffffff"}
                               onClick={() => {
                                 const activeCustom = customWebcamTextColor || "#ffffff";
                                 setWebcamTextColor(activeCustom);
                                 localStorage.setItem("webcamTextColor", activeCustom);
                                 window.dispatchEvent(new Event("storage"));
                               }}
-                              onChange={(e) => {
-                                const val = e.target.value;
+                              onChange={(val) => {
                                 setCustomWebcamTextColor(val);
                                 setWebcamTextColor(val);
                                 localStorage.setItem("customWebcamTextColor", val);
                                 localStorage.setItem("webcamTextColor", val);
                                 window.dispatchEvent(new Event("storage"));
                               }}
+                              title={(t as any).webcamPickTextColor || "Yazı Rengi Seç"}
                               style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                width: "100%",
-                                height: "100%",
-                                opacity: 0,
-                                cursor: "pointer"
+                                width: "22px", height: "22px",
+                                boxShadow: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor) ? `0 0 10px ${webcamTextColor}` : "none",
+                                border: !["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(webcamTextColor) ? "2px solid #ffffff" : "2px solid transparent"
                               }}
                             />
-                            <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
+                            <Palette size={12} color="#fff" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                           </div>
                         </div>
-
-                        <input
-                          type="text"
-                          className="premium-input"
-                          value={webcamTextColor}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setWebcamTextColor(val);
-                            if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val)) {
-                              if (!["#38bdf8", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#ffffff", "#f97316"].includes(val)) {
-                                setCustomWebcamTextColor(val);
-                                localStorage.setItem("customWebcamTextColor", val);
-                              }
-                              localStorage.setItem("webcamTextColor", val);
-                              window.dispatchEvent(new Event("storage"));
-                            }
-                          }}
-                          placeholder="#FFFFFF"
-                          style={{
-                            width: "240px",
-                            padding: "8px 10px",
-                            fontSize: "0.9rem",
-                            fontFamily: "monospace",
-                            textTransform: "uppercase",
-                            textAlign: "center"
-                          }}
-                        />
                       </div>
                     </div>
 
@@ -4108,21 +3958,29 @@ function SettingsWindow() {
                               }}
                             />
                           ))}
-                          <div style={{
-                            position: "relative", width: "24px", height: "24px", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                            background: ["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
-                              ? customWebcamTextBgColor : webcamTextBgColor,
-                            border: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
-                              ? "2px solid white" : "2px solid rgba(255,255,255,0.2)",
-                            boxShadow: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor)
-                              ? `0 0 10px rgba(255,255,255,0.5)` : "none",
-                            transition: "all 0.2s", overflow: "hidden"
-                          }}>
-                            <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
-                            <input type="color" value={customWebcamTextBgColor.startsWith("#") && customWebcamTextBgColor.length === 7 ? customWebcamTextBgColor : "#000000"}
-                              onClick={() => { const activeCustom = customWebcamTextBgColor || "#000000"; setWebcamTextBgColor(activeCustom); localStorage.setItem("webcamTextBgColor", activeCustom); window.dispatchEvent(new Event("storage")); }}
-                              onChange={(e) => { const val = e.target.value; setCustomWebcamTextBgColor(val); setWebcamTextBgColor(val); localStorage.setItem("customWebcamTextBgColor", val); localStorage.setItem("webcamTextBgColor", val); window.dispatchEvent(new Event("storage")); }}
-                              style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%", cursor: "pointer" }} />
+                          <div style={{ position: "relative", zIndex: 10 }}>
+                            <CustomColorPicker
+                              color={customWebcamTextBgColor.startsWith("#") && customWebcamTextBgColor.length === 7 ? customWebcamTextBgColor : "#000000"}
+                              onClick={() => {
+                                const activeCustom = customWebcamTextBgColor || "#000000";
+                                setWebcamTextBgColor(activeCustom);
+                                localStorage.setItem("webcamTextBgColor", activeCustom);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              onChange={(val) => {
+                                setCustomWebcamTextBgColor(val);
+                                setWebcamTextBgColor(val);
+                                localStorage.setItem("customWebcamTextBgColor", val);
+                                localStorage.setItem("webcamTextBgColor", val);
+                                window.dispatchEvent(new Event("storage"));
+                              }}
+                              style={{
+                                width: "24px", height: "24px",
+                                boxShadow: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor) ? `0 0 10px rgba(255,255,255,0.5)` : "none",
+                                border: !["#000000", "#0f172a", "#1e1b4b", "#1c0d24", "#3f0e0e", "#06202a"].includes(webcamTextBgColor) ? "2px solid white" : "2px solid rgba(255,255,255,0.2)"
+                              }}
+                            />
+                            <Palette size={12} color="#fff" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                           </div>
                         </div>
                       </div>
