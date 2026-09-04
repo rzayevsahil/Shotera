@@ -15,7 +15,7 @@ interface SelectionRect {
   h: number;
 }
 
-type Tool = "select" | "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur" | "step" | "eraser";
+type Tool = "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur" | "step" | "eraser";
 
 interface Point {
   x: number;
@@ -55,28 +55,33 @@ const PENCIL_CURSOR = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2F
 const getResizeHandle = (x: number, y: number, rect: SelectionRect): string | null => {
   const t = 8; // threshold in pixels
   const { x: rx, y: ry, w: rw, h: rh } = rect;
+  
+  const near = (a: number, b: number) => Math.abs(a - b) <= t;
 
-  // Check corners first
-  if (Math.abs(x - rx) <= t && Math.abs(y - ry) <= t) return "tl";
-  if (Math.abs(x - (rx + rw)) <= t && Math.abs(y - ry) <= t) return "tr";
-  if (Math.abs(x - rx) <= t && Math.abs(y - (ry + rh)) <= t) return "bl";
-  if (Math.abs(x - (rx + rw)) <= t && Math.abs(y - (ry + rh)) <= t) return "br";
+  // Check corners (Resize)
+  if (near(x, rx) && near(y, ry)) return "tl";
+  if (near(x, rx + rw) && near(y, ry)) return "tr";
+  if (near(x, rx) && near(y, ry + rh)) return "bl";
+  if (near(x, rx + rw) && near(y, ry + rh)) return "br";
 
-  // Check edges
-  if (Math.abs(y - ry) <= t && x >= rx && x <= rx + rw) return "t";
-  if (Math.abs(y - (ry + rh)) <= t && x >= rx && x <= rx + rw) return "b";
-  if (Math.abs(x - rx) <= t && y >= ry && y <= ry + rh) return "l";
-  if (Math.abs(x - (rx + rw)) <= t && y >= ry && y <= ry + rh) return "r";
+  // Check midpoints (Resize)
+  if (near(x, rx + rw / 2) && near(y, ry)) return "t";
+  if (near(x, rx + rw / 2) && near(y, ry + rh)) return "b";
+  if (near(y, ry + rh / 2) && near(x, rx)) return "l";
+  if (near(y, ry + rh / 2) && near(x, rx + rw)) return "r";
 
-  // Check inside
-  if (x > rx && x < rx + rw && y > ry && y < ry + rh) return "move";
+  // Check edges (Move)
+  if (near(y, ry) && x >= rx && x <= rx + rw) return "move";
+  if (near(y, ry + rh) && x >= rx && x <= rx + rw) return "move";
+  if (near(x, rx) && y >= ry && y <= ry + rh) return "move";
+  if (near(x, rx + rw) && y >= ry && y <= ry + rh) return "move";
 
   return null;
 };
 
-const getCursorForHandle = (handle: string | null, tool: Tool): string => {
-  if (tool !== "select") return "crosshair";
+const getCursorForHandle = (handle: string | null): string => {
   if (!handle) return "crosshair";
+  if (handle === "move") return "move";
   switch (handle) {
     case "tl":
     case "br":
@@ -214,7 +219,7 @@ function ScreenshotCapture() {
   const [initialSelection, setInitialSelection] = useState<SelectionRect | null>(null);
 
   // Drawing state
-  const [activeTool, setActiveTool] = useState<Tool>("select");
+  const [activeTool, setActiveTool] = useState<Tool>("pencil");
   const [drawColor, setDrawColor] = useState("#ef4444"); // Red by default
   const [boardMode, setBoardMode] = useState<"normal" | "white" | "black">("normal");
   const [drawings, setDrawings] = useState<DrawingAction[]>([]);
@@ -314,7 +319,7 @@ function ScreenshotCapture() {
       setImageSrc(null);
       setSelection(null);
       setDrawings([]);
-      setActiveTool("select");
+      setActiveTool("pencil");
       setBoardMode("normal");
       setTextInput({ visible: false, x: 0, y: 0, val: "" });
 
@@ -333,7 +338,7 @@ function ScreenshotCapture() {
       setImageSrc(null);
       setSelection(null);
       setDrawings([]);
-      setActiveTool("select");
+      setActiveTool("pencil");
       setBoardMode("normal");
       setTextInput({ visible: false, x: 0, y: 0, val: "" });
       loadScreenshot();
@@ -459,27 +464,25 @@ function ScreenshotCapture() {
       ctx.setLineDash([]);
       ctx.strokeRect(selection.x, selection.y, selection.w, selection.h);
 
-      // Draw 8 resize handles if in select tool
-      if (activeTool === "select") {
-        const drawHandle = (hx: number, hy: number) => {
-          const size = 6;
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(hx - size / 2, hy - size / 2, size, size);
-          ctx.strokeStyle = "rgba(0, 242, 254, 1)";
-          ctx.lineWidth = 1.5;
-          ctx.strokeRect(hx - size / 2, hy - size / 2, size, size);
-        };
+      // Always draw 8 resize handles
+      const drawHandle = (hx: number, hy: number) => {
+        const size = 6;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(hx - size / 2, hy - size / 2, size, size);
+        ctx.strokeStyle = "rgba(0, 242, 254, 1)";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(hx - size / 2, hy - size / 2, size, size);
+      };
 
-        const { x: rx, y: ry, w: rw, h: rh } = selection;
-        drawHandle(rx, ry); // TL
-        drawHandle(rx + rw / 2, ry); // T
-        drawHandle(rx + rw, ry); // TR
-        drawHandle(rx, ry + rh / 2); // L
-        drawHandle(rx + rw, ry + rh / 2); // R
-        drawHandle(rx, ry + rh); // BL
-        drawHandle(rx + rw / 2, ry + rh); // B
-        drawHandle(rx + rw, ry + rh); // BR
-      }
+      const { x: rx, y: ry, w: rw, h: rh } = selection;
+      drawHandle(rx, ry); // TL
+      drawHandle(rx + rw / 2, ry); // T
+      drawHandle(rx + rw, ry); // TR
+      drawHandle(rx, ry + rh / 2); // L
+      drawHandle(rx + rw, ry + rh / 2); // R
+      drawHandle(rx, ry + rh); // BL
+      drawHandle(rx + rw / 2, ry + rh); // B
+      drawHandle(rx + rw, ry + rh); // BR
 
       // 5. Draw drawings constrained (clipped) within selection area
       ctx.save();
@@ -748,8 +751,6 @@ function ScreenshotCapture() {
         canvasRef.current.style.cursor = ERASER_CURSOR;
       } else if (activeTool === "pencil") {
         canvasRef.current.style.cursor = PENCIL_CURSOR;
-      } else if (activeTool === "select" && selection) {
-        // Handled dynamically by handleMouseMove
       } else {
         canvasRef.current.style.cursor = "crosshair";
       }
@@ -770,7 +771,7 @@ function ScreenshotCapture() {
       setImgElement(null);
       setSelection(null);
       setDrawings([]);
-      setActiveTool("select");
+      setActiveTool("pencil");
       setBoardMode("normal");
       setTextInput({ visible: false, x: 0, y: 0, val: "" });
       await invoke("hide_screenshot_window");
@@ -802,70 +803,70 @@ function ScreenshotCapture() {
       return;
     }
 
-    if (activeTool === "select") {
-      if (selection) {
-        // Check if user is clicking on a resize handle or selection body
-        const handle = getResizeHandle(x, y, selection);
-        if (handle) {
-          setDragMode(handle);
-          setDragStartPoint({ x, y });
-          setInitialSelection({ ...selection });
-          return;
+    if (selection) {
+      // Check if user is clicking on a resize handle
+      const handle = getResizeHandle(x, y, selection);
+      if (handle) {
+        setDragMode(handle);
+        setDragStartPoint({ x, y });
+        setInitialSelection({ ...selection });
+        return;
+      }
+    }
+
+    const isInsideSelection = selection && (
+      x >= selection.x &&
+      x <= selection.x + selection.w &&
+      y >= selection.y &&
+      y <= selection.y + selection.h
+    );
+
+    if (isInsideSelection) {
+      // Annotations mode (Pencil, Arrow, Rect, Text, etc.)
+      if (activeTool === "eraser") {
+        e.preventDefault();
+        setIsDrawing(true);
+        setCurrentEraserPoints([{ x, y, time: Date.now() }]);
+        if (hoveredDrawingIndex !== null) {
+          setDrawings((prev) => {
+            const next = [...prev];
+            if (next[hoveredDrawingIndex] && !next[hoveredDrawingIndex].erasingStart) {
+              next[hoveredDrawingIndex] = { ...next[hoveredDrawingIndex], erasingStart: Date.now() };
+            }
+            return next;
+          });
+          setHoveredDrawingIndex(null);
+        }
+      } else if (activeTool === "step") {
+        e.preventDefault();
+        const nextStep = drawings.filter((d) => d.type === "step").length + 1;
+        setDrawings((prev) => [
+          ...prev,
+          {
+            type: "step",
+            start: { x, y },
+            color: drawColor,
+            width: 3,
+            stepNumber: nextStep,
+          },
+        ]);
+      } else if (activeTool === "text") {
+        e.preventDefault();
+        setTextInput({ visible: true, x, y, val: "" });
+      } else {
+        setIsDrawing(true);
+        setDrawingStart({ x, y });
+        setDrawingEnd({ x, y });
+        if (activeTool === "pencil") {
+          setCurrentPencilPoints([{ x, y }]);
         }
       }
-
-      // If no selection clicked, start drawing a new selection box
+    } else {
+      // Clicked outside selection, start drawing a new selection box
       setIsSelecting(true);
       setStartPoint({ x, y });
       setSelection({ x, y, w: 0, h: 0 });
       setDrawings([]);
-    } else if (selection) {
-      // Annotations mode (Pencil, Arrow, Rect, Text)
-      if (
-        x >= selection.x &&
-        x <= selection.x + selection.w &&
-        y >= selection.y &&
-        y <= selection.y + selection.h
-      ) {
-        if (activeTool === "eraser") {
-          e.preventDefault();
-          setIsDrawing(true);
-          setCurrentEraserPoints([{ x, y, time: Date.now() }]);
-          if (hoveredDrawingIndex !== null) {
-            setDrawings((prev) => {
-              const next = [...prev];
-              if (next[hoveredDrawingIndex] && !next[hoveredDrawingIndex].erasingStart) {
-                next[hoveredDrawingIndex] = { ...next[hoveredDrawingIndex], erasingStart: Date.now() };
-              }
-              return next;
-            });
-            setHoveredDrawingIndex(null);
-          }
-        } else if (activeTool === "step") {
-          e.preventDefault();
-          const nextStep = drawings.filter((d) => d.type === "step").length + 1;
-          setDrawings((prev) => [
-            ...prev,
-            {
-              type: "step",
-              start: { x, y },
-              color: drawColor,
-              width: 3,
-              stepNumber: nextStep,
-            },
-          ]);
-        } else if (activeTool === "text") {
-          e.preventDefault();
-          setTextInput({ visible: true, x, y, val: "" });
-        } else {
-          setIsDrawing(true);
-          setDrawingStart({ x, y });
-          setDrawingEnd({ x, y });
-          if (activeTool === "pencil") {
-            setCurrentPencilPoints([{ x, y }]);
-          }
-        }
-      }
     }
   };
 
@@ -984,13 +985,15 @@ function ScreenshotCapture() {
       }
 
       if (canvasRef.current) {
-        if (activeTool !== "select") {
-          canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "pencil" ? PENCIL_CURSOR : (activeTool === "step" ? "crosshair" : "crosshair")));
-        } else if (selection) {
-          const handle = getResizeHandle(x, y, selection);
-          canvasRef.current.style.cursor = getCursorForHandle(handle, activeTool);
+        let handle = null;
+        if (selection) {
+          handle = getResizeHandle(x, y, selection);
+        }
+        
+        if (handle) {
+          canvasRef.current.style.cursor = getCursorForHandle(handle); // Force resize cursor over active tools
         } else {
-          canvasRef.current.style.cursor = "crosshair";
+          canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "pencil" ? PENCIL_CURSOR : "crosshair"));
         }
       }
     }
@@ -1545,16 +1548,6 @@ function ScreenshotCapture() {
       {selection && !isSelecting && (
         <div className="capture-toolbar" ref={toolbarRef} style={getToolbarStyle()}>
           <button
-            className={`toolbar-btn ${activeTool === "select" ? "active" : ""}`}
-            onClick={() => setActiveTool("select")}
-            title={t.toolSelect}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" strokeLinecap="round">
-              <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
-            </svg>
-          </button>
-
-          <button
             className={`toolbar-btn ${activeTool === "pencil" ? "active" : ""}`}
             onClick={() => setActiveTool("pencil")}
             title={t.toolPencil}
@@ -1647,7 +1640,6 @@ function ScreenshotCapture() {
           >
             <Trash2 size={16} />
           </button>
-
           {activeTool === "text" && (
             <>
               <div className="toolbar-divider" />
