@@ -542,9 +542,13 @@ function ScreenshotCapture() {
           const angle = Math.atan2(toY - fromY, toX - fromX);
           const headLength = 15;
 
+          const width = isHovered ? (act.width || 4) + 2 : (act.width || 4);
+          const lineEndX = toX - (width * 0.8) * Math.cos(angle);
+          const lineEndY = toY - (width * 0.8) * Math.sin(angle);
+
           ctx.beginPath();
           ctx.moveTo(fromX, fromY);
-          ctx.lineTo(toX, toY);
+          ctx.lineTo(lineEndX, lineEndY);
           ctx.stroke();
 
           // Arrow head
@@ -1224,9 +1228,13 @@ function ScreenshotCapture() {
         const angle = Math.atan2(toY - fromY, toX - fromX);
         const headLength = 15;
 
+        const width = act.width || 4;
+        const lineEndX = toX - (width * 0.8) * Math.cos(angle);
+        const lineEndY = toY - (width * 0.8) * Math.sin(angle);
+
         tempCtx.beginPath();
         tempCtx.moveTo(fromX, fromY);
-        tempCtx.lineTo(toX, toY);
+        tempCtx.lineTo(lineEndX, lineEndY);
         tempCtx.stroke();
 
         tempCtx.beginPath();
