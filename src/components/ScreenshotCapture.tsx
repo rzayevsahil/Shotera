@@ -745,7 +745,9 @@ function ScreenshotCapture() {
 
   useEffect(() => {
     if (canvasRef.current) {
-      if (activeTool === "text") {
+      if (!selection) {
+        canvasRef.current.style.cursor = "crosshair";
+      } else if (activeTool === "text") {
         canvasRef.current.style.cursor = "text";
       } else if (activeTool === "eraser") {
         canvasRef.current.style.cursor = ERASER_CURSOR;
@@ -755,7 +757,7 @@ function ScreenshotCapture() {
         canvasRef.current.style.cursor = "crosshair";
       }
     }
-  }, [activeTool]);
+  }, [activeTool, selection]);
 
   const handleClose = async () => {
     try {
@@ -992,6 +994,8 @@ function ScreenshotCapture() {
         
         if (handle) {
           canvasRef.current.style.cursor = getCursorForHandle(handle); // Force resize cursor over active tools
+        } else if (!selection) {
+          canvasRef.current.style.cursor = "crosshair"; // Always crosshair before selection
         } else {
           canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "pencil" ? PENCIL_CURSOR : "crosshair"));
         }
