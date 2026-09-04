@@ -38,6 +38,11 @@ interface DrawingAction {
   erasingStart?: number; // for soft delete animation
 }
 
+interface FadingEraserTrail {
+  points: Point[];
+  endTime: number;
+}
+
 // Custom eraser cursor matching the lucide icon, scaled down to 16x16
 const ERASER_CURSOR = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m7%2021-4.3-4.3c-1-1-1-2.5%200-3.4l9.6-9.6c1-1%202.5-1%203.4%200l5.6%205.6c1%201%201%202.5%200%203.4L13%2021%22%20%2F%3E%3Cpath%20d%3D%22M22%2021H7%22%20%2F%3E%3Cpath%20d%3D%22m5%2011%209%209%22%20%2F%3E%3C%2Fsvg%3E") 4 14, crosshair`;
 
@@ -213,6 +218,7 @@ function ScreenshotCapture() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPencilPoints, setCurrentPencilPoints] = useState<Point[]>([]);
   const [currentEraserPoints, setCurrentEraserPoints] = useState<Point[]>([]);
+  const [fadingEraserTrails, setFadingEraserTrails] = useState<FadingEraserTrail[]>([]);
   const [drawingStart, setDrawingStart] = useState<Point | null>(null);
   const [drawingEnd, setDrawingEnd] = useState<Point | null>(null);
 
@@ -220,7 +226,9 @@ function ScreenshotCapture() {
 
   useEffect(() => {
     const hasErasing = drawings.some(d => d.erasingStart !== undefined);
-    if (hasErasing) {
+    const hasFadingTrails = fadingEraserTrails.length > 0;
+    
+    if (hasErasing || hasFadingTrails) {
       const frame = requestAnimationFrame(() => {
         setAnimFrame(f => f + 1);
         
@@ -230,10 +238,15 @@ function ScreenshotCapture() {
         if (shouldPurge) {
           setDrawings(prev => prev.filter(d => !d.erasingStart || now - d.erasingStart <= 400));
         }
+
+        const shouldPurgeTrails = fadingEraserTrails.some(t => now - t.endTime > 500);
+        if (shouldPurgeTrails) {
+          setFadingEraserTrails(prev => prev.filter(t => now - t.endTime <= 500));
+        }
       });
       return () => cancelAnimationFrame(frame);
     }
-  }, [drawings, animFrame]);
+  }, [drawings, fadingEraserTrails, animFrame]);
 
   // Text tool state
   const [textInput, setTextInput] = useState({ visible: false, x: 0, y: 0, val: "" });
@@ -647,7 +660,7 @@ function ScreenshotCapture() {
         }
       }
 
-      // Draw eraser trail
+      // Draw current active eraser trail
       if (currentEraserPoints.length > 0) {
         ctx.globalAlpha = 1.0;
         ctx.beginPath();
@@ -662,9 +675,26 @@ function ScreenshotCapture() {
         ctx.stroke();
       }
 
+      // Draw fading eraser trails
+      fadingEraserTrails.forEach(trail => {
+        const elapsed = Date.now() - trail.endTime;
+        if (elapsed > 500) return;
+        ctx.globalAlpha = Math.max(0, 1.0 - (elapsed / 500));
+        ctx.beginPath();
+        ctx.moveTo(trail.points[0].x, trail.points[0].y);
+        for (let i = 1; i < trail.points.length; i++) {
+          ctx.lineTo(trail.points[i].x, trail.points[i].y);
+        }
+        ctx.strokeStyle = "rgba(156, 163, 175, 0.5)";
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.stroke();
+      });
+
       ctx.restore();
     }
-  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, currentEraserPoints, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough, blurAmount, animFrame]);
+  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, currentEraserPoints, fadingEraserTrails, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough, blurAmount, animFrame]);
 
   useEffect(() => {
     if (textInput.visible && textInputRef.current) {
@@ -961,6 +991,9 @@ function ScreenshotCapture() {
       setIsDrawing(false);
 
       if (activeTool === "eraser") {
+        if (currentEraserPoints.length > 0) {
+          setFadingEraserTrails(prev => [...prev, { points: currentEraserPoints, endTime: Date.now() }]);
+        }
         setCurrentEraserPoints([]);
       } else if (activeTool === "pencil" && currentPencilPoints.length > 0) {
         setDrawings((prev) => [
