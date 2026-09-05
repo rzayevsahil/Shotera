@@ -285,21 +285,36 @@ export default function WebcamOverlay() {
           zIndex: 1
         }}>
           {webcamMode === "image" ? (
-            <img
-              src={webcamImagePath ? convertFileSrc(webcamImagePath) : ""}
-              style={{
+            webcamImagePath ? (
+              <img
+                src={convertFileSrc(webcamImagePath)}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: "translateZ(0)",
+                  borderRadius: "50%",
+                  clipPath: "circle(50% at 50% 50%)",
+                  WebkitClipPath: "circle(50% at 50% 50%)",
+                  display: (started && !hasError) ? "block" : "none",
+                  pointerEvents: "none"
+                }}
+                alt=""
+              />
+            ) : (
+              <div style={{
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
-                transform: "translateZ(0)",
+                display: (started && !hasError) ? "flex" : "none",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(15, 23, 42, 0.95)",
                 borderRadius: "50%",
-                clipPath: "circle(50% at 50% 50%)",
-                WebkitClipPath: "circle(50% at 50% 50%)",
-                display: (started && !hasError && webcamImagePath) ? "block" : "none",
                 pointerEvents: "none"
-              }}
-              alt=""
-            />
+              }}>
+                <Camera size={56} color={borderColor} style={{ opacity: 0.8 }} />
+              </div>
+            )
           ) : (
             <video
               ref={videoRef}
