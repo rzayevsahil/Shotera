@@ -15,7 +15,7 @@ interface SelectionRect {
   h: number;
 }
 
-type Tool = "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur" | "step" | "eraser";
+type Tool = "pencil" | "arrow" | "line" | "rect" | "circle" | "text" | "blur" | "step" | "eraser" | "dashed-line" | "solid-rect" | "solid-circle" | "triangle" | "solid-triangle" | "wave";
 
 interface Point {
   x: number;
@@ -126,17 +126,21 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
     return minDist;
   }
   
-  if (act.type === "line" || act.type === "arrow") {
+  if (act.type === "line" || act.type === "arrow" || act.type === "dashed-line" || act.type === "wave") {
     if (act.start && act.end) {
       return distPointToSegment(px, py, act.start.x, act.start.y, act.end.x, act.end.y);
     }
   }
 
-  if (act.type === "rect" && act.start && act.end) {
+  if ((act.type === "rect" || act.type === "solid-rect") && act.start && act.end) {
     const minX = Math.min(act.start.x, act.end.x);
     const maxX = Math.max(act.start.x, act.end.x);
     const minY = Math.min(act.start.y, act.end.y);
     const maxY = Math.max(act.start.y, act.end.y);
+    
+    if (act.type === "solid-rect" && px >= minX && px <= maxX && py >= minY && py <= maxY) {
+      return 0; // inside
+    }
     
     const d1 = distPointToSegment(px, py, minX, minY, maxX, minY); // top
     const d2 = distPointToSegment(px, py, maxX, minY, maxX, maxY); // right
@@ -145,7 +149,7 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
     return Math.min(d1, d2, d3, d4);
   }
 
-  if (act.type === "circle" && act.start && act.end) {
+  if ((act.type === "circle" || act.type === "solid-circle") && act.start && act.end) {
     const rx = Math.abs(act.end.x - act.start.x) / 2;
     const ry = Math.abs(act.end.y - act.start.y) / 2;
     const cx = act.start.x + (act.end.x - act.start.x) / 2;
@@ -153,13 +157,44 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
     
     if (rx === 0 || ry === 0) return Infinity;
     
-    // Approximation for ellipse: transform point to circle space
     const dx = (px - cx) / rx;
     const dy = (py - cy) / ry;
     const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-    // Rough distance to perimeter
+    
+    if (act.type === "solid-circle" && distFromCenter <= 1) {
+      return 0; // inside ellipse
+    }
+    
     const avgR = (rx + ry) / 2;
     return Math.abs(distFromCenter - 1) * avgR;
+  }
+
+  if ((act.type === "triangle" || act.type === "solid-triangle") && act.start && act.end) {
+    const topX = act.start.x + (act.end.x - act.start.x) / 2;
+    const topY = act.start.y;
+    const brX = act.end.x;
+    const brY = act.end.y;
+    const blX = act.start.x;
+    const blY = act.end.y;
+
+    if (act.type === "solid-triangle") {
+      const sign = (p1x: number, p1y: number, p2x: number, p2y: number, p3x: number, p3y: number) => {
+        return (p1x - p3x) * (p2y - p3y) - (p2x - p3x) * (p1y - p3y);
+      };
+      const d1 = sign(px, py, topX, topY, brX, brY);
+      const d2 = sign(px, py, brX, brY, blX, blY);
+      const d3 = sign(px, py, blX, blY, topX, topY);
+      const has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+      const has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+      if (!(has_neg && has_pos)) {
+        return 0;
+      }
+    }
+
+    const d1 = distPointToSegment(px, py, topX, topY, brX, brY);
+    const d2 = distPointToSegment(px, py, brX, brY, blX, blY);
+    const d3 = distPointToSegment(px, py, blX, blY, topX, topY);
+    return Math.min(d1, d2, d3);
   }
 
   if (act.type === "text" && act.start && act.text) {
@@ -220,6 +255,8 @@ function ScreenshotCapture() {
 
   // Drawing state
   const [activeTool, setActiveTool] = useState<Tool>("pencil");
+  const [lastShape, setLastShape] = useState<Tool>("rect");
+  const [showShapeMenu, setShowShapeMenu] = useState(false);
   const [drawColor, setDrawColor] = useState("#ef4444"); // Red by default
   const [boardMode, setBoardMode] = useState<"normal" | "white" | "black">("normal");
   const [drawings, setDrawings] = useState<DrawingAction[]>([]);
@@ -563,6 +600,59 @@ function ScreenshotCapture() {
             toY - headLength * Math.sin(angle + Math.PI / 6)
           );
           ctx.fill();
+        } else if (act.type === "dashed-line" && act.start && act.end) {
+          ctx.setLineDash([8, 8]);
+          ctx.beginPath();
+          ctx.moveTo(act.start.x, act.start.y);
+          ctx.lineTo(act.end.x, act.end.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        } else if (act.type === "solid-rect" && act.start && act.end) {
+          ctx.fillRect(
+            act.start.x,
+            act.start.y,
+            act.end.x - act.start.x,
+            act.end.y - act.start.y
+          );
+        } else if (act.type === "solid-circle" && act.start && act.end) {
+          const rx = Math.abs(act.end.x - act.start.x) / 2;
+          const ry = Math.abs(act.end.y - act.start.y) / 2;
+          const cx = act.start.x + (act.end.x - act.start.x) / 2;
+          const cy = act.start.y + (act.end.y - act.start.y) / 2;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+          ctx.fill();
+        } else if (act.type === "triangle" && act.start && act.end) {
+          ctx.beginPath();
+          ctx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y); // Top
+          ctx.lineTo(act.end.x, act.end.y); // Bottom Right
+          ctx.lineTo(act.start.x, act.end.y); // Bottom Left
+          ctx.closePath();
+          ctx.stroke();
+        } else if (act.type === "solid-triangle" && act.start && act.end) {
+          ctx.beginPath();
+          ctx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y); // Top
+          ctx.lineTo(act.end.x, act.end.y); // Bottom Right
+          ctx.lineTo(act.start.x, act.end.y); // Bottom Left
+          ctx.closePath();
+          ctx.fill();
+        } else if (act.type === "wave" && act.start && act.end) {
+          const dx = act.end.x - act.start.x;
+          const dy = act.end.y - act.start.y;
+          const distance = Math.hypot(dx, dy);
+          const angle = Math.atan2(dy, dx);
+          const amplitude = 5;
+          const frequency = 10;
+          ctx.save();
+          ctx.translate(act.start.x, act.start.y);
+          ctx.rotate(angle);
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          for (let i = 0; i <= distance; i += 2) {
+              ctx.lineTo(i, Math.sin(i / frequency) * amplitude);
+          }
+          ctx.stroke();
+          ctx.restore();
         } else if (act.type === "blur" && act.start && act.end) {
           ctx.save();
           const bx = Math.min(act.start.x, act.end.x);
@@ -656,33 +746,9 @@ function ScreenshotCapture() {
             color: drawColor,
             width: 3,
           }, -1);
-        } else if (activeTool === "rect" && drawingStart && drawingEnd) {
+        } else if (["rect", "line", "circle", "arrow", "dashed-line", "solid-rect", "solid-circle", "triangle", "solid-triangle", "wave"].includes(activeTool) && drawingStart && drawingEnd) {
           drawAction({
-            type: "rect",
-            start: drawingStart,
-            end: drawingEnd,
-            color: drawColor,
-            width: 3,
-          }, -1);
-        } else if (activeTool === "line" && drawingStart && drawingEnd) {
-          drawAction({
-            type: "line",
-            start: drawingStart,
-            end: drawingEnd,
-            color: drawColor,
-            width: 3,
-          }, -1);
-        } else if (activeTool === "circle" && drawingStart && drawingEnd) {
-          drawAction({
-            type: "circle",
-            start: drawingStart,
-            end: drawingEnd,
-            color: drawColor,
-            width: 3,
-          }, -1);
-        } else if (activeTool === "arrow" && drawingStart && drawingEnd) {
-          drawAction({
-            type: "arrow",
+            type: activeTool,
             start: drawingStart,
             end: drawingEnd,
             color: drawColor,
@@ -1051,44 +1117,11 @@ function ScreenshotCapture() {
             width: 3,
           },
         ]);
-      } else if (activeTool === "rect" && drawingStart && drawingEnd) {
+      } else if (["rect", "line", "circle", "arrow", "dashed-line", "solid-rect", "solid-circle", "triangle", "solid-triangle", "wave"].includes(activeTool) && drawingStart && drawingEnd) {
         setDrawings((prev) => [
           ...prev,
           {
-            type: "rect",
-            start: drawingStart,
-            end: drawingEnd,
-            color: drawColor,
-            width: 3,
-          },
-        ]);
-      } else if (activeTool === "line" && drawingStart && drawingEnd) {
-        setDrawings((prev) => [
-          ...prev,
-          {
-            type: "line",
-            start: drawingStart,
-            end: drawingEnd,
-            color: drawColor,
-            width: 3,
-          },
-        ]);
-      } else if (activeTool === "circle" && drawingStart && drawingEnd) {
-        setDrawings((prev) => [
-          ...prev,
-          {
-            type: "circle",
-            start: drawingStart,
-            end: drawingEnd,
-            color: drawColor,
-            width: 3,
-          },
-        ]);
-      } else if (activeTool === "arrow" && drawingStart && drawingEnd) {
-        setDrawings((prev) => [
-          ...prev,
-          {
-            type: "arrow",
+            type: activeTool,
             start: drawingStart,
             end: drawingEnd,
             color: drawColor,
@@ -1248,6 +1281,59 @@ function ScreenshotCapture() {
           toY - headLength * Math.sin(angle + Math.PI / 6)
         );
         tempCtx.fill();
+      } else if (act.type === "dashed-line" && act.start && act.end) {
+        tempCtx.setLineDash([8, 8]);
+        tempCtx.beginPath();
+        tempCtx.moveTo(act.start.x, act.start.y);
+        tempCtx.lineTo(act.end.x, act.end.y);
+        tempCtx.stroke();
+        tempCtx.setLineDash([]);
+      } else if (act.type === "solid-rect" && act.start && act.end) {
+        tempCtx.fillRect(
+          act.start.x,
+          act.start.y,
+          act.end.x - act.start.x,
+          act.end.y - act.start.y
+        );
+      } else if (act.type === "solid-circle" && act.start && act.end) {
+        const rx = Math.abs(act.end.x - act.start.x) / 2;
+        const ry = Math.abs(act.end.y - act.start.y) / 2;
+        const cx = act.start.x + (act.end.x - act.start.x) / 2;
+        const cy = act.start.y + (act.end.y - act.start.y) / 2;
+        tempCtx.beginPath();
+        tempCtx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+        tempCtx.fill();
+      } else if (act.type === "triangle" && act.start && act.end) {
+        tempCtx.beginPath();
+        tempCtx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y); // Top
+        tempCtx.lineTo(act.end.x, act.end.y); // Bottom Right
+        tempCtx.lineTo(act.start.x, act.end.y); // Bottom Left
+        tempCtx.closePath();
+        tempCtx.stroke();
+      } else if (act.type === "solid-triangle" && act.start && act.end) {
+        tempCtx.beginPath();
+        tempCtx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y); // Top
+        tempCtx.lineTo(act.end.x, act.end.y); // Bottom Right
+        tempCtx.lineTo(act.start.x, act.end.y); // Bottom Left
+        tempCtx.closePath();
+        tempCtx.fill();
+      } else if (act.type === "wave" && act.start && act.end) {
+        const dx = act.end.x - act.start.x;
+        const dy = act.end.y - act.start.y;
+        const distance = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        const amplitude = 5;
+        const frequency = 10;
+        tempCtx.save();
+        tempCtx.translate(act.start.x, act.start.y);
+        tempCtx.rotate(angle);
+        tempCtx.beginPath();
+        tempCtx.moveTo(0, 0);
+        for (let i = 0; i <= distance; i += 2) {
+            tempCtx.lineTo(i, Math.sin(i / frequency) * amplitude);
+        }
+        tempCtx.stroke();
+        tempCtx.restore();
       } else if (act.type === "blur" && act.start && act.end) {
         tempCtx.save();
         const bx = Math.min(act.start.x, act.end.x);
@@ -1508,6 +1594,19 @@ function ScreenshotCapture() {
 
   const t = translations[lang];
 
+  const SHAPE_TOOLS = [
+    { id: "rect", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="1" /></svg>, title: t.toolRect || "Kare (Boş)" },
+    { id: "solid-rect", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1" /></svg>, title: (t as any).toolSolidRect || "Kare (Dolu)" },
+    { id: "circle", icon: <Circle size={16} />, title: t.toolCircle || "Yuvarlak (Boş)" },
+    { id: "solid-circle", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" /></svg>, title: (t as any).toolSolidCircle || "Yuvarlak (Dolu)" },
+    { id: "triangle", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="8,2 14,14 2,14" /></svg>, title: (t as any).toolTriangle || "Üçgen (Boş)" },
+    { id: "solid-triangle", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="8,2 14,14 2,14" /></svg>, title: (t as any).toolSolidTriangle || "Üçgen (Dolu)" },
+    { id: "line", icon: <Slash size={16} />, title: t.toolLine || "Çizgi" },
+    { id: "dashed-line", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 3"><line x1="2" y1="14" x2="14" y2="2" /></svg>, title: (t as any).toolDashedLine || "Kırık Çizgi" },
+    { id: "arrow", icon: <ArrowUpRight size={16} />, title: t.toolArrow || "Ok" },
+    { id: "wave", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M2,8 Q5,3 8,8 T14,8" /></svg>, title: (t as any).toolWave || "Dalga" },
+  ];
+
   return (
     <div className="capture-container" ref={containerRef}>
       {!selection && (
@@ -1568,39 +1667,47 @@ function ScreenshotCapture() {
           </button>
 
 
-          <button
-            className={`toolbar-btn ${activeTool === "line" ? "active" : ""}`}
-            onClick={() => setActiveTool("line")}
-            title={t.toolLine}
-          >
-            <Slash size={16} />
-          </button>
-
-          <button
-            className={`toolbar-btn ${activeTool === "arrow" ? "active" : ""}`}
-            onClick={() => setActiveTool("arrow")}
-            title={t.toolArrow}
-          >
-            <ArrowUpRight size={16} />
-          </button>
-
-          <button
-            className={`toolbar-btn ${activeTool === "rect" ? "active" : ""}`}
-            onClick={() => setActiveTool("rect")}
-            title={t.toolRect}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <rect x="1.5" y="1.5" width="13" height="13" rx="1" />
-            </svg>
-          </button>
-
-          <button
-            className={`toolbar-btn ${activeTool === "circle" ? "active" : ""}`}
-            onClick={() => setActiveTool("circle")}
-            title={t.toolCircle}
-          >
-            <Circle size={16} />
-          </button>
+          <div style={{ position: "relative" }}>
+             <button
+                className={`toolbar-btn ${['rect', 'solid-rect', 'circle', 'solid-circle', 'triangle', 'solid-triangle', 'line', 'dashed-line', 'arrow', 'wave'].includes(activeTool) ? "active" : ""}`}
+                style={{ position: 'relative' }}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  if (x > rect.width - 12 && y > rect.height - 12) {
+                    setShowShapeMenu(!showShapeMenu);
+                  } else {
+                    if (activeTool === lastShape) {
+                      setShowShapeMenu(!showShapeMenu);
+                    } else {
+                      setActiveTool(lastShape);
+                      setShowShapeMenu(false);
+                    }
+                  }
+                }}
+                title={(t as any).toolShapes || "Şekiller (Menü için tekrar tıklayın)"}
+             >
+                {SHAPE_TOOLS.find(s => s.id === lastShape)?.icon}
+                <svg style={{ position: 'absolute', bottom: 3, right: 3 }} width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="6,9 18,9 12,18" />
+                </svg>
+             </button>
+             {showShapeMenu && (
+               <div style={{ position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
+                 {SHAPE_TOOLS.map(tool => (
+                    <button
+                      key={tool.id}
+                      className={`toolbar-btn ${activeTool === tool.id ? "active" : ""}`}
+                      onClick={() => { setActiveTool(tool.id as Tool); setLastShape(tool.id as Tool); setShowShapeMenu(false); }}
+                      title={tool.title}
+                    >
+                      {tool.icon}
+                    </button>
+                 ))}
+               </div>
+             )}
+          </div>
 
           <button
             className={`toolbar-btn ${activeTool === "text" ? "active" : ""}`}
