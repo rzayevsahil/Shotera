@@ -55,7 +55,7 @@ const PENCIL_CURSOR = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2F
 const getResizeHandle = (x: number, y: number, rect: SelectionRect): string | null => {
   const t = 8; // threshold in pixels
   const { x: rx, y: ry, w: rw, h: rh } = rect;
-  
+
   const near = (a: number, b: number) => Math.abs(a - b) <= t;
 
   // Check corners (Resize)
@@ -125,7 +125,7 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
     }
     return minDist;
   }
-  
+
   if (act.type === "line" || act.type === "arrow" || act.type === "dashed-line" || act.type === "wave") {
     if (act.start && act.end) {
       return distPointToSegment(px, py, act.start.x, act.start.y, act.end.x, act.end.y);
@@ -137,11 +137,11 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
     const maxX = Math.max(act.start.x, act.end.x);
     const minY = Math.min(act.start.y, act.end.y);
     const maxY = Math.max(act.start.y, act.end.y);
-    
+
     if (act.type === "solid-rect" && px >= minX && px <= maxX && py >= minY && py <= maxY) {
       return 0; // inside
     }
-    
+
     const d1 = distPointToSegment(px, py, minX, minY, maxX, minY); // top
     const d2 = distPointToSegment(px, py, maxX, minY, maxX, maxY); // right
     const d3 = distPointToSegment(px, py, minX, maxY, maxX, maxY); // bottom
@@ -154,17 +154,17 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
     const ry = Math.abs(act.end.y - act.start.y) / 2;
     const cx = act.start.x + (act.end.x - act.start.x) / 2;
     const cy = act.start.y + (act.end.y - act.start.y) / 2;
-    
+
     if (rx === 0 || ry === 0) return Infinity;
-    
+
     const dx = (px - cx) / rx;
     const dy = (py - cy) / ry;
     const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-    
+
     if (act.type === "solid-circle" && distFromCenter <= 1) {
       return 0; // inside ellipse
     }
-    
+
     const avgR = (rx + ry) / 2;
     return Math.abs(distFromCenter - 1) * avgR;
   }
@@ -200,8 +200,8 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
   if (act.type === "text" && act.start && act.text) {
     const estWidth = act.text.length * 10; // rough estimation
     const estHeight = 20;
-    if (px >= act.start.x - 5 && px <= act.start.x + estWidth + 5 && 
-        py >= act.start.y - 5 && py <= act.start.y + estHeight + 5) {
+    if (px >= act.start.x - 5 && px <= act.start.x + estWidth + 5 &&
+      py >= act.start.y - 5 && py <= act.start.y + estHeight + 5) {
       return 0;
     }
     return Infinity;
@@ -212,7 +212,7 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
     if (dist <= 14) return 0;
     return dist - 14;
   }
-  
+
   if (act.type === "blur" && act.start && act.end) {
     const minX = Math.min(act.start.x, act.end.x);
     const maxX = Math.max(act.start.x, act.end.x);
@@ -275,11 +275,11 @@ function ScreenshotCapture() {
     const hasErasing = drawings.some(d => d.erasingStart !== undefined);
     const hasFadingTrails = fadingEraserTrails.length > 0;
     const hasActiveEraser = currentEraserPoints.length > 0;
-    
+
     if (hasErasing || hasFadingTrails || hasActiveEraser) {
       const frame = requestAnimationFrame(() => {
         setAnimFrame(f => f + 1);
-        
+
         const now = Date.now();
 
         // Shrink the current eraser points (comet tail effect, e.g. 250ms long)
@@ -536,7 +536,7 @@ function ScreenshotCapture() {
         }
 
         const isHovered = index === hoveredDrawingIndex;
-        
+
         ctx.globalAlpha = alpha;
         ctx.strokeStyle = (isHovered || act.erasingStart) ? "rgba(156, 163, 175, 0.7)" : act.color;
         ctx.fillStyle = (isHovered || act.erasingStart) ? "rgba(156, 163, 175, 0.7)" : act.color;
@@ -649,7 +649,7 @@ function ScreenshotCapture() {
           ctx.beginPath();
           ctx.moveTo(0, 0);
           for (let i = 0; i <= distance; i += 2) {
-              ctx.lineTo(i, Math.sin(i / frequency) * amplitude);
+            ctx.lineTo(i, Math.sin(i / frequency) * amplitude);
           }
           ctx.stroke();
           ctx.restore();
@@ -1010,7 +1010,7 @@ function ScreenshotCapture() {
         setCurrentPencilPoints((prev) => [...prev, { x: clampedX, y: clampedY }]);
       } else if (activeTool === "eraser") {
         setCurrentEraserPoints((prev) => [...prev, { x: clampedX, y: clampedY, time: Date.now() }]);
-        
+
         let minDistance = 15;
         let foundIndex = -1;
         for (let i = drawings.length - 1; i >= 0; i--) {
@@ -1021,7 +1021,7 @@ function ScreenshotCapture() {
             break;
           }
         }
-        
+
         if (foundIndex !== -1) {
           setDrawings((prev) => {
             const next = [...prev];
@@ -1048,7 +1048,7 @@ function ScreenshotCapture() {
             break;
           }
         }
-        
+
         if (foundIndex !== hoveredDrawingIndex) {
           setHoveredDrawingIndex(foundIndex);
         }
@@ -1061,7 +1061,7 @@ function ScreenshotCapture() {
         if (selection) {
           handle = getResizeHandle(x, y, selection);
         }
-        
+
         if (handle) {
           canvasRef.current.style.cursor = getCursorForHandle(handle); // Force resize cursor over active tools
         } else if (!selection) {
@@ -1330,7 +1330,7 @@ function ScreenshotCapture() {
         tempCtx.beginPath();
         tempCtx.moveTo(0, 0);
         for (let i = 0; i <= distance; i += 2) {
-            tempCtx.lineTo(i, Math.sin(i / frequency) * amplitude);
+          tempCtx.lineTo(i, Math.sin(i / frequency) * amplitude);
         }
         tempCtx.stroke();
         tempCtx.restore();
@@ -1668,45 +1668,45 @@ function ScreenshotCapture() {
 
 
           <div style={{ position: "relative" }}>
-             <button
-                className={`toolbar-btn ${['rect', 'solid-rect', 'circle', 'solid-circle', 'triangle', 'solid-triangle', 'line', 'dashed-line', 'arrow', 'wave'].includes(activeTool) ? "active" : ""}`}
-                style={{ position: 'relative' }}
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  if (x > rect.width - 12 && y > rect.height - 12) {
+            <button
+              className={`toolbar-btn ${['rect', 'solid-rect', 'circle', 'solid-circle', 'triangle', 'solid-triangle', 'line', 'dashed-line', 'arrow', 'wave'].includes(activeTool) ? "active" : ""}`}
+              style={{ position: 'relative' }}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                if (x > rect.width - 12 && y > rect.height - 12) {
+                  setShowShapeMenu(!showShapeMenu);
+                } else {
+                  if (activeTool === lastShape) {
                     setShowShapeMenu(!showShapeMenu);
                   } else {
-                    if (activeTool === lastShape) {
-                      setShowShapeMenu(!showShapeMenu);
-                    } else {
-                      setActiveTool(lastShape);
-                      setShowShapeMenu(false);
-                    }
+                    setActiveTool(lastShape);
+                    setShowShapeMenu(false);
                   }
-                }}
-                title={(t as any).toolShapes || "Şekiller (Menü için tekrar tıklayın)"}
-             >
-                {SHAPE_TOOLS.find(s => s.id === lastShape)?.icon}
-                <svg style={{ position: 'absolute', bottom: 3, right: 3 }} width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="6,9 18,9 12,18" />
-                </svg>
-             </button>
-             {showShapeMenu && (
-               <div style={{ position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
-                 {SHAPE_TOOLS.map(tool => (
-                    <button
-                      key={tool.id}
-                      className={`toolbar-btn ${activeTool === tool.id ? "active" : ""}`}
-                      onClick={() => { setActiveTool(tool.id as Tool); setLastShape(tool.id as Tool); setShowShapeMenu(false); }}
-                      title={tool.title}
-                    >
-                      {tool.icon}
-                    </button>
-                 ))}
-               </div>
-             )}
+                }
+              }}
+              title={(t as any).toolShapes || "Şekiller (Menü için tekrar tıklayın)"}
+            >
+              {SHAPE_TOOLS.find(s => s.id === lastShape)?.icon}
+              <svg style={{ position: 'absolute', bottom: 1, right: 0 }} width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="6,9 18,9 12,18" />
+              </svg>
+            </button>
+            {showShapeMenu && (
+              <div style={{ position: "absolute", top: "calc(100% + 8px)", left: "-8px", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
+                {SHAPE_TOOLS.map(tool => (
+                  <button
+                    key={tool.id}
+                    className={`toolbar-btn ${activeTool === tool.id ? "active" : ""}`}
+                    onClick={() => { setActiveTool(tool.id as Tool); setLastShape(tool.id as Tool); setShowShapeMenu(false); }}
+                    title={tool.title}
+                  >
+                    {tool.icon}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <button
@@ -1852,7 +1852,7 @@ function ScreenshotCapture() {
               >
                 <Palette size={12} color="#fff" style={{ pointerEvents: "none", opacity: 0.9, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
               </div>
-              
+
               {showColorPicker && (
                 <div style={{
                   position: "absolute",
@@ -1870,9 +1870,9 @@ function ScreenshotCapture() {
                   gap: "12px",
                   alignItems: "center"
                 }}>
-                  <HexColorPicker 
-                    color={drawColor.startsWith("#") && drawColor.length === 7 ? drawColor : "#ef4444"} 
-                    onChange={setDrawColor} 
+                  <HexColorPicker
+                    color={drawColor.startsWith("#") && drawColor.length === 7 ? drawColor : "#ef4444"}
+                    onChange={setDrawColor}
                   />
                   <input
                     type="text"
