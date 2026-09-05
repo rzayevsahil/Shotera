@@ -3531,7 +3531,7 @@ function SettingsWindow() {
 
                     {/* Mikrofon Ses Seviyesi */}
                     {recordMic && (
-                      <div className="setting-row" style={{ marginTop: "-8px", paddingTop: 0 }}>
+                      <div className="setting-row" style={{ marginTop: "16px" }}>
                         <div className="setting-info">
                           <span className="setting-label">{(t as any).recordMicVolumeLabel || "Mikrofon Ses Seviyesi"}</span>
                         </div>
@@ -3577,7 +3577,7 @@ function SettingsWindow() {
 
                     {/* Sistem Ses Seviyesi */}
                     {recordAudio && (
-                      <div className="setting-row" style={{ marginTop: "-8px", paddingTop: 0 }}>
+                      <div className="setting-row" style={{ marginTop: "16px" }}>
                         <div className="setting-info">
                           <span className="setting-label">{(t as any).recordAudioVolumeLabel || "Sistem Ses Seviyesi"}</span>
                         </div>
@@ -3713,7 +3713,7 @@ function SettingsWindow() {
                             </div>
                           </div>
                           {webcamImagePath && (
-                            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px", marginTop: "-8px" }}>
+                            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px", marginTop: "8px" }}>
                               <button
                                 className="premium-button"
                                 onClick={() => {
