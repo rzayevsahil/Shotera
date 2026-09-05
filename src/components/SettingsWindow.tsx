@@ -2593,11 +2593,8 @@ function SettingsWindow() {
                       )}
                     </>
                   )}
-                  </div>
-
-
                   {timerBgMode === "image" && (
-                    <div className="setting-row" data-tour="setting-timer-bg-scale">
+                    <div className="setting-row" style={{ marginTop: "-8px", paddingTop: 0, borderTop: "1px solid rgba(255, 255, 255, 0.05)" }}>
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).timerBgScaleOption || "Scale to screen"}</span>
                         <span className="setting-desc">{(t as any).timerBgScaleDesc || "Seçilen görselin çözünürlüğü ne olursa olsun ekranı tam kaplayacak şekilde ölçeklenmesini sağlar."}</span>
@@ -2618,6 +2615,7 @@ function SettingsWindow() {
                       </label>
                     </div>
                   )}
+                  </div>
 
                   {/* Clock Font Style Row */}
                   <div className="setting-row" data-tour="setting-timer-font">

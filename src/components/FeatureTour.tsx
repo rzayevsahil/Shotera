@@ -364,16 +364,7 @@ export const TOUR_STEPS: TourStep[] = [
     requireClick: false,
   },
 
-  {
-    id: "setting_timer_bg_scale",
-    target: '[data-tour="setting-timer-bg-scale"]',
-    tab: "timer",
-    subTab: "theme",
-    titleKey: "tourTimerBgScaleTitle",
-    descKey: "tourTimerBgScaleDesc",
-    interactiveHintKey: "tourClickTimerBgScale",
-    requireClick: false,
-  },
+
   {
     id: "setting_timer_font",
     target: '[data-tour="setting-timer-font"]',
