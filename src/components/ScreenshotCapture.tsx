@@ -1583,7 +1583,7 @@ function ScreenshotCapture() {
     }
 
     const desiredLeft = selection.x + (selection.w / 2) - (toolbarWidth / 2);
-    
+
     const left = Math.max(
       margin,
       Math.min(
@@ -1688,7 +1688,7 @@ function ScreenshotCapture() {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
+
                 if (x > rect.width - 12 && y > rect.height - 12) {
                   setShowShapeMenu(!showShapeMenu);
                 } else {
@@ -1708,7 +1708,7 @@ function ScreenshotCapture() {
               </svg>
             </button>
             {showShapeMenu && (
-              <div style={{ position: "absolute", top: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 120) ? "auto" : "calc(100% + 8px)", bottom: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 120) ? "calc(100% + 8px)" : "auto", left: "-8px", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
+              <div style={{ position: "absolute", top: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 100) ? "auto" : "calc(100% + 8px)", bottom: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 100) ? "calc(100% + 8px)" : "auto", left: "-8px", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
                 {SHAPE_TOOLS.map(tool => (
                   <button
                     key={tool.id}
