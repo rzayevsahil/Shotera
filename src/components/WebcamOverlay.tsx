@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { Camera } from "lucide-react";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import { translations, getLanguage, Language } from "../i18n";
 
 const activeStreams = new Set<MediaStream>();
@@ -43,10 +44,10 @@ export default function WebcamOverlay() {
       setWebcamTextBgOpacity(Number(localStorage.getItem("webcamTextBgOpacity") || "60"));
     };
     window.addEventListener("storage", handleStorageChange);
-    
+
     // Check initially in case it changed before component mounted
     setLang(getLanguage());
-    
+
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
@@ -101,7 +102,7 @@ export default function WebcamOverlay() {
         const mode = localStorage.getItem("webcamPermissionMode") || "once";
         const hasAllowed = localStorage.getItem("webcamHasAllowed") === "true";
         const perm = await navigator.permissions.query({ name: "camera" as any });
-        
+
         if (perm.state === "denied") {
           setPermissionState("denied");
           setHasError(true);
@@ -283,76 +284,76 @@ export default function WebcamOverlay() {
           overflow: "hidden",
           zIndex: 1
         }}>
-        {webcamMode === "image" ? (
-          <img
-            src={webcamImagePath ? convertFileSrc(webcamImagePath) : ""}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              transform: "translateZ(0)",
-              borderRadius: "50%",
-              clipPath: "circle(50% at 50% 50%)",
-              WebkitClipPath: "circle(50% at 50% 50%)",
-              display: (started && !hasError && webcamImagePath) ? "block" : "none",
-              pointerEvents: "none"
-            }}
-            alt=""
-          />
-        ) : (
-          <video
-            ref={videoRef}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              transform: "scaleX(-1) translateZ(0)", // Maintain mirror + GPU layer lock
-              borderRadius: "50%",
-              clipPath: "circle(50% at 50% 50%)", // Force circular mask at GPU level
-              WebkitClipPath: "circle(50% at 50% 50%)", // Safari/Webkit fallback
-              display: (started && !hasError) ? "block" : "none",
-              pointerEvents: "none"
-            }}
-          />
-        )}
-        {!started && permissionState === "idle" && (
-          <div
-            style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
-          >
-            {t.webcamOff}
-          </div>
-        )}
-        {permissionState === "prompt" && (
-          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
-            <Camera size={28} color={borderColor} style={{ marginBottom: 10 }} />
-            <span style={{ fontSize: "14px", fontWeight: "bold", marginBottom: 4 }}>{t.webcamPermissionRequired}</span>
-            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", marginBottom: 14, lineHeight: 1.2, whiteSpace: "pre-line" }}>{t.webcamPermissionDesc}</span>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("requesting"); executeGetUserMedia(); }} style={{ background: borderColor, border: "none", color: "#000", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px", boxShadow: `0 0 10px ${borderColor}` }}>{t.webcamYes}</button>
-              <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("idle"); isStartingRef.current = false; }} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px" }}>{t.webcamNo}</button>
+          {webcamMode === "image" ? (
+            <img
+              src={webcamImagePath ? convertFileSrc(webcamImagePath) : ""}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: "translateZ(0)",
+                borderRadius: "50%",
+                clipPath: "circle(50% at 50% 50%)",
+                WebkitClipPath: "circle(50% at 50% 50%)",
+                display: (started && !hasError && webcamImagePath) ? "block" : "none",
+                pointerEvents: "none"
+              }}
+              alt=""
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: "scaleX(-1) translateZ(0)", // Maintain mirror + GPU layer lock
+                borderRadius: "50%",
+                clipPath: "circle(50% at 50% 50%)", // Force circular mask at GPU level
+                WebkitClipPath: "circle(50% at 50% 50%)", // Safari/Webkit fallback
+                display: (started && !hasError) ? "block" : "none",
+                pointerEvents: "none"
+              }}
+            />
+          )}
+          {!started && permissionState === "idle" && !isStartingRef.current && (
+            <div
+              style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none" }}
+            >
+              {t.webcamOff}
             </div>
-          </div>
-        )}
-        {permissionState === "requesting" && (
-          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
-            <div className="recording-indicator" style={{ width: 14, height: 14, marginBottom: 12, animation: "pulse-recording 1s infinite", background: borderColor, boxShadow: `0 0 8px ${borderColor}` }}></div>
-            <span style={{ fontSize: "11px", fontWeight: "bold", lineHeight: 1.3, whiteSpace: "pre-line" }}>{t.webcamStarting}</span>
-          </div>
-        )}
-        {started && hasError && permissionState !== "denied" && (
-          <div
-            style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line", padding: "10px" }}
-          >
-            {t.webcamNotFound}
-          </div>
-        )}
-        {permissionState === "denied" && (
-          <div
-            style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line", padding: "10px" }}
-          >
-            {t.webcamAccessDenied}
-          </div>
-        )}
+          )}
+          {permissionState === "prompt" && (
+            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
+              <Camera size={28} color={borderColor} style={{ marginBottom: 10 }} />
+              <span style={{ fontSize: "14px", fontWeight: "bold", marginBottom: 4 }}>{t.webcamPermissionRequired}</span>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", marginBottom: 14, lineHeight: 1.2, whiteSpace: "pre-line" }}>{t.webcamPermissionDesc}</span>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button onMouseDown={(e) => { e.stopPropagation(); isStartingRef.current = true; setPermissionState("requesting"); setTimeout(() => executeGetUserMedia(), 250); }} style={{ background: borderColor, border: "none", color: "#000", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px", boxShadow: `0 0 10px ${borderColor}` }}>{t.webcamYes}</button>
+                <button onMouseDown={(e) => { e.stopPropagation(); setPermissionState("denied"); isStartingRef.current = false; emit("webcam-permission-denied"); setTimeout(() => { getCurrentWindow().hide().catch(console.error); }, 1000); }} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", padding: "6px 14px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer", fontSize: "11px" }}>{t.webcamNo}</button>
+              </div>
+            </div>
+          )}
+          {permissionState === "requesting" && (
+            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(15, 23, 42, 0.95)", zIndex: 10, textAlign: "center", padding: "10px" }}>
+              <div className="recording-indicator" style={{ width: 14, height: 14, marginBottom: 12, animation: "pulse-recording 1s infinite", background: borderColor, boxShadow: `0 0 8px ${borderColor}` }}></div>
+              <span style={{ fontSize: "11px", fontWeight: "bold", lineHeight: 1.3, whiteSpace: "pre-line" }}>{t.webcamStarting}</span>
+            </div>
+          )}
+          {started && hasError && permissionState !== "denied" && (
+            <div
+              style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 14, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line", padding: "10px" }}
+            >
+              {t.webcamNotFound}
+            </div>
+          )}
+          {permissionState === "denied" && (
+            <div
+              style={{ position: "absolute", inset: 0, borderRadius: "50%", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", fontSize: 13, fontWeight: "bold", textAlign: "center", pointerEvents: "none", whiteSpace: "pre-line", padding: "10px" }}
+            >
+              {t.webcamAccessDenied}
+            </div>
+          )}
         </div>
       </div>
       {webcamText.trim() && (

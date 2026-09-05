@@ -574,6 +574,21 @@ function SettingsWindow() {
     });
   }, []);
 
+  useEffect(() => {
+    let unlistenFn: any;
+    import("@tauri-apps/api/event").then(({ listen }) => {
+      listen("webcam-permission-denied", () => {
+        setRecordWebcam(false);
+        localStorage.setItem("recordWebcam", "false");
+      }).then((fn) => {
+        unlistenFn = fn;
+      });
+    });
+    return () => {
+      if (unlistenFn) unlistenFn();
+    };
+  }, []);
+
   // Auto-check for updates on mount
   useEffect(() => {
     handleUpdateCheck(true);
