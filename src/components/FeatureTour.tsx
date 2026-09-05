@@ -363,6 +363,7 @@ export const TOUR_STEPS: TourStep[] = [
     interactiveHintKey: "tourClickTimerBg",
     requireClick: false,
   },
+
   {
     id: "setting_timer_bg_scale",
     target: '[data-tour="setting-timer-bg-scale"]',
@@ -542,6 +543,7 @@ export const TOUR_STEPS: TourStep[] = [
     interactiveHintKey: "tourClickRecordMic",
     requireClick: true,
   },
+
   {
     id: "setting_record_audio",
     target: '[data-tour="setting-record-audio"]',
@@ -552,6 +554,7 @@ export const TOUR_STEPS: TourStep[] = [
     interactiveHintKey: "tourClickRecordAudio",
     requireClick: true,
   },
+
   {
     id: "setting_record_controls",
     target: '[data-tour="setting-record-controls"]',
@@ -562,16 +565,7 @@ export const TOUR_STEPS: TourStep[] = [
     interactiveHintKey: "tourClickRecordControls",
     requireClick: true,
   },
-  {
-    id: "setting_audio_ducking",
-    target: '[data-tour="setting-audio-ducking"]',
-    tab: "record",
-    subTab: "record_general",
-    titleKey: "tourAudioDuckingTitle",
-    descKey: "tourAudioDuckingDesc",
-    interactiveHintKey: "tourClickAudioDucking",
-    requireClick: true,
-  },
+
   {
     id: "record_subtab_webcam",
     target: '[data-tour="record-subtab-webcam"]',
@@ -592,6 +586,7 @@ export const TOUR_STEPS: TourStep[] = [
     interactiveHintKey: "tourClickWebcamMode",
     requireClick: true,
   },
+
   {
     id: "setting_webcam_border_color",
     target: '[data-tour="setting-webcam-border-color"]',
@@ -650,6 +645,26 @@ export const TOUR_STEPS: TourStep[] = [
     titleKey: "tourWebcamTextColorTitle",
     descKey: "tourWebcamTextColorDesc",
     interactiveHintKey: "tourClickWebcamTextColor",
+    requireClick: false,
+  },
+  {
+    id: "setting_webcam_text_bg_color",
+    target: '[data-tour="setting-webcam-text-bg-color"]',
+    tab: "record",
+    subTab: "record_webcam",
+    titleKey: "tourWebcamTextBgColorTitle",
+    descKey: "tourWebcamTextBgColorDesc",
+    interactiveHintKey: "tourClickWebcamTextBgColor",
+    requireClick: false,
+  },
+  {
+    id: "setting_webcam_text_bg_opacity",
+    target: '[data-tour="setting-webcam-text-bg-opacity"]',
+    tab: "record",
+    subTab: "record_webcam",
+    titleKey: "tourWebcamTextBgOpacityTitle",
+    descKey: "tourWebcamTextBgOpacityDesc",
+    interactiveHintKey: "tourClickWebcamTextBgOpacity",
     requireClick: false,
   },
   {
@@ -827,7 +842,7 @@ export default function FeatureTour({ isOpen, onClose, onSelectTab }: FeatureTou
     if (currentStep.tab && onSelectTab) {
       onSelectTab(currentStep.tab);
     }
-    
+
     if (currentStep.subTab) {
       window.dispatchEvent(new CustomEvent("tour-subtab-change", { detail: currentStep.subTab }));
     }

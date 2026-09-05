@@ -2473,7 +2473,8 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Mode & Custom Image Section */}
-                  <div className="setting-row" data-tour="setting-timer-bg" style={(timerBgMode === "image" || timerBgMode === "desktop") ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
+                  <div data-tour="setting-timer-bg">
+                    <div className="setting-row" style={(timerBgMode === "image" || timerBgMode === "desktop") ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
                       <span className="setting-desc">{(t as any).timerBgImageDesc || "Mola ekranına düz renk yerine masaüstünüzün soluk görüntüsünü veya özel bir görsel ekleyin."}</span>
@@ -2510,10 +2511,10 @@ function SettingsWindow() {
                     </>
                   )}
 
-                  {timerBgMode === "image" && (
-                    <>
-                      <div
-                        onClick={() => {
+                    {timerBgMode === "image" && (
+                      <>
+                        <div
+                          onClick={() => {
                           if ((window as any).__TAURI_INTERNALS__) {
                             handleSelectTimerImageTauri();
                           } else {
@@ -2592,6 +2593,7 @@ function SettingsWindow() {
                       )}
                     </>
                   )}
+                  </div>
 
 
                   {timerBgMode === "image" && (
@@ -3507,7 +3509,8 @@ function SettingsWindow() {
                   </div>
 
                   {/* Mikrofonu Kaydet */}
-                  <div className="setting-row" data-tour="setting-record-mic" style={{ borderBottom: recordMic ? "none" : undefined, paddingBottom: recordMic ? "8px" : undefined }}>
+                  <div data-tour="setting-record-mic">
+                    <div className="setting-row" style={{ borderBottom: recordMic ? "none" : undefined, paddingBottom: recordMic ? "8px" : undefined }}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).recordMicLabel || "Mikrofonu Kaydet"}</span>
                       <span className="setting-desc">{(t as any).recordMicDesc || "Kendi sesinizi (mikrofon) video kaydına dahil edin."}</span>
@@ -3551,9 +3554,11 @@ function SettingsWindow() {
                       </div>
                     </div>
                   )}
+                  </div>
 
                   {/* Sistem Sesini Kaydet */}
-                  <div className="setting-row" data-tour="setting-record-audio" style={{ borderBottom: recordAudio ? "none" : undefined, paddingBottom: recordAudio ? "8px" : undefined }}>
+                  <div data-tour="setting-record-audio">
+                    <div className="setting-row" style={{ borderBottom: recordAudio ? "none" : undefined, paddingBottom: recordAudio ? "8px" : undefined }}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
                       <span className="setting-desc">{(t as any).recordAudioDesc || "Video kaydına bilgisayarın dahili sesini de dahil edin."}</span>
@@ -3595,6 +3600,7 @@ function SettingsWindow() {
                       </div>
                     </div>
                   )}
+                  </div>
 
                   {/* Kayıt Kontrolcüsünü Göster */}
                   <div className="setting-row" data-tour="setting-record-controls">
@@ -3634,7 +3640,8 @@ function SettingsWindow() {
                     </div>
 
                     {/* Webcam Mode */}
-                    <div className="setting-row" data-tour="setting-webcam-mode" style={webcamMode === "image" ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
+                    <div data-tour="setting-webcam-mode">
+                      <div className="setting-row" style={webcamMode === "image" ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
                       </div>
@@ -3737,6 +3744,7 @@ function SettingsWindow() {
                         )}
                       </>
                     )}
+                    </div>
                     {/* Kamera Çerçeve Rengi */}
                     <div className="setting-row" data-tour="setting-webcam-border-color">
                       <div className="setting-info">
