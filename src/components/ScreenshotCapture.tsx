@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
@@ -263,6 +263,18 @@ function ScreenshotCapture() {
   const [drawings, setDrawings] = useState<DrawingAction[]>([]);
   const [hoveredDrawingIndex, setHoveredDrawingIndex] = useState<number | null>(null);
 
+  const [toolbarRealWidth, setToolbarRealWidth] = useState<number>(0);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (toolbarRef.current) {
+      const w = toolbarRef.current.offsetWidth;
+      if (w !== toolbarRealWidth) {
+        setToolbarRealWidth(w);
+      }
+    }
+  });
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPencilPoints, setCurrentPencilPoints] = useState<Point[]>([]);
   const [currentEraserPoints, setCurrentEraserPoints] = useState<Point[]>([]);
@@ -309,7 +321,6 @@ function ScreenshotCapture() {
   // Text tool state
   const [textInput, setTextInput] = useState({ visible: false, x: 0, y: 0, val: "" });
   const textInputRef = useRef<HTMLInputElement | null>(null);
-  const toolbarRef = useRef<HTMLDivElement | null>(null);
   const [textBold, setTextBold] = useState(true);
   const [textItalic, setTextItalic] = useState(false);
   const [textUnderline, setTextUnderline] = useState(false);
@@ -1557,9 +1568,9 @@ function ScreenshotCapture() {
     const toolbarHeight = 44;
 
     // Dynamically estimate width based on active tool extra panels
-    let estimatedWidth = 960;
-    if (activeTool === "text") estimatedWidth = 1080;
-    else if (activeTool === "blur") estimatedWidth = 1180;
+    let estimatedWidth = 420;
+    if (activeTool === "text") estimatedWidth = 560;
+    else if (activeTool === "blur") estimatedWidth = 580;
 
     const measuredWidth = toolbarRef.current?.offsetWidth || 0;
     const toolbarWidth = Math.max(estimatedWidth, measuredWidth);
@@ -1572,11 +1583,13 @@ function ScreenshotCapture() {
       top = Math.max(margin, selection.y - toolbarHeight - margin);
     }
 
+    const desiredLeft = selection.x + (selection.w / 2) - (toolbarWidth / 2);
+    
     const left = Math.max(
       margin,
       Math.min(
         screenW - toolbarWidth - margin,
-        selection.x + selection.w - toolbarWidth
+        desiredLeft
       )
     );
     return { top, left };
