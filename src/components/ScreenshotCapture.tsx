@@ -257,7 +257,6 @@ function ScreenshotCapture() {
   const [activeTool, setActiveTool] = useState<Tool>("pencil");
   const [lastShape, setLastShape] = useState<Tool>("rect");
   const [showShapeMenu, setShowShapeMenu] = useState(false);
-  const [shapeMenuPosition, setShapeMenuPosition] = useState<"top" | "bottom">("bottom");
   const [drawColor, setDrawColor] = useState("#ef4444"); // Red by default
   const [boardMode, setBoardMode] = useState<"normal" | "white" | "black">("normal");
   const [drawings, setDrawings] = useState<DrawingAction[]>([]);
@@ -1690,17 +1689,11 @@ function ScreenshotCapture() {
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
                 
-                const handleMenuToggle = () => {
-                  const spaceBelow = window.innerHeight - rect.bottom;
-                  setShapeMenuPosition(spaceBelow < 120 ? "top" : "bottom");
-                  setShowShapeMenu(!showShapeMenu);
-                };
-
                 if (x > rect.width - 12 && y > rect.height - 12) {
-                  handleMenuToggle();
+                  setShowShapeMenu(!showShapeMenu);
                 } else {
                   if (activeTool === lastShape) {
-                    handleMenuToggle();
+                    setShowShapeMenu(!showShapeMenu);
                   } else {
                     setActiveTool(lastShape);
                     setShowShapeMenu(false);
@@ -1715,7 +1708,7 @@ function ScreenshotCapture() {
               </svg>
             </button>
             {showShapeMenu && (
-              <div style={{ position: "absolute", top: shapeMenuPosition === "bottom" ? "calc(100% + 8px)" : "auto", bottom: shapeMenuPosition === "top" ? "calc(100% + 8px)" : "auto", left: "-8px", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
+              <div style={{ position: "absolute", top: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 120) ? "auto" : "calc(100% + 8px)", bottom: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 120) ? "calc(100% + 8px)" : "auto", left: "-8px", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
                 {SHAPE_TOOLS.map(tool => (
                   <button
                     key={tool.id}
