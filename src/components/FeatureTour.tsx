@@ -940,18 +940,34 @@ export default function FeatureTour({ isOpen, onClose, onSelectTab }: FeatureTou
 
     if (targetRect.width > 300) {
       // Large element: position centered below or above
-      tooltipStyle = {
-        position: "fixed",
-        left: `${Math.max(20, Math.min(window.innerWidth - 380, targetRect.left + (targetRect.width / 2) - 180))}px`,
-        top: isBottomSide ? `${Math.max(20, targetRect.top - 180)}px` : `${Math.min(window.innerHeight - 200, targetRect.bottom + 16)}px`,
-      };
+      if (isBottomSide) {
+        tooltipStyle = {
+          position: "fixed",
+          left: `${Math.max(20, Math.min(window.innerWidth - 380, targetRect.left + (targetRect.width / 2) - 180))}px`,
+          bottom: `${Math.max(20, window.innerHeight - targetRect.top + 16)}px`,
+        };
+      } else {
+        tooltipStyle = {
+          position: "fixed",
+          left: `${Math.max(20, Math.min(window.innerWidth - 380, targetRect.left + (targetRect.width / 2) - 180))}px`,
+          top: `${Math.max(20, targetRect.bottom + 16)}px`,
+        };
+      }
     } else {
       // Small element (like sidebar link): position to the right or left
-      tooltipStyle = {
-        position: "fixed",
-        left: isRightSide ? `${Math.max(20, targetRect.left - 360)}px` : `${Math.min(window.innerWidth - 380, targetRect.right + 20)}px`,
-        top: `${Math.max(20, Math.min(window.innerHeight - 220, targetRect.top - 10))}px`,
-      };
+      if (isRightSide) {
+        tooltipStyle = {
+          position: "fixed",
+          right: `${Math.max(20, window.innerWidth - targetRect.left + 20)}px`,
+          top: `${Math.max(20, Math.min(window.innerHeight - 220, targetRect.top - 10))}px`,
+        };
+      } else {
+        tooltipStyle = {
+          position: "fixed",
+          left: `${Math.max(20, targetRect.right + 20)}px`,
+          top: `${Math.max(20, Math.min(window.innerHeight - 220, targetRect.top - 10))}px`,
+        };
+      }
     }
   }
 
