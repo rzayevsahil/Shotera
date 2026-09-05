@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders, Lightbulb, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders, Lightbulb, PanelLeftClose, PanelLeft, Eye, X } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -244,6 +244,7 @@ function CustomColorPicker({ color, onChange, onClick, title, style }: { color: 
 
 function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
   const [recordSubTab, setRecordSubTab] = useState<"general" | "webcam" | "shortcuts">("general");
   const [timerSubTab, setTimerSubTab] = useState<"general" | "theme" | "sound">("general");
@@ -3015,7 +3016,12 @@ function SettingsWindow() {
             </div>
 
             {/* SAĞ KOLON: Canlı Önizleme Kartı (Sticky / Sabit Genişlik) */}
-            <div className="settings-two-column-right">
+            <div className={`settings-two-column-right ${isMobilePreviewOpen ? 'mobile-modal-open' : ''}`}>
+              {isMobilePreviewOpen && (
+                <button className="mobile-modal-close-btn" onClick={() => setIsMobilePreviewOpen(false)} title="Önizlemeyi Kapat">
+                  <X size={18} />
+                </button>
+              )}
               {/* Canlı Önizleme Monitör Simülasyonu Kartı */}
               <div className="settings-card" data-tour="setting-timer-preview" style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "14px", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "10px" }}>
@@ -4232,7 +4238,12 @@ function SettingsWindow() {
             </div>
 
             {/* SAĞ KOLON (Sabit Panel): Canlı Önizleme Alanı (Preview) */}
-            <div className="settings-two-column-right">
+            <div className={`settings-two-column-right ${isMobilePreviewOpen ? 'mobile-modal-open' : ''}`}>
+              {isMobilePreviewOpen && (
+                <button className="mobile-modal-close-btn" onClick={() => setIsMobilePreviewOpen(false)} title="Önizlemeyi Kapat">
+                  <X size={18} />
+                </button>
+              )}
               <div className="settings-card" data-tour="setting-webcam-preview" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px", alignItems: "center" }}>
                 {/* Panel Başlığı */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>
@@ -5008,6 +5019,26 @@ function SettingsWindow() {
         onClose={() => setIsTourOpen(false)}
         onSelectTab={(tab) => setActiveTab(tab as any)}
       />
+
+      {/* Mobil Önizleme Butonu (Sadece timer ve record sekmelerinde görünür) */}
+      {(activeTab === "timer" || activeTab === "record") && (
+        <>
+          {!isMobilePreviewOpen && (
+            <button 
+              className="mobile-preview-btn premium-button" 
+              onClick={() => setIsMobilePreviewOpen(true)}
+              title="Önizlemeyi Gör"
+            >
+              <Eye size={18} /> Önizleme
+            </button>
+          )}
+          
+          <div 
+            className={`mobile-modal-backdrop ${isMobilePreviewOpen ? 'open' : ''}`}
+            onClick={() => setIsMobilePreviewOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 }
