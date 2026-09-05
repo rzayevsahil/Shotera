@@ -2473,7 +2473,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Background Mode & Custom Image Section */}
-                  <div data-tour="setting-timer-bg">
+                  <div data-tour="setting-timer-bg" className="setting-group">
                     <div className="setting-row" style={(timerBgMode === "image" || timerBgMode === "desktop") ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).timerBgModeLabel || "Arka Plan Kaynağı"}</span>
@@ -3507,7 +3507,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Mikrofonu Kaydet */}
-                  <div data-tour="setting-record-mic">
+                  <div data-tour="setting-record-mic" className="setting-group">
                     <div className="setting-row" style={{ borderBottom: recordMic ? "none" : undefined, paddingBottom: recordMic ? "8px" : undefined }}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).recordMicLabel || "Mikrofonu Kaydet"}</span>
@@ -3555,7 +3555,7 @@ function SettingsWindow() {
                   </div>
 
                   {/* Sistem Sesini Kaydet */}
-                  <div data-tour="setting-record-audio">
+                  <div data-tour="setting-record-audio" className="setting-group">
                     <div className="setting-row" style={{ borderBottom: recordAudio ? "none" : undefined, paddingBottom: recordAudio ? "8px" : undefined }}>
                     <div className="setting-info">
                       <span className="setting-label">{(t as any).recordAudioLabel || "Sistem Sesini Kaydet"}</span>
@@ -3638,7 +3638,7 @@ function SettingsWindow() {
                     </div>
 
                     {/* Webcam Mode */}
-                    <div data-tour="setting-webcam-mode">
+                    <div data-tour="setting-webcam-mode" className="setting-group">
                       <div className="setting-row" style={webcamMode === "image" ? { borderBottom: "none", paddingBottom: "8px" } : undefined}>
                       <div className="setting-info">
                         <span className="setting-label">{(t as any).webcamModeLabel || "Kamera Modu"}</span>
