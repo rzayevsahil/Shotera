@@ -71,7 +71,7 @@ function FontSelect({ value, onChange, placeholder, searchPlaceholder }: { value
   const filteredFonts = SYSTEM_FONTS.filter(f => f.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div ref={dropdownRef} style={{ position: "relative", width: "240px" }}>
+    <div ref={dropdownRef} className="font-select-wrapper" style={{ position: "relative" }}>
       <div
         className="premium-input"
         style={{
@@ -2085,9 +2085,9 @@ function SettingsWindow() {
         )}
 
         {activeTab === "timer" && (
-          <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
+          <div className="settings-two-column-layout">
             {/* SOL KOLON: Sekmeli (Sub-Tabs) Form ve Ayar Alanı */}
-            <div style={{ flex: "1 1 0%", minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="settings-two-column-left">
 
               {/* Mini Sekmeler (Sub-Tabs) */}
               <div
@@ -3015,17 +3015,7 @@ function SettingsWindow() {
             </div>
 
             {/* SAĞ KOLON: Canlı Önizleme Kartı (Sticky / Sabit Genişlik) */}
-            <div
-              style={{
-                width: "360px",
-                flexShrink: 0,
-                position: "sticky",
-                top: "0px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px"
-              }}
-            >
+            <div className="settings-two-column-right">
               {/* Canlı Önizleme Monitör Simülasyonu Kartı */}
               <div className="settings-card" data-tour="setting-timer-preview" style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "14px", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "10px" }}>
@@ -3343,9 +3333,9 @@ function SettingsWindow() {
         )}
 
         {activeTab === "record" && (
-          <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
+          <div className="settings-two-column-layout">
             {/* SOL KOLON: Sekmeli (Sub-Tabs) Form ve Ayar Alanı */}
-            <div style={{ flex: "1 1 0%", minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="settings-two-column-left">
 
               {/* Mini Sekmeler (Sub-Tabs) */}
               <div
@@ -4242,17 +4232,7 @@ function SettingsWindow() {
             </div>
 
             {/* SAĞ KOLON (Sabit Panel): Canlı Önizleme Alanı (Preview) */}
-            <div
-              style={{
-                width: "320px",
-                flex: "0 0 320px",
-                position: "sticky",
-                top: "0px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px"
-              }}
-            >
+            <div className="settings-two-column-right">
               <div className="settings-card" data-tour="setting-webcam-preview" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px", alignItems: "center" }}>
                 {/* Panel Başlığı */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "12px" }}>

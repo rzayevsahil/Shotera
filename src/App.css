@@ -272,6 +272,65 @@ h6 {
   color: var(--text-muted);
 }
 
+/* Responsive Two Column Layout for Settings */
+.settings-two-column-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.settings-two-column-left {
+  flex: 1 1 0%;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-two-column-right {
+  flex: 0 0 340px;
+  width: 340px;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .settings-two-column-right {
+    flex: 1 1 100%;
+    width: 100%;
+    position: static;
+  }
+  .setting-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .setting-info {
+    max-width: 100% !important;
+  }
+  .setting-row > select, 
+  .setting-row > div:not(.setting-info) {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+  .premium-input {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: 100%;
+  }
+  .font-select-wrapper {
+    width: 100% !important;
+  }
+}
+
+.font-select-wrapper {
+  width: 240px;
+}
+
 /* Premium Inputs and Controls */
 .premium-input {
   background: var(--bg-input);
