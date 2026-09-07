@@ -27,11 +27,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Create assets directory and copy images from the app's src folder
-      - name: Copy App Assets
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install Website Dependencies
         run: |
-          mkdir -p website/assets
-          cp -r src/assets/* website/assets/
+          cd website
+          npm ci
+
+      - name: Build Website
+        run: |
+          cd website
+          npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -39,7 +50,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './website'
+          path: './website/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
