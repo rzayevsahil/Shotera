@@ -6,6 +6,7 @@ import { translations } from '../translations';
 import { SHOTERA_LINKS } from '../data';
 import { useViewfinder } from '../context/ViewfinderContext';
 import { dustRevealVariants } from '../utils/animations';
+import { useLatestVersion } from '../hooks/useLatestVersion';
 
 interface DownloadSectionProps {
   currentLang: Language;
@@ -13,6 +14,7 @@ interface DownloadSectionProps {
 
 export function DownloadSection({ currentLang }: DownloadSectionProps) {
   const t = translations[currentLang];
+  const latestVersion = useLatestVersion(t.nav.versionBadge);
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
   const { activeTarget, setActiveTarget } = useViewfinder();
@@ -100,9 +102,7 @@ export function DownloadSection({ currentLang }: DownloadSectionProps) {
             </div>
 
             <a
-              href={SHOTERA_LINKS.latestRelease}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`https://github.com/rzayevsahil/Shotera/releases/download/${latestVersion}/Shotera_${latestVersion.replace('v', '')}_x64-setup.exe`}
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 text-xs font-semibold text-white bg-slate-950 hover:bg-slate-800 rounded-xl shadow-xs transition-all tracking-wide relative z-10"
             >
               <Download className="w-4 h-4" />
