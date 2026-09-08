@@ -2,6 +2,7 @@ import { Github, Globe } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../translations';
 import { SHOTERA_LINKS } from '../data';
+import { useLatestVersion } from '../hooks/useLatestVersion';
 
 interface FooterProps {
   currentLang: Language;
@@ -18,6 +19,7 @@ const LANGUAGES: { code: Language; label: string }[] = [
 
 export function Footer({ currentLang, onLanguageChange }: FooterProps) {
   const t = translations[currentLang];
+  const latestVersion = useLatestVersion(t.nav.versionBadge);
 
   return (
     <footer className="bg-slate-950 text-slate-400 text-xs border-t border-slate-900 py-16 sm:py-20">
@@ -33,7 +35,7 @@ export function Footer({ currentLang, onLanguageChange }: FooterProps) {
               />
               <span className="font-semibold text-white tracking-tight text-base">Shotera</span>
               <span className="text-[10px] font-mono-code bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full border border-slate-800">
-                v1.4.0
+                {latestVersion}
               </span>
             </div>
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
@@ -96,7 +98,7 @@ export function Footer({ currentLang, onLanguageChange }: FooterProps) {
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors"
                 >
-                  Release Notes
+                  {t.footer.releaseNotes}
                 </a>
               </li>
             </ul>
@@ -116,7 +118,7 @@ export function Footer({ currentLang, onLanguageChange }: FooterProps) {
                   className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
                 >
                   <Github className="w-3.5 h-3.5" />
-                  <span>GitHub Repository</span>
+                  <span>{t.footer.githubRepo}</span>
                 </a>
               </li>
               <li>
@@ -126,7 +128,7 @@ export function Footer({ currentLang, onLanguageChange }: FooterProps) {
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors"
                 >
-                  Issue Tracker
+                  {t.footer.issueTracker}
                 </a>
               </li>
             </ul>
@@ -135,7 +137,7 @@ export function Footer({ currentLang, onLanguageChange }: FooterProps) {
             <div className="pt-3">
               <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mb-2">
                 <Globe className="w-3.5 h-3.5" />
-                <span>Languages</span>
+                <span>{t.footer.languages}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {LANGUAGES.map((lang) => (

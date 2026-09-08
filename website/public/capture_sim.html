@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { 
+    margin: 0; padding: 0; 
+    width: 600px; height: 400px; 
+    overflow: hidden; 
+    background: #0f172a; 
+    font-family: 'Consolas', monospace; 
+    color: #e2e8f0; 
+  }
+  
+  .code-bg {
+    padding: 30px; 
+    font-size: 14px; 
+    line-height: 1.6; 
+    white-space: pre; 
+  }
+  .keyword { color: #c678dd; }
+  .func { color: #61afef; }
+  .str { color: #98c379; }
+  .comment { color: #64748b; font-style: italic; }
+  
+  /* Initial dark overlay before capture starts */
+  .dimmer {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    animation: dimScreen 0.2s forwards 0.5s;
+  }
+
+  /* The bright capture box that acts like a window through the dimness */
+  .capture-box {
+    position: absolute;
+    top: 90px;
+    left: 80px;
+    width: 0px;
+    height: 0px;
+    border: 1px solid #38bdf8;
+    background: transparent;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.65);
+    opacity: 0;
+    animation: 
+      showBox 0.1s forwards 0.7s,
+      dragBox 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.7s;
+  }
+  
+  /* The magnifying loupe */
+  .loupe {
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #334155;
+    background: #020617;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .loupe-bg {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+    background-size: 10px 10px;
+    background-position: center;
+  }
+  
+  /* Loupe Crosshairs */
+  .loupe::after { content: ''; position: absolute; width: 100%; height: 1px; background: #38bdf8; }
+  .loupe::before { content: ''; position: absolute; height: 100%; width: 1px; background: #38bdf8; }
+  
+  /* Dimension tooltip */
+  .coord {
+    position: absolute;
+    bottom: -28px;
+    right: 60px;
+    background: #0f172a;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #334155;
+    white-space: nowrap;
+    opacity: 0;
+    animation: showTooltip 0.2s forwards 1.2s;
+  }
+
+  @keyframes dimScreen { to { background: rgba(0,0,0,0.65); } }
+  @keyframes showBox { to { opacity: 1; } }
+  @keyframes dragBox {
+    0% { width: 0; height: 0; }
+    100% { width: 380px; height: 210px; }
+  }
+  @keyframes showTooltip { to { opacity: 1; } }
+</style>
+</head>
+<body>
+  <div class="code-bg">
+<span class="comment">// Shotera Native Capture Engine</span>
+<span class="keyword">import</span> { CaptureEngine } <span class="keyword">from</span> <span class="str">'@shotera/core'</span>;
+
+<span class="keyword">class</span> ShoteraUI {
+  <span class="keyword">async</span> <span class="func">startRegionCapture</span>() {
+    <span class="keyword">const</span> engine = <span class="keyword">new</span> <span class="func">CaptureEngine</span>();
+    
+    <span class="keyword">await</span> engine.<span class="func">freezeDisplay</span>();
+    engine.<span class="func">showLoupe</span>({ zoom: <span class="str">8</span> });
+    
+    <span class="keyword">const</span> region = <span class="keyword">await</span> engine.<span class="func">waitForSelection</span>();
+    <span class="keyword">return</span> region.<span class="func">toImageData</span>();
+  }
+}
+  </div>
+  
+  <div class="dimmer"></div>
+  <div class="capture-box">
+    <div class="loupe"><div class="loupe-bg"></div></div>
+    <div class="coord">460 × 300</div>
+  </div>
+</body>
+</html>

@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Keyboard, Sliders, Check } from 'lucide-react';
+import { motion, useInView } from 'motion/react';
 import { Language } from '../types';
 import { translations } from '../translations';
 import { SHORTCUTS_DATA } from '../data';
+import { useViewfinder } from '../context/ViewfinderContext';
 
 interface ShortcutsStationProps {
   currentLang: Language;
@@ -12,6 +14,14 @@ export function ShortcutsStation({ currentLang }: ShortcutsStationProps) {
   const t = translations[currentLang];
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeShortcutTriggered, setActiveShortcutTriggered] = useState<string | null>(null);
+
+  const ref = useRef(null);
+  const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
+  const { activeTarget, setActiveTarget } = useViewfinder();
+
+  useEffect(() => {
+    if (isInView) setActiveTarget('shortcuts');
+  }, [isInView, setActiveTarget]);
 
   const categories = [
     { id: 'all', label: t.shortcuts.categories.all },
@@ -38,7 +48,7 @@ export function ShortcutsStation({ currentLang }: ShortcutsStationProps) {
           <div className="inline-flex items-center px-3.5 py-1 bg-white border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase shadow-2xs mb-4">
             <span>{t.shortcuts.eyebrow}</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 mb-4">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 mb-4">
             {t.shortcuts.title}
           </h2>
           <p className="text-base text-slate-600 leading-relaxed">
@@ -65,8 +75,15 @@ export function ShortcutsStation({ currentLang }: ShortcutsStationProps) {
         </div>
 
         {/* Shortcuts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {filteredShortcuts.map((shortcut) => {
+        <div className="relative max-w-5xl mx-auto" ref={ref}>
+          {activeTarget === 'shortcuts' && (
+            <motion.div
+              layoutId="global-viewfinder"
+              className="absolute -inset-4 md:-inset-6 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-[2rem] pointer-events-none z-50"
+            />
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+            {filteredShortcuts.map((shortcut) => {
             const isTriggered = activeShortcutTriggered === shortcut.id;
             return (
               <div
@@ -111,6 +128,7 @@ export function ShortcutsStation({ currentLang }: ShortcutsStationProps) {
               </div>
             );
           })}
+          </div>
         </div>
 
         {/* Customization Note Footer */}

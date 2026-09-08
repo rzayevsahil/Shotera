@@ -15,7 +15,7 @@ export function PhilosophySection({ currentLang }: PhilosophySectionProps) {
           <span>{t.philosophy.eyebrow}</span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 mb-8">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 mb-8">
           {t.philosophy.title}
         </h2>
 

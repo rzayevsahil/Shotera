@@ -54,6 +54,9 @@ export interface TranslationStrings {
       replaced: string;
       desc: string;
     }[];
+    bannerTitle: string;
+    bannerDesc: string;
+    bannerBtn: string;
   };
   showcases: {
     capture: {
@@ -97,6 +100,14 @@ export interface TranslationStrings {
     eyebrow: string;
     title: string;
     subtitle: string;
+    categories: {
+      id: string;
+      title: string;
+      items: {
+        title: string;
+        description: string;
+      }[];
+    }[];
   };
   howItWorks: {
     eyebrow: string;
@@ -134,6 +145,11 @@ export interface TranslationStrings {
     reqStorage: string;
     licenseTitle: string;
     licenseDesc: string;
+    recommended: string;
+    downloadExeBtn: string;
+    downloadZipBtn: string;
+    windowsInstallerFeatures: string[];
+    windowsPortableFeatures: string[];
   };
   github: {
     eyebrow: string;
@@ -156,5 +172,9 @@ export interface TranslationStrings {
     openSource: string;
     copyright: string;
     builtFor: string;
+    releaseNotes: string;
+    githubRepo: string;
+    issueTracker: string;
+    languages: string;
   };
 }

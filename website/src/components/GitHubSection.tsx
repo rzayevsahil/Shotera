@@ -18,7 +18,7 @@ export function GitHubSection({ currentLang }: GitHubSectionProps) {
             <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-bold tracking-wider text-slate-500 uppercase">
               <span>{t.github.eyebrow}</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-950">
+            <h3 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight text-slate-950">
               {t.github.title}
             </h3>
             <p className="text-sm text-slate-600 max-w-xl leading-relaxed">

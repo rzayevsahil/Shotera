@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
+import { motion, useInView } from 'motion/react';
 import {
   Crop,
   PenTool,
@@ -25,6 +26,8 @@ import {
 } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../translations';
+import { useViewfinder } from '../context/ViewfinderContext';
+import { dustRevealVariants } from '../utils/animations';
 
 interface FeatureShowcasesProps {
   currentLang: Language;
@@ -32,6 +35,30 @@ interface FeatureShowcasesProps {
 
 export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
   const t = translations[currentLang];
+  const ref1 = useRef(null);
+  const ref2 = useRef(null);
+  const ref3 = useRef(null);
+  const ref4 = useRef(null);
+  const ref5 = useRef(null);
+  const ref6 = useRef(null);
+
+  const inView1 = useInView(ref1, { margin: "-40% 0px -40% 0px" });
+  const inView2 = useInView(ref2, { margin: "-40% 0px -40% 0px" });
+  const inView3 = useInView(ref3, { margin: "-40% 0px -40% 0px" });
+  const inView4 = useInView(ref4, { margin: "-40% 0px -40% 0px" });
+  const inView5 = useInView(ref5, { margin: "-40% 0px -40% 0px" });
+  const inView6 = useInView(ref6, { margin: "-40% 0px -40% 0px" });
+
+  const { activeTarget, setActiveTarget } = useViewfinder();
+
+  useEffect(() => {
+    if (inView6) setActiveTarget('features-6');
+    else if (inView5) setActiveTarget('features-5');
+    else if (inView4) setActiveTarget('features-4');
+    else if (inView3) setActiveTarget('features-3');
+    else if (inView2) setActiveTarget('features-2');
+    else if (inView1) setActiveTarget('features-1');
+  }, [inView1, inView2, inView3, inView4, inView5, inView6, setActiveTarget]);
 
   // Showcase 1: Region Selection State
   const [selectedPresetRegion, setSelectedPresetRegion] = useState<'1080p' | '720p' | 'window'>('720p');
@@ -104,11 +131,18 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Text Column */}
-          <div className="lg:col-span-5 space-y-6">
+          <motion.div
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-5 space-y-6"
+          >
             <div className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase">
               {t.showcases.capture.tag}
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 leading-tight">
               {t.showcases.capture.title}
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
@@ -124,11 +158,25 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Product UI Visual: Interactive Snapping Showcase */}
-          <div className="lg:col-span-7">
-            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl overflow-hidden relative">
+          <motion.div
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-7 relative"
+            ref={ref1}
+          >
+            {activeTarget === 'features-1' && (
+              <motion.div
+                layoutId="global-viewfinder"
+                className="absolute inset-0 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-3xl pointer-events-none z-50"
+              />
+            )}
+            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl overflow-hidden relative z-10">
               <div className="bg-slate-950 rounded-2xl p-5 sm:p-7 border border-slate-800 relative overflow-hidden space-y-4">
                 {/* Preset region selector bar */}
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3 text-xs font-mono-code">
@@ -137,33 +185,30 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                     <button
                       type="button"
                       onClick={() => setSelectedPresetRegion('720p')}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                        selectedPresetRegion === '720p'
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${selectedPresetRegion === '720p'
                           ? 'bg-white text-slate-950 font-bold'
                           : 'text-slate-400 hover:text-white'
-                      }`}
+                        }`}
                     >
                       1280×720 (16:9)
                     </button>
                     <button
                       type="button"
                       onClick={() => setSelectedPresetRegion('1080p')}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                        selectedPresetRegion === '1080p'
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${selectedPresetRegion === '1080p'
                           ? 'bg-white text-slate-950 font-bold'
                           : 'text-slate-400 hover:text-white'
-                      }`}
+                        }`}
                     >
                       1920×1080 (FHD)
                     </button>
                     <button
                       type="button"
                       onClick={() => setSelectedPresetRegion('window')}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                        selectedPresetRegion === 'window'
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${selectedPresetRegion === 'window'
                           ? 'bg-white text-slate-950 font-bold'
                           : 'text-slate-400 hover:text-white'
-                      }`}
+                        }`}
                     >
                       Auto Window Snap
                     </button>
@@ -172,13 +217,12 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
 
                 {/* Active Selection Box */}
                 <div
-                  className={`relative border-2 border-white bg-white/5 rounded-xl p-5 transition-all duration-200 ${
-                    selectedPresetRegion === '1080p'
+                  className={`relative border-2 border-white bg-white/5 rounded-xl p-5 transition-all duration-200 ${selectedPresetRegion === '1080p'
                       ? 'min-h-[190px]'
                       : selectedPresetRegion === '720p'
-                      ? 'min-h-[160px]'
-                      : 'min-h-[140px] border-emerald-400 bg-emerald-950/20'
-                  }`}
+                        ? 'min-h-[160px]'
+                        : 'min-h-[140px] border-emerald-400 bg-emerald-950/20'
+                    }`}
                 >
                   {/* Dimension pill */}
                   <div className="absolute -top-3 left-4 bg-white text-slate-950 font-mono-code font-bold text-[10px] px-2.5 py-0.5 rounded shadow-xs uppercase">
@@ -221,7 +265,7 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -231,8 +275,22 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Visual: Interactive Sandbox */}
-          <div className="lg:col-span-7 order-2 lg:order-1">
-            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl">
+          <motion.div
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-7 order-2 lg:order-1 relative"
+            ref={ref2}
+          >
+            {activeTarget === 'features-2' && (
+              <motion.div
+                layoutId="global-viewfinder"
+                className="absolute inset-0 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-3xl pointer-events-none z-50"
+              />
+            )}
+            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl relative z-10">
               <div className="bg-slate-950 rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-4">
                 {/* Mini Sandbox Workspace */}
                 <div
@@ -251,9 +309,8 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                     <div className="flex items-center gap-2">
                       <span className="text-slate-400">Secret:</span>
                       <span
-                        className={`bg-slate-800/80 px-2 py-0.5 rounded text-slate-300 transition-all select-none ${
-                          showcaseSecretBlurred ? 'filter blur-[6px] opacity-75' : ''
-                        }`}
+                        className={`bg-slate-800/80 px-2 py-0.5 rounded text-slate-300 transition-all select-none ${showcaseSecretBlurred ? 'filter blur-[6px] opacity-75' : ''
+                          }`}
                       >
                         sk_live_9481a82bcf08249a88
                       </span>
@@ -281,9 +338,8 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                     <button
                       type="button"
                       onClick={() => setActiveShowcaseTool('step')}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                        activeShowcaseTool === 'step' ? 'bg-white text-slate-950' : 'bg-slate-800 text-slate-300'
-                      }`}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${activeShowcaseTool === 'step' ? 'bg-white text-slate-950' : 'bg-slate-800 text-slate-300'
+                        }`}
                     >
                       <ListOrdered className="w-3.5 h-3.5" />
                       <span>Drop Step {showcaseStepCount}</span>
@@ -291,9 +347,8 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                     <button
                       type="button"
                       onClick={() => setShowcaseSecretBlurred(!showcaseSecretBlurred)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                        showcaseSecretBlurred ? 'bg-white text-slate-950' : 'bg-slate-800 text-slate-300'
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${showcaseSecretBlurred ? 'bg-white text-slate-950' : 'bg-slate-800 text-slate-300'
+                        }`}
                     >
                       <Droplet className="w-3.5 h-3.5" />
                       <span>{showcaseSecretBlurred ? 'Blur Active' : 'Toggle Blur'}</span>
@@ -317,14 +372,21 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Text */}
-          <div className="lg:col-span-5 space-y-6 order-1 lg:order-2">
+          <motion.div
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-5 space-y-6 order-1 lg:order-2"
+          >
             <div className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase">
               {t.showcases.annotation.tag}
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 leading-tight">
               {t.showcases.annotation.title}
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
@@ -340,7 +402,7 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -350,11 +412,18 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Text */}
-          <div className="lg:col-span-5 space-y-6">
+          <motion.div
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-5 space-y-6"
+          >
             <div className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase">
               {t.showcases.zoom.tag}
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 leading-tight">
               {t.showcases.zoom.title}
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
@@ -370,11 +439,25 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Right Visual: Interactive Magnification Control */}
-          <div className="lg:col-span-7">
-            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl">
+          {/* Right Visual: Interactive Magnifier */}
+          <motion.div
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-7 relative"
+            ref={ref3}
+          >
+            {activeTarget === 'features-3' && (
+              <motion.div
+                layoutId="global-viewfinder"
+                className="absolute inset-0 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-3xl pointer-events-none z-50"
+              />
+            )}
+            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl relative z-10">
               <div className="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="flex items-center gap-2">
@@ -390,11 +473,10 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                         key={mul}
                         type="button"
                         onClick={() => setZoomMultiplier(mul)}
-                        className={`px-2.5 py-0.5 rounded font-bold transition-colors ${
-                          zoomMultiplier === mul
+                        className={`px-2.5 py-0.5 rounded font-bold transition-colors ${zoomMultiplier === mul
                             ? 'bg-white text-slate-950'
                             : 'text-slate-400 hover:text-slate-200'
-                        }`}
+                          }`}
                       >
                         {mul}×
                       </button>
@@ -428,7 +510,7 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -438,8 +520,22 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Visual */}
-          <div className="lg:col-span-7 order-2 lg:order-1">
-            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl">
+          <motion.div
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-7 order-2 lg:order-1 relative"
+            ref={ref4}
+          >
+            {activeTarget === 'features-4' && (
+              <motion.div
+                layoutId="global-viewfinder"
+                className="absolute inset-0 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-3xl pointer-events-none z-50"
+              />
+            )}
+            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl relative z-10">
               <div className="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="flex items-center gap-2">
@@ -488,14 +584,21 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Text */}
-          <div className="lg:col-span-5 space-y-6 order-1 lg:order-2">
+          <motion.div
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-5 space-y-6 order-1 lg:order-2"
+          >
             <div className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase">
               {t.showcases.record.tag}
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 leading-tight">
               {t.showcases.record.title}
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
@@ -511,7 +614,7 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -521,11 +624,18 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Text */}
-          <div className="lg:col-span-5 space-y-6">
+          <motion.div
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-5 space-y-6"
+          >
             <div className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase">
               {t.showcases.ocr.tag}
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 leading-tight">
               {t.showcases.ocr.title}
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
@@ -541,11 +651,25 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Visual: OCR Live Extraction Demo */}
-          <div className="lg:col-span-7">
-            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl">
+          <motion.div
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-7 relative"
+            ref={ref5}
+          >
+            {activeTarget === 'features-5' && (
+              <motion.div
+                layoutId="global-viewfinder"
+                className="absolute inset-0 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-3xl pointer-events-none z-50"
+              />
+            )}
+            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl relative z-10">
               <div className="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                   <span className="text-xs font-mono-code text-slate-300">
@@ -590,7 +714,7 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -600,8 +724,22 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Visual: Interactive Countdown Timer */}
-          <div className="lg:col-span-7 order-2 lg:order-1">
-            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl">
+          <motion.div
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-7 order-2 lg:order-1 relative"
+            ref={ref6}
+          >
+            {activeTarget === 'features-6' && (
+              <motion.div
+                layoutId="global-viewfinder"
+                className="absolute inset-0 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-3xl pointer-events-none z-50"
+              />
+            )}
+            <div className="rounded-3xl bg-slate-50 border border-slate-100 p-3 sm:p-5 shadow-xl relative z-10">
               <div className="bg-slate-950 rounded-2xl p-7 border border-slate-800 text-center space-y-5">
                 <div className="inline-flex items-center gap-1.5 text-xs font-mono-code text-slate-300 bg-slate-900 px-3.5 py-1 rounded-full border border-slate-800">
                   <Timer className="w-3.5 h-3.5" />
@@ -627,11 +765,10 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                   <button
                     type="button"
                     onClick={() => setTimerRunning(!timerRunning)}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
-                      timerRunning
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${timerRunning
                         ? 'bg-rose-600 hover:bg-rose-700 text-white'
                         : 'bg-white hover:bg-slate-100 text-slate-950'
-                    }`}
+                      }`}
                   >
                     {timerRunning ? (
                       <>
@@ -673,14 +810,21 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Text */}
-          <div className="lg:col-span-5 space-y-6 order-1 lg:order-2">
+          <motion.div
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="lg:col-span-5 space-y-6 order-1 lg:order-2"
+          >
             <div className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase">
               {t.showcases.timer.tag}
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-950 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-slate-950 leading-tight">
               {t.showcases.timer.title}
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
@@ -696,7 +840,7 @@ export function FeatureShowcases({ currentLang }: FeatureShowcasesProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

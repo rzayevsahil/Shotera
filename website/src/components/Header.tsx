@@ -3,6 +3,7 @@ import { Download, Github, Menu, X, ChevronDown, Check } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../translations';
 import { SHOTERA_LINKS } from '../data';
+import { useLatestVersion } from '../hooks/useLatestVersion';
 
 interface HeaderProps {
   currentLang: Language;
@@ -21,6 +22,7 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const latestVersion = useLatestVersion(translations[currentLang].nav.versionBadge);
 
   const t = translations[currentLang];
 
@@ -42,7 +44,7 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-200 ${
+      className={`sticky top-0 z-[60] transition-all duration-200 ${
         scrolled
           ? 'bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs'
           : 'bg-white border-b border-slate-100'
@@ -62,9 +64,9 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
               className="w-8 h-8 rounded-lg shadow-sm group-hover:scale-105 transition-transform object-contain"
             />
             <div className="flex items-center gap-2">
-              <span className="text-lg sm:text-xl font-semibold tracking-tight uppercase text-slate-950">Shotera</span>
+              <span className="text-lg sm:text-xl font-display font-semibold tracking-tight uppercase text-slate-950">Shotera</span>
               <span className="text-[10px] font-mono-code font-semibold tracking-wider bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase">
-                {t.nav.versionBadge}
+                {latestVersion}
               </span>
             </div>
           </a>

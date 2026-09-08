@@ -31,7 +31,9 @@ import {
   Slash
 } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
+import { motion } from 'motion/react';
 import { InteractiveWebcamOverlay } from './InteractiveWebcamOverlay';
+import { useViewfinder } from '../context/ViewfinderContext';
 
 // Custom eraser cursor matching the lucide icon, scaled down to 16x16
 const ERASER_CURSOR = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m7%2021-4.3-4.3c-1-1-1-2.5%200-3.4l9.6-9.6c1-1%202.5-1%203.4%200l5.6%205.6c1%201%201%202.5%200%203.4L13%2021%22%20%2F%3E%3Cpath%20d%3D%22M22%2021H7%22%20%2F%3E%3Cpath%20d%3D%22m5%2011%209%209%22%20%2F%3E%3C%2Fsvg%3E") 4 14, crosshair`;
@@ -79,6 +81,7 @@ const SHAPE_TOOLS = [
 ];
 
 export function ShoteraAppWindow() {
+  const { activeTarget } = useViewfinder();
   const [activeTab, setActiveTab] = useState<'annotation' | 'zoom' | 'record'>('annotation');
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -1075,16 +1078,30 @@ export function ShoteraAppWindow() {
             }}
           >
             {/* Transparent Crop Window with dark shadow overlay */}
-            <div
-              onPointerDown={(e) => activeTab === 'annotation' && startDrag(e, 'move')}
-              className={`w-full h-full transition-shadow ${
-                activeTab === 'record'
-                  ? 'cursor-default ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)]'
-                  : activeTab === 'annotation'
-                  ? 'cursor-move ring-2 ring-[#00f2fe] shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]'
-                  : 'cursor-default'
-              }`}
-            />
+            {activeTarget === 'hero' ? (
+              <motion.div
+                layoutId="global-viewfinder"
+                onPointerDown={(e) => activeTab === 'annotation' && startDrag(e, 'move')}
+                className={`w-full h-full transition-shadow ${
+                  activeTab === 'record'
+                    ? 'cursor-default ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)]'
+                    : activeTab === 'annotation'
+                    ? 'cursor-move ring-2 ring-[#00f2fe] shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]'
+                    : 'cursor-default'
+                }`}
+              />
+            ) : (
+              <div 
+                onPointerDown={(e) => activeTab === 'annotation' && startDrag(e, 'move')}
+                className={`w-full h-full transition-shadow ${
+                  activeTab === 'record'
+                    ? 'cursor-default ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)]'
+                    : activeTab === 'annotation'
+                    ? 'cursor-move ring-2 ring-[#00f2fe] shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]'
+                    : 'cursor-default'
+                }`}
+              />
+            )}
           </div>
         </div>
 

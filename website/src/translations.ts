@@ -36,17 +36,17 @@ export const translations: Record<Language, TranslationStrings> = {
       items: [
         {
           name: 'Screen Snipping & Region Capture',
-          replaced: 'Snipping Tool / Lightshot',
+          replaced: 'Standalone Snipping Tools',
           desc: 'High-precision pixel snapping, color loupe, and instant multi-monitor capture.',
         },
         {
           name: 'Live Screen Zoom & Magnifier',
-          replaced: 'ZoomIt / Windows Magnifier',
+          replaced: 'Separate Screen Magnifiers',
           desc: 'Smooth hardware zoom with live screen drawing and cursor tracking.',
         },
         {
           name: 'Annotation & Step Numbering',
-          replaced: 'Paint / Markup Apps',
+          replaced: 'Basic Paint Apps',
           desc: 'Vector arrows, auto-incrementing step badges, text callouts, and pixelated blur redaction.',
         },
         {
@@ -65,6 +65,9 @@ export const translations: Record<Language, TranslationStrings> = {
           desc: 'Integrated Pomodoro and eye-strain rest intervals on your screen.',
         },
       ],
+      bannerTitle: 'One Unified Background Process',
+      bannerDesc: '~40MB RAM footprint • Zero background telemetry • Instant global hotkey hook',
+      bannerBtn: 'Download Unified App',
     },
     showcases: {
       capture: {
@@ -138,6 +141,118 @@ export const translations: Record<Language, TranslationStrings> = {
       eyebrow: 'Capability Matrix',
       title: 'Engineered for developers, designers, and educators',
       subtitle: 'Every feature is purpose-built to eliminate friction in your daily visual workflow.',
+    categories: [
+  {
+    id: 'capture',
+    title: 'Capture',
+    items: [
+      {
+        title: 'Region & Window Snapping',
+        description: 'Pixel-accurate crosshair with smart edge detection and active window outline detection.'
+      },
+      {
+        title: 'Full-Screen & Multi-Monitor',
+        description: 'Single-hotkey capture across 4K displays and mixed DPI setups without downscaling artifacts.'
+      },
+      {
+        title: 'Multiple Image Formats',
+        description: 'Direct output to lossless PNG, compressed JPEG, modern WebP, or uncompressed BMP.'
+      },
+      {
+        title: 'Lossless Loupe & HEX Inspector',
+        description: 'Real-time 8x zoom magnifier showing exact RGB and HEX color codes for UI developers.'
+      }
+    ]
+  },
+  {
+    id: 'explain',
+    title: 'Explain',
+    items: [
+      {
+        title: 'Step Numbering Badges',
+        description: 'Auto-incrementing numbered circles (1, 2, 3...) for documenting workflows and tutorials.'
+      },
+      {
+        title: 'Vector Arrows & Shapes',
+        description: 'Clean geometric lines, filled rectangles, ellipses, and curved pointer arrows.'
+      },
+      {
+        title: 'Security Blur & Pixelation',
+        description: 'Non-destructive Gaussian blur and pixelation brushes for hiding passwords, tokens, and PII.'
+      },
+      {
+        title: 'Clean Typography Callouts',
+        description: 'High-contrast text badges with customizable font weights, background pill, and shadows.'
+      }
+    ]
+  },
+  {
+    id: 'present',
+    title: 'Present',
+    items: [
+      {
+        title: 'Hardware Screen Zoom',
+        description: 'Fluid 2x to 8x screen magnification with zero CPU lag during live presentations.'
+      },
+      {
+        title: 'Live Screen Drawing',
+        description: 'Draw freehand vector lines, arrows, and circles directly on top of running desktop applications.'
+      },
+      {
+        title: 'Interactive Live Zoom',
+        description: 'Keep desktop apps clickable and interactive while working in a magnified viewport.'
+      },
+      {
+        title: 'Screen Pinning (Always-on-Top)',
+        description: 'Pin screenshot snippets anywhere on screen as floating reference cards while writing code.'
+      }
+    ]
+  },
+  {
+    id: 'record',
+    title: 'Record',
+    items: [
+      {
+        title: 'Hardware Acceleration',
+        description: 'Native GPU-backed video encoding (NVENC / QuickSync / AMD AMF) for seamless 60 FPS recording.'
+      },
+      {
+        title: 'Targeted Window Capture',
+        description: 'Record specific application windows without capturing confidential taskbar or background clutter.'
+      },
+      {
+        title: 'Synchronized Audio Streams',
+        description: 'Simultaneously capture studio microphone audio and internal PC audio with balance sliders.'
+      },
+      {
+        title: 'Lightweight MP4 Packaging',
+        description: 'Immediate export to widely supported H.264 MP4 with compact file sizes ready for sharing.'
+      }
+    ]
+  },
+  {
+    id: 'smarter',
+    title: 'Work Smarter',
+    items: [
+      {
+        title: 'On-Device Screen OCR',
+        description: 'Instantly extract text from unselectable UI dialogs, protected PDFs, and videos to clipboard.'
+      },
+      {
+        title: 'Ergonomic Break & Focus Timer',
+        description: 'Integrated 20-20-20 rest intervals and Pomodoro timers to reduce eye fatigue during long sessions.'
+      },
+      {
+        title: 'Cloud Upload & Instant Link',
+        description: 'Upload captures with one click and receive a clean shareable URL in your clipboard.'
+      },
+      {
+        title: 'System Tray & Auto Updates',
+        description: 'Runs silently in background with ~40MB RAM usage; automatic frictionless update engine.'
+      }
+    ]
+  }
+],
     },
     howItWorks: {
       eyebrow: 'Workflow',
@@ -186,7 +301,23 @@ export const translations: Record<Language, TranslationStrings> = {
       reqRam: '100 MB available RAM (Ultra-lightweight)',
       reqStorage: '50 MB free disk space',
       licenseTitle: 'Free & Open Source',
-      licenseDesc: 'Released under the permissive MIT license. Zero spyware, zero telemetry, zero forced ads.',
+            licenseDesc: 'Released under the permissive MIT license. Zero spyware, zero telemetry, zero forced ads.',
+      recommended: 'Recommended',
+      downloadExeBtn: 'Download Shotera (.exe)',
+      downloadZipBtn: 'Download Portable (.zip)',
+      windowsInstallerFeatures: [
+        'Windows 10 / 11 (64-bit Architecture)',
+        'Automatic background updates & system tray',
+        'Instant global hotkey registration'
+      ],
+      windowsPortableFeatures: [
+        'Zero installation or registry writes',
+        'Runs from USB flash drive or network folder',
+        'Self-contained configuration file'
+      ],
+      bannerTitle: 'One Unified Background Process',
+      bannerDesc: '~40MB RAM footprint • Zero background telemetry • Instant global hotkey hook',
+      bannerBtn: 'Download Unified App',
     },
     github: {
       eyebrow: 'Open Source',
@@ -208,7 +339,11 @@ export const translations: Record<Language, TranslationStrings> = {
       resources: 'Resources',
       openSource: 'Open Source',
       copyright: '© 2026 Shotera. Open source under the MIT License.',
-      builtFor: 'Developed by Sahil Rzayev. Built for creators, developers, and teams.',
+            builtFor: 'Developed by Sahil Rzayev. Built for creators, developers, and teams.',
+      releaseNotes: 'Release Notes',
+      githubRepo: 'GitHub Repository',
+      issueTracker: 'Issue Tracker',
+      languages: 'Languages',
     },
   },
   az: {
@@ -246,17 +381,17 @@ export const translations: Record<Language, TranslationStrings> = {
       items: [
         {
           name: 'Ekran və Sahə Çəkmə',
-          replaced: 'Snipping Tool / Lightshot',
+          replaced: 'Xarici Ekran Alıntısı Alətləri',
           desc: 'Piksel dəqiqlikli sahə seçimi və çoxlu monitor dəstəyi.',
         },
         {
           name: 'Canlı Ekran Böyütmə (Zoom)',
-          replaced: 'ZoomIt / Lupa',
+          replaced: 'Ayrı Ekran Böyüdücüləri',
           desc: 'Sərbəst rəsm və kursor izləmə ilə hamar aparat böyütməsi.',
         },
         {
           name: 'Qeydlər və Nömrələmə',
-          replaced: 'Paint / Markup proqramları',
+          replaced: 'Sadə Rəsm Tətbiqləri',
           desc: 'Oxlar, addım-addım nömrələr, mətn və bulanıqlaşdırma (blur).',
         },
         {
@@ -275,6 +410,9 @@ export const translations: Record<Language, TranslationStrings> = {
           desc: 'Göz istirahəti və Pomodoro üçün daxili taymer sistemi.',
         },
       ],
+      bannerTitle: 'Tək Vahid Arxa Fon Prosesi',
+      bannerDesc: '~40MB RAM istifadəsi • Arxa fonda izləmə yoxdur • Anında qlobal qısayol bağlantısı',
+      bannerBtn: 'Vahid Tətbiqi Yüklə',
     },
     showcases: {
       capture: {
@@ -348,6 +486,119 @@ export const translations: Record<Language, TranslationStrings> = {
       eyebrow: 'İmkanlar Cədvəli',
       title: 'Tərtibatçılar, dizaynerlər və müəllimlər üçün hazırlanıb',
       subtitle: 'Hər bir funksiya gündəlik vizual iş axınınızı sürətləndirmək üçün yaradılıb.',
+    categories: [
+  {
+    id: 'capture',
+    title: 'Yakala',
+    items: [
+      {
+        title: 'Bölge ve Pencere Yakalama',
+        description: 'Akıllı kenar algılama ve aktif pencere tespiti ile piksel hassasiyetinde seçim.'
+      },
+      {
+        title: 'Tam Ekran ve Çoklu Monitör',
+        description: 'Görüntü bozulması olmadan 4K ve farklı çözünürlüklü ekranlarda tek tuşla yakalama.'
+      },
+      {
+        title: 'Çoklu Format Desteği',
+        kayıp: 'Kayıpsız PNG, sıkıştırılmış JPEG, WebP veya BMP olarak doğrudan dışa aktarma.',
+        description: 'Kayıpsız PNG, sıkıştırılmış JPEG, modern WebP veya BMP formatlarında dışa aktarma.'
+      },
+      {
+        title: 'Kayıpsız Büyüteç ve HEX',
+        description: 'Tasarımcılar için tam RGB ve HEX renk kodlarını gösteren gerçek zamanlı 8x büyüteç.'
+      }
+    ]
+  },
+  {
+    id: 'explain',
+    title: 'Açıkla',
+    items: [
+      {
+        title: 'Adım Numaralandırma',
+        description: 'İş akışlarını ve eğitimleri belgelemek için otomatik artan sıralı numaralar (1, 2, 3...).'
+      },
+      {
+        title: 'Vektör Oklar ve Şekiller',
+        description: 'Temiz geometrik çizgiler, içi dolu dikdörtgenler, elipsler ve kavisli işaret okları.'
+      },
+      {
+        title: 'Güvenlik ve Sansürleme (Blur)',
+        description: 'Şifreleri ve gizli verileri gizlemek için tahribatsız bulanıklaştırma (blur) ve pikselleştirme.'
+      },
+      {
+        title: 'Temiz Metin Kutuları',
+        description: 'Özelleştirilebilir font kalınlığı, arka plan ve gölgelere sahip yüksek kontrastlı metin kutuları.'
+      }
+    ]
+  },
+  {
+    id: 'present',
+    title: 'Sun',
+    items: [
+      {
+        title: 'Donanımsal Ekran Yakınlaştırma',
+        description: 'Canlı sunumlar sırasında sıfır CPU gecikmesi ile akıcı 2x - 8x ekran yakınlaştırması.'
+      },
+      {
+        title: 'Canlı Ekran Çizimi',
+        description: 'Doğrudan masaüstü uygulamalarının üzerinde serbest vektör çizgileri, oklar ve daireler çizin.'
+      },
+      {
+        title: 'Etkileşimli Canlı Zoom',
+        description: 'Yakınlaştırılmış ekranda çalışırken masaüstü uygulamalarını tıklanabilir ve etkileşimli tutun.'
+      },
+      {
+        title: 'Ekrana Sabitleme (Pin)',
+        description: 'Kod yazarken ekran görüntülerini sürekli üstte duran referans kartları olarak sabitleyin.'
+      }
+    ]
+  },
+  {
+    id: 'record',
+    title: 'Kaydet',
+    items: [
+      {
+        title: 'Donanım Hızlandırma',
+        description: 'Kesintisiz 60 FPS kayıt için donanım tabanlı video kodlama (NVENC / QuickSync / AMD AMF).'
+      },
+      {
+        title: 'Hedef Pencere Kaydı',
+        description: 'Görev çubuğunu veya arkaplandaki gizli verileri almadan sadece belirli bir pencereyi kaydedin.'
+      },
+      {
+        title: 'Senkronize Ses Kaydı',
+        description: 'Mikrofon sesini ve sistem sesini denge ayarlarıyla aynı anda sorunsuz kaydedin.'
+      },
+      {
+        title: 'Hafif MP4 Formatı',
+        description: 'Paylaşmaya hazır kompakt dosya boyutlarıyla evrensel H.264 MP4 formatına anında çıktı.'
+      }
+    ]
+  },
+  {
+    id: 'smarter',
+    title: 'Akıllı Çalış',
+    items: [
+      {
+        title: 'Dahili Ekran OCR',
+        description: 'Seçilemeyen arayüzlerden, PDF ve videolardan metinleri anında panoya kopyalayın.'
+      },
+      {
+        title: 'Ergonomik Mola Zamanlayıcısı',
+        description: 'Uzun seanslarda göz yorgunluğunu azaltmak için 20-20-20 molaları ve Pomodoro zamanlayıcıları.'
+      },
+      {
+        title: 'Buluta Yükleme ve Anında Link',
+        description: 'Ekran görüntülerini tek tıkla yükleyin ve anında paylaşılabilir bir bağlantı alın.'
+      },
+      {
+        title: 'Sistem Tepsisi ve Otomatik Güncelleme',
+        description: '~40MB RAM kullanımı ile arka planda sessizce çalışır; pürüzsüz otomatik güncelleme motoru.'
+      }
+    ]
+  }
+],
     },
     howItWorks: {
       eyebrow: 'İş Axını',
@@ -396,7 +647,23 @@ export const translations: Record<Language, TranslationStrings> = {
       reqRam: '100 MB RAM (Çox yüngül)',
       reqStorage: '50 MB boş disk sahəsi',
       licenseTitle: 'Pulsuz və Açıq Mənbə',
-      licenseDesc: 'MIT lisenziyası ilə buraxılıb. Sıfır casus proqram, sıfır reklam.',
+            licenseDesc: 'MIT lisenziyası ilə buraxılıb. Sıfır casus proqram, sıfır reklam.',
+      recommended: 'Tövsiyə olunur',
+      downloadExeBtn: 'Shotera Yüklə (.exe)',
+      downloadZipBtn: 'Portativ Versiya Yüklə (.zip)',
+      windowsInstallerFeatures: [
+        'Windows 10 / 11 (64-bit Arxitektura)',
+        'Avtomatik arxa fon yenilənmələri və sistem tepsisi',
+        'Dərhal qlobal qısayol qeydiyyatı'
+      ],
+      windowsPortableFeatures: [
+        'Quraşdırma və ya reyestr yazıları tələb etmir',
+        'USB fleş disk və ya şəbəkə qovluğundan işləyir',
+        'Özündə cəmlənmiş konfiqurasiya faylı'
+      ],
+      bannerTitle: 'Tək Vahid Arxa Fon Prosesi',
+      bannerDesc: '~40MB RAM istifadəsi • Arxa fonda izləmə yoxdur • Anında qlobal qısayol bağlantısı',
+      bannerBtn: 'Vahid Tətbiqi Yüklə',
     },
     github: {
       eyebrow: 'Açıq Mənbə',
@@ -418,7 +685,11 @@ export const translations: Record<Language, TranslationStrings> = {
       resources: 'Resurslar',
       openSource: 'Açıq Mənbə',
       copyright: '© 2026 Shotera. MIT Lisenziyası ilə açıq mənbəli.',
-      builtFor: 'Sahil Rzayev tərəfindən yaradılıb. Yaradıcılar və mühəndislər üçün.',
+            builtFor: 'Sahil Rzayev tərəfindən yaradılıb. Yaradıcılar və mühəndislər üçün.',
+      releaseNotes: 'Buraxılış Qeydləri',
+      githubRepo: 'GitHub Repozitoriyası',
+      issueTracker: 'Xəta İzləyici',
+      languages: 'Dillər',
     },
   },
   tr: {
@@ -456,17 +727,17 @@ export const translations: Record<Language, TranslationStrings> = {
       items: [
         {
           name: 'Ekran ve Bölge Yakalama',
-          replaced: 'Ekran Alıntısı Aracı / Lightshot',
+          replaced: 'Harici Ekran Alıntısı Araçları',
           desc: 'Piksel hassasiyetinde seçim, büyüteç ve çoklu monitör desteği.',
         },
         {
           name: 'Canlı Ekran Yakınlaştırma (Zoom)',
-          replaced: 'ZoomIt / Büyüteç',
+          replaced: 'Ayrı Ekran Büyüteçleri',
           desc: 'Ekran üzerinde canlı çizim ve kesintisiz donanım yakınlaştırması.',
         },
         {
           name: 'Açıklama ve Adım Numaralandırma',
-          replaced: 'Paint / Çizim Uygulamaları',
+          replaced: 'Basit Çizim Uygulamaları',
           desc: 'Vektör oklar, sıralı adım rozetleri, metin ve sansürleme (blur).',
         },
         {
@@ -485,6 +756,9 @@ export const translations: Record<Language, TranslationStrings> = {
           desc: 'Göz dinlendirme ve Pomodoro için entegre zamanlayıcı.',
         },
       ],
+      bannerTitle: 'Tek ve Birleşik Arka Plan Süreci',
+      bannerDesc: '~40MB RAM kullanımı • Arka planda telemetri yok • Anında global kısayol bağlantısı',
+      bannerBtn: 'Birleşik Uygulamayı İndir',
     },
     showcases: {
       capture: {
@@ -558,6 +832,119 @@ export const translations: Record<Language, TranslationStrings> = {
       eyebrow: 'Özellik Matrisi',
       title: 'Geliştiriciler, tasarımcılar ve eğitmenler için tasarlandı',
       subtitle: 'Her özellik, günlük iş akışınızdaki sürtünmeyi yok etmek için geliştirildi.',
+    categories: [
+  {
+    id: 'capture',
+    title: 'Yakala',
+    items: [
+      {
+        title: 'Bölge ve Pencere Yakalama',
+        description: 'Akıllı kenar algılama ve aktif pencere tespiti ile piksel hassasiyetinde seçim.'
+      },
+      {
+        title: 'Tam Ekran ve Çoklu Monitör',
+        description: 'Görüntü bozulması olmadan 4K ve farklı çözünürlüklü ekranlarda tek tuşla yakalama.'
+      },
+      {
+        title: 'Çoklu Format Desteği',
+        kayıp: 'Kayıpsız PNG, sıkıştırılmış JPEG, WebP veya BMP olarak doğrudan dışa aktarma.',
+        description: 'Kayıpsız PNG, sıkıştırılmış JPEG, modern WebP veya BMP formatlarında dışa aktarma.'
+      },
+      {
+        title: 'Kayıpsız Büyüteç ve HEX',
+        description: 'Tasarımcılar için tam RGB ve HEX renk kodlarını gösteren gerçek zamanlı 8x büyüteç.'
+      }
+    ]
+  },
+  {
+    id: 'explain',
+    title: 'Açıkla',
+    items: [
+      {
+        title: 'Adım Numaralandırma',
+        description: 'İş akışlarını ve eğitimleri belgelemek için otomatik artan sıralı numaralar (1, 2, 3...).'
+      },
+      {
+        title: 'Vektör Oklar ve Şekiller',
+        description: 'Temiz geometrik çizgiler, içi dolu dikdörtgenler, elipsler ve kavisli işaret okları.'
+      },
+      {
+        title: 'Güvenlik ve Sansürleme (Blur)',
+        description: 'Şifreleri ve gizli verileri gizlemek için tahribatsız bulanıklaştırma (blur) ve pikselleştirme.'
+      },
+      {
+        title: 'Temiz Metin Kutuları',
+        description: 'Özelleştirilebilir font kalınlığı, arka plan ve gölgelere sahip yüksek kontrastlı metin kutuları.'
+      }
+    ]
+  },
+  {
+    id: 'present',
+    title: 'Sun',
+    items: [
+      {
+        title: 'Donanımsal Ekran Yakınlaştırma',
+        description: 'Canlı sunumlar sırasında sıfır CPU gecikmesi ile akıcı 2x - 8x ekran yakınlaştırması.'
+      },
+      {
+        title: 'Canlı Ekran Çizimi',
+        description: 'Doğrudan masaüstü uygulamalarının üzerinde serbest vektör çizgileri, oklar ve daireler çizin.'
+      },
+      {
+        title: 'Etkileşimli Canlı Zoom',
+        description: 'Yakınlaştırılmış ekranda çalışırken masaüstü uygulamalarını tıklanabilir ve etkileşimli tutun.'
+      },
+      {
+        title: 'Ekrana Sabitleme (Pin)',
+        description: 'Kod yazarken ekran görüntülerini sürekli üstte duran referans kartları olarak sabitleyin.'
+      }
+    ]
+  },
+  {
+    id: 'record',
+    title: 'Kaydet',
+    items: [
+      {
+        title: 'Donanım Hızlandırma',
+        description: 'Kesintisiz 60 FPS kayıt için donanım tabanlı video kodlama (NVENC / QuickSync / AMD AMF).'
+      },
+      {
+        title: 'Hedef Pencere Kaydı',
+        description: 'Görev çubuğunu veya arkaplandaki gizli verileri almadan sadece belirli bir pencereyi kaydedin.'
+      },
+      {
+        title: 'Senkronize Ses Kaydı',
+        description: 'Mikrofon sesini ve sistem sesini denge ayarlarıyla aynı anda sorunsuz kaydedin.'
+      },
+      {
+        title: 'Hafif MP4 Formatı',
+        description: 'Paylaşmaya hazır kompakt dosya boyutlarıyla evrensel H.264 MP4 formatına anında çıktı.'
+      }
+    ]
+  },
+  {
+    id: 'smarter',
+    title: 'Akıllı Çalış',
+    items: [
+      {
+        title: 'Dahili Ekran OCR',
+        description: 'Seçilemeyen arayüzlerden, PDF ve videolardan metinleri anında panoya kopyalayın.'
+      },
+      {
+        title: 'Ergonomik Mola Zamanlayıcısı',
+        description: 'Uzun seanslarda göz yorgunluğunu azaltmak için 20-20-20 molaları ve Pomodoro zamanlayıcıları.'
+      },
+      {
+        title: 'Buluta Yükleme ve Anında Link',
+        description: 'Ekran görüntülerini tek tıkla yükleyin ve anında paylaşılabilir bir bağlantı alın.'
+      },
+      {
+        title: 'Sistem Tepsisi ve Otomatik Güncelleme',
+        description: '~40MB RAM kullanımı ile arka planda sessizce çalışır; pürüzsüz otomatik güncelleme motoru.'
+      }
+    ]
+  }
+],
     },
     howItWorks: {
       eyebrow: 'İş Akışı',
@@ -606,7 +993,23 @@ export const translations: Record<Language, TranslationStrings> = {
       reqRam: '100 MB RAM (Çok Hafif)',
       reqStorage: '50 MB boş disk alanı',
       licenseTitle: 'Ücretsiz ve Açık Kaynak',
-      licenseDesc: 'MIT lisansı ile sunulmaktadır. Sıfır casus yazılım, sıfır reklam.',
+            licenseDesc: 'MIT lisansı ile sunulmaktadır. Sıfır casus yazılım, sıfır reklam.',
+      recommended: 'Önerilen',
+      downloadExeBtn: 'Shotera İndir (.exe)',
+      downloadZipBtn: 'Taşınabilir İndir (.zip)',
+      windowsInstallerFeatures: [
+        'Windows 10 / 11 (64-bit Mimari)',
+        'Otomatik arka plan güncellemeleri ve sistem tepsisi',
+        'Anında global kısayol kaydı'
+      ],
+      windowsPortableFeatures: [
+        'Kurulum veya kayıt defteri yazısı yok',
+        'USB bellekten veya ağ klasöründen çalışır',
+        'Bağımsız yapılandırma dosyası'
+      ],
+      bannerTitle: 'Tek ve Birleşik Arka Plan Süreci',
+      bannerDesc: '~40MB RAM kullanımı • Arka planda telemetri yok • Anında global kısayol bağlantısı',
+      bannerBtn: 'Birleşik Uygulamayı İndir',
     },
     github: {
       eyebrow: 'Açık Kaynak',
@@ -628,7 +1031,11 @@ export const translations: Record<Language, TranslationStrings> = {
       resources: 'Kaynaklar',
       openSource: 'Açık Kaynak',
       copyright: '© 2026 Shotera. MIT Lisansı ile açık kaynak.',
-      builtFor: 'Sahil Rzayev tarafından geliştirildi. Üreticiler ve mühendisler için.',
+            builtFor: 'Sahil Rzayev tarafından geliştirildi. Üreticiler ve mühendisler için.',
+      releaseNotes: 'Sürüm Notları',
+      githubRepo: 'GitHub Deposu',
+      issueTracker: 'Sorun İzleyici',
+      languages: 'Diller',
     },
   },
   ru: {
@@ -666,17 +1073,17 @@ export const translations: Record<Language, TranslationStrings> = {
       items: [
         {
           name: 'Захват области и экрана',
-          replaced: 'Ножницы / Lightshot',
+          replaced: 'Сторонние утилиты для скриншотов',
           desc: 'Пиксельная точность, лупа и мгновенный захват нескольких мониторов.',
         },
         {
           name: 'Живой зум и увеличение',
-          replaced: 'ZoomIt / Лупа Windows',
+          replaced: 'Отдельные экранные лупы',
           desc: 'Плавное аппаратное увеличение с рисованием прямо по экрану.',
         },
         {
           name: 'Аннотации и нумерация шагов',
-          replaced: 'Paint / Графические редакторы',
+          replaced: 'Базовые графические редакторы',
           desc: 'Стрелки, авто-нумерация шагов (1, 2, 3), текст и размытие (blur).',
         },
         {
@@ -695,6 +1102,9 @@ export const translations: Record<Language, TranslationStrings> = {
           desc: 'Встроенный таймер для отдыха глаз и работы по Pomodoro.',
         },
       ],
+      bannerTitle: 'Единый фоновый процесс',
+      bannerDesc: '~40 МБ ОЗУ • Никакой фоновой телеметрии • Мгновенные глобальные горячие клавиши',
+      bannerBtn: 'Скачать единое приложение',
     },
     showcases: {
       capture: {
@@ -768,6 +1178,118 @@ export const translations: Record<Language, TranslationStrings> = {
       eyebrow: 'Матрица возможностей',
       title: 'Создано для разработчиков, дизайнеров и преподавателей',
       subtitle: 'Каждая функция спроектирована для максимальной скорости работы.',
+    categories: [
+  {
+    id: 'capture',
+    title: 'Capture',
+    items: [
+      {
+        title: 'Region & Window Snapping',
+        description: 'Pixel-accurate crosshair with smart edge detection and active window outline detection.'
+      },
+      {
+        title: 'Full-Screen & Multi-Monitor',
+        description: 'Single-hotkey capture across 4K displays and mixed DPI setups without downscaling artifacts.'
+      },
+      {
+        title: 'Multiple Image Formats',
+        description: 'Direct output to lossless PNG, compressed JPEG, modern WebP, or uncompressed BMP.'
+      },
+      {
+        title: 'Lossless Loupe & HEX Inspector',
+        description: 'Real-time 8x zoom magnifier showing exact RGB and HEX color codes for UI developers.'
+      }
+    ]
+  },
+  {
+    id: 'explain',
+    title: 'Explain',
+    items: [
+      {
+        title: 'Step Numbering Badges',
+        description: 'Auto-incrementing numbered circles (1, 2, 3...) for documenting workflows and tutorials.'
+      },
+      {
+        title: 'Vector Arrows & Shapes',
+        description: 'Clean geometric lines, filled rectangles, ellipses, and curved pointer arrows.'
+      },
+      {
+        title: 'Security Blur & Pixelation',
+        description: 'Non-destructive Gaussian blur and pixelation brushes for hiding passwords, tokens, and PII.'
+      },
+      {
+        title: 'Clean Typography Callouts',
+        description: 'High-contrast text badges with customizable font weights, background pill, and shadows.'
+      }
+    ]
+  },
+  {
+    id: 'present',
+    title: 'Present',
+    items: [
+      {
+        title: 'Hardware Screen Zoom',
+        description: 'Fluid 2x to 8x screen magnification with zero CPU lag during live presentations.'
+      },
+      {
+        title: 'Live Screen Drawing',
+        description: 'Draw freehand vector lines, arrows, and circles directly on top of running desktop applications.'
+      },
+      {
+        title: 'Interactive Live Zoom',
+        description: 'Keep desktop apps clickable and interactive while working in a magnified viewport.'
+      },
+      {
+        title: 'Screen Pinning (Always-on-Top)',
+        description: 'Pin screenshot snippets anywhere on screen as floating reference cards while writing code.'
+      }
+    ]
+  },
+  {
+    id: 'record',
+    title: 'Record',
+    items: [
+      {
+        title: 'Hardware Acceleration',
+        description: 'Native GPU-backed video encoding (NVENC / QuickSync / AMD AMF) for seamless 60 FPS recording.'
+      },
+      {
+        title: 'Targeted Window Capture',
+        description: 'Record specific application windows without capturing confidential taskbar or background clutter.'
+      },
+      {
+        title: 'Synchronized Audio Streams',
+        description: 'Simultaneously capture studio microphone audio and internal PC audio with balance sliders.'
+      },
+      {
+        title: 'Lightweight MP4 Packaging',
+        description: 'Immediate export to widely supported H.264 MP4 with compact file sizes ready for sharing.'
+      }
+    ]
+  },
+  {
+    id: 'smarter',
+    title: 'Work Smarter',
+    items: [
+      {
+        title: 'On-Device Screen OCR',
+        description: 'Instantly extract text from unselectable UI dialogs, protected PDFs, and videos to clipboard.'
+      },
+      {
+        title: 'Ergonomic Break & Focus Timer',
+        description: 'Integrated 20-20-20 rest intervals and Pomodoro timers to reduce eye fatigue during long sessions.'
+      },
+      {
+        title: 'Cloud Upload & Instant Link',
+        description: 'Upload captures with one click and receive a clean shareable URL in your clipboard.'
+      },
+      {
+        title: 'System Tray & Auto Updates',
+        description: 'Runs silently in background with ~40MB RAM usage; automatic frictionless update engine.'
+      }
+    ]
+  }
+],
     },
     howItWorks: {
       eyebrow: 'Рабочий процесс',
@@ -816,7 +1338,23 @@ export const translations: Record<Language, TranslationStrings> = {
       reqRam: '100 МБ ОЗУ (Ультра-легковесный)',
       reqStorage: '50 МБ свободного места',
       licenseTitle: 'Бесплатно и с открытым кодом',
-      licenseDesc: 'Выпущено под лицензией MIT. Без шпионских модулей и рекламы.',
+            licenseDesc: 'Выпущено под лицензией MIT. Без шпионских программ и рекламы.',
+      recommended: 'Рекомендуется',
+      downloadExeBtn: 'Скачать Shotera (.exe)',
+      downloadZipBtn: 'Скачать Portable (.zip)',
+      windowsInstallerFeatures: [
+        'Windows 10 / 11 (64-битная архитектура)',
+        'Автоматические обновления и системный трей',
+        'Мгновенная регистрация глобальных горячих клавиш'
+      ],
+      windowsPortableFeatures: [
+        'Без установки и записей в реестре',
+        'Запускается с USB-накопителя или сетевой папки',
+        'Автономный конфигурационный файл'
+      ],
+      bannerTitle: 'Единый фоновый процесс',
+      bannerDesc: '~40 МБ ОЗУ • Никакой фоновой телеметрии • Мгновенные глобальные горячие клавиши',
+      bannerBtn: 'Скачать единое приложение',
     },
     github: {
       eyebrow: 'Открытый код',
@@ -838,7 +1376,11 @@ export const translations: Record<Language, TranslationStrings> = {
       resources: 'Ресурсы',
       openSource: 'Открытый код',
       copyright: '© 2026 Shotera. Лицензия MIT.',
-      builtFor: 'Разработано Sahil Rzayev. Для создателей, разработчиков и команд.',
+            builtFor: 'Разработано Сахилем Рзаевым. Для создателей и инженеров.',
+      releaseNotes: 'История версий',
+      githubRepo: 'Репозиторий GitHub',
+      issueTracker: 'Трекер задач',
+      languages: 'Языки',
     },
   },
   de: {
@@ -876,7 +1418,7 @@ export const translations: Record<Language, TranslationStrings> = {
       items: [
         {
           name: 'Bereichs- & Bildschirmaufnahme',
-          replaced: 'Snipping Tool / Lightshot',
+          replaced: 'Externe Snipping-Tools',
           desc: 'Pixelgenaue Auswahl, Farblupe und Multimonitor-Unterstützung.',
         },
         {
@@ -905,6 +1447,9 @@ export const translations: Record<Language, TranslationStrings> = {
           desc: 'Integrierte Pomodoro- und Augenschonungs-Intervalle direkt auf dem Bildschirm.',
         },
       ],
+      bannerTitle: 'Ein einheitlicher Hintergrundprozess',
+      bannerDesc: '~40MB RAM-Bedarf • Keine Hintergrund-Telemetrie • Sofortige globale Hotkeys',
+      bannerBtn: 'Einheitliche App herunterladen',
     },
     showcases: {
       capture: {
@@ -978,6 +1523,118 @@ export const translations: Record<Language, TranslationStrings> = {
       eyebrow: 'Funktionsübersicht',
       title: 'Entwickelt für Programmierer, Designer und Dozenten',
       subtitle: 'Jede Funktion wurde entwickelt, um Reibung in Ihrem täglichen Arbeitsablauf zu minimieren.',
+    categories: [
+  {
+    id: 'capture',
+    title: 'Capture',
+    items: [
+      {
+        title: 'Region & Window Snapping',
+        description: 'Pixel-accurate crosshair with smart edge detection and active window outline detection.'
+      },
+      {
+        title: 'Full-Screen & Multi-Monitor',
+        description: 'Single-hotkey capture across 4K displays and mixed DPI setups without downscaling artifacts.'
+      },
+      {
+        title: 'Multiple Image Formats',
+        description: 'Direct output to lossless PNG, compressed JPEG, modern WebP, or uncompressed BMP.'
+      },
+      {
+        title: 'Lossless Loupe & HEX Inspector',
+        description: 'Real-time 8x zoom magnifier showing exact RGB and HEX color codes for UI developers.'
+      }
+    ]
+  },
+  {
+    id: 'explain',
+    title: 'Explain',
+    items: [
+      {
+        title: 'Step Numbering Badges',
+        description: 'Auto-incrementing numbered circles (1, 2, 3...) for documenting workflows and tutorials.'
+      },
+      {
+        title: 'Vector Arrows & Shapes',
+        description: 'Clean geometric lines, filled rectangles, ellipses, and curved pointer arrows.'
+      },
+      {
+        title: 'Security Blur & Pixelation',
+        description: 'Non-destructive Gaussian blur and pixelation brushes for hiding passwords, tokens, and PII.'
+      },
+      {
+        title: 'Clean Typography Callouts',
+        description: 'High-contrast text badges with customizable font weights, background pill, and shadows.'
+      }
+    ]
+  },
+  {
+    id: 'present',
+    title: 'Present',
+    items: [
+      {
+        title: 'Hardware Screen Zoom',
+        description: 'Fluid 2x to 8x screen magnification with zero CPU lag during live presentations.'
+      },
+      {
+        title: 'Live Screen Drawing',
+        description: 'Draw freehand vector lines, arrows, and circles directly on top of running desktop applications.'
+      },
+      {
+        title: 'Interactive Live Zoom',
+        description: 'Keep desktop apps clickable and interactive while working in a magnified viewport.'
+      },
+      {
+        title: 'Screen Pinning (Always-on-Top)',
+        description: 'Pin screenshot snippets anywhere on screen as floating reference cards while writing code.'
+      }
+    ]
+  },
+  {
+    id: 'record',
+    title: 'Record',
+    items: [
+      {
+        title: 'Hardware Acceleration',
+        description: 'Native GPU-backed video encoding (NVENC / QuickSync / AMD AMF) for seamless 60 FPS recording.'
+      },
+      {
+        title: 'Targeted Window Capture',
+        description: 'Record specific application windows without capturing confidential taskbar or background clutter.'
+      },
+      {
+        title: 'Synchronized Audio Streams',
+        description: 'Simultaneously capture studio microphone audio and internal PC audio with balance sliders.'
+      },
+      {
+        title: 'Lightweight MP4 Packaging',
+        description: 'Immediate export to widely supported H.264 MP4 with compact file sizes ready for sharing.'
+      }
+    ]
+  },
+  {
+    id: 'smarter',
+    title: 'Work Smarter',
+    items: [
+      {
+        title: 'On-Device Screen OCR',
+        description: 'Instantly extract text from unselectable UI dialogs, protected PDFs, and videos to clipboard.'
+      },
+      {
+        title: 'Ergonomic Break & Focus Timer',
+        description: 'Integrated 20-20-20 rest intervals and Pomodoro timers to reduce eye fatigue during long sessions.'
+      },
+      {
+        title: 'Cloud Upload & Instant Link',
+        description: 'Upload captures with one click and receive a clean shareable URL in your clipboard.'
+      },
+      {
+        title: 'System Tray & Auto Updates',
+        description: 'Runs silently in background with ~40MB RAM usage; automatic frictionless update engine.'
+      }
+    ]
+  }
+],
     },
     howItWorks: {
       eyebrow: 'Workflow',
@@ -1026,7 +1683,23 @@ export const translations: Record<Language, TranslationStrings> = {
       reqRam: '100 MB RAM (Extrem ressourcenschonend)',
       reqStorage: '50 MB freier Festplattenspeicher',
       licenseTitle: 'Kostenlos & Open Source',
-      licenseDesc: 'Veröffentlicht unter der MIT-Lizenz. Keine Spyware, keine Werbung.',
+            licenseDesc: 'Veröffentlicht unter der MIT-Lizenz. Keine Spyware, keine Werbung.',
+      recommended: 'Empfohlen',
+      downloadExeBtn: 'Shotera Herunterladen (.exe)',
+      downloadZipBtn: 'Portable Herunterladen (.zip)',
+      windowsInstallerFeatures: [
+        'Windows 10 / 11 (64-bit Architektur)',
+        'Automatische Hintergrund-Updates & System-Tray',
+        'Sofortige globale Hotkey-Registrierung'
+      ],
+      windowsPortableFeatures: [
+        'Keine Installation oder Registry-Einträge',
+        'Läuft vom USB-Stick oder Netzwerkordner',
+        'Eigenständige Konfigurationsdatei'
+      ],
+      bannerTitle: 'Ein einheitlicher Hintergrundprozess',
+      bannerDesc: '~40MB RAM-Bedarf • Keine Hintergrund-Telemetrie • Sofortige globale Hotkeys',
+      bannerBtn: 'Einheitliche App herunterladen',
     },
     github: {
       eyebrow: 'Open Source',
@@ -1048,7 +1721,11 @@ export const translations: Record<Language, TranslationStrings> = {
       resources: 'Ressourcen',
       openSource: 'Open Source',
       copyright: '© 2026 Shotera. Open Source unter MIT-Lizenz.',
-      builtFor: 'Entwickelt von Sahil Rzayev. Für Entwickler, Designer und Teams.',
+            builtFor: 'Entwickelt von Sahil Rzayev. Für Entwickler und Teams.',
+      releaseNotes: 'Versionshinweise',
+      githubRepo: 'GitHub Repository',
+      issueTracker: 'Issue Tracker',
+      languages: 'Sprachen',
     },
   },
 };

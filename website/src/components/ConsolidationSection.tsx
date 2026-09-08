@@ -1,6 +1,10 @@
+import { useRef, useEffect } from 'react';
 import { Crop, ZoomIn, PenTool, ScanText, Video, Timer, Check, ArrowRight } from 'lucide-react';
+import { motion, useInView } from 'motion/react';
 import { Language } from '../types';
 import { translations } from '../translations';
+import { useViewfinder } from '../context/ViewfinderContext';
+import { dustRevealVariants } from '../utils/animations';
 
 interface ConsolidationSectionProps {
   currentLang: Language;
@@ -8,6 +12,14 @@ interface ConsolidationSectionProps {
 
 export function ConsolidationSection({ currentLang }: ConsolidationSectionProps) {
   const t = translations[currentLang];
+  const ref = useRef(null);
+  const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
+  const { activeTarget, setActiveTarget } = useViewfinder();
+
+  useEffect(() => {
+    if (isInView) setActiveTarget('consolidation');
+    // If scrolling up, we can let Hero take over, but for simplicity let useInView trigger it when scrolling down.
+  }, [isInView, setActiveTarget]);
 
   const tools = [
     {
@@ -59,24 +71,56 @@ export function ConsolidationSection({ currentLang }: ConsolidationSectionProps)
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center mb-16 space-y-4">
-          <div className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase">
+          <motion.div
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="inline-flex items-center px-3.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[11px] font-bold tracking-wider text-slate-500 uppercase"
+          >
             {t.whyShotera.eyebrow}
-          </div>
-          <h2 className="text-3xl sm:text-5xl font-semibold tracking-tight text-slate-950">
+          </motion.div>
+          <motion.h2
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="text-3xl sm:text-5xl font-display font-semibold tracking-tight text-slate-950"
+          >
             {t.whyShotera.title}
-          </h2>
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            custom={2}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={dustRevealVariants}
+            className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto"
+          >
             {t.whyShotera.subtitle}
-          </p>
+          </motion.p>
         </div>
 
         {/* The Consolidation Matrix Card */}
-        <div className="max-w-6xl mx-auto bg-slate-50/50 rounded-3xl sm:rounded-[36px] border border-slate-100 p-6 sm:p-10 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div ref={ref} className="relative max-w-6xl mx-auto bg-slate-50/50 rounded-3xl sm:rounded-[36px] border border-slate-100 p-6 sm:p-10 shadow-sm">
+          {activeTarget === 'consolidation' && (
+            <motion.div
+              layoutId="global-viewfinder"
+              className="absolute inset-0 ring-2 ring-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] rounded-3xl sm:rounded-[36px] pointer-events-none z-50"
+            />
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
             {tools.map((tool, idx) => {
               const Icon = tool.icon;
               return (
-                <div
+                <motion.div
+                  custom={idx + 3}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-50px" }}
+                  variants={dustRevealVariants}
                   key={idx}
                   className="p-6 rounded-2xl border border-slate-200/70 bg-white hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100 transition-all flex flex-col justify-between group"
                 >
@@ -103,7 +147,7 @@ export function ConsolidationSection({ currentLang }: ConsolidationSectionProps)
                       <span>Shotera</span>
                     </span>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -119,10 +163,10 @@ export function ConsolidationSection({ currentLang }: ConsolidationSectionProps)
                 />
                 <div className="text-left">
                   <div className="text-base font-semibold text-white">
-                    One Unified Background Process
+                    {t.whyShotera.bannerTitle}
                   </div>
                   <div className="text-xs text-slate-400">
-                    ~40MB RAM footprint • Zero background telemetry • Instant global hotkey hook
+                    {t.whyShotera.bannerDesc}
                   </div>
                 </div>
               </div>
@@ -131,7 +175,7 @@ export function ConsolidationSection({ currentLang }: ConsolidationSectionProps)
                 href="#download"
                 className="inline-flex items-center gap-2 px-6 py-3 text-xs font-semibold text-slate-950 bg-white hover:bg-slate-100 rounded-xl transition-colors whitespace-nowrap shadow-sm"
               >
-                <span>Download Unified App</span>
+                <span>{t.whyShotera.bannerBtn}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>

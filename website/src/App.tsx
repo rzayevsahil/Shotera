@@ -12,6 +12,8 @@ import { GitHubSection } from './components/GitHubSection';
 import { PhilosophySection } from './components/PhilosophySection';
 import { Footer } from './components/Footer';
 
+import { ViewfinderProvider } from './context/ViewfinderContext';
+
 export default function App() {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     // Detect user language preference or default to 'en'
@@ -31,20 +33,22 @@ export default function App() {
   }, [currentLang]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans antialiased selection:bg-slate-100 selection:text-slate-900">
-      <Header currentLang={currentLang} onLanguageChange={setCurrentLang} />
-      <main className="grow">
-        <Hero currentLang={currentLang} />
-        <ConsolidationSection currentLang={currentLang} />
-        <FeatureShowcases currentLang={currentLang} />
-        <FeatureGrid currentLang={currentLang} />
-        <HowItWorks currentLang={currentLang} />
-        <ShortcutsStation currentLang={currentLang} />
-        <DownloadSection currentLang={currentLang} />
-        <PhilosophySection currentLang={currentLang} />
-        <GitHubSection currentLang={currentLang} />
-      </main>
-      <Footer currentLang={currentLang} onLanguageChange={setCurrentLang} />
-    </div>
+    <ViewfinderProvider>
+      <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans antialiased selection:bg-slate-100 selection:text-slate-900">
+        <Header currentLang={currentLang} onLanguageChange={setCurrentLang} />
+        <main className="grow">
+          <Hero currentLang={currentLang} />
+          <ConsolidationSection currentLang={currentLang} />
+          <FeatureShowcases currentLang={currentLang} />
+          <FeatureGrid currentLang={currentLang} />
+          <HowItWorks currentLang={currentLang} />
+          <ShortcutsStation currentLang={currentLang} />
+          <DownloadSection currentLang={currentLang} />
+          <PhilosophySection currentLang={currentLang} />
+          <GitHubSection currentLang={currentLang} />
+        </main>
+        <Footer currentLang={currentLang} onLanguageChange={setCurrentLang} />
+      </div>
+    </ViewfinderProvider>
   );
 }
