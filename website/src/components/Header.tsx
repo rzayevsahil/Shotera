@@ -59,7 +59,7 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
             id="header-brand-link"
           >
             <img
-              src="/logo.png"
+              src="./logo.png"
               alt="Shotera Logo"
               className="w-8 h-8 rounded-lg shadow-sm group-hover:scale-105 transition-transform object-contain"
             />

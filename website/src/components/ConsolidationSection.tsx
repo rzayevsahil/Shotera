@@ -157,7 +157,7 @@ export function ConsolidationSection({ currentLang }: ConsolidationSectionProps)
             <div className="bg-slate-950 text-white rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-slate-200">
               <div className="flex items-center gap-4">
                 <img
-                  src="/logo.png"
+                  src="./logo.png"
                   alt="Shotera Logo"
                   className="w-10 h-10 rounded-xl object-contain shadow-md border border-white/20"
                 />
