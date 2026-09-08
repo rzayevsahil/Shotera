@@ -18,7 +18,7 @@ import ScreenRecorderModal from "./ScreenRecorderModal";
 import "./ScreenRecorderModal.css";
 import FeatureTour from "./FeatureTour";
 import { HexColorPicker } from "react-colorful";
-type ActiveTab = "general" | "capture" | "save" | "zoom" | "live_zoom" | "timer" | "record" | "about";
+type ActiveTab = "general" | "capture" | "zoom" | "live_zoom" | "timer" | "record" | "about";
 
 function resolveImageSrc(src: string | null | undefined): string {
   if (!src) return "";
@@ -1272,16 +1272,7 @@ function SettingsWindow() {
               <Camera className="nav-icon" />
               {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{t.sidebarCapture}</span>}
             </div>
-            <div
-              className={`nav-item ${activeTab === "save" ? "active" : ""}`}
-              data-tour="nav-save"
-              onClick={() => setActiveTab("save")}
-              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
-              title={isSidebarCollapsed ? t.sidebarSave : undefined}
-            >
-              <FolderOpen className="nav-icon" />
-              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{t.sidebarSave}</span>}
-            </div>
+
             <div
               className={`nav-item ${activeTab === "zoom" ? "active" : ""}`}
               data-tour="nav-zoom"
@@ -1370,7 +1361,7 @@ function SettingsWindow() {
           <h2 className="section-title">
             {activeTab === "general" && t.generalTitle}
             {activeTab === "capture" && t.captureTitle}
-            {activeTab === "save" && t.saveTitle}
+
             {activeTab === "zoom" && (t as any).zoomTitle}
             {activeTab === "live_zoom" && (t as any).liveZoomTitle}
             {activeTab === "record" && (t as any).recordTitle}
@@ -1380,7 +1371,7 @@ function SettingsWindow() {
           <p className="section-subtitle">
             {activeTab === "general" && t.generalSubtitle}
             {activeTab === "capture" && t.captureSubtitle}
-            {activeTab === "save" && t.saveSubtitle}
+
             {activeTab === "zoom" && (t as any).zoomSubtitle}
             {activeTab === "live_zoom" && (t as any).liveZoomSubtitle}
             {activeTab === "record" && (t as any).recordSubtitle}
@@ -1460,6 +1451,151 @@ function SettingsWindow() {
                 <option value="en">English</option>
               </select>
             </div>
+
+            <div className="setting-row" data-tour="setting-save-folder">
+              <div className="setting-info">
+                <span className="setting-label">{t.defaultSaveDir}</span>
+                <span className="setting-desc">{t.defaultSaveDirDesc}</span>
+              </div>
+              <div style={{ display: "flex", gap: "8px", flex: 1, maxWidth: "500px", minWidth: "240px" }}>
+                <input
+                  type="text"
+                  className="premium-input"
+                  value={savePath}
+                  readOnly
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setSavePath(folder);
+                    }
+                  }}
+                  style={{ minWidth: "0", flexGrow: 1, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer" }}
+                />
+                <button
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setSavePath(folder);
+                    }
+                  }}
+                  className="action-btn"
+                  title={t.selectFolder}
+                  style={{
+                    padding: "0 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    color: "white",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                    e.currentTarget.style.borderColor = "var(--accent-cyan)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                    e.currentTarget.style.borderColor = "var(--border-color)";
+                  }}
+                >
+                  <FolderOpen size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-row" data-tour="setting-video-save-folder">
+              <div className="setting-info">
+                <span className="setting-label">{(t as any).defaultVideoSaveDir || "Varsayılan Video Kayıt Dizini"}</span>
+                <span className="setting-desc">{(t as any).defaultVideoSaveDirDesc || "Ekran kayıtlarının (video) kaydedileceği klasör."}</span>
+              </div>
+              <div style={{ display: "flex", gap: "8px", flex: 1, maxWidth: "500px", minWidth: "240px" }}>
+                <input
+                  type="text"
+                  className="premium-input"
+                  value={videoSavePath}
+                  readOnly
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setVideoSavePath(folder);
+                    }
+                  }}
+                  style={{ minWidth: "0", flexGrow: 1, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer" }}
+                />
+                <button
+                  onClick={async () => {
+                    const folder = await invoke<string | null>("select_folder");
+                    if (folder) {
+                      setVideoSavePath(folder);
+                    }
+                  }}
+                  className="action-btn"
+                  title={t.selectFolder}
+                  style={{
+                    padding: "0 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    color: "white",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                    e.currentTarget.style.borderColor = "var(--accent-cyan)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                    e.currentTarget.style.borderColor = "var(--border-color)";
+                  }}
+                >
+                  <FolderOpen size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-row" data-tour="setting-format">
+              <div className="setting-info">
+                <span className="setting-label">{t.fileFormat}</span>
+                <span className="setting-desc">{t.fileFormatDesc}</span>
+              </div>
+              <select
+                className="premium-input"
+                value={fileFormat}
+                onChange={(e) => setFileFormat(e.target.value)}
+                style={{ width: "240px" }}
+              >
+                <option value="PNG">PNG ({t.formatLossless})</option>
+                <option value="JPG">JPG ({t.formatCompressed})</option>
+                <option value="WebP">WebP ({t.formatModern})</option>
+              </select>
+            </div>
+
+            {fileFormat !== "PNG" && (
+              <div className="setting-row" data-tour="setting-image-quality">
+                <div className="setting-info">
+                  <span className="setting-label">{t.imageQuality}</span>
+                  <span className="setting-desc">{t.imageQualityDesc}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                  <input
+                    type="range"
+                    min="30"
+                    max="100"
+                    value={imageQuality}
+                    onChange={(e) => setImageQuality(Number(e.target.value))}
+                    style={{ flexGrow: 1, accentColor: "var(--accent-cyan)" }}
+                  />
+                  <span style={{ minWidth: "36px", textAlign: "right", fontWeight: 600 }}>%{imageQuality}</span>
+                </div>
+              </div>
+            )}
 
             <div className="setting-row">
               <div className="setting-info">
@@ -1656,154 +1792,7 @@ function SettingsWindow() {
           </div>
         )}
 
-        {activeTab === "save" && (
-          <div className="settings-card">
-            <div className="setting-row" data-tour="setting-save-folder">
-              <div className="setting-info">
-                <span className="setting-label">{t.defaultSaveDir}</span>
-                <span className="setting-desc">{t.defaultSaveDirDesc}</span>
-              </div>
-              <div style={{ display: "flex", gap: "8px", flex: 1, maxWidth: "500px", minWidth: "240px" }}>
-                <input
-                  type="text"
-                  className="premium-input"
-                  value={savePath}
-                  readOnly
-                  onClick={async () => {
-                    const folder = await invoke<string | null>("select_folder");
-                    if (folder) {
-                      setSavePath(folder);
-                    }
-                  }}
-                  style={{ minWidth: "0", flexGrow: 1, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer" }}
-                />
-                <button
-                  onClick={async () => {
-                    const folder = await invoke<string | null>("select_folder");
-                    if (folder) {
-                      setSavePath(folder);
-                    }
-                  }}
-                  className="action-btn"
-                  title={t.selectFolder}
-                  style={{
-                    padding: "0 12px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid var(--border-color)",
-                    borderRadius: "8px",
-                    color: "white",
-                    transition: "all 0.2s ease"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
-                    e.currentTarget.style.borderColor = "var(--accent-cyan)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                    e.currentTarget.style.borderColor = "var(--border-color)";
-                  }}
-                >
-                  <FolderOpen size={16} />
-                </button>
-              </div>
-            </div>
 
-            <div className="setting-row" data-tour="setting-video-save-folder">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).defaultVideoSaveDir || "Varsayılan Video Kayıt Dizini"}</span>
-                <span className="setting-desc">{(t as any).defaultVideoSaveDirDesc || "Ekran kayıtlarının (video) kaydedileceği klasör."}</span>
-              </div>
-              <div style={{ display: "flex", gap: "8px", flex: 1, maxWidth: "500px", minWidth: "240px" }}>
-                <input
-                  type="text"
-                  className="premium-input"
-                  value={videoSavePath}
-                  readOnly
-                  onClick={async () => {
-                    const folder = await invoke<string | null>("select_folder");
-                    if (folder) {
-                      setVideoSavePath(folder);
-                    }
-                  }}
-                  style={{ minWidth: "0", flexGrow: 1, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer" }}
-                />
-                <button
-                  onClick={async () => {
-                    const folder = await invoke<string | null>("select_folder");
-                    if (folder) {
-                      setVideoSavePath(folder);
-                    }
-                  }}
-                  className="action-btn"
-                  title={t.selectFolder}
-                  style={{
-                    padding: "0 12px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid var(--border-color)",
-                    borderRadius: "8px",
-                    color: "white",
-                    transition: "all 0.2s ease"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
-                    e.currentTarget.style.borderColor = "var(--accent-cyan)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                    e.currentTarget.style.borderColor = "var(--border-color)";
-                  }}
-                >
-                  <FolderOpen size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className="setting-row" data-tour="setting-format">
-              <div className="setting-info">
-                <span className="setting-label">{t.fileFormat}</span>
-                <span className="setting-desc">{t.fileFormatDesc}</span>
-              </div>
-              <select
-                className="premium-input"
-                value={fileFormat}
-                onChange={(e) => setFileFormat(e.target.value)}
-                style={{ width: "240px" }}
-              >
-                <option value="PNG">PNG ({t.formatLossless})</option>
-                <option value="JPG">JPG ({t.formatCompressed})</option>
-                <option value="WebP">WebP ({t.formatModern})</option>
-              </select>
-            </div>
-
-            {fileFormat !== "PNG" && (
-              <div className="setting-row" data-tour="setting-image-quality">
-                <div className="setting-info">
-                  <span className="setting-label">{t.imageQuality}</span>
-                  <span className="setting-desc">{t.imageQualityDesc}</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
-                  <input
-                    type="range"
-                    min="30"
-                    max="100"
-                    value={imageQuality}
-                    onChange={(e) => setImageQuality(Number(e.target.value))}
-                    style={{ flexGrow: 1, accentColor: "var(--accent-cyan)" }}
-                  />
-                  <span style={{ minWidth: "36px", textAlign: "right", fontWeight: 600 }}>%{imageQuality}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {activeTab === "zoom" && (
           <div className="settings-card">

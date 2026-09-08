@@ -94,6 +94,34 @@ export const TOUR_STEPS: TourStep[] = [
     interactiveHintKey: "tourClickLanguage",
     requireClick: true,
   },
+  {
+    id: "setting_save_folder",
+    target: '[data-tour="setting-save-folder"]',
+    tab: "general",
+    titleKey: "tourSaveFolderTitle",
+    descKey: "tourSaveFolderDesc",
+    interactiveHintKey: "tourClickSaveFolder",
+    requireClick: true,
+  },
+  {
+    id: "setting_video_save_folder",
+    target: '[data-tour="setting-video-save-folder"]',
+    tab: "general",
+    titleKey: "tourVideoSaveFolderTitle",
+    descKey: "tourVideoSaveFolderDesc",
+    interactiveHintKey: "tourClickVideoSaveFolder",
+    requireClick: true,
+  },
+  {
+    id: "setting_format",
+    target: '[data-tour="setting-format"]',
+    tab: "general",
+    titleKey: "tourFileFormatTitle",
+    descKey: "tourFileFormatDesc",
+    interactiveHintKey: "tourClickFileFormat",
+    requireClick: true,
+  },
+  
   // 2. CAPTURE TAB
   {
     id: "capture",
@@ -158,44 +186,7 @@ export const TOUR_STEPS: TourStep[] = [
     interactiveHintKey: "tourClickEditorShortcuts",
     requireClick: true,
   },
-  // 3. SAVE TAB
-  {
-    id: "save",
-    target: '[data-tour="nav-save"]',
-    tab: "save",
-    titleKey: "tourSaveTitle",
-    descKey: "tourSaveDesc",
-    interactiveHintKey: "tourClickNavSave",
-    requireClick: true,
-  },
-  {
-    id: "setting_save_folder",
-    target: '[data-tour="setting-save-folder"]',
-    tab: "save",
-    titleKey: "tourSaveFolderTitle",
-    descKey: "tourSaveFolderDesc",
-    interactiveHintKey: "tourClickSaveFolder",
-    requireClick: true,
-  },
-  {
-    id: "setting_video_save_folder",
-    target: '[data-tour="setting-video-save-folder"]',
-    tab: "save",
-    titleKey: "tourVideoSaveFolderTitle",
-    descKey: "tourVideoSaveFolderDesc",
-    interactiveHintKey: "tourClickVideoSaveFolder",
-    requireClick: true,
-  },
-  {
-    id: "setting_format",
-    target: '[data-tour="setting-format"]',
-    tab: "save",
-    titleKey: "tourFileFormatTitle",
-    descKey: "tourFileFormatDesc",
-    interactiveHintKey: "tourClickFileFormat",
-    requireClick: true,
-  },
-  // 4. ZOOM TAB
+  // 3. ZOOM TAB
   {
     id: "zoom",
     target: '[data-tour="nav-zoom"]',
