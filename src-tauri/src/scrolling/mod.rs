@@ -1,6 +1,7 @@
 pub mod capture;
 pub mod engine;
 pub mod matcher;
+pub mod seam;
 pub mod stitcher;
 
 use matcher::OverlapMatcher;
@@ -62,6 +63,8 @@ pub struct ScrollingProgressPayload {
     pub current_height: u32,
     pub status: String, // "scrolling", "completed", "cancelled", "stopped"
     pub is_manual: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<f32>,
 }
 
 pub struct ScrollingManager {
@@ -420,6 +423,7 @@ pub async fn start_scrolling_capture(
                 current_height: stitcher.current_height(),
                 status: "scrolling".into(),
                 is_manual,
+                confidence: Some(1.0),
             },
         );
 
@@ -478,7 +482,8 @@ pub async fn start_scrolling_capture(
                     if last_stitch_time.elapsed().as_millis() > 350 {
                         if let Some(overlap) = matcher.find_vertical_overlap(&prev_stabilized_frame, &curr_frame, &match_config) {
                             if !overlap.is_identical && overlap.dy >= (phys_h as f32 * 0.35) as u32 {
-                                let appended = stitcher.append_frame(&curr_frame, overlap.dy);
+                                let seam_res = seam::SeamFinder::find_optimal_seam(&prev_stabilized_frame, &curr_frame, overlap.dy);
+                                let appended = stitcher.append_frame_with_seam(&curr_frame, overlap.dy, seam_res.seam_k);
                                 if appended {
                                     step += 1;
                                     prev_stabilized_frame = curr_frame.clone();
@@ -491,6 +496,7 @@ pub async fn start_scrolling_capture(
                                             current_height: stitcher.current_height(),
                                             status: "scrolling".into(),
                                             is_manual: true,
+                                            confidence: Some(seam_res.confidence),
                                         },
                                     );
                                 }
@@ -509,7 +515,8 @@ pub async fn start_scrolling_capture(
                         // The screen has completely settled and is 100% stationary and sharp!
                         if let Some(overlap) = matcher.find_vertical_overlap(&prev_stabilized_frame, &curr_frame, &match_config) {
                             if !overlap.is_identical && overlap.dy >= 2 {
-                                let appended = stitcher.append_frame(&curr_frame, overlap.dy);
+                                let seam_res = seam::SeamFinder::find_optimal_seam(&prev_stabilized_frame, &curr_frame, overlap.dy);
+                                let appended = stitcher.append_frame_with_seam(&curr_frame, overlap.dy, seam_res.seam_k);
                                 if !appended {
                                     break;
                                 }
@@ -525,6 +532,7 @@ pub async fn start_scrolling_capture(
                                         current_height: stitcher.current_height(),
                                         status: "scrolling".into(),
                                         is_manual: true,
+                                        confidence: Some(seam_res.confidence),
                                     },
                                 );
                             }
@@ -538,7 +546,8 @@ pub async fn start_scrolling_capture(
             if let Ok(final_frame) = capture::capture_screen_rect(phys_x, phys_y, phys_w, phys_h) {
                 if let Some(overlap) = matcher.find_vertical_overlap(&prev_stabilized_frame, &final_frame, &match_config) {
                     if !overlap.is_identical && overlap.dy >= 2 {
-                        stitcher.append_frame(&final_frame, overlap.dy);
+                        let seam_res = seam::SeamFinder::find_optimal_seam(&prev_stabilized_frame, &final_frame, overlap.dy);
+                        stitcher.append_frame_with_seam(&final_frame, overlap.dy, seam_res.seam_k);
                     }
                 }
             }
@@ -547,6 +556,7 @@ pub async fn start_scrolling_capture(
             let mut consecutive_no_movement = 0u32;
             let mut consecutive_match_failures = 0u32;
             let mut cursor_cycle = 0u32;
+            let mut current_confidence = 1.0f32;
 
             while step <= max_steps && is_running_flag.load(Ordering::SeqCst) {
                 // Check ESC key -> cancel
@@ -680,7 +690,13 @@ pub async fn start_scrolling_capture(
                         continue;
                     } else {
                         consecutive_no_movement = 0;
-                        let appended = stitcher.append_frame(&curr_frame, overlap.dy);
+                        let seam_res = seam::SeamFinder::find_optimal_seam(&prev_frame, &curr_frame, overlap.dy);
+                        current_confidence = seam_res.confidence;
+                        println!(
+                            "[Scrolling] Step {}: dy={}, seam_k={}, motion={:.1}, conf={:.2}, sticky_h={}, moving_zones={:?}",
+                            step, overlap.dy, seam_res.seam_k, seam_res.motion_energy, seam_res.confidence, seam_res.sticky_header_height, seam_res.moving_zones
+                        );
+                        let appended = stitcher.append_frame_with_seam(&curr_frame, overlap.dy, seam_res.seam_k);
                         if !appended {
                             println!("[Scrolling] Stitcher stopped appending at step {}", step);
                             break;
@@ -712,6 +728,7 @@ pub async fn start_scrolling_capture(
                         current_height: stitcher.current_height(),
                         status: "scrolling".into(),
                         is_manual: false,
+                        confidence: Some(current_confidence),
                     },
                 );
             }
@@ -765,6 +782,7 @@ pub async fn start_scrolling_capture(
                         current_height: final_h,
                         status: "completed".into(),
                         is_manual,
+                        confidence: Some(1.0),
                     },
                 );
 

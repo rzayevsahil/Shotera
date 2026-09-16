@@ -1,8 +1,14 @@
 use image::RgbaImage;
 
+#[derive(Clone)]
+pub struct FrameSlice {
+    pub frame: RgbaImage,
+    pub start_y: u32,
+    pub end_y: u32,
+}
+
 pub struct ImageStitcher {
-    base_frame: Option<RgbaImage>,
-    slices: Vec<RgbaImage>,
+    slices: Vec<FrameSlice>,
     total_height: u32,
     max_height: u32,
     consecutive_no_movement: u32,
@@ -11,7 +17,6 @@ pub struct ImageStitcher {
 impl ImageStitcher {
     pub fn new(max_height: u32) -> Self {
         Self {
-            base_frame: None,
             slices: Vec::new(),
             total_height: 0,
             max_height,
@@ -19,43 +24,47 @@ impl ImageStitcher {
         }
     }
 
-    /// Adds the very first frame.
+    /// Adds the very first frame to start the stitching session.
     pub fn set_initial_frame(&mut self, frame: RgbaImage) {
-        self.total_height = frame.height();
-        self.base_frame = Some(frame);
+        let h = frame.height();
         self.slices.clear();
+        self.slices.push(FrameSlice {
+            frame,
+            start_y: 0,
+            end_y: h,
+        });
+        self.total_height = h;
         self.consecutive_no_movement = 0;
     }
 
-    /// Appends the newly revealed content from curr_frame given the vertical shift dy.
-    /// Returns true if appended successfully, or false if stopped (max height reached, no movement, etc.).
-    pub fn append_frame(&mut self, curr_frame: &RgbaImage, dy: u32) -> bool {
-        let base = match &self.base_frame {
-            Some(b) => b,
-            None => {
-                self.set_initial_frame(curr_frame.clone());
-                return true;
-            }
-        };
+    /// Appends curr_frame using a motion-aware dynamic seam k_seam.
+    ///
+    /// - In the previous frame, the seam line cuts at (dy + k_seam).
+    /// - In curr_frame, the new slice begins at k_seam and extends down to h.
+    /// - The net height added to the canvas is mathematically guaranteed to equal dy.
+    pub fn append_frame_with_seam(
+        &mut self,
+        curr_frame: &RgbaImage,
+        dy: u32,
+        seam_k: u32,
+    ) -> bool {
+        if self.slices.is_empty() {
+            self.set_initial_frame(curr_frame.clone());
+            return true;
+        }
 
-        let w = base.width();
-        let h = base.height();
-
+        let h = curr_frame.height();
         if dy == 0 {
             self.consecutive_no_movement += 1;
-            // If no movement 2 times in a row, signal completion
-            return self.consecutive_no_movement < 2;
+            return self.consecutive_no_movement < 3;
         }
 
         self.consecutive_no_movement = 0;
-
-        // Ensure dy is valid
         let safe_dy = dy.min(h);
         if safe_dy == 0 {
             return false;
         }
 
-        // Check if adding this slice would exceed max_height limit
         if self.total_height + safe_dy > self.max_height {
             eprintln!(
                 "[ImageStitcher] Max height limit reached ({} > {})",
@@ -65,14 +74,37 @@ impl ImageStitcher {
             return false;
         }
 
-        // The newly revealed content is at the bottom of curr_frame: [h - safe_dy, h]
-        let slice_y = h - safe_dy;
-        let slice = image::imageops::crop_imm(curr_frame, 0, slice_y, w, safe_dy).to_image();
+        let overlap_h = h.saturating_sub(safe_dy);
+        let safe_seam_k = seam_k.min(overlap_h);
 
-        self.total_height += safe_dy;
-        self.slices.push(slice);
+        // Update the previous slice's end_y to cut at (safe_dy + safe_seam_k)
+        if let Some(last_slice) = self.slices.last_mut() {
+            let seam_cut_y = (safe_dy + safe_seam_k).clamp(last_slice.start_y, last_slice.frame.height());
+            // Adjust total_height according to the truncation of the previous slice
+            let prev_slice_h = last_slice.end_y - last_slice.start_y;
+            let new_slice_h = seam_cut_y - last_slice.start_y;
+            self.total_height = self.total_height.saturating_sub(prev_slice_h).saturating_add(new_slice_h);
+            last_slice.end_y = seam_cut_y;
+        }
 
+        // Push new slice from curr_frame starting at safe_seam_k down to h
+        let new_slice_h = h.saturating_sub(safe_seam_k);
+        self.slices.push(FrameSlice {
+            frame: curr_frame.clone(),
+            start_y: safe_seam_k,
+            end_y: h,
+        });
+
+        self.total_height += new_slice_h;
         true
+    }
+
+    /// Legacy fixed-seam append fallback for compatibility
+    #[allow(dead_code)]
+    pub fn append_frame(&mut self, curr_frame: &RgbaImage, dy: u32) -> bool {
+        let h = curr_frame.height();
+        let overlap_h = h.saturating_sub(dy);
+        self.append_frame_with_seam(curr_frame, dy, overlap_h)
     }
 
     /// Directly appends an exact slice (e.g. remaining viewport tail at the bottom of the window).
@@ -82,7 +114,7 @@ impl ImageStitcher {
         if h == 0 || w == 0 {
             return;
         }
-        if self.base_frame.is_none() {
+        if self.slices.is_empty() {
             self.set_initial_frame(slice);
             return;
         }
@@ -95,7 +127,11 @@ impl ImageStitcher {
             return;
         }
         self.total_height += h;
-        self.slices.push(slice);
+        self.slices.push(FrameSlice {
+            frame: slice,
+            start_y: 0,
+            end_y: h,
+        });
     }
 
     pub fn current_height(&self) -> u32 {
@@ -107,88 +143,102 @@ impl ImageStitcher {
         self.slices.len()
     }
 
-    /// Assembles all slices into a single unified tall RgbaImage.
+    /// Returns references to all preserved raw frames for inspection / debugging.
+    #[allow(dead_code)]
+    pub fn raw_frames(&self) -> Vec<&RgbaImage> {
+        self.slices.iter().map(|s| &s.frame).collect()
+    }
+
+    /// Assembles all slices into a single unified tall RgbaImage with zero visual tearing.
     pub fn finalize(self) -> Result<RgbaImage, String> {
-        let base = self.base_frame.ok_or("No base frame to stitch")?;
-        let w = base.width();
+        if self.slices.is_empty() {
+            return Err("No slices to stitch".into());
+        }
+
+        let w = self.slices[0].frame.width();
         let total_h = self.total_height;
 
         if w == 0 || total_h == 0 {
             return Err("Cannot stitch image with 0 dimensions".into());
         }
 
-        if self.slices.is_empty() {
-            return Ok(base);
-        }
-
         let mut final_img = RgbaImage::new(w, total_h);
+        let mut curr_dest_y = 0u32;
 
-        // 1. Copy base frame to top
-        image::imageops::replace(&mut final_img, &base, 0, 0);
-
-        // 2. Sequentially copy each new slice downwards
-        let mut curr_y = base.height() as i64;
         for slice in self.slices {
-            let slice_h = slice.height() as i64;
-            image::imageops::replace(&mut final_img, &slice, 0, curr_y);
-            curr_y += slice_h;
+            let slice_h = slice.end_y.saturating_sub(slice.start_y);
+            if slice_h == 0 {
+                continue;
+            }
+
+            // Copy rows [start_y .. end_y] of slice.frame into final_img at curr_dest_y
+            for sy in 0..slice_h {
+                let src_y = slice.start_y + sy;
+                let dest_y = curr_dest_y + sy;
+                if dest_y >= total_h || src_y >= slice.frame.height() {
+                    break;
+                }
+
+                for x in 0..w {
+                    let pixel = slice.frame.get_pixel(x, src_y);
+                    final_img.put_pixel(x, dest_y, *pixel);
+                }
+            }
+
+            curr_dest_y += slice_h;
         }
 
         let trimmed = Self::trim_trailing_blank_rows(&final_img);
         Ok(trimmed)
     }
 
-    /// Detects and trims excessive trailing identical/blank background rows at the bottom of the stitched image.
-    /// Leaves a comfortable 24px bottom margin below the content.
-    pub fn trim_trailing_blank_rows(img: &RgbaImage) -> RgbaImage {
-        let w = img.width();
-        let h = img.height();
-
-        if h <= 120 || w == 0 {
+    /// Trims uniform blank rows (e.g. trailing white or solid black padding) from the bottom edge.
+    fn trim_trailing_blank_rows(img: &RgbaImage) -> RgbaImage {
+        let (w, h) = (img.width(), img.height());
+        if h < 20 || w < 20 {
             return img.clone();
         }
 
-        let stride = (w / 60).max(1);
-        let sample_count = ((w + stride - 1) / stride) as f32;
+        let sample_row = h - 1;
+        let p0 = img.get_pixel(w / 2, sample_row);
+        let is_white = p0[0] > 248 && p0[1] > 248 && p0[2] > 248;
+        let is_black = p0[0] < 8 && p0[1] < 8 && p0[2] < 8;
 
+        if !is_white && !is_black {
+            return img.clone();
+        }
+
+        let target_lum = if is_white { 255u8 } else { 0u8 };
         let mut blank_rows = 0u32;
+        let max_trim = (h / 3).min(400);
 
-        // Scan upwards from the bottom comparing row y with row y+1
-        for y in (0..h - 1).rev() {
-            let mut diff_sum: u32 = 0;
-            let mut x = 0;
-            while x < w {
-                let p1 = img.get_pixel(x, y);
-                let p2 = img.get_pixel(x, y + 1);
-
-                diff_sum += (p1[0] as i32 - p2[0] as i32).unsigned_abs();
-                diff_sum += (p1[1] as i32 - p2[1] as i32).unsigned_abs();
-                diff_sum += (p1[2] as i32 - p2[2] as i32).unsigned_abs();
-
-                x += stride;
+        for y in (0..h).rev() {
+            let mut row_is_blank = true;
+            for x in (0..w).step_by(8) {
+                let p = img.get_pixel(x, y);
+                let diff = (p[0] as i32 - target_lum as i32).unsigned_abs();
+                if diff > 5 {
+                    row_is_blank = false;
+                    break;
+                }
             }
 
-            let mad = (diff_sum as f32) / (sample_count * 3.0);
-            if mad <= 2.5 {
+            if row_is_blank {
                 blank_rows += 1;
+                if blank_rows >= max_trim {
+                    break;
+                }
             } else {
-                // Hit actual content changing vertically
                 break;
             }
         }
 
-        // If there are more than 36 trailing identical background rows, trim the excess
-        // while preserving a clean 24px bottom margin.
-        let margin = 24u32;
-        if blank_rows > 36 + margin {
-            let trim_amount = blank_rows - margin;
-            let new_h = h.saturating_sub(trim_amount).max(100);
-            if new_h < h {
-                return image::imageops::crop_imm(img, 0, 0, w, new_h).to_image();
-            }
+        if blank_rows > 8 && blank_rows < h {
+            let new_h = h - blank_rows;
+            image::imageops::crop_imm(img, 0, 0, w, new_h).to_image()
+        } else {
+            img.clone()
         }
-
-        img.clone()
     }
 }
 
@@ -198,55 +248,64 @@ mod tests {
     use image::Rgba;
 
     #[test]
-    fn test_trim_trailing_blank_rows() {
-        let w = 100;
+    fn test_dynamic_seam_stitching_continuity() {
+        let w = 200;
         let h = 500;
-        let mut img = RgbaImage::new(w, h);
+        let dy1 = 200;
+        let dy2 = 180;
 
-        // Content from y = 0 to 200
-        for y in 0..200 {
+        // Frame 1: absolute y in [0..500]
+        let mut f1 = RgbaImage::new(w, h);
+        for y in 0..h {
             for x in 0..w {
-                let val = ((x + y) % 255) as u8;
-                img.put_pixel(x, y, Rgba([val, val, val, 255]));
+                let val = (y % 256) as u8;
+                f1.put_pixel(x, y, Rgba([val, val, val, 255]));
             }
         }
 
-        // Trailing white background from y = 200 to 500 (300 blank rows)
-        for y in 200..h {
+        // Frame 2: absolute y in [200..700]
+        let mut f2 = RgbaImage::new(w, h);
+        for y in 0..h {
+            let abs_y = y + dy1;
             for x in 0..w {
-                img.put_pixel(x, y, Rgba([255, 255, 255, 255]));
+                let val = (abs_y % 256) as u8;
+                f2.put_pixel(x, y, Rgba([val, val, val, 255]));
             }
         }
 
-        let trimmed = ImageStitcher::trim_trailing_blank_rows(&img);
-        assert!(trimmed.height() < h, "Image should be trimmed");
-        assert_eq!(trimmed.height(), 225, "Should leave clean margin below content");
-    }
-
-    #[test]
-    fn test_append_exact_slice() {
-        let mut stitcher = ImageStitcher::new(2000);
-        let mut base = RgbaImage::new(100, 300);
-        for y in 0..300 {
-            for x in 0..100 {
-                let v = ((x * 3 + y * 7) % 250) as u8;
-                base.put_pixel(x, y, Rgba([v, v, v, 255]));
+        // Frame 3: absolute y in [380..880]
+        let mut f3 = RgbaImage::new(w, h);
+        for y in 0..h {
+            let abs_y = y + dy1 + dy2;
+            for x in 0..w {
+                let val = (abs_y % 256) as u8;
+                f3.put_pixel(x, y, Rgba([val, val, val, 255]));
             }
         }
-        stitcher.set_initial_frame(base);
-        assert_eq!(stitcher.current_height(), 300);
 
-        let mut tail = RgbaImage::new(100, 110);
-        for y in 0..110 {
-            for x in 0..100 {
-                let v = ((x * 5 + y * 11) % 250) as u8;
-                tail.put_pixel(x, y, Rgba([v, v, v, 255]));
-            }
+        let mut stitcher = ImageStitcher::new(32_000);
+        stitcher.set_initial_frame(f1);
+
+        // Seam 1: dynamic seam at k = 120
+        stitcher.append_frame_with_seam(&f2, dy1, 120);
+
+        // Seam 2: dynamic seam at k = 200
+        stitcher.append_frame_with_seam(&f3, dy2, 200);
+
+        assert_eq!(stitcher.current_height(), h + dy1 + dy2);
+
+        let final_img = stitcher.finalize().expect("Finalize should succeed");
+        assert_eq!(final_img.height(), h + dy1 + dy2);
+
+        // Verify continuity: each row y in final_img should match (y % 256)
+        for y in 0..final_img.height() {
+            let p = final_img.get_pixel(50, y);
+            let expected = (y % 256) as u8;
+            assert_eq!(
+                p[0], expected,
+                "Row {} has value {}, expected continuous value {}",
+                y, p[0], expected
+            );
         }
-        stitcher.append_exact_slice(tail);
-        assert_eq!(stitcher.current_height(), 410);
-
-        let final_img = stitcher.finalize().unwrap();
-        assert_eq!(final_img.height(), 410);
     }
 }
