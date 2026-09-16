@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders, Lightbulb, PanelLeftClose, PanelLeft, Eye, X } from "lucide-react";
+import { Settings, Camera, FolderOpen, Info, Github, Mail, AlertTriangle, ZoomIn, Video, Play, Pause, Monitor, Timer, Volume2, Palette, LayoutTemplate, Shapes, Pencil, Undo2, LogOut, Clock, Zap, RotateCcw, Copy, Save, Square, Mic, MicOff, Sparkles, Upload, Music, Trash2, Bell, FileAudio, Keyboard, Type, Sliders, Lightbulb, PanelLeftClose, PanelLeft, Eye, X, ChevronsDown } from "lucide-react";
 import logo from "../assets/logo.png";
 import avatar from "../assets/developer_image.png";
 import { translations, getLanguage, setLanguage, Language } from "../i18n";
@@ -246,6 +246,7 @@ function SettingsWindow() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
+  const [captureSubTab, setCaptureSubTab] = useState<"standard" | "scrolling">("standard");
   const [recordSubTab, setRecordSubTab] = useState<"general" | "webcam" | "shortcuts">("general");
   const [timerSubTab, setTimerSubTab] = useState<"general" | "theme" | "sound">("general");
   const [lang, setLang] = useState<Language>(getLanguage);
@@ -294,6 +295,13 @@ function SettingsWindow() {
   const [pauseRecordShortcut, setPauseRecordShortcut] = useState(() => localStorage.getItem("pauseRecordShortcut") || "Ctrl+6");
   const [webcamShortcut, setWebcamShortcut] = useState(() => localStorage.getItem("webcamShortcut") || "Ctrl+7");
   const [micShortcut, setMicShortcut] = useState(() => localStorage.getItem("micShortcut") || "Ctrl+8");
+  const [scrollingShortcut, setScrollingShortcut] = useState(() => localStorage.getItem("scrollingShortcut") || "Ctrl+9");
+  const [scrollingMethod, setScrollingMethod] = useState(() => localStorage.getItem("scrollingMethod") || "auto");
+  const [scrollingDelay, setScrollingDelay] = useState<number>(() => Number(localStorage.getItem("scrollingDelay") || "350"));
+  const [scrollingAmount, setScrollingAmount] = useState<number>(() => Number(localStorage.getItem("scrollingAmount") || "2"));
+  const [scrollingMaxSteps, setScrollingMaxSteps] = useState<number>(() => Number(localStorage.getItem("scrollingMaxSteps") || "60"));
+  const [scrollingSensitivity, setScrollingSensitivity] = useState(() => localStorage.getItem("scrollingSensitivity") || "normal");
+  const [scrollingStopOnNoMovement, setScrollingStopOnNoMovement] = useState(() => localStorage.getItem("scrollingStopOnNoMovement") !== "false");
   const [timerShortcut, setTimerShortcut] = useState(() => localStorage.getItem("timerShortcut") || "Ctrl+3");
   const [timerDefaultDuration, setTimerDefaultDuration] = useState<number>(() => Number(localStorage.getItem("timerDefaultDuration") || "600"));
   const [timerCountDirection, setTimerCountDirection] = useState<"down" | "up">(
@@ -482,7 +490,7 @@ function SettingsWindow() {
     window.dispatchEvent(new Event("storage"));
     emit("timer-settings-updated").catch(() => { });
   };
-  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "pause_record" | "webcam" | "mic" | "timer" | null>(null);
+  const [recordingType, setRecordingType] = useState<"region" | "fullscreen" | "zoom" | "live_zoom" | "record" | "pause_record" | "webcam" | "mic" | "timer" | "scrolling" | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [isRecorderModalOpen, setIsRecorderModalOpen] = useState(false);
   const [recordFps, setRecordFps] = useState<number>(() => Number(localStorage.getItem("recordFps") || "30"));
@@ -698,8 +706,26 @@ function SettingsWindow() {
     localStorage.setItem("webcamImagePath", webcamImagePath);
     localStorage.setItem("webcamBorderAnimation", webcamBorderAnimation);
 
+    localStorage.setItem("scrollingMethod", scrollingMethod);
+    localStorage.setItem("scrollingDelay", String(scrollingDelay));
+    localStorage.setItem("scrollingAmount", String(scrollingAmount));
+    localStorage.setItem("scrollingMaxSteps", String(scrollingMaxSteps));
+    localStorage.setItem("scrollingSensitivity", scrollingSensitivity);
+    localStorage.setItem("scrollingStopOnNoMovement", String(scrollingStopOnNoMovement));
+
+    invoke("update_scrolling_settings", {
+      settings: {
+        scroll_method: scrollingMethod,
+        scroll_delay_ms: scrollingDelay,
+        scroll_amount: scrollingAmount,
+        max_scroll_count: scrollingMaxSteps,
+        overlap_sensitivity: scrollingSensitivity,
+        stop_on_no_movement: scrollingStopOnNoMovement,
+      }
+    }).catch(console.error);
+
     window.dispatchEvent(new Event("storage"));
-  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, micShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamTextBgColor, webcamTextBgOpacity, webcamMode, webcamImagePath, webcamBorderAnimation]);
+  }, [startAtBoot, startInTray, includeCursor, playAudio, savePath, videoSavePath, fileFormat, imageQuality, regionShortcut, fullscreenShortcut, zoomShortcut, liveZoomShortcut, timerShortcut, timerDefaultDuration, timerCountDirection, timerRingColor, timerBgStyle, timerFontStyle, timerSoundPreset, showNotifications, defaultBlurAmount, pauseRecordShortcut, webcamShortcut, micShortcut, webcamText, webcamTextColor, webcamTextFont, webcamTextSize, webcamTextAnimation, webcamTextBgColor, webcamTextBgOpacity, webcamMode, webcamImagePath, webcamBorderAnimation, scrollingMethod, scrollingDelay, scrollingAmount, scrollingMaxSteps, scrollingSensitivity, scrollingStopOnNoMovement]);
 
   const handleImageFile = async (file: File, isWebcam: boolean) => {
     if (!file.type.startsWith("image/")) return;
@@ -856,10 +882,11 @@ function SettingsWindow() {
       pauseRecordShortcut: pauseRecordShortcut,
       webcamShortcut: webcamShortcut,
       micShortcut: micShortcut,
+      scrollingShortcut: scrollingShortcut,
     }).catch((e) => {
       console.error("Failed to sync shortcuts with Rust backend:", e);
     });
-  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, liveZoomShortcut, recordShortcut, pauseRecordShortcut, webcamShortcut, micShortcut]);
+  }, [regionShortcut, fullscreenShortcut, zoomShortcut, timerShortcut, liveZoomShortcut, recordShortcut, pauseRecordShortcut, webcamShortcut, micShortcut, scrollingShortcut]);
 
   // Handle global shortcut recording
   useEffect(() => {
@@ -932,6 +959,7 @@ function SettingsWindow() {
         webcam: webcamShortcut,
         mic: micShortcut,
         timer: timerShortcut,
+        scrolling: scrollingShortcut,
       };
 
       const conflictingAction = Object.entries(allShortcuts).find(([key, val]) =>
@@ -968,6 +996,9 @@ function SettingsWindow() {
       } else if (recordingType === "mic") {
         setMicShortcut(shortcutStr);
         localStorage.setItem("micShortcut", shortcutStr);
+      } else if (recordingType === "scrolling") {
+        setScrollingShortcut(shortcutStr);
+        localStorage.setItem("scrollingShortcut", shortcutStr);
       } else if (recordingType === "timer") {
         setTimerShortcut(shortcutStr);
         localStorage.setItem("timerShortcut", shortcutStr);
@@ -1010,6 +1041,7 @@ function SettingsWindow() {
         webcam: webcamShortcut,
         mic: micShortcut,
         timer: timerShortcut,
+        scrolling: scrollingShortcut,
       };
 
       const conflictingAction = Object.entries(allShortcuts).find(([key, val]) =>
@@ -1043,6 +1075,9 @@ function SettingsWindow() {
       } else if (recordingType === "mic") {
         setMicShortcut(shortcutStr);
         localStorage.setItem("micShortcut", shortcutStr);
+      } else if (recordingType === "scrolling") {
+        setScrollingShortcut(shortcutStr);
+        localStorage.setItem("scrollingShortcut", shortcutStr);
       } else if (recordingType === "timer") {
         setTimerShortcut(shortcutStr);
         localStorage.setItem("timerShortcut", shortcutStr);
@@ -1078,6 +1113,7 @@ function SettingsWindow() {
       const pauseRecShortcut = localStorage.getItem("pauseRecordShortcut") || "Ctrl+6";
       const webShortcut = localStorage.getItem("webcamShortcut") || "Ctrl+7";
       const microphoneShortcut = localStorage.getItem("micShortcut") || "Ctrl+8";
+      const scShortcut = localStorage.getItem("scrollingShortcut") || "Ctrl+9";
       invoke("update_shortcuts", {
         regionShortcut: regShortcut,
         fullscreenShortcut: fsShortcut,
@@ -1088,6 +1124,7 @@ function SettingsWindow() {
         pauseRecordShortcut: pauseRecShortcut,
         webcamShortcut: webShortcut,
         micShortcut: microphoneShortcut,
+        scrollingShortcut: scShortcut,
       }).catch((err) => console.error(err));
     };
   }, [recordingType]);
@@ -1617,178 +1654,473 @@ function SettingsWindow() {
 
         {activeTab === "capture" && (
           <div className="settings-card" data-tour="global-shortcut-card">
-            <div className="setting-row" data-tour="shortcut-region">
-              <div className="setting-info">
-                <span className="setting-label">{t.globalShortcut}</span>
-                <span className="setting-desc">{t.globalShortcutDesc}</span>
-              </div>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <button
-                  className={`shortcut-badge customizable ${recordingType === "region" ? "recording" : ""}`}
-                  onClick={() => setRecordingType(recordingType === "region" ? null : "region")}
-                  title={t.shortcutChangeHint}
-                  style={{
-                    cursor: "pointer",
-                    border: recordingType === "region" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
-                    background: recordingType === "region" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                    color: recordingType === "region" ? "var(--accent-cyan)" : "white",
-                    fontWeight: 600,
-                    animation: recordingType === "region" ? "pulse-border 1.5s infinite" : "none",
-                    outline: "none"
-                  }}
-                >
-                  {recordingType === "region" ? t.shortcutPressKeys : formatShortcut(regionShortcut)}
-                </button>
-                <button
-                  className="premium-button"
-                  onClick={handleTakeScreenshot}
-                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
-                  title={t.captureNow}
-                >
-                  <Camera size={14} />
-                  {t.captureNow}
-                </button>
-              </div>
+            {/* Sub-Tabs: Standart Ekran vs Kaydırmalı Ekran */}
+            <div
+              style={{
+                display: "flex",
+                gap: "6px",
+                background: "rgba(255, 255, 255, 0.03)",
+                padding: "4px",
+                borderRadius: "10px",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                marginBottom: "12px"
+              }}
+            >
+              <button
+                type="button"
+                data-tour="capture-subtab-standard"
+                onClick={() => setCaptureSubTab("standard")}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "9px 12px",
+                  borderRadius: "7px",
+                  border: captureSubTab === "standard" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                  background: captureSubTab === "standard" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                  color: captureSubTab === "standard" ? "var(--accent-cyan)" : "var(--text-muted)",
+                  fontWeight: captureSubTab === "standard" ? 600 : 500,
+                  fontSize: "0.88rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                <Camera size={15} />
+                <span>{(t as any).captureSubTabStandard || "Standart Ekran"}</span>
+              </button>
+
+              <button
+                type="button"
+                data-tour="capture-subtab-scrolling"
+                onClick={() => setCaptureSubTab("scrolling")}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "9px 12px",
+                  borderRadius: "7px",
+                  border: captureSubTab === "scrolling" ? "1px solid rgba(0, 242, 254, 0.3)" : "1px solid transparent",
+                  background: captureSubTab === "scrolling" ? "rgba(0, 242, 254, 0.12)" : "transparent",
+                  color: captureSubTab === "scrolling" ? "var(--accent-cyan)" : "var(--text-muted)",
+                  fontWeight: captureSubTab === "scrolling" ? 600 : 500,
+                  fontSize: "0.88rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                <ChevronsDown size={15} />
+                <span>{(t as any).captureSubTabScrolling || "Kaydırmalı Ekran"}</span>
+              </button>
             </div>
 
-            <div className="setting-row" data-tour="shortcut-fullscreen">
-              <div className="setting-info">
-                <span className="setting-label">{t.globalFullscreenShortcut}</span>
-                <span className="setting-desc">{t.globalFullscreenShortcutDesc}</span>
-              </div>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <button
-                  className={`shortcut-badge customizable ${recordingType === "fullscreen" ? "recording" : ""}`}
-                  onClick={() => setRecordingType(recordingType === "fullscreen" ? null : "fullscreen")}
-                  title={t.shortcutChangeHint}
-                  style={{
-                    cursor: "pointer",
-                    border: recordingType === "fullscreen" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
-                    background: recordingType === "fullscreen" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                    color: recordingType === "fullscreen" ? "var(--accent-cyan)" : "white",
-                    fontWeight: 600,
-                    animation: recordingType === "fullscreen" ? "pulse-border 1.5s infinite" : "none",
-                    outline: "none"
-                  }}
-                >
-                  {recordingType === "fullscreen" ? t.shortcutPressKeys : formatShortcut(fullscreenShortcut)}
-                </button>
-                <button
-                  className="premium-button"
-                  onClick={handleTakeFullscreenScreenshot}
-                  style={{ padding: "6px 14px", fontSize: "0.85rem" }}
-                  title={t.captureNow}
-                >
-                  <Camera size={14} />
-                  {t.captureNow}
-                </button>
-              </div>
-            </div>
-
-            <div className="setting-row" data-tour="setting-shutter">
-              <div className="setting-info">
-                <span className="setting-label">{t.playShutterSound}</span>
-                <span className="setting-desc">{t.playShutterSoundDesc}</span>
-              </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={playAudio}
-                  onChange={(e) => setPlayAudio(e.target.checked)}
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            <div className="setting-row" data-tour="setting-include-cursor">
-              <div className="setting-info">
-                <span className="setting-label">{t.includeCursor}</span>
-                <span className="setting-desc">{t.includeCursorDesc}</span>
-              </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={includeCursor}
-                  onChange={(e) => setIncludeCursor(e.target.checked)}
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            <div className="setting-row" data-tour="setting-blur-amount">
-              <div className="setting-info">
-                <span className="setting-label">{(t as any).blurAmountSetting}</span>
-                <span className="setting-desc">{(t as any).blurAmountDesc}</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
-                <input
-                  type="range"
-                  min="2"
-                  max="30"
-                  value={defaultBlurAmount}
-                  onChange={(e) => setDefaultBlurAmount(Number(e.target.value))}
-                  style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
-                />
-                <span style={{ minWidth: "45px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{defaultBlurAmount} px</span>
-              </div>
-            </div>
-
-            <div data-tour="setting-editor-shortcuts" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
-              <div className="setting-info">
-                <span className="setting-label">{t.editorShortcuts}</span>
-                <span className="setting-desc">{t.editorShortcutsDesc}</span>
-              </div>
-
-              <div className="responsive-shortcut-grid">
-                {/* 1. Kopyala */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <Copy size={15} color="#38bdf8" />
-                    {t.editorCopy}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>C</kbd>
+            {captureSubTab === "standard" && (
+              <>
+                <div className="setting-row" data-tour="shortcut-region">
+                  <div className="setting-info">
+                    <span className="setting-label">{t.globalShortcut}</span>
+                    <span className="setting-desc">{t.globalShortcutDesc}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <button
+                      className={`shortcut-badge customizable ${recordingType === "region" ? "recording" : ""}`}
+                      onClick={() => setRecordingType(recordingType === "region" ? null : "region")}
+                      title={t.shortcutChangeHint}
+                      style={{
+                        cursor: "pointer",
+                        border: recordingType === "region" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                        background: recordingType === "region" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                        color: recordingType === "region" ? "var(--accent-cyan)" : "white",
+                        fontWeight: 600,
+                        animation: recordingType === "region" ? "pulse-border 1.5s infinite" : "none",
+                        outline: "none"
+                      }}
+                    >
+                      {recordingType === "region" ? t.shortcutPressKeys : formatShortcut(regionShortcut)}
+                    </button>
+                    <button
+                      className="premium-button"
+                      onClick={handleTakeScreenshot}
+                      style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                      title={t.captureNow}
+                    >
+                      <Camera size={14} />
+                      {t.captureNow}
+                    </button>
                   </div>
                 </div>
 
-                {/* 2. Kaydet */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <Save size={15} color="#10b981" />
-                    {t.editorSave}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>S</kbd>
+                <div className="setting-row" data-tour="shortcut-fullscreen">
+                  <div className="setting-info">
+                    <span className="setting-label">{t.globalFullscreenShortcut}</span>
+                    <span className="setting-desc">{t.globalFullscreenShortcutDesc}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <button
+                      className={`shortcut-badge customizable ${recordingType === "fullscreen" ? "recording" : ""}`}
+                      onClick={() => setRecordingType(recordingType === "fullscreen" ? null : "fullscreen")}
+                      title={t.shortcutChangeHint}
+                      style={{
+                        cursor: "pointer",
+                        border: recordingType === "fullscreen" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                        background: recordingType === "fullscreen" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                        color: recordingType === "fullscreen" ? "var(--accent-cyan)" : "white",
+                        fontWeight: 600,
+                        animation: recordingType === "fullscreen" ? "pulse-border 1.5s infinite" : "none",
+                        outline: "none"
+                      }}
+                    >
+                      {recordingType === "fullscreen" ? t.shortcutPressKeys : formatShortcut(fullscreenShortcut)}
+                    </button>
+                    <button
+                      className="premium-button"
+                      onClick={handleTakeFullscreenScreenshot}
+                      style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                      title={t.captureNow}
+                    >
+                      <Camera size={14} />
+                      {t.captureNow}
+                    </button>
                   </div>
                 </div>
 
-                {/* 3. Geri Al */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <Undo2 size={15} color="#a855f7" />
-                    {t.editorUndo}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
-                    <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Z</kbd>
+                <div className="setting-row" data-tour="setting-shutter">
+                  <div className="setting-info">
+                    <span className="setting-label">{t.playShutterSound}</span>
+                    <span className="setting-desc">{t.playShutterSoundDesc}</span>
+                  </div>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={playAudio}
+                      onChange={(e) => setPlayAudio(e.target.checked)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <div className="setting-row" data-tour="setting-include-cursor">
+                  <div className="setting-info">
+                    <span className="setting-label">{t.includeCursor}</span>
+                    <span className="setting-desc">{t.includeCursorDesc}</span>
+                  </div>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={includeCursor}
+                      onChange={(e) => setIncludeCursor(e.target.checked)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <div className="setting-row" data-tour="setting-blur-amount">
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).blurAmountSetting}</span>
+                    <span className="setting-desc">{(t as any).blurAmountDesc}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                    <input
+                      type="range"
+                      min="2"
+                      max="30"
+                      value={defaultBlurAmount}
+                      onChange={(e) => setDefaultBlurAmount(Number(e.target.value))}
+                      style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                    />
+                    <span style={{ minWidth: "45px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{defaultBlurAmount} px</span>
                   </div>
                 </div>
 
-                {/* 4. Kapat */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
-                    <LogOut size={15} color="#f87171" />
-                    {t.editorClose}
-                  </span>
-                  <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>ESC</kbd>
+                <div data-tour="setting-editor-shortcuts" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", marginTop: "8px" }}>
+                  <div className="setting-info">
+                    <span className="setting-label">{t.editorShortcuts}</span>
+                    <span className="setting-desc">{t.editorShortcutsDesc}</span>
+                  </div>
+
+                  <div className="responsive-shortcut-grid">
+                    {/* 1. Kopyala */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                        <Copy size={15} color="#38bdf8" />
+                        {t.editorCopy}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>C</kbd>
+                      </div>
+                    </div>
+
+                    {/* 2. Kaydet */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                        <Save size={15} color="#4ade80" />
+                        {t.editorSave}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>S</kbd>
+                      </div>
+                    </div>
+
+                    {/* 3. Sabitle */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                        <Square size={15} color="#a855f7" />
+                        {(t as any).editorPin || "Sabitle"}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>P</kbd>
+                      </div>
+                    </div>
+
+                    {/* 4. Geri Al */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                        <Undo2 size={15} color="#fbbf24" />
+                        {t.editorUndo}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Z</kbd>
+                      </div>
+                    </div>
+
+                    {/* 5. Sıfırla */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                        <RotateCcw size={15} color="#f472b6" />
+                        {(t as any).editorReset || "Sıfırla"}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>Ctrl</kbd>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>+</span>
+                        <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>R</kbd>
+                      </div>
+                    </div>
+
+                    {/* 6. Kapat */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.02)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap" }}>
+                        <LogOut size={15} color="#f87171" />
+                        {t.editorClose}
+                      </span>
+                      <kbd style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.25)", borderRadius: "4px", padding: "1px 6px", fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "#ffffff" }}>ESC</kbd>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
+
+            {captureSubTab === "scrolling" && (
+              <>
+                {/* Scrolling Screenshot Settings */}
+                <div className="setting-row" data-tour="shortcut-scrolling">
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).globalScrollingShortcut || "Global Kısayol (Kaydırmalı Ekran)"}</span>
+                    <span className="setting-desc">{(t as any).globalScrollingShortcutDesc || "Uzun web sayfaları ve pencereler için kaydırmalı ekran görüntüsü kısayolu."}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <button
+                      className={`shortcut-badge customizable ${recordingType === "scrolling" ? "recording" : ""}`}
+                      onClick={() => setRecordingType(recordingType === "scrolling" ? null : "scrolling")}
+                      title={t.shortcutChangeHint}
+                      style={{
+                        cursor: "pointer",
+                        border: recordingType === "scrolling" ? "1px solid var(--accent-cyan)" : "1px solid rgba(255, 255, 255, 0.1)",
+                        background: recordingType === "scrolling" ? "rgba(0, 242, 254, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                        color: recordingType === "scrolling" ? "var(--accent-cyan)" : "white",
+                        fontWeight: 600,
+                        animation: recordingType === "scrolling" ? "pulse-border 1.5s infinite" : "none",
+                        outline: "none"
+                      }}
+                    >
+                      {recordingType === "scrolling" ? t.shortcutPressKeys : formatShortcut(scrollingShortcut)}
+                    </button>
+                    <button
+                      className="premium-button"
+                      onClick={() => invoke("trigger_scrolling_capture_command").catch(console.error)}
+                      style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                      title={(t as any).scrollingCapture || "Kaydırmalı Ekran Görüntüsü"}
+                    >
+                      <ChevronsDown size={14} />
+                      {t.captureNow}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Scrolling Method & Advanced Parameters */}
+                <div className="setting-row">
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).scrollingMethod || "Kaydırma Yöntemi"}</span>
+                    <span className="setting-desc">{(t as any).scrollingMethodDesc || "Hedef pencereyi kaydırmak için kullanılacak yöntem."}</span>
+                  </div>
+                  <select
+                    className="premium-input theme-select"
+                    value={scrollingMethod}
+                    onChange={(e) => {
+                      setScrollingMethod(e.target.value);
+                      localStorage.setItem("scrollingMethod", e.target.value);
+                      window.dispatchEvent(new Event("storage"));
+                    }}
+                    style={{ width: "240px" }}
+                  >
+                    <option value="auto">{(t as any).scrollMethodAuto || "Otomatik (Fare Tekerleği Simülasyonu)"}</option>
+                    <option value="page_down">{(t as any).scrollMethodPageDown || "Otomatik (Page Down Tuşu)"}</option>
+                    <option value="manual">{(t as any).scrollMethodManual || "Manuel (Kullanıcı Kendisi Kaydırır)"}</option>
+                  </select>
+                </div>
+
+                {scrollingMethod === "manual" && (
+                  <div style={{
+                    margin: "4px 0 16px 0",
+                    padding: "10px 14px",
+                    background: "rgba(0, 242, 254, 0.08)",
+                    border: "1px solid rgba(0, 242, 254, 0.25)",
+                    borderRadius: "8px",
+                    fontSize: "0.8rem",
+                    color: "#cbd5e1",
+                    lineHeight: "1.45"
+                  }}>
+                    {(t as any).scrollingManualTip || "Manuel modda Shotera sayfayı otomatik kaydırmaz; siz farenizle sayfayı kaydırdıkça yeni bölümleri algılayıp birleştirir. Bitirmek için Enter'a veya Tamamla butonuna basın."}
+                  </div>
+                )}
+
+                <div className="setting-row" style={{ opacity: scrollingMethod === "manual" ? 0.4 : 1, transition: "opacity 0.2s" }}>
+                  <div className="setting-info">
+                    <span className="setting-label">
+                      {(t as any).scrollingDelay || "Kaydırma Gecikmesi"}
+                      {scrollingMethod === "manual" && <span style={{ fontSize: "0.72rem", color: "#94a3b8", marginLeft: "6px" }}>(Yalnızca Otomatik)</span>}
+                    </span>
+                    <span className="setting-desc">{(t as any).scrollingDelayDesc || "Her kaydırma adımı sonrasında içeriğin yüklenmesi için bekleme süresi."}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                    <input
+                      type="range"
+                      min="100"
+                      max="1000"
+                      step="50"
+                      disabled={scrollingMethod === "manual"}
+                      value={scrollingDelay}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setScrollingDelay(val);
+                        localStorage.setItem("scrollingDelay", val.toString());
+                      }}
+                      style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: scrollingMethod === "manual" ? "not-allowed" : "pointer" }}
+                    />
+                    <span style={{ minWidth: "55px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{scrollingDelay} ms</span>
+                  </div>
+                </div>
+
+                <div className="setting-row" style={{ opacity: scrollingMethod === "manual" ? 0.4 : 1, transition: "opacity 0.2s" }}>
+                  <div className="setting-info">
+                    <span className="setting-label">
+                      {(t as any).scrollingAmount || "Kaydırma Miktarı"}
+                      {scrollingMethod === "manual" && <span style={{ fontSize: "0.72rem", color: "#94a3b8", marginLeft: "6px" }}>(Yalnızca Otomatik)</span>}
+                    </span>
+                    <span className="setting-desc">{(t as any).scrollingAmountDesc || "Her kaydırma adımında gönderilecek tekerlek çentiği miktarı."}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                    <input
+                      type="range"
+                      min="1"
+                      max="5"
+                      step="1"
+                      disabled={scrollingMethod === "manual"}
+                      value={scrollingAmount}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setScrollingAmount(val);
+                        localStorage.setItem("scrollingAmount", val.toString());
+                      }}
+                      style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: scrollingMethod === "manual" ? "not-allowed" : "pointer" }}
+                    />
+                    <span style={{ minWidth: "55px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{scrollingAmount} notch</span>
+                  </div>
+                </div>
+
+                <div className="setting-row">
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).scrollingMaxSteps || "Maksimum Kaydırma Sayısı"}</span>
+                    <span className="setting-desc">{(t as any).scrollingMaxStepsDesc || "Sonsuz kaydırmalı sayfalarda hafıza güvenliği için maksimum kare limiti."}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "240px" }}>
+                    <input
+                      type="range"
+                      min="5"
+                      max="300"
+                      step="5"
+                      value={scrollingMaxSteps}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setScrollingMaxSteps(val);
+                        localStorage.setItem("scrollingMaxSteps", val.toString());
+                        invoke("update_scrolling_settings", {
+                          settings: {
+                            scroll_method: scrollingMethod,
+                            scroll_delay_ms: scrollingDelay,
+                            scroll_amount: scrollingAmount,
+                            max_scroll_count: val,
+                            overlap_sensitivity: scrollingSensitivity,
+                            stop_on_no_movement: scrollingStopOnNoMovement,
+                          }
+                        }).catch(console.error);
+                      }}
+                      style={{ flexGrow: 1, accentColor: "var(--accent-cyan)", cursor: "pointer" }}
+                    />
+                    <span style={{ minWidth: "55px", textAlign: "right", fontWeight: 600, fontFamily: "monospace" }}>{scrollingMaxSteps} frames</span>
+                  </div>
+                </div>
+
+                <div className="setting-row">
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).scrollingSensitivity || "Örtüşme Hassasiyeti"}</span>
+                    <span className="setting-desc">{(t as any).scrollingSensitivityDesc || "Piksel eşleme ve dikişleme algoritmasının tolerans seviyesi."}</span>
+                  </div>
+                  <select
+                    className="premium-input theme-select"
+                    value={scrollingSensitivity}
+                    onChange={(e) => {
+                      setScrollingSensitivity(e.target.value);
+                      localStorage.setItem("scrollingSensitivity", e.target.value);
+                    }}
+                    style={{ width: "240px" }}
+                  >
+                    <option value="normal">{(t as any).sensitivityNormal || "Normal (Önerilen)"}</option>
+                    <option value="high">{(t as any).sensitivityHigh || "Yüksek (Katı)"}</option>
+                    <option value="flexible">{(t as any).sensitivityFlexible || "Esnek (Gevşek)"}</option>
+                  </select>
+                </div>
+
+                <div className="setting-row">
+                  <div className="setting-info">
+                    <span className="setting-label">{(t as any).scrollingStopOnNoMovement || "Hareket Olmadığında Otomatik Durdur"}</span>
+                    <span className="setting-desc">{(t as any).scrollingStopOnNoMovementDesc || "Sayfa sonuna ulaşıldığında veya içerik ilerlemediğinde kaydırmayı otomatik tamamla."}</span>
+                  </div>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={scrollingStopOnNoMovement}
+                      onChange={(e) => {
+                        setScrollingStopOnNoMovement(e.target.checked);
+                        localStorage.setItem("scrollingStopOnNoMovement", e.target.checked ? "true" : "false");
+                      }}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+              </>
+            )}
           </div>
         )}
 

@@ -105,6 +105,19 @@
         "visible": false,
         "alwaysOnTop": true,
         "skipTaskbar": true
+      },
+      {
+        "label": "scrolling_hud",
+        "title": "Shotera Scrolling",
+        "width": 320,
+        "height": 72,
+        "resizable": false,
+        "transparent": true,
+        "shadow": false,
+        "decorations": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
       }
     ],
     "security": {

@@ -28,6 +28,7 @@
   --glass-blur: blur(12px);
   --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 
+  color-scheme: dark;
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.5;
@@ -257,7 +258,7 @@ h6 {
   max-width: 60%;
 }
 
-.settings-card > .setting-info {
+.settings-card>.setting-info {
   max-width: 100%;
 }
 
@@ -305,7 +306,7 @@ h6 {
   bottom: 24px;
   right: 24px;
   z-index: 1000;
-  box-shadow: 0 8px 24px rgba(0,242,254,0.3);
+  box-shadow: 0 8px 24px rgba(0, 242, 254, 0.3);
   padding: 12px 24px;
   font-size: 1rem;
   font-weight: 600;
@@ -325,14 +326,21 @@ h6 {
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
 @media (max-width: 1100px) {
   .settings-two-column-right {
-    display: none; /* Gizle, modal ile gösterilecek */
+    display: none;
+    /* Gizle, modal ile gösterilecek */
   }
+
   .settings-two-column-right.mobile-modal-open {
     display: flex;
     position: fixed !important;
@@ -345,35 +353,40 @@ h6 {
     background: var(--bg-app);
     padding: 24px 20px;
     border-radius: 20px 0 0 20px;
-    box-shadow: -20px 0 50px rgba(0,0,0,0.8), -1px 0 0 rgba(255,255,255,0.1);
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.8), -1px 0 0 rgba(255, 255, 255, 0.1);
     animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     overflow-y: auto;
   }
-  
+
   .mobile-preview-btn {
     display: flex !important;
   }
-  
+
   .mobile-modal-backdrop.open {
     display: block !important;
   }
+
   .setting-row {
     flex-wrap: wrap;
     gap: 12px;
   }
+
   .setting-info {
     max-width: 100% !important;
   }
-  .setting-row > select, 
-  .setting-row > div:not(.setting-info) {
+
+  .setting-row>select,
+  .setting-row>div:not(.setting-info) {
     width: 100% !important;
     min-width: 100% !important;
   }
+
   .premium-input {
     flex: 1 1 0% !important;
     min-width: 0 !important;
     width: 100%;
   }
+
   .font-select-wrapper {
     width: 100% !important;
   }
@@ -398,7 +411,7 @@ h6 {
   color: var(--text-color);
   cursor: pointer;
   z-index: 2001;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
 }
 
@@ -425,6 +438,71 @@ h6 {
   outline: none;
   border-color: var(--accent-cyan);
   box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.15);
+}
+
+/* Premium Select / Dropdown Styling */
+select,
+select.premium-input,
+.theme-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: rgba(13, 16, 23, 0.9);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2300f2fe' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 14px) center;
+  background-size: 16px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--text-main);
+  padding: 10px 40px 10px 14px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  color-scheme: dark;
+}
+
+select:hover,
+select.premium-input:hover,
+.theme-select:hover {
+  background-color: rgba(22, 27, 38, 0.95);
+  border-color: rgba(0, 242, 254, 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 10px rgba(0, 242, 254, 0.12);
+}
+
+select:focus,
+select.premium-input:focus,
+.theme-select:focus {
+  background-color: rgba(15, 20, 30, 0.98);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.2), 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+select:disabled,
+select.premium-input:disabled,
+.theme-select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Dropdown Option Items */
+select option,
+.theme-select option {
+  background-color: #0b0f19;
+  color: #f0f3f8;
+  padding: 12px 14px;
+  font-size: 0.92rem;
+}
+
+select option:checked,
+.theme-select option:checked {
+  background-color: #162438 !important;
+  color: #00f2fe !important;
 }
 
 .premium-button {
@@ -722,6 +800,7 @@ input:checked+.slider:before {
 .shortcut-badge.customizable {
   transition: all 0.2s ease;
 }
+
 .shortcut-badge.customizable:hover {
   border-color: var(--accent-cyan) !important;
   background: rgba(0, 242, 254, 0.08) !important;
@@ -732,9 +811,11 @@ input:checked+.slider:before {
   0% {
     box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.4);
   }
+
   70% {
     box-shadow: 0 0 0 6px rgba(0, 242, 254, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(0, 242, 254, 0);
   }
@@ -781,8 +862,59 @@ input:checked+.slider:before {
   border: 1px solid var(--border-color);
 }
 
-.responsive-shortcut-grid > div {
+.responsive-shortcut-grid>div {
   flex: 1 1 calc(50% - 10px);
   min-width: 280px;
   max-width: 100%;
+}
+
+/* Scrolling Capture Overlay Styles */
+.scrolling-mode-banner {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 242, 254, 0.45);
+  border-radius: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 242, 254, 0.25);
+  color: #f8fafc;
+  font-size: 0.85rem;
+  animation: fadeIn 0.2s ease-out;
+  pointer-events: auto;
+}
+
+.scrolling-mode-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #00f2fe;
+  font-weight: 700;
+}
+
+.scrolling-start-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  color: #0b0c10;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+  transition: all 0.15s ease;
+}
+
+.scrolling-start-btn:hover {
+  filter: brightness(1.15);
+  transform: scale(1.03);
 }

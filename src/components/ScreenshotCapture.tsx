@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette, Eraser } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette, Eraser, ChevronsDown } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { HexColorPicker } from "react-colorful";
 import { translations, getLanguage, Language } from "../i18n";
@@ -229,6 +229,12 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
 
 function ScreenshotCapture() {
   const [lang, setLang] = useState<Language>(getLanguage);
+  const [isScrollingMode, setIsScrollingMode] = useState(false);
+  const [isTallImage, setIsTallImage] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [isScrollingResult, setIsScrollingResult] = useState(false);
+  const isScrollingResultRef = useRef(false);
+  const isScrollingCaptureActiveRef = useRef(false);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -385,11 +391,49 @@ function ScreenshotCapture() {
       setImgElement(null);
       setImageSrc(null);
       setSelection(null);
+      setIsTallImage(false);
+      setIsScrollingMode(false);
+      setScrollY(0);
       setDrawings([]);
       setActiveTool("pencil");
       setBoardMode("normal");
       setTextInput({ visible: false, x: 0, y: 0, val: "" });
       loadScreenshot();
+    });
+
+    const unlistenScrollingMode = listen("start-scrolling-mode", () => {
+      isScrollingResultRef.current = false;
+      setIsScrollingResult(false);
+      setIsScrollingMode(true);
+      setIsTallImage(false);
+      setScrollY(0);
+      setSelection(null);
+    });
+
+    const unlistenScrollingCompleted = listen<number>("scrolling-completed", () => {
+      isScrollingResultRef.current = true;
+      setIsScrollingResult(true);
+      isScrollingCaptureActiveRef.current = false;
+    });
+
+    const unlistenScrollingCancelled = listen("scrolling-cancelled", () => {
+      isScrollingCaptureActiveRef.current = false;
+    });
+
+    const unlistenScrollingError = listen("scrolling-error", () => {
+      isScrollingCaptureActiveRef.current = false;
+    });
+
+    const unlistenScrollingSettings = listen<any>("scrolling-settings-updated", (event) => {
+      if (event.payload) {
+        const p = event.payload;
+        if (p.scroll_method) localStorage.setItem("scrollingMethod", p.scroll_method);
+        if (p.scroll_delay_ms) localStorage.setItem("scrollingDelay", String(p.scroll_delay_ms));
+        if (p.scroll_amount) localStorage.setItem("scrollingAmount", String(p.scroll_amount));
+        if (p.max_scroll_count) localStorage.setItem("scrollingMaxSteps", String(p.max_scroll_count));
+        if (p.overlap_sensitivity) localStorage.setItem("scrollingSensitivity", p.overlap_sensitivity);
+        if (p.stop_on_no_movement !== undefined) localStorage.setItem("scrollingStopOnNoMovement", String(p.stop_on_no_movement));
+      }
     });
 
     const unlistenFocus = listen("force-focus", () => {
@@ -398,6 +442,11 @@ function ScreenshotCapture() {
 
     return () => {
       unlisten.then((fn) => fn());
+      unlistenScrollingMode.then((fn) => fn());
+      unlistenScrollingCompleted.then((fn) => fn());
+      unlistenScrollingCancelled.then((fn) => fn());
+      unlistenScrollingError.then((fn) => fn());
+      unlistenScrollingSettings.then((fn) => fn());
       unlistenFocus.then((fn) => fn());
     };
   }, []);
@@ -415,6 +464,12 @@ function ScreenshotCapture() {
 
       // Do not trigger global copy/save shortcuts when typing text
       if (textInput.visible) return;
+
+      if (isScrollingMode && selection && e.key === "Enter") {
+        e.preventDefault();
+        handleStartScrolling();
+        return;
+      }
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
         e.preventDefault();
@@ -454,6 +509,19 @@ function ScreenshotCapture() {
     img.src = imageSrc;
     img.onload = () => {
       setImgElement(img);
+      const isFromScrolling = isScrollingResultRef.current || isScrollingResult;
+      const isTall = isFromScrolling || img.naturalHeight > window.innerHeight * 1.05 || (img.naturalHeight > img.naturalWidth * 1.4 && img.naturalHeight > 800);
+      setIsTallImage(isTall);
+      if (isTall) {
+        setIsScrollingMode(false);
+        setScrollY(0);
+        const displayW = Math.min(img.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
+        const scale = displayW / img.naturalWidth;
+        const displayH = img.naturalHeight * scale;
+        const offX = (window.innerWidth - displayW) / 2;
+        setSelection({ x: offX, y: 20, w: displayW, h: displayH });
+      }
+      isScrollingResultRef.current = false;
       // Wait for React to render the new image onto the canvas BEFORE displaying the window
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -462,6 +530,21 @@ function ScreenshotCapture() {
       });
     };
   }, [imageSrc]);
+
+  // Handle mouse wheel scrolling when viewing a tall scrolling screenshot
+  useEffect(() => {
+    if (!isTallImage || !imgElement) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
+      const scale = displayW / imgElement.naturalWidth;
+      const displayH = imgElement.naturalHeight * scale;
+      const maxScroll = Math.max(0, displayH - window.innerHeight + 140);
+      setScrollY((prev) => Math.max(0, Math.min(maxScroll, prev + e.deltaY)));
+    };
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [isTallImage, imgElement]);
 
   // Redraw canvas loop
   useEffect(() => {
@@ -475,67 +558,100 @@ function ScreenshotCapture() {
     canvas.width = w;
     canvas.height = h;
 
-    // 1. Draw original screenshot image
-    ctx.drawImage(imgElement, 0, 0, w, h);
+    if (isTallImage) {
+      const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
+      const scale = displayW / imgElement.naturalWidth;
+      const displayH = imgElement.naturalHeight * scale;
+      const offX = (window.innerWidth - displayW) / 2;
+      const offY = -scrollY + 20;
 
-    // 2. Draw dark screen overlay
-    ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
-    ctx.fillRect(0, 0, w, h);
+      // Draw dark sleek background
+      ctx.fillStyle = "rgba(11, 12, 16, 0.94)";
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw tall image
+      ctx.drawImage(imgElement, offX, offY, displayW, displayH);
+
+      // Border around tall image
+      ctx.strokeStyle = "rgba(0, 242, 254, 0.4)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(offX, offY, displayW, displayH);
+    } else {
+      // 1. Draw original screenshot image
+      ctx.drawImage(imgElement, 0, 0, w, h);
+
+      // 2. Draw dark screen overlay
+      ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+      ctx.fillRect(0, 0, w, h);
+    }
 
     if (selection) {
-      // 3. Clear selection area to show original screenshot or whiteboard/blackboard
-      ctx.clearRect(selection.x, selection.y, selection.w, selection.h);
-      if (boardMode === "white") {
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
-      } else if (boardMode === "black") {
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
-      } else {
-        ctx.drawImage(
-          imgElement,
-          (selection.x * imgElement.naturalWidth) / w,
-          (selection.y * imgElement.naturalHeight) / h,
-          (selection.w * imgElement.naturalWidth) / w,
-          (selection.h * imgElement.naturalHeight) / h,
-          selection.x,
-          selection.y,
-          selection.w,
-          selection.h
-        );
+      if (!isTallImage) {
+        // 3. Clear selection area to show original screenshot or whiteboard/blackboard
+        ctx.clearRect(selection.x, selection.y, selection.w, selection.h);
+        if (boardMode === "white") {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
+        } else if (boardMode === "black") {
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
+        } else {
+          ctx.drawImage(
+            imgElement,
+            (selection.x * imgElement.naturalWidth) / w,
+            (selection.y * imgElement.naturalHeight) / h,
+            (selection.w * imgElement.naturalWidth) / w,
+            (selection.h * imgElement.naturalHeight) / h,
+            selection.x,
+            selection.y,
+            selection.w,
+            selection.h
+          );
+        }
       }
 
 
-      // 4. Draw selection border
-      ctx.strokeStyle = "rgba(0, 242, 254, 0.9)";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([]);
-      ctx.strokeRect(selection.x, selection.y, selection.w, selection.h);
-
-      // Always draw 8 resize handles
-      const drawHandle = (hx: number, hy: number) => {
-        const size = 6;
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(hx - size / 2, hy - size / 2, size, size);
-        ctx.strokeStyle = "rgba(0, 242, 254, 1)";
+      if (!isTallImage) {
+        // 4. Draw selection border
+        ctx.strokeStyle = "rgba(0, 242, 254, 0.9)";
         ctx.lineWidth = 1.5;
-        ctx.strokeRect(hx - size / 2, hy - size / 2, size, size);
-      };
+        ctx.setLineDash([]);
+        ctx.strokeRect(selection.x, selection.y, selection.w, selection.h);
 
-      const { x: rx, y: ry, w: rw, h: rh } = selection;
-      drawHandle(rx, ry); // TL
-      drawHandle(rx + rw / 2, ry); // T
-      drawHandle(rx + rw, ry); // TR
-      drawHandle(rx, ry + rh / 2); // L
-      drawHandle(rx + rw, ry + rh / 2); // R
-      drawHandle(rx, ry + rh); // BL
-      drawHandle(rx + rw / 2, ry + rh); // B
-      drawHandle(rx + rw, ry + rh); // BR
+        // Always draw 8 resize handles
+        const drawHandle = (hx: number, hy: number) => {
+          const size = 6;
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(hx - size / 2, hy - size / 2, size, size);
+          ctx.strokeStyle = "rgba(0, 242, 254, 1)";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(hx - size / 2, hy - size / 2, size, size);
+        };
+
+        const { x: rx, y: ry, w: rw, h: rh } = selection;
+        drawHandle(rx, ry); // TL
+        drawHandle(rx + rw / 2, ry); // T
+        drawHandle(rx + rw, ry); // TR
+        drawHandle(rx, ry + rh / 2); // L
+        drawHandle(rx + rw, ry + rh / 2); // R
+        drawHandle(rx, ry + rh); // BL
+        drawHandle(rx + rw / 2, ry + rh); // B
+        drawHandle(rx + rw, ry + rh); // BR
+      }
 
       // 5. Draw drawings constrained (clipped) within selection area
       ctx.save();
       ctx.beginPath();
-      ctx.rect(selection.x, selection.y, selection.w, selection.h);
+      if (isTallImage) {
+        const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
+        const offX = (window.innerWidth - displayW) / 2;
+        const offY = -scrollY + 20;
+        const scale = displayW / imgElement.naturalWidth;
+        const displayH = imgElement.naturalHeight * scale;
+        ctx.rect(offX, offY, displayW, displayH);
+      } else {
+        ctx.rect(selection.x, selection.y, selection.w, selection.h);
+      }
       ctx.clip();
 
       const drawAction = (act: DrawingAction, index: number) => {
@@ -842,6 +958,12 @@ function ScreenshotCapture() {
 
   const handleClose = async () => {
     try {
+      if (!isScrollingCaptureActiveRef.current) {
+        invoke("cancel_scrolling_capture").catch(() => {});
+      }
+      isScrollingResultRef.current = false;
+      setIsScrollingResult(false);
+
       // Synchronously clear the canvas DOM context to prevent old frame buffer flash on next show
       const canvas = canvasRef.current;
       if (canvas) {
@@ -853,6 +975,9 @@ function ScreenshotCapture() {
       setImageSrc(null);
       setImgElement(null);
       setSelection(null);
+      setIsScrollingMode(false);
+      setIsTallImage(false);
+      setScrollY(0);
       setDrawings([]);
       setActiveTool("pencil");
       setBoardMode("normal");
@@ -865,6 +990,9 @@ function ScreenshotCapture() {
 
   useEffect(() => {
     const handleBlur = () => {
+      if (isScrollingCaptureActiveRef.current) {
+        return;
+      }
       handleClose();
     };
     window.addEventListener("blur", handleBlur);
@@ -1196,39 +1324,15 @@ function ScreenshotCapture() {
   };
 
   const getCroppedBase64 = (format = "PNG", quality = 90): string | null => {
-    if (!selection || !imgElement) return null;
+    if (!imgElement) return null;
+    if (!selection && !isTallImage) return null;
 
     const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = selection.w;
-    tempCanvas.height = selection.h;
     const tempCtx = tempCanvas.getContext("2d");
     if (!tempCtx) return null;
 
     const w = window.innerWidth;
     const h = window.innerHeight;
-    if (boardMode === "white") {
-      tempCtx.fillStyle = "#ffffff";
-      tempCtx.fillRect(0, 0, selection.w, selection.h);
-    } else if (boardMode === "black") {
-      tempCtx.fillStyle = "#000000";
-      tempCtx.fillRect(0, 0, selection.w, selection.h);
-    } else {
-      tempCtx.drawImage(
-        imgElement,
-        (selection.x * imgElement.naturalWidth) / w,
-        (selection.y * imgElement.naturalHeight) / h,
-        (selection.w * imgElement.naturalWidth) / w,
-        (selection.h * imgElement.naturalHeight) / h,
-        0,
-        0,
-        selection.w,
-        selection.h
-      );
-    }
-
-
-    tempCtx.save();
-    tempCtx.translate(-selection.x, -selection.y);
 
     const drawAction = (act: DrawingAction) => {
       tempCtx.strokeStyle = act.color;
@@ -1316,16 +1420,16 @@ function ScreenshotCapture() {
         tempCtx.fill();
       } else if (act.type === "triangle" && act.start && act.end) {
         tempCtx.beginPath();
-        tempCtx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y); // Top
-        tempCtx.lineTo(act.end.x, act.end.y); // Bottom Right
-        tempCtx.lineTo(act.start.x, act.end.y); // Bottom Left
+        tempCtx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y);
+        tempCtx.lineTo(act.end.x, act.end.y);
+        tempCtx.lineTo(act.start.x, act.end.y);
         tempCtx.closePath();
         tempCtx.stroke();
       } else if (act.type === "solid-triangle" && act.start && act.end) {
         tempCtx.beginPath();
-        tempCtx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y); // Top
-        tempCtx.lineTo(act.end.x, act.end.y); // Bottom Right
-        tempCtx.lineTo(act.start.x, act.end.y); // Bottom Left
+        tempCtx.moveTo(act.start.x + (act.end.x - act.start.x) / 2, act.start.y);
+        tempCtx.lineTo(act.end.x, act.end.y);
+        tempCtx.lineTo(act.start.x, act.end.y);
         tempCtx.closePath();
         tempCtx.fill();
       } else if (act.type === "wave" && act.start && act.end) {
@@ -1368,13 +1472,8 @@ function ScreenshotCapture() {
           const sw = Math.min(screenW - sx, bw + (bx - sx) + pad);
           const sh = Math.min(screenH - sy, bh + (by - sy) + pad);
 
-          const dx = sx;
-          const dy = sy;
-          const dw = sw;
-          const dh = sh;
-
-          const scaleX = imgElement.naturalWidth / screenW;
-          const scaleY = imgElement.naturalHeight / screenH;
+          const scaleX = isTallImage ? 1.0 : (imgElement.naturalWidth / screenW);
+          const scaleY = isTallImage ? 1.0 : (imgElement.naturalHeight / screenH);
 
           tempCtx.filter = `blur(${currentBlur}px)`;
           tempCtx.drawImage(
@@ -1383,7 +1482,7 @@ function ScreenshotCapture() {
             sy * scaleY,
             sw * scaleX,
             sh * scaleY,
-            dx, dy, dw, dh
+            sx, sy, sw, sh
           );
         }
         tempCtx.restore();
@@ -1407,7 +1506,6 @@ function ScreenshotCapture() {
         tempCtx.font = `${fontStyle} ${fontWeight} 16px Inter, Arial, sans-serif`;
         tempCtx.fillText(act.text, act.start.x, act.start.y);
 
-        // Draw underline/strikethrough if needed
         const textWidth = tempCtx.measureText(act.text).width;
         const textHeight = 16;
 
@@ -1431,8 +1529,54 @@ function ScreenshotCapture() {
       }
     };
 
-    drawings.forEach(drawAction);
-    tempCtx.restore();
+    if (isTallImage) {
+      // Export full tall image at 100% natural resolution without any scrollY offset
+      tempCanvas.width = imgElement.naturalWidth;
+      tempCanvas.height = imgElement.naturalHeight;
+
+      tempCtx.drawImage(imgElement, 0, 0);
+
+      const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
+      const scale = displayW / imgElement.naturalWidth;
+      const offX = (window.innerWidth - displayW) / 2;
+      const offY = -scrollY + 20;
+
+      tempCtx.save();
+      // Translate screen annotations to natural image coordinates
+      tempCtx.scale(1 / scale, 1 / scale);
+      tempCtx.translate(-offX, -offY);
+      drawings.forEach(drawAction);
+      tempCtx.restore();
+    } else {
+      if (!selection) return null;
+      tempCanvas.width = selection.w;
+      tempCanvas.height = selection.h;
+
+      if (boardMode === "white") {
+        tempCtx.fillStyle = "#ffffff";
+        tempCtx.fillRect(0, 0, selection.w, selection.h);
+      } else if (boardMode === "black") {
+        tempCtx.fillStyle = "#000000";
+        tempCtx.fillRect(0, 0, selection.w, selection.h);
+      } else {
+        tempCtx.drawImage(
+          imgElement,
+          (selection.x * imgElement.naturalWidth) / w,
+          (selection.y * imgElement.naturalHeight) / h,
+          (selection.w * imgElement.naturalWidth) / w,
+          (selection.h * imgElement.naturalHeight) / h,
+          0,
+          0,
+          selection.w,
+          selection.h
+        );
+      }
+
+      tempCtx.save();
+      tempCtx.translate(-selection.x, -selection.y);
+      drawings.forEach(drawAction);
+      tempCtx.restore();
+    }
 
     const mimeType = format.toLowerCase() === "jpg" ? "image/jpeg" : `image/${format.toLowerCase()}`;
     const qValue = quality / 100;
@@ -1447,6 +1591,64 @@ function ScreenshotCapture() {
       new Audio(shutterSoundUrl).play().catch((err) => {
         console.error("Failed to play shutter sound:", err);
       });
+    }
+  };
+
+  const handleStartScrolling = async () => {
+    if (!selection) return;
+    try {
+      isScrollingCaptureActiveRef.current = true;
+      const rect = {
+        x: Math.round(selection.x),
+        y: Math.round(selection.y),
+        width: Math.round(selection.w),
+        height: Math.round(selection.h),
+        scale_factor: window.devicePixelRatio || 1.0,
+      };
+
+      // Query centralized settings from Rust AppState to guarantee cross-window synchronization
+      let settings: any = null;
+      try {
+        const backendSettings = await invoke<any>("get_scrolling_settings");
+        const maxSteps = backendSettings?.max_scroll_count ?? backendSettings?.maxScrollCount;
+        if (backendSettings && typeof maxSteps === "number" && maxSteps > 0) {
+          settings = {
+            scroll_method: backendSettings.scroll_method || backendSettings.scrollMethod || "auto",
+            scroll_delay_ms: backendSettings.scroll_delay_ms ?? backendSettings.scrollDelayMs ?? 350,
+            scroll_amount: backendSettings.scroll_amount ?? backendSettings.scrollAmount ?? 2,
+            max_scroll_count: maxSteps,
+            overlap_sensitivity: backendSettings.overlap_sensitivity || backendSettings.overlapSensitivity || "normal",
+            stop_on_no_movement: backendSettings.stop_on_no_movement ?? backendSettings.stopOnNoMovement ?? true,
+          };
+        }
+      } catch (err) {
+        console.warn("Could not fetch backend scrolling settings, falling back to localStorage", err);
+      }
+
+      if (!settings) {
+        const method = localStorage.getItem("scrollingMethod") || "auto";
+        const delay = Number(localStorage.getItem("scrollingDelay") || "350");
+        const amount = Number(localStorage.getItem("scrollingAmount") || "2");
+        const maxSteps = Number(localStorage.getItem("scrollingMaxSteps") || "60");
+        const sensitivity = localStorage.getItem("scrollingSensitivity") || "normal";
+        const stopOnNoMovement = localStorage.getItem("scrollingStopOnNoMovement") !== "false";
+        settings = {
+          scroll_method: method,
+          scroll_delay_ms: delay,
+          scroll_amount: amount,
+          max_scroll_count: maxSteps,
+          overlap_sensitivity: sensitivity,
+          stop_on_no_movement: stopOnNoMovement,
+        };
+      }
+
+      await invoke("start_scrolling_capture", {
+        rect,
+        settings,
+      });
+    } catch (e) {
+      isScrollingCaptureActiveRef.current = false;
+      console.error("Failed to start scrolling capture:", e);
     }
   };
 
@@ -1566,6 +1768,13 @@ function ScreenshotCapture() {
     const margin = 12;
     const toolbarHeight = 44;
 
+    if (isTallImage) {
+      const measuredWidth = toolbarRef.current?.offsetWidth || 480;
+      const left = Math.max(margin, (window.innerWidth - measuredWidth) / 2);
+      const top = window.innerHeight - toolbarHeight - 20;
+      return { top, left };
+    }
+
     // Dynamically estimate width based on active tool extra panels
     let estimatedWidth = 420;
     if (activeTool === "text") estimatedWidth = 560;
@@ -1622,7 +1831,27 @@ function ScreenshotCapture() {
 
   return (
     <div className="capture-container" ref={containerRef}>
-      {!selection && (
+      {isScrollingMode && (
+        <div className="scrolling-mode-banner">
+          <div className="scrolling-mode-badge">
+            <ChevronsDown size={16} />
+            <span>{(t as any).scrollingCapture || "Kaydırmalı Ekran Görüntüsü"}</span>
+          </div>
+          <span style={{ fontSize: "0.82rem", color: "#cbd5e1" }}>
+            {selection
+              ? `${(t as any).scrollingBtnStart || "Kaydırmayı Başlat"} • ${(t as any).scrollingEscHint || "ESC ile durdur"}`
+              : (t as any).scrollingDragPrompt}
+          </span>
+          {selection && (
+            <button className="scrolling-start-btn" onClick={handleStartScrolling}>
+              <ChevronsDown size={14} />
+              {(t as any).scrollingBtnStart || "Kaydırmayı Başlat"}
+            </button>
+          )}
+        </div>
+      )}
+
+      {!selection && !isScrollingMode && (
         <div className="capture-instructions">
           {t.dragToSelect}
         </div>
@@ -1669,7 +1898,7 @@ function ScreenshotCapture() {
         />
       )}
 
-      {selection && !isSelecting && (
+      {selection && !isSelecting && !isScrollingMode && (
         <div className="capture-toolbar" ref={toolbarRef} style={getToolbarStyle()}>
           <button
             className={`toolbar-btn ${activeTool === "pencil" ? "active" : ""}`}
@@ -1919,6 +2148,18 @@ function ScreenshotCapture() {
           </div>
 
           <div className="toolbar-divider" />
+
+          {/* Scrolling Screenshot Action Button */}
+          {!isTallImage && (
+            <button
+              className={`toolbar-btn ${isScrollingMode ? "active" : ""}`}
+              style={{ color: isScrollingMode ? "var(--text-inverse)" : "#00f2fe" }}
+              onClick={handleStartScrolling}
+              title={(t as any).scrollingToolbarTooltip || "Kaydırmalı Ekran Görüntüsü (Uzun)"}
+            >
+              <ChevronsDown size={16} />
+            </button>
+          )}
 
           <button
             className="toolbar-btn action-copy"

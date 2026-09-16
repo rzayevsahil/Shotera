@@ -1,0 +1,159 @@
+.scrolling-hud-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  user-select: none;
+  overflow: hidden;
+}
+
+.scrolling-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 242, 254, 0.2);
+  border-radius: 40px;
+  color: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  animation: hudFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
+}
+
+.scrolling-hud-pill.completed {
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(34, 197, 94, 0.25);
+}
+
+.scrolling-hud-indicator {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrolling-hud-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00f2fe;
+}
+
+.scrolling-hud-dot.completed {
+  background: #22c55e;
+}
+
+.scrolling-hud-pulse {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 242, 254, 0.4);
+  animation: hudPulse 1.5s infinite ease-out;
+}
+
+.scrolling-hud-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scrolling-hud-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scrolling-hud-meta {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scrolling-hud-badge {
+  color: #00f2fe;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.scrolling-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+}
+
+.scrolling-hud-btn-stop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.scrolling-hud-btn-stop:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+.scrolling-hud-btn-stop.btn-finish {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #86efac;
+}
+
+.scrolling-hud-btn-stop.btn-finish:hover {
+  background: rgba(34, 197, 94, 0.35);
+  color: #ffffff;
+  border-color: #22c55e;
+}
+
+.scrolling-hud-esc {
+  font-size: 0.65rem;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+@keyframes hudFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes hudPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}

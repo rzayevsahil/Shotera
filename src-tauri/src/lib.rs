@@ -5,6 +5,8 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use base64::prelude::*;
 use chrono::Local;
+
+mod scrolling;
 // use tauri_plugin_notification::NotificationExt;
 
 // DEBUG LOGGING HELPER
@@ -31,6 +33,8 @@ struct AppState {
     pause_record_shortcut: Mutex<String>,
     webcam_shortcut: Mutex<String>,
     mic_shortcut: Mutex<String>,
+    scrolling_shortcut: Mutex<String>,
+    scrolling_settings: Mutex<scrolling::ScrollingSettings>,
     pinned_image: Mutex<Option<String>>,
     show_notifications: Mutex<bool>,
     status_overlay_token: std::sync::atomic::AtomicU64,
@@ -843,6 +847,35 @@ fn trigger_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Re
     Ok(())
 }
 
+fn trigger_scrolling_mode(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
+    if let Some(zoom_window) = app_handle.get_webview_window("zoom") {
+        if zoom_window.is_visible().unwrap_or(false) {
+            let _ = zoom_window.emit("request-zoom-snapshot", ());
+            return Ok(());
+        }
+    }
+
+    if let Some(window) = app_handle.get_webview_window("screenshot") {
+        if window.is_visible().unwrap_or(false) {
+            let _ = window.hide();
+            restore_focus(app_handle, "screenshot");
+            return Ok(());
+        }
+    }
+
+    capture_screen_to_state(app_handle, state)?;
+    if let Some(window) = app_handle.get_webview_window("screenshot") {
+        window.emit("screenshot-captured", ()).map_err(|e| e.to_string())?;
+        window.emit("start-scrolling-mode", ()).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn trigger_scrolling_capture_command(app_handle: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    trigger_scrolling_mode(&app_handle, &state)
+}
+
 
 fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppState>) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("screenshot") {
@@ -1201,6 +1234,30 @@ fn update_notification_setting(state: State<'_, AppState>, show: bool) {
     }
 }
 
+#[tauri::command]
+fn update_scrolling_settings(
+    app_handle: AppHandle,
+    state: State<'_, AppState>,
+    settings: scrolling::ScrollingSettings,
+) -> Result<(), String> {
+    if let Ok(mut s) = state.scrolling_settings.lock() {
+        *s = settings.clone();
+    }
+    let _ = app_handle.emit("scrolling-settings-updated", &settings);
+    Ok(())
+}
+
+#[tauri::command]
+fn get_scrolling_settings(
+    state: State<'_, AppState>,
+) -> Result<scrolling::ScrollingSettings, String> {
+    state
+        .scrolling_settings
+        .lock()
+        .map(|s| s.clone())
+        .map_err(|e| e.to_string())
+}
+
 fn register_all_shortcuts_helper(
     app_handle: &AppHandle,
     reg_shortcut_str: &str,
@@ -1212,6 +1269,7 @@ fn register_all_shortcuts_helper(
     pause_record_shortcut_str: &str,
     webcam_shortcut_str: &str,
     mic_shortcut_str: &str,
+    scrolling_shortcut_str: &str,
 ) -> Result<(), String> {
     use std::str::FromStr;
     let _ = app_handle.global_shortcut().unregister_all();
@@ -1243,6 +1301,9 @@ fn register_all_shortcuts_helper(
     if let Ok(sc) = Shortcut::from_str(&mic_shortcut_str.to_lowercase()) {
         let _ = app_handle.global_shortcut().register(sc);
     }
+    if let Ok(sc) = Shortcut::from_str(&scrolling_shortcut_str.to_lowercase()) {
+        let _ = app_handle.global_shortcut().register(sc);
+    }
     Ok(())
 }
 
@@ -1259,6 +1320,7 @@ fn update_shortcuts(
     pause_record_shortcut: Option<String>,
     webcam_shortcut: Option<String>,
     mic_shortcut: Option<String>,
+    scrolling_shortcut: Option<String>,
 ) -> Result<(), String> {
     let timer_str = timer_shortcut.unwrap_or_else(|| state.break_timer_shortcut.lock().unwrap().clone());
     let zoom_str = zoom_shortcut.unwrap_or_else(|| state.zoom_shortcut.lock().unwrap().clone());
@@ -1267,6 +1329,7 @@ fn update_shortcuts(
     let pause_record_str = pause_record_shortcut.unwrap_or_else(|| state.pause_record_shortcut.lock().unwrap().clone());
     let webcam_str = webcam_shortcut.unwrap_or_else(|| state.webcam_shortcut.lock().unwrap().clone());
     let mic_str = mic_shortcut.unwrap_or_else(|| state.mic_shortcut.lock().unwrap().clone());
+    let scrolling_str = scrolling_shortcut.unwrap_or_else(|| state.scrolling_shortcut.lock().unwrap().clone());
 
     register_all_shortcuts_helper(
         &app_handle,
@@ -1279,6 +1342,7 @@ fn update_shortcuts(
         &pause_record_str,
         &webcam_str,
         &mic_str,
+        &scrolling_str,
     )?;
 
     if let Ok(mut reg_state) = state.region_shortcut.lock() {
@@ -1307,6 +1371,9 @@ fn update_shortcuts(
     }
     if let Ok(mut mic_state) = state.mic_shortcut.lock() {
         *mic_state = mic_str.to_lowercase();
+    }
+    if let Ok(mut sc_state) = state.scrolling_shortcut.lock() {
+        *sc_state = scrolling_str.to_lowercase();
     }
 
     Ok(())
@@ -1961,6 +2028,8 @@ pub fn run() {
             pause_record_shortcut: Mutex::new("ctrl+6".to_string()),
             webcam_shortcut: Mutex::new("ctrl+7".to_string()),
             mic_shortcut: Mutex::new("ctrl+8".to_string()),
+            scrolling_shortcut: Mutex::new("ctrl+9".to_string()),
+            scrolling_settings: Mutex::new(scrolling::ScrollingSettings::default()),
             pinned_image: Mutex::new(None),
 
             show_notifications: Mutex::new(true),
@@ -1995,6 +2064,14 @@ pub fn run() {
                         let pause_record_shortcut_str = state.pause_record_shortcut.lock().unwrap().clone();
                         let webcam_shortcut_str = state.webcam_shortcut.lock().unwrap().clone();
                         let mic_shortcut_str = state.mic_shortcut.lock().unwrap().clone();
+                        let scrolling_shortcut_str = state.scrolling_shortcut.lock().unwrap().clone();
+                        
+                        if let Ok(scrolling_sc) = scrolling_shortcut_str.parse::<Shortcut>() {
+                            if shortcut == &scrolling_sc {
+                                let _ = trigger_scrolling_mode(app_handle_shortcut, &state);
+                                return;
+                            }
+                        }
                         
                         if let Ok(pause_sc) = pause_record_shortcut_str.parse::<Shortcut>() {
                             if shortcut == &pause_sc {
@@ -2098,6 +2175,9 @@ pub fn run() {
             let pause_record_shortcut = Shortcut::from_str(&state.pause_record_shortcut.lock().unwrap()).unwrap();
             let webcam_shortcut = Shortcut::from_str(&state.webcam_shortcut.lock().unwrap()).unwrap();
             let mic_shortcut = Shortcut::from_str(&state.mic_shortcut.lock().unwrap()).unwrap();
+            if let Ok(sc_sc) = Shortcut::from_str(&state.scrolling_shortcut.lock().unwrap()) {
+                let _ = app.global_shortcut().register(sc_sc);
+            }
             
             let _ = app.global_shortcut().register(reg_shortcut);
             let _ = app.global_shortcut().register(fs_shortcut);
@@ -2114,6 +2194,7 @@ pub fn run() {
                 let quit_i = MenuItem::with_id(app_ref, "quit", "Quit", true, None::<&str>)?;
                 let settings_i = MenuItem::with_id(app_ref, "settings", "Settings", true, None::<&str>)?;
                 let capture_i = MenuItem::with_id(app_ref, "capture", "Take Screenshot", true, None::<&str>)?;
+                let scrolling_i = MenuItem::with_id(app_ref, "scrolling", "Scrolling Screenshot", true, None::<&str>)?;
                 let record_i = MenuItem::with_id(app_ref, "record", "Screen Record", true, None::<&str>)?;
                 let timer_i = MenuItem::with_id(app_ref, "timer", "Break Timer", true, None::<&str>)?;
                 let zoom_i = MenuItem::with_id(app_ref, "zoom", "Screen Zoom", true, None::<&str>)?;
@@ -2122,6 +2203,7 @@ pub fn run() {
                 let sep2 = PredefinedMenuItem::separator(app_ref)?;
                 let menu = Menu::with_items(app_ref, &[
                     &capture_i,
+                    &scrolling_i,
                     &record_i,
                     &sep1,
                     &timer_i,
@@ -2154,6 +2236,14 @@ pub fn run() {
                                     std::thread::sleep(std::time::Duration::from_millis(300));
                                     let state = app_handle_clone.state::<AppState>();
                                     let _ = trigger_screenshot(&app_handle_clone, &state);
+                                });
+                            }
+                            "scrolling" => {
+                                let app_handle_clone = app_handle_tray.clone();
+                                std::thread::spawn(move || {
+                                    std::thread::sleep(std::time::Duration::from_millis(300));
+                                    let state = app_handle_clone.state::<AppState>();
+                                    let _ = trigger_scrolling_mode(&app_handle_clone, &state);
                                 });
                             }
                             "record" => {
@@ -2268,7 +2358,13 @@ pub fn run() {
             hide_recorder_window,
             open_recorder_view,
             hide_status_overlay,
-            lock_workstation
+            lock_workstation,
+            trigger_scrolling_capture_command,
+            update_scrolling_settings,
+            get_scrolling_settings,
+            scrolling::start_scrolling_capture,
+            scrolling::stop_scrolling_capture,
+            scrolling::cancel_scrolling_capture
         ])
 
         .run(tauri::generate_context!())

@@ -11,6 +11,7 @@ import LiveZoomCanvas from "./components/LiveZoomCanvas";
 import ScreenRecorderModal from "./components/ScreenRecorderModal";
 import WebcamOverlay from "./components/WebcamOverlay";
 import StatusOverlay from "./components/StatusOverlay";
+import ScrollingHud from "./components/ScrollingHud";
 import "./App.css";
 
 function StandaloneRecorder() {
@@ -130,6 +131,10 @@ function App() {
 
   if (label === "status_overlay") {
     return <StatusOverlay />;
+  }
+
+  if (label === "scrolling_hud") {
+    return <ScrollingHud />;
   }
 
   return <SettingsWindow />;
