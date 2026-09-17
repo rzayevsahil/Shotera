@@ -18,7 +18,7 @@ import ScreenRecorderModal from "./ScreenRecorderModal";
 import "./ScreenRecorderModal.css";
 import FeatureTour from "./FeatureTour";
 import { HexColorPicker } from "react-colorful";
-type ActiveTab = "general" | "capture" | "zoom" | "live_zoom" | "timer" | "record" | "about";
+type ActiveTab = "general" | "capture" | "zoom" | "live_zoom" | "timer" | "record" | "history" | "about";
 
 function resolveImageSrc(src: string | null | undefined): string {
   if (!src) return "";
@@ -253,6 +253,8 @@ function SettingsWindow() {
   const [appVersion, setAppVersion] = useState("v0.1.0");
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem("sidebarCollapsed") === "true");
+  const isWaitingForEditorRef = useRef(false);
+
   useEffect(() => {
     getVersion().then(v => setAppVersion(`v${v}`)).catch(() => { });
     const tourCompleted = localStorage.getItem("shotera_tour_completed");
@@ -260,6 +262,22 @@ function SettingsWindow() {
       const timer = setTimeout(() => setIsTourOpen(true), 600);
       return () => clearTimeout(timer);
     }
+  }, []);
+
+  useEffect(() => {
+    const unlistenPromise = listen("screenshot-closed", () => {
+      if (isWaitingForEditorRef.current) {
+        import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
+           getCurrentWindow().show().catch(console.error);
+           getCurrentWindow().setFocus().catch(console.error);
+        });
+        isWaitingForEditorRef.current = false;
+      }
+    });
+
+    return () => {
+      unlistenPromise.then(f => f());
+    };
   }, []);
 
   useEffect(() => {
@@ -349,6 +367,47 @@ function SettingsWindow() {
 
   const [recordAudioVolume, setRecordAudioVolume] = useState<number>(() => Number(localStorage.getItem("recordAudioVolume") ?? "100"));
   const [recordMicVolume, setRecordMicVolume] = useState<number>(() => Number(localStorage.getItem("recordMicVolume") ?? "100"));
+  const [recordFramerate, setRecordFramerate] = useState<number>(() => Number(localStorage.getItem("recordFramerate") ?? "30"));
+  const [recordWebcamEnabled, setRecordWebcamEnabled] = useState<boolean>(() => localStorage.getItem("recordWebcamEnabled") === "true");
+  const [recordWebcamShape, setRecordWebcamShape] = useState<"circle" | "square" | "rectangle">(() => (localStorage.getItem("recordWebcamShape") as any) || "circle");
+  
+  // History State
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{x: number, y: number, item: any} | null>(null);
+
+  // Close context menu on global click
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    if (contextMenu) {
+      window.addEventListener("click", handleClick);
+    }
+    return () => window.removeEventListener("click", handleClick);
+  }, [contextMenu]);
+
+  // Load history when tab is active
+  useEffect(() => {
+    const loadHistory = () => {
+      setIsHistoryLoading(true);
+      invoke("get_history")
+        .then((items: any) => setHistoryItems(items))
+        .catch(console.error)
+        .finally(() => setIsHistoryLoading(false));
+    };
+
+    if (activeTab === "history") {
+      loadHistory();
+      
+      const unlistenPromise = listen("history-updated", () => {
+        loadHistory();
+      });
+
+      return () => {
+        unlistenPromise.then(f => f());
+      };
+    }
+  }, [activeTab]);
+
   const customAudioInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleCustomAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1350,6 +1409,15 @@ function SettingsWindow() {
               <Play className="nav-icon" />
               {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{(t as any).sidebarRecord}</span>}
             </div>
+            <div
+              className={`nav-item ${activeTab === "history" ? "active" : ""}`}
+              onClick={() => setActiveTab("history")}
+              style={{ justifyContent: isSidebarCollapsed ? "center" : "flex-start", padding: isSidebarCollapsed ? "12px" : "10px 14px", position: "relative" }}
+              title={isSidebarCollapsed ? (t as any).sidebarHistory : undefined}
+            >
+              <Clock className="nav-icon" />
+              {!isSidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{(t as any).sidebarHistory}</span>}
+            </div>
 
             <div
               className={`nav-item ${activeTab === "about" ? "active" : ""}`}
@@ -1403,6 +1471,7 @@ function SettingsWindow() {
             {activeTab === "live_zoom" && (t as any).liveZoomTitle}
             {activeTab === "record" && (t as any).recordTitle}
             {activeTab === "timer" && (t as any).timerTitle}
+            {activeTab === "history" && (t as any).historyTitle}
             {activeTab === "about" && t.aboutTitle}
           </h2>
           <p className="section-subtitle">
@@ -1413,6 +1482,7 @@ function SettingsWindow() {
             {activeTab === "live_zoom" && (t as any).liveZoomSubtitle}
             {activeTab === "record" && (t as any).recordSubtitle}
             {activeTab === "timer" && (t as any).timerSubtitle}
+            {activeTab === "history" && (t as any).historySubtitle}
             {activeTab === "about" && t.aboutSubtitle}
           </p>
 
@@ -5005,6 +5075,158 @@ function SettingsWindow() {
                 </span>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === "history" && (
+          <div className="history-container" style={{ display: "flex", flexDirection: "column", gap: "16px", flex: 1, position: "relative" }}>
+            {isHistoryLoading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "40px", color: "var(--text-muted)" }}>
+                Yükleniyor...
+              </div>
+            ) : historyItems.length === 0 ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "40px", color: "var(--text-muted)" }}>
+                Geçmiş bulunamadı.
+              </div>
+            ) : (
+              <div className="history-grid" style={{ 
+                display: "grid", 
+                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", 
+                gap: "16px", 
+                alignContent: "start" 
+              }}>
+                {historyItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="history-item"
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      let posX = e.clientX;
+                      let posY = e.clientY;
+                      // Keep within window bounds roughly
+                      if (posX + 200 > window.innerWidth) posX = window.innerWidth - 200;
+                      if (posY + 300 > window.innerHeight) posY = window.innerHeight - 300;
+                      setContextMenu({ x: posX, y: posY, item });
+                    }}
+                    style={{
+                      aspectRatio: "16/9",
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      overflow: "hidden",
+                      position: "relative",
+                      cursor: "context-menu"
+                    }}
+                  >
+                    <img 
+                      src={`data:image/png;base64,${item.thumbnail_base64}`} 
+                      alt={item.filename} 
+                      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = "0.9"}
+                    />
+                    <div style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)",
+                      padding: "16px 8px 6px",
+                      fontSize: "0.7rem",
+                      color: "#cbd5e1"
+                    }}>
+                      {(() => {
+                        const d = new Date(item.timestamp * 1000);
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const yyyy = d.getFullYear();
+                        const hh = String(d.getHours()).padStart(2, '0');
+                        const min = String(d.getMinutes()).padStart(2, '0');
+                        return `${dd}.${mm}.${yyyy} ${hh}:${min}`;
+                      })()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {contextMenu && (
+              <div
+                style={{
+                  position: "fixed",
+                  left: `${contextMenu.x}px`,
+                  top: `${contextMenu.y}px`,
+                  backgroundColor: "#1e293b",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "8px",
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+                  padding: "6px",
+                  zIndex: 9999,
+                  minWidth: "160px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px"
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {[
+                  { label: (t as any).ctxOpen || "Aç", icon: <FolderOpen size={14} />, action: () => invoke("open_history_image", { filepath: contextMenu.item.filepath }).catch(console.error) },
+                  { label: (t as any).ctxEdit || "Düzenle", icon: <Pencil size={14} />, action: async () => {
+                    try {
+                      const fullBase64 = await invoke("read_history_image_full", { filepath: contextMenu.item.filepath });
+                      isWaitingForEditorRef.current = true;
+                      const currentWindow = getCurrentWindow();
+                      currentWindow.hide();
+                      emit("open-image-for-edit", { imageBase64: fullBase64 });
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }},
+                  { label: (t as any).ctxCopy || "Kopyala", icon: <Copy size={14} />, action: async () => {
+                    try {
+                      const fullBase64 = await invoke("read_history_image_full", { filepath: contextMenu.item.filepath });
+                      await invoke("copy_base64_image_to_clipboard", { base64Str: fullBase64 });
+                    } catch(e) { console.error(e); }
+                  }},
+                  { label: (t as any).ctxCopyPath || "Yolu Kopyala", icon: <FileAudio size={14} />, action: () => {
+                    navigator.clipboard.writeText(contextMenu.item.filepath).catch(console.error);
+                  }},
+                  { label: (t as any).ctxDelete || "Sil", icon: <Trash2 size={14} color="#ef4444" />, danger: true, action: async () => {
+                    try {
+                      await invoke("delete_from_history", { filepath: contextMenu.item.filepath });
+                      setHistoryItems(prev => prev.filter(i => i.id !== contextMenu.item.id));
+                    } catch(e) { console.error(e); }
+                  }},
+                ].map((menuItem, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      menuItem.action();
+                      setContextMenu(null);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      width: "100%",
+                      padding: "8px 12px",
+                      background: "transparent",
+                      border: "none",
+                      color: menuItem.danger ? "#ef4444" : "#f1f5f9",
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                      textAlign: "left"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = menuItem.danger ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.1)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                  >
+                    {menuItem.icon}
+                    {menuItem.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

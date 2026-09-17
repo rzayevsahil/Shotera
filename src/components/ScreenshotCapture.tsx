@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { listen, emit } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette, Eraser, ChevronsDown, Crop, Monitor } from "lucide-react";
 import Tesseract from "tesseract.js";
@@ -245,6 +245,16 @@ function ScreenshotCapture() {
   const [isScrollingResult, setIsScrollingResult] = useState(false);
   const isScrollingResultRef = useRef(false);
   const isScrollingCaptureActiveRef = useRef(false);
+  const isHistoryEditRef = useRef(false);
+  const lastSavedToHistoryDataUrl = useRef<string | null>(null);
+
+  const saveToHistoryIfNew = async (base64: string) => {
+    if (lastSavedToHistoryDataUrl.current !== base64) {
+      lastSavedToHistoryDataUrl.current = base64;
+      await invoke("save_to_history", { base64Str: base64 }).catch(console.error);
+      emit("history-updated");
+    }
+  };
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -428,6 +438,24 @@ function ScreenshotCapture() {
       loadScreenshot();
     });
 
+    const unlistenEdit = listen<{imageBase64: string}>("open-image-for-edit", (event) => {
+      isHistoryEditRef.current = true;
+      setImgElement(null);
+      setImageSrc(null);
+      setSelection(null);
+      setCaptureMode("region");
+      setWindowCaptureImage(null);
+      setIsTallImage(false);
+      setIsScrollingMode(false);
+      setScrollY(0);
+      setDrawings([]);
+      setActiveTool("pencil");
+      setBoardMode("normal");
+      setTextInput({ visible: false, x: 0, y: 0, val: "" });
+      setImageSrc(`data:image/png;base64,${event.payload.imageBase64}`);
+      invoke("show_screenshot_window").catch(console.error);
+    });
+
     const unlistenScrollingMode = listen("start-scrolling-mode", () => {
       isScrollingResultRef.current = false;
       setIsScrollingResult(false);
@@ -469,6 +497,7 @@ function ScreenshotCapture() {
 
     return () => {
       unlisten.then((fn) => fn());
+      unlistenEdit.then((fn) => fn());
       unlistenScrollingMode.then((fn) => fn());
       unlistenScrollingCompleted.then((fn) => fn());
       unlistenScrollingCancelled.then((fn) => fn());
@@ -537,16 +566,33 @@ function ScreenshotCapture() {
     img.onload = () => {
       setImgElement(img);
       const isFromScrolling = isScrollingResultRef.current || isScrollingResult;
-      const isTall = isFromScrolling || img.naturalHeight > window.innerHeight * 1.05 || (img.naturalHeight > img.naturalWidth * 1.4 && img.naturalHeight > 800);
+      const isFromHistory = isHistoryEditRef.current;
+      const isTall = isFromHistory || isFromScrolling || img.naturalHeight > window.innerHeight * 1.05 || (img.naturalHeight > img.naturalWidth * 1.4 && img.naturalHeight > 800);
       setIsTallImage(isTall);
+      
       if (isTall) {
         setIsScrollingMode(false);
         setScrollY(0);
-        const displayW = Math.min(img.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
-        const scale = displayW / img.naturalWidth;
-        const displayH = img.naturalHeight * scale;
+        
+        let displayW = Math.min(img.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
+        let scale = displayW / img.naturalWidth;
+        let displayH = img.naturalHeight * scale;
+        
+        // If it's a history edit and it's taller than screen, we must also constrain height to fit in screen
+        if (isFromHistory && displayH > window.innerHeight - 80) {
+           displayH = window.innerHeight - 80;
+           scale = displayH / img.naturalHeight;
+           displayW = img.naturalWidth * scale;
+        }
+
         const offX = (window.innerWidth - displayW) / 2;
-        setSelection({ x: offX, y: 20, w: displayW, h: displayH });
+        // If it's history edit and fits vertically easily, center it vertically instead of sticking to y=20
+        const offY = isFromHistory && displayH < window.innerHeight - 80 
+                     ? (window.innerHeight - displayH) / 2 
+                     : 20;
+
+        setSelection({ x: offX, y: offY, w: displayW, h: displayH });
+        isHistoryEditRef.current = false;
       }
       isScrollingResultRef.current = false;
       // Wait for React to render the new image onto the canvas BEFORE displaying the window
@@ -586,11 +632,23 @@ function ScreenshotCapture() {
     canvas.height = h;
 
     if (isTallImage) {
-      const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
-      const scale = displayW / imgElement.naturalWidth;
-      const displayH = imgElement.naturalHeight * scale;
+      const maxW = window.innerWidth - 80;
+      let displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), maxW);
+      let scale = displayW / imgElement.naturalWidth;
+      let displayH = imgElement.naturalHeight * scale;
+      
+      // Mirror the onload logic to ensure correct rendering size
+      if (selection && selection.h < window.innerHeight - 80 && Math.abs(selection.h - displayH) > 1) {
+         // It was constrained by height in history mode
+         displayH = selection.h;
+         scale = displayH / imgElement.naturalHeight;
+         displayW = imgElement.naturalWidth * scale;
+      }
+
       const offX = (window.innerWidth - displayW) / 2;
-      const offY = -scrollY + 20;
+      const offY = selection && selection.y > 20 && selection.y === (window.innerHeight - displayH) / 2
+                   ? selection.y 
+                   : -scrollY + 20;
 
       // Draw dark sleek background
       ctx.fillStyle = "rgba(11, 12, 16, 0.94)";
@@ -1051,6 +1109,7 @@ function ScreenshotCapture() {
       setBoardMode("normal");
       setTextInput({ visible: false, x: 0, y: 0, val: "" });
       await invoke("hide_screenshot_window");
+      emit("screenshot-closed");
     } catch (e) {
       console.error(e);
     }
@@ -1638,10 +1697,21 @@ function ScreenshotCapture() {
 
       tempCtx.drawImage(imgElement, 0, 0);
 
-      const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
-      const scale = displayW / imgElement.naturalWidth;
+      const maxW = window.innerWidth - 80;
+      let displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), maxW);
+      let scale = displayW / imgElement.naturalWidth;
+      let displayH = imgElement.naturalHeight * scale;
+      
+      if (selection && selection.h < window.innerHeight - 80 && Math.abs(selection.h - displayH) > 1) {
+         displayH = selection.h;
+         scale = displayH / imgElement.naturalHeight;
+         displayW = imgElement.naturalWidth * scale;
+      }
+
       const offX = (window.innerWidth - displayW) / 2;
-      const offY = -scrollY + 20;
+      const offY = selection && selection.y > 20 && selection.y === (window.innerHeight - displayH) / 2
+                   ? selection.y 
+                   : -scrollY + 20;
 
       tempCtx.save();
       // Translate screen annotations to natural image coordinates
@@ -1758,6 +1828,7 @@ function ScreenshotCapture() {
     // Copy to clipboard should always remain lossless PNG for high compatibility
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
+    saveToHistoryIfNew(base64);
     try {
       playShutterSoundIfEnabled();
       await invoke("copy_base64_image_to_clipboard", { base64Str: base64 });
@@ -1772,6 +1843,8 @@ function ScreenshotCapture() {
     const quality = Number(localStorage.getItem("imageQuality") || "90");
     const base64 = getCroppedBase64(format, quality);
     if (!base64) return;
+    
+    saveToHistoryIfNew(base64);
     try {
       playShutterSoundIfEnabled();
       await invoke("save_base64_image", { base64Str: base64, format: format });
@@ -1785,6 +1858,8 @@ function ScreenshotCapture() {
   const handleUpload = async () => {
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
+    
+    saveToHistoryIfNew(base64);
     setIsUploading(true);
     try {
       const link = await invoke("upload_to_imgur", { base64Str: base64 });
@@ -1802,6 +1877,8 @@ function ScreenshotCapture() {
   const handlePin = async () => {
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
+    
+    saveToHistoryIfNew(base64);
 
     const w = selection ? selection.w : window.innerWidth;
     const h = selection ? selection.h : window.innerHeight;
@@ -1821,6 +1898,8 @@ function ScreenshotCapture() {
   const handleOcr = async () => {
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
+    
+    saveToHistoryIfNew(base64);
     setIsOcring(true);
     try {
       const dataUrl = `data:image/png;base64,${base64}`;

@@ -960,9 +960,10 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
     
     // 3. Copy to clipboard
     let mut ctx = arboard::Clipboard::new().map_err(|e| e.to_string())?;
-    let width = image.width() as usize;
-    let height = image.height() as usize;
-    let bytes = image.into_raw();
+    let dimensions = image.dimensions();
+    let width = dimensions.0 as usize;
+    let height = dimensions.1 as usize;
+    let bytes = image.clone().into_raw();
     let img_data = arboard::ImageData {
         width,
         height,
@@ -984,7 +985,13 @@ fn trigger_fullscreen_screenshot(app_handle: &AppHandle, state: &State<'_, AppSt
     };
     show_app_notification(state, "Shotera", body, None);
     
-    // 5. Emit event to frontend to play shutter sound
+    // 5. Save to history
+    let mut png_bytes = std::io::Cursor::new(Vec::new());
+    if image.clone().write_to(&mut png_bytes, image::ImageFormat::Png).is_ok() {
+        let _ = save_to_history_bytes(app_handle, png_bytes.get_ref());
+    }
+    
+    // 6. Emit event to frontend to play shutter sound
     let _ = app_handle.emit("fullscreen-captured", ());
     
     Ok(())
@@ -2008,6 +2015,143 @@ fn set_app_user_model_id() {
     }
 }
 
+#[derive(serde::Serialize)]
+struct HistoryItem {
+    id: String,
+    filename: String,
+    filepath: String,
+    thumbnail_base64: String,
+    timestamp: i64,
+}
+
+#[tauri::command]
+async fn save_to_history(
+    app_handle: AppHandle,
+    base64_str: String,
+) -> Result<String, String> {
+    let image_data = BASE64_STANDARD.decode(&base64_str).map_err(|e| e.to_string())?;
+    save_to_history_bytes(&app_handle, &image_data)
+}
+
+fn save_to_history_bytes(app_handle: &AppHandle, image_data: &[u8]) -> Result<String, String> {
+    let mut history_dir = app_handle.path().app_local_data_dir().map_err(|e| e.to_string())?;
+    history_dir.push("History");
+    
+    if !history_dir.exists() {
+        std::fs::create_dir_all(&history_dir).map_err(|e| e.to_string())?;
+    }
+    
+    // Check limit
+    let mut files: Vec<_> = std::fs::read_dir(&history_dir)
+        .map_err(|e| e.to_string())?
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().extension().map_or(false, |ext| ext == "png"))
+        .collect();
+        
+    // Sort by modification time ascending (oldest first)
+    files.sort_by(|a, b| {
+        let a_meta = a.metadata().unwrap();
+        let b_meta = b.metadata().unwrap();
+        a_meta.modified().unwrap().cmp(&b_meta.modified().unwrap())
+    });
+    
+    // Keep max 50 items (delete if we will exceed)
+    if files.len() >= 50 {
+        let to_remove = files.len() - 49;
+        for i in 0..to_remove {
+            let _ = std::fs::remove_file(files[i].path());
+        }
+    }
+    
+    let now = chrono::Local::now();
+    let filename = format!("shotera_history_{}.png", now.format("%Y%m%d_%H%M%S"));
+    let file_path = history_dir.join(&filename);
+    
+    std::fs::write(&file_path, image_data).map_err(|e| e.to_string())?;
+    
+    Ok(file_path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+async fn get_history(app_handle: AppHandle) -> Result<Vec<HistoryItem>, String> {
+    let mut history_dir = app_handle.path().app_local_data_dir().map_err(|e| e.to_string())?;
+    history_dir.push("History");
+    
+    if !history_dir.exists() {
+        return Ok(Vec::new());
+    }
+    
+    let mut files: Vec<_> = std::fs::read_dir(&history_dir)
+        .map_err(|e| e.to_string())?
+        .filter_map(|entry| entry.ok())
+        .collect();
+        
+    // Sort by modification time descending (newest first)
+    files.sort_by(|a, b| {
+        let a_meta = a.metadata().unwrap();
+        let b_meta = b.metadata().unwrap();
+        b_meta.modified().unwrap().cmp(&a_meta.modified().unwrap())
+    });
+    
+    let mut items = Vec::new();
+    for entry in files {
+        let path = entry.path();
+        if let Some(ext) = path.extension() {
+            if ext == "png" {
+                if let Ok(metadata) = entry.metadata() {
+                    let timestamp = metadata.modified().unwrap().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
+                    // Generate thumbnail
+                    if let Ok(img) = image::open(&path) {
+                        // resize proportionally, max width 240
+                        let thumb = image::imageops::thumbnail(&img, 240, 240);
+                        let mut png_bytes = std::io::Cursor::new(Vec::new());
+                        if thumb.write_to(&mut png_bytes, image::ImageFormat::Png).is_ok() {
+                            let thumb_b64 = BASE64_STANDARD.encode(png_bytes.get_ref());
+                            items.push(HistoryItem {
+                                id: path.file_name().unwrap().to_string_lossy().to_string(),
+                                filename: path.file_name().unwrap().to_string_lossy().to_string(),
+                                filepath: path.to_string_lossy().to_string(),
+                                thumbnail_base64: thumb_b64,
+                                timestamp,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    Ok(items)
+}
+
+#[tauri::command]
+async fn delete_from_history(filepath: String) -> Result<(), String> {
+    std::fs::remove_file(filepath).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn read_history_image_full(filepath: String) -> Result<String, String> {
+    let bytes = std::fs::read(filepath).map_err(|e| e.to_string())?;
+    Ok(BASE64_STANDARD.encode(bytes))
+}
+
+#[tauri::command]
+async fn open_history_image(filepath: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&filepath)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        // Fallback for other OS if ever needed
+        Ok(())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(target_os = "windows")]
@@ -2313,6 +2457,11 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            save_to_history,
+            get_history,
+            delete_from_history,
+            read_history_image_full,
+            open_history_image,
             get_last_screenshot,
             copy_to_clipboard,
             save_to_file,
