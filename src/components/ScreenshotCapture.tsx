@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette, Eraser, ChevronsDown } from "lucide-react";
+import { Copy, Download, X, Pencil, ArrowUpRight, Type, Undo, Trash2, Slash, Circle, Droplets, CloudUpload, Pin, ScanText, ListOrdered, Palette, Eraser, ChevronsDown, Crop, Monitor } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { HexColorPicker } from "react-colorful";
 import { translations, getLanguage, Language } from "../i18n";
@@ -270,6 +270,7 @@ function ScreenshotCapture() {
   const [initialSelection, setInitialSelection] = useState<SelectionRect | null>(null);
 
   // Window capture state
+  const [captureMode, setCaptureMode] = useState<"region" | "window">("region");
   const [systemWindows, setSystemWindows] = useState<WindowInfo[]>([]);
   const [hoveredWindow, setHoveredWindow] = useState<WindowInfo | null>(null);
   const [windowCaptureImage, setWindowCaptureImage] = useState<HTMLImageElement | null>(null);
@@ -387,6 +388,7 @@ function ScreenshotCapture() {
       setImgElement(null);
       setImageSrc(null);
       setSelection(null);
+      setCaptureMode("region");
       setWindowCaptureImage(null);
       setDrawings([]);
       setActiveTool("pencil");
@@ -414,6 +416,7 @@ function ScreenshotCapture() {
       setImgElement(null);
       setImageSrc(null);
       setSelection(null);
+      setCaptureMode("region");
       setWindowCaptureImage(null);
       setIsTallImage(false);
       setIsScrollingMode(false);
@@ -965,7 +968,7 @@ function ScreenshotCapture() {
     } else if (hoveredWindow && !isSelecting) {
       const scaleX = imgElement.naturalWidth / w;
       const scaleY = imgElement.naturalHeight / h;
-      
+
       ctx.clearRect(hoveredWindow.x, hoveredWindow.y, hoveredWindow.width, hoveredWindow.height);
       ctx.drawImage(
         imgElement,
@@ -994,6 +997,18 @@ function ScreenshotCapture() {
   }, [textInput.visible]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Space" && !selection) {
+        e.preventDefault();
+        setCaptureMode(prev => prev === "region" ? "window" : "region");
+        setHoveredWindow(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selection]);
+
+  useEffect(() => {
     if (canvasRef.current) {
       if (!selection) {
         canvasRef.current.style.cursor = "crosshair";
@@ -1012,7 +1027,7 @@ function ScreenshotCapture() {
   const handleClose = async () => {
     try {
       if (!isScrollingCaptureActiveRef.current) {
-        invoke("cancel_scrolling_capture").catch(() => {});
+        invoke("cancel_scrolling_capture").catch(() => { });
       }
       isScrollingResultRef.current = false;
       setIsScrollingResult(false);
@@ -1126,14 +1141,14 @@ function ScreenshotCapture() {
         }
       }
     } else {
-      if (hoveredWindow) {
+      if (captureMode === "window" && hoveredWindow) {
         setSelection({
           x: hoveredWindow.x,
           y: hoveredWindow.y,
           w: hoveredWindow.width,
           h: hoveredWindow.height,
         });
-        
+
         // Capture specific window directly from OS
         const winId = hoveredWindow.id;
         invoke<string>("capture_window", { id: winId })
@@ -1282,14 +1297,16 @@ function ScreenshotCapture() {
           canvasRef.current.style.cursor = getCursorForHandle(handle); // Force resize cursor over active tools
         } else if (!selection) {
           let found = null;
-          for (const win of systemWindows) {
-            if (x >= win.x && x <= win.x + win.width && y >= win.y && y <= win.y + win.height) {
-              found = win;
-              break;
+          if (captureMode === "window") {
+            for (const win of systemWindows) {
+              if (x >= win.x && x <= win.x + win.width && y >= win.y && y <= win.y + win.height) {
+                found = win;
+                break;
+              }
             }
           }
           setHoveredWindow(found);
-          canvasRef.current.style.cursor = found ? "pointer" : "crosshair";
+          canvasRef.current.style.cursor = captureMode === "window" ? (found ? "pointer" : "default") : "crosshair";
         } else {
           canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "pencil" ? PENCIL_CURSOR : "crosshair"));
         }
@@ -1938,7 +1955,9 @@ function ScreenshotCapture() {
 
       {!selection && !isScrollingMode && (
         <div className="capture-instructions">
-          {t.dragToSelect}
+          {captureMode === "window"
+            ? t.clickWindowToCapture
+            : t.dragToSelect}
         </div>
       )}
 
@@ -1951,6 +1970,30 @@ function ScreenshotCapture() {
       {selection && (
         <div className="size-indicator" style={getSizeIndicatorStyle()}>
           {selection.w} x {selection.h} px
+        </div>
+      )}
+
+      {!selection && !isTallImage && (
+        <div className="capture-mode-toolbar" onClick={(e) => e.stopPropagation()}>
+          <button
+            className={`mode-btn ${captureMode === "region" ? "active" : ""}`}
+            onClick={() => setCaptureMode("region")}
+            title="Region Capture (Space to toggle)"
+          >
+            <Crop size={18} />
+            <span>Region</span>
+          </button>
+          <button
+            className={`mode-btn ${captureMode === "window" ? "active" : ""}`}
+            onClick={() => {
+              setCaptureMode("window");
+              setHoveredWindow(null);
+            }}
+            title="Window Capture (Space to toggle)"
+          >
+            <Monitor size={18} />
+            <span>Window</span>
+          </button>
         </div>
       )}
 

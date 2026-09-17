@@ -118,6 +118,7 @@ export const translations = {
     devGitHub: "GitHub Profili",
 
     dragToSelect: "Sürükleyip Alan Seçin | Çıkmak için ESC",
+    clickWindowToCapture: "Yakalamak istediğiniz pencereye tıklayın",
     toolSelect: "Seçim Aracı (Taşı / Yeniden Boyutlandır)",
     toolPencil: "Serbest Kalem",
     toolArrow: "Ok Ekle",
@@ -802,6 +803,7 @@ export const translations = {
     devGitHub: "GitHub Profile",
 
     dragToSelect: "Drag to Select Area | Press ESC to Exit",
+    clickWindowToCapture: "Click the window you want to capture",
     toolSelect: "Selection Tool (Move / Resize)",
     toolPencil: "Free Pencil",
     toolArrow: "Add Arrow",
@@ -1480,7 +1482,8 @@ export const translations = {
     devGitHub: "GitHub Profili",
 
     dragToSelect: "Sürüşdürərək Sahə Seçin | Çıxış üçün ESC",
-    toolSelect: "Seçim Aləti (Daşı / Ölçünü Dəyiş)",
+    clickWindowToCapture: "Yaxalamaq istədiyiniz pəncərəyə klikləyin",
+    toolSelect: "Seçim Aləti (Daşı / Yenidən Ölçüləndir)",
     toolPencil: "Sərbəst Qələm",
     toolArrow: "Ox Əlavə Et",
     toolRect: "Düzbucaqlı Çək",
@@ -2160,7 +2163,8 @@ export const translations = {
     devGitHub: "Профиль GitHub",
 
     dragToSelect: "Выделите область мышью | ESC для выхода",
-    toolSelect: "Выбор (Перемещение / Размер)",
+    clickWindowToCapture: "Кликните по окну, которое хотите захватить",
+    toolSelect: "Инструмент выделения (Перемещение / Изменение размера)",
     toolPencil: "Карандаш",
     toolArrow: "Стрелка",
     toolRect: "Прямоугольник",
@@ -2837,6 +2841,7 @@ export const translations = {
     devGitHub: "GitHub-Profil",
 
     dragToSelect: "Ziehen Sie einen Bereich mit der Maus | ESC zum Beenden",
+    clickWindowToCapture: "Klicken Sie auf das Fenster, das Sie erfassen möchten",
     toolSelect: "Auswahl (Verschieben / Ändern)",
     toolPencil: "Stift",
     toolArrow: "Pfeil",
