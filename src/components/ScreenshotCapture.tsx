@@ -237,7 +237,11 @@ const getDistanceToDrawing = (act: DrawingAction, px: number, py: number): numbe
   return Infinity;
 };
 
-function ScreenshotCapture() {
+interface ScreenshotCaptureProps {
+  isEditorWindow?: boolean;
+}
+
+function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
   const [lang, setLang] = useState<Language>(getLanguage);
   const [isScrollingMode, setIsScrollingMode] = useState(false);
   const [isTallImage, setIsTallImage] = useState(false);
@@ -420,92 +424,123 @@ function ScreenshotCapture() {
   };
 
   useEffect(() => {
-    loadScreenshot();
-
-    const unlisten = listen("screenshot-captured", () => {
-      setImgElement(null);
-      setImageSrc(null);
-      setSelection(null);
-      setCaptureMode("region");
-      setWindowCaptureImage(null);
-      setIsTallImage(false);
-      setIsScrollingMode(false);
-      setScrollY(0);
-      setDrawings([]);
-      setActiveTool("pencil");
-      setBoardMode("normal");
-      setTextInput({ visible: false, x: 0, y: 0, val: "" });
+    if (isEditorWindow) {
+      const unlistenEdit = listen<{imageBase64: string}>("load-editor-image", (event) => {
+        isHistoryEditRef.current = true;
+        setImgElement(null);
+        setImageSrc(null);
+        setSelection(null);
+        setCaptureMode("region");
+        setWindowCaptureImage(null);
+        setIsTallImage(false);
+        setIsScrollingMode(false);
+        setScrollY(0);
+        setDrawings([]);
+        setActiveTool("pencil");
+        setBoardMode("normal");
+        setTextInput({ visible: false, x: 0, y: 0, val: "" });
+        
+        setTimeout(() => {
+          setImageSrc(`data:image/png;base64,${event.payload.imageBase64}`);
+        }, 50);
+      });
+      
+      emit("editor-ready").catch(console.error);
+      
+      return () => {
+        unlistenEdit.then((fn) => fn());
+      };
+    } else {
       loadScreenshot();
-    });
 
-    const unlistenEdit = listen<{imageBase64: string}>("open-image-for-edit", (event) => {
-      isHistoryEditRef.current = true;
-      setImgElement(null);
-      setImageSrc(null);
-      setSelection(null);
-      setCaptureMode("region");
-      setWindowCaptureImage(null);
-      setIsTallImage(false);
-      setIsScrollingMode(false);
-      setScrollY(0);
-      setDrawings([]);
-      setActiveTool("pencil");
-      setBoardMode("normal");
-      setTextInput({ visible: false, x: 0, y: 0, val: "" });
-      setImageSrc(`data:image/png;base64,${event.payload.imageBase64}`);
-      invoke("show_screenshot_window").catch(console.error);
-    });
+      const unlisten = listen("screenshot-captured", () => {
+        setImgElement(null);
+        setImageSrc(null);
+        setSelection(null);
+        setCaptureMode("region");
+        setWindowCaptureImage(null);
+        setIsTallImage(false);
+        setIsScrollingMode(false);
+        setScrollY(0);
+        setDrawings([]);
+        setActiveTool("pencil");
+        setBoardMode("normal");
+        setTextInput({ visible: false, x: 0, y: 0, val: "" });
+        loadScreenshot();
+      });
 
-    const unlistenScrollingMode = listen("start-scrolling-mode", () => {
-      isScrollingResultRef.current = false;
-      setIsScrollingResult(false);
-      setIsScrollingMode(true);
-      setIsTallImage(false);
-      setScrollY(0);
-      setSelection(null);
-    });
+      const unlistenEdit = listen<{imageBase64: string}>("open-image-for-edit", (event) => {
+        isHistoryEditRef.current = true;
+        setImgElement(null);
+        setImageSrc(null);
+        setSelection(null);
+        setCaptureMode("region");
+        setWindowCaptureImage(null);
+        setIsTallImage(false);
+        setIsScrollingMode(false);
+        setScrollY(0);
+        setDrawings([]);
+        setActiveTool("pencil");
+        setBoardMode("normal");
+        setTextInput({ visible: false, x: 0, y: 0, val: "" });
+        
+        setTimeout(() => {
+          setImageSrc(`data:image/png;base64,${event.payload.imageBase64}`);
+          invoke("show_screenshot_window").catch(console.error);
+        }, 50);
+      });
 
-    const unlistenScrollingCompleted = listen<number>("scrolling-completed", () => {
-      isScrollingResultRef.current = true;
-      setIsScrollingResult(true);
-      isScrollingCaptureActiveRef.current = false;
-    });
+      const unlistenScrollingMode = listen("start-scrolling-mode", () => {
+        isScrollingResultRef.current = false;
+        setIsScrollingResult(false);
+        setIsScrollingMode(true);
+        setIsTallImage(false);
+        setScrollY(0);
+        setSelection(null);
+      });
 
-    const unlistenScrollingCancelled = listen("scrolling-cancelled", () => {
-      isScrollingCaptureActiveRef.current = false;
-    });
+      const unlistenScrollingCompleted = listen<number>("scrolling-completed", () => {
+        isScrollingResultRef.current = true;
+        setIsScrollingResult(true);
+        isScrollingCaptureActiveRef.current = false;
+      });
 
-    const unlistenScrollingError = listen("scrolling-error", () => {
-      isScrollingCaptureActiveRef.current = false;
-    });
+      const unlistenScrollingCancelled = listen("scrolling-cancelled", () => {
+        isScrollingCaptureActiveRef.current = false;
+      });
 
-    const unlistenScrollingSettings = listen<any>("scrolling-settings-updated", (event) => {
-      if (event.payload) {
-        const p = event.payload;
-        if (p.scroll_method) localStorage.setItem("scrollingMethod", p.scroll_method);
-        if (p.scroll_delay_ms) localStorage.setItem("scrollingDelay", String(p.scroll_delay_ms));
-        if (p.scroll_amount) localStorage.setItem("scrollingAmount", String(p.scroll_amount));
-        if (p.max_scroll_count) localStorage.setItem("scrollingMaxSteps", String(p.max_scroll_count));
-        if (p.overlap_sensitivity) localStorage.setItem("scrollingSensitivity", p.overlap_sensitivity);
-        if (p.stop_on_no_movement !== undefined) localStorage.setItem("scrollingStopOnNoMovement", String(p.stop_on_no_movement));
-      }
-    });
+      const unlistenScrollingError = listen("scrolling-error", () => {
+        isScrollingCaptureActiveRef.current = false;
+      });
 
-    const unlistenFocus = listen("force-focus", () => {
-      window.focus();
-    });
+      const unlistenScrollingSettings = listen<any>("scrolling-settings-updated", (event) => {
+        if (event.payload) {
+          const p = event.payload;
+          if (p.scroll_method) localStorage.setItem("scrollingMethod", p.scroll_method);
+          if (p.scroll_delay_ms) localStorage.setItem("scrollingDelay", String(p.scroll_delay_ms));
+          if (p.scroll_amount) localStorage.setItem("scrollingAmount", String(p.scroll_amount));
+          if (p.max_scroll_count) localStorage.setItem("scrollingMaxSteps", String(p.max_scroll_count));
+          if (p.overlap_sensitivity) localStorage.setItem("scrollingSensitivity", p.overlap_sensitivity);
+          if (p.stop_on_no_movement !== undefined) localStorage.setItem("scrollingStopOnNoMovement", String(p.stop_on_no_movement));
+        }
+      });
 
-    return () => {
-      unlisten.then((fn) => fn());
-      unlistenEdit.then((fn) => fn());
-      unlistenScrollingMode.then((fn) => fn());
-      unlistenScrollingCompleted.then((fn) => fn());
-      unlistenScrollingCancelled.then((fn) => fn());
-      unlistenScrollingError.then((fn) => fn());
-      unlistenScrollingSettings.then((fn) => fn());
-      unlistenFocus.then((fn) => fn());
-    };
-  }, []);
+      const unlistenFocus = listen("force-focus", () => {
+        window.focus();
+      });
+
+      return () => {
+        unlisten.then((fn) => fn());
+        unlistenEdit.then((fn) => fn());
+        unlistenScrollingMode.then((fn) => fn());
+        unlistenScrollingCompleted.then((fn) => fn());
+        unlistenScrollingCancelled.then((fn) => fn());
+        unlistenScrollingError.then((fn) => fn());
+        unlistenScrollingSettings.then((fn) => fn());
+        unlistenFocus.then((fn) => fn());
+      };
+    }
+  }, [isEditorWindow]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -562,7 +597,6 @@ function ScreenshotCapture() {
   useEffect(() => {
     if (!imageSrc) return;
     const img = new Image();
-    img.src = imageSrc;
     img.onload = () => {
       setImgElement(img);
       const isFromScrolling = isScrollingResultRef.current || isScrollingResult;
@@ -598,10 +632,37 @@ function ScreenshotCapture() {
       // Wait for React to render the new image onto the canvas BEFORE displaying the window
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          invoke("show_screenshot_window").catch(console.error);
+          if (!isEditorWindow) {
+            invoke("show_screenshot_window").catch(console.error);
+          } else {
+            Promise.all([
+              import("@tauri-apps/api/window"),
+              import("@tauri-apps/api/dpi")
+            ]).then(async ([windowApi, dpiApi]) => {
+              try {
+                const win = windowApi.getCurrentWindow();
+                const { LogicalSize } = dpiApi;
+                
+                let w = Math.round(img.naturalWidth / (window.devicePixelRatio || 1) + 80);
+                let h = Math.round(img.naturalHeight / (window.devicePixelRatio || 1) + 120);
+                w = Math.round(Math.max(600, Math.min(window.screen.width * 0.9, w)));
+                h = Math.round(Math.max(400, Math.min(window.screen.height * 0.9, h)));
+                
+                await win.setSize(new LogicalSize(w, h));
+                await win.center();
+              } catch (e) {
+                console.error("Failed to resize editor window:", e);
+              } finally {
+                const win = windowApi.getCurrentWindow();
+                await win.show();
+                await win.setFocus();
+              }
+            });
+          }
         });
       });
     };
+    img.src = imageSrc;
   }, [imageSrc]);
 
   // Handle mouse wheel scrolling when viewing a tall scrolling screenshot
@@ -658,9 +719,11 @@ function ScreenshotCapture() {
       ctx.drawImage(imgElement, offX, offY, displayW, displayH);
 
       // Border around tall image
-      ctx.strokeStyle = "rgba(0, 242, 254, 0.4)";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(offX, offY, displayW, displayH);
+      if (!isEditorWindow) {
+        ctx.strokeStyle = "rgba(0, 242, 254, 0.4)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(offX, offY, displayW, displayH);
+      }
     } else {
       // 1. Draw original screenshot image
       ctx.drawImage(imgElement, 0, 0, w, h);
@@ -1084,6 +1147,14 @@ function ScreenshotCapture() {
 
   const handleClose = async () => {
     try {
+      if (isEditorWindow) {
+        import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
+          getCurrentWindow().hide();
+        });
+        emit("screenshot-closed");
+        return;
+      }
+
       if (!isScrollingCaptureActiveRef.current) {
         invoke("cancel_scrolling_capture").catch(() => { });
       }
@@ -1120,13 +1191,25 @@ function ScreenshotCapture() {
       if (isScrollingCaptureActiveRef.current) {
         return;
       }
+      if (isEditorWindow) return; // Prevent editor window from closing when losing focus
       handleClose();
     };
     window.addEventListener("blur", handleBlur);
     return () => {
       window.removeEventListener("blur", handleBlur);
     };
-  }, []);
+  }, [isEditorWindow]);
+
+  useEffect(() => {
+    if (isEditorWindow) {
+      import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
+        getCurrentWindow().onCloseRequested((event) => {
+          event.preventDefault();
+          getCurrentWindow().hide();
+        });
+      }).catch(console.error);
+    }
+  }, [isEditorWindow]);
 
   // Drag selection handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -1222,6 +1305,7 @@ function ScreenshotCapture() {
 
         setHoveredWindow(null);
       } else {
+        if (isEditorWindow) return; // Prevent clearing selection in editor mode
         // Clicked outside selection, start drawing a new selection box
         setIsSelecting(true);
         setStartPoint({ x, y });
@@ -1949,6 +2033,10 @@ function ScreenshotCapture() {
     const margin = 12;
     const toolbarHeight = 44;
 
+    if (isEditorWindow) {
+      return { bottom: 20, left: "50%", transform: "translateX(-50%)" };
+    }
+
     if (isTallImage) {
       const measuredWidth = toolbarRef.current?.offsetWidth || 480;
       const left = Math.max(margin, (window.innerWidth - measuredWidth) / 2);
@@ -1985,9 +2073,9 @@ function ScreenshotCapture() {
   };
 
   const getSizeIndicatorStyle = () => {
-    if (!selection) return {};
+    if (!selection || isEditorWindow) return { display: "none" };
     const margin = 8;
-    let top = selection.y - 28;
+    let top = selection.y - 30;
     if (top < 0) {
       top = selection.y + margin;
     }
@@ -2011,7 +2099,7 @@ function ScreenshotCapture() {
   ];
 
   return (
-    <div className="capture-container" ref={containerRef}>
+    <div className="capture-container" ref={containerRef} style={isEditorWindow ? { backgroundColor: "#0f172a" } : undefined}>
       {isScrollingMode && (
         <div className="scrolling-mode-banner">
           <div className="scrolling-mode-badge">
@@ -2032,7 +2120,7 @@ function ScreenshotCapture() {
         </div>
       )}
 
-      {!selection && !isScrollingMode && (
+      {!selection && !isScrollingMode && !isEditorWindow && (
         <div className="capture-instructions">
           {captureMode === "window"
             ? t.clickWindowToCapture
@@ -2052,7 +2140,7 @@ function ScreenshotCapture() {
         </div>
       )}
 
-      {!selection && !isTallImage && (
+      {!selection && !isTallImage && !isEditorWindow && (
         <div className="capture-mode-toolbar" onClick={(e) => e.stopPropagation()}>
           <button
             className={`mode-btn ${captureMode === "region" ? "active" : ""}`}
@@ -2368,22 +2456,26 @@ function ScreenshotCapture() {
             </button>
           )}
 
-          <button
-            className="toolbar-btn action-copy"
-            onClick={handleCopy}
-            title={t.actionCopy}
-          >
-            <Copy size={16} />
-          </button>
+          {!isEditorWindow && (
+            <button
+              className="toolbar-btn action-copy"
+              onClick={handleCopy}
+              title={t.actionCopy}
+            >
+              <Copy size={16} />
+            </button>
+          )}
 
-          <button
-            className="toolbar-btn"
-            style={{ color: "#f59e0b" }}
-            onClick={handlePin}
-            title={t.actionPin}
-          >
-            <Pin size={16} />
-          </button>
+          {!isEditorWindow && (
+            <button
+              className="toolbar-btn"
+              style={{ color: "#f59e0b" }}
+              onClick={handlePin}
+              title={t.actionPin}
+            >
+              <Pin size={16} />
+            </button>
+          )}
 
           <button
             className="toolbar-btn"
@@ -2405,21 +2497,25 @@ function ScreenshotCapture() {
             <ScanText size={16} />
           </button>
 
-          <button
-            className="toolbar-btn action-save"
-            onClick={handleSave}
-            title={t.actionSave}
-          >
-            <Download size={16} />
-          </button>
+          {!isEditorWindow && (
+            <button
+              className="toolbar-btn action-save"
+              onClick={handleSave}
+              title={t.actionSave}
+            >
+              <Download size={16} />
+            </button>
+          )}
 
-          <button
-            className="toolbar-btn action-close"
-            onClick={handleClose}
-            title={t.actionClose}
-          >
-            <X size={16} />
-          </button>
+          {!isEditorWindow && (
+            <button
+              className="toolbar-btn action-close"
+              onClick={handleClose}
+              title={t.actionClose}
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -5173,11 +5173,30 @@ function SettingsWindow() {
                   { label: (t as any).ctxOpen || "Aç", icon: <FolderOpen size={14} />, action: () => invoke("open_history_image", { filepath: contextMenu.item.filepath }).catch(console.error) },
                   { label: (t as any).ctxEdit || "Düzenle", icon: <Pencil size={14} />, action: async () => {
                     try {
-                      const fullBase64 = await invoke("read_history_image_full", { filepath: contextMenu.item.filepath });
-                      isWaitingForEditorRef.current = true;
-                      const currentWindow = getCurrentWindow();
-                      currentWindow.hide();
-                      emit("open-image-for-edit", { imageBase64: fullBase64 });
+                      const fullBase64 = await invoke<string>("read_history_image_full", { filepath: contextMenu.item.filepath });
+                      
+                      const img = new Image();
+                      img.onload = async () => {
+                        try {
+                          const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
+                          let editorWin = await WebviewWindow.getByLabel("editor");
+                          if (!editorWin) {
+                            const unlistenReady = await listen("editor-ready", () => {
+                              emit("load-editor-image", { imageBase64: fullBase64 });
+                              unlistenReady();
+                            });
+                            editorWin = new WebviewWindow("editor", { title: "Shotera Editor", center: true, visible: false, resizable: true });
+                          } else {
+                            setTimeout(() => emit("load-editor-image", { imageBase64: fullBase64 }), 10);
+                          }
+                        } catch (err) {
+                          console.error("Editor window spawn error:", err);
+                        }
+                      };
+                      img.onerror = (err) => {
+                        console.error("Image load error:", err);
+                      };
+                      img.src = `data:image/png;base64,${fullBase64}`;
                     } catch (e) {
                       console.error(e);
                     }

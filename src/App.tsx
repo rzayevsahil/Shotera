@@ -100,6 +100,10 @@ function App() {
     );
   }
 
+  if (label === "editor") {
+    return <ScreenshotCapture isEditorWindow={true} />;
+  }
+
   if (label === "screenshot") {
     return <ScreenshotCapture />;
   }

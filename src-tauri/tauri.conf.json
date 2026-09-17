@@ -23,6 +23,16 @@
         "visible": false
       },
       {
+        "label": "editor",
+        "title": "Shotera Editor",
+        "width": 1024,
+        "height": 768,
+        "resizable": true,
+        "visible": false,
+        "transparent": false,
+        "decorations": true
+      },
+      {
         "label": "screenshot",
         "title": "Shotera Capture",
         "fullscreen": true,
