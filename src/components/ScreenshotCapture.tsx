@@ -425,7 +425,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
 
   useEffect(() => {
     if (isEditorWindow) {
-      const unlistenEdit = listen<{imageBase64: string}>("load-editor-image", (event) => {
+      const unlistenEdit = listen<{ imageBase64: string }>("load-editor-image", (event) => {
         isHistoryEditRef.current = true;
         setImgElement(null);
         setImageSrc(null);
@@ -439,14 +439,14 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
         setActiveTool("pencil");
         setBoardMode("normal");
         setTextInput({ visible: false, x: 0, y: 0, val: "" });
-        
+
         setTimeout(() => {
           setImageSrc(`data:image/png;base64,${event.payload.imageBase64}`);
         }, 50);
       });
-      
+
       emit("editor-ready").catch(console.error);
-      
+
       return () => {
         unlistenEdit.then((fn) => fn());
       };
@@ -469,7 +469,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
         loadScreenshot();
       });
 
-      const unlistenEdit = listen<{imageBase64: string}>("open-image-for-edit", (event) => {
+      const unlistenEdit = listen<{ imageBase64: string }>("open-image-for-edit", (event) => {
         isHistoryEditRef.current = true;
         setImgElement(null);
         setImageSrc(null);
@@ -483,7 +483,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
         setActiveTool("pencil");
         setBoardMode("normal");
         setTextInput({ visible: false, x: 0, y: 0, val: "" });
-        
+
         setTimeout(() => {
           setImageSrc(`data:image/png;base64,${event.payload.imageBase64}`);
           invoke("show_screenshot_window").catch(console.error);
@@ -603,27 +603,27 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
       const isFromHistory = isHistoryEditRef.current;
       const isTall = isFromHistory || isFromScrolling || img.naturalHeight > window.innerHeight * 1.05 || (img.naturalHeight > img.naturalWidth * 1.4 && img.naturalHeight > 800);
       setIsTallImage(isTall);
-      
+
       if (isTall) {
         setIsScrollingMode(false);
         setScrollY(0);
-        
+
         let displayW = Math.min(img.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
         let scale = displayW / img.naturalWidth;
         let displayH = img.naturalHeight * scale;
-        
+
         // If it's a history edit and it's taller than screen, we must also constrain height to fit in screen
         if (isFromHistory && displayH > window.innerHeight - 80) {
-           displayH = window.innerHeight - 80;
-           scale = displayH / img.naturalHeight;
-           displayW = img.naturalWidth * scale;
+          displayH = window.innerHeight - 80;
+          scale = displayH / img.naturalHeight;
+          displayW = img.naturalWidth * scale;
         }
 
         const offX = (window.innerWidth - displayW) / 2;
         // If it's history edit and fits vertically easily, center it vertically instead of sticking to y=20
-        const offY = isFromHistory && displayH < window.innerHeight - 80 
-                     ? (window.innerHeight - displayH) / 2 
-                     : 20;
+        const offY = isFromHistory && displayH < window.innerHeight - 80
+          ? (window.innerHeight - displayH) / 2
+          : 20;
 
         setSelection({ x: offX, y: offY, w: displayW, h: displayH });
         isHistoryEditRef.current = false;
@@ -642,12 +642,12 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
               try {
                 const win = windowApi.getCurrentWindow();
                 const { LogicalSize } = dpiApi;
-                
+
                 let w = Math.round(img.naturalWidth / (window.devicePixelRatio || 1) + 80);
                 let h = Math.round(img.naturalHeight / (window.devicePixelRatio || 1) + 120);
                 w = Math.round(Math.max(600, Math.min(window.screen.width * 0.9, w)));
                 h = Math.round(Math.max(400, Math.min(window.screen.height * 0.9, h)));
-                
+
                 await win.setSize(new LogicalSize(w, h));
                 await win.center();
               } catch (e) {
@@ -677,8 +677,40 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
       setScrollY((prev) => Math.max(0, Math.min(maxScroll, prev + e.deltaY)));
     };
     window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, [isTallImage, imgElement]);
+
+    const handleResize = () => {
+      if (isEditorWindow && imgElement) {
+        const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
+        const scale = displayW / imgElement.naturalWidth;
+        let displayH = imgElement.naturalHeight * scale;
+        
+        if (displayH > window.innerHeight - 80) {
+          displayH = window.innerHeight - 80;
+          const scaleH = displayH / imgElement.naturalHeight;
+          const displayW2 = imgElement.naturalWidth * scaleH;
+          setSelection({
+            x: (window.innerWidth - displayW2) / 2,
+            y: 20,
+            w: displayW2,
+            h: displayH
+          });
+        } else {
+          setSelection({
+            x: (window.innerWidth - displayW) / 2,
+            y: (window.innerHeight - displayH) / 2,
+            w: displayW,
+            h: displayH
+          });
+        }
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isTallImage, imgElement, isEditorWindow]);
 
   // Redraw canvas loop
   useEffect(() => {
@@ -697,19 +729,19 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
       let displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), maxW);
       let scale = displayW / imgElement.naturalWidth;
       let displayH = imgElement.naturalHeight * scale;
-      
+
       // Mirror the onload logic to ensure correct rendering size
       if (selection && selection.h < window.innerHeight - 80 && Math.abs(selection.h - displayH) > 1) {
-         // It was constrained by height in history mode
-         displayH = selection.h;
-         scale = displayH / imgElement.naturalHeight;
-         displayW = imgElement.naturalWidth * scale;
+        // It was constrained by height in history mode
+        displayH = selection.h;
+        scale = displayH / imgElement.naturalHeight;
+        displayW = imgElement.naturalWidth * scale;
       }
 
       const offX = (window.innerWidth - displayW) / 2;
       const offY = selection && selection.y > 20 && selection.y === (window.innerHeight - displayH) / 2
-                   ? selection.y 
-                   : -scrollY + 20;
+        ? selection.y
+        : -scrollY + 20;
 
       // Draw dark sleek background
       ctx.fillStyle = "rgba(11, 12, 16, 0.94)";
@@ -802,16 +834,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
       // 5. Draw drawings constrained (clipped) within selection area
       ctx.save();
       ctx.beginPath();
-      if (isTallImage) {
-        const displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), window.innerWidth - 80);
-        const offX = (window.innerWidth - displayW) / 2;
-        const offY = -scrollY + 20;
-        const scale = displayW / imgElement.naturalWidth;
-        const displayH = imgElement.naturalHeight * scale;
-        ctx.rect(offX, offY, displayW, displayH);
-      } else {
-        ctx.rect(selection.x, selection.y, selection.w, selection.h);
-      }
+      ctx.rect(selection.x, selection.y, selection.w, selection.h);
       ctx.clip();
 
       const drawAction = (act: DrawingAction, index: number) => {
@@ -1226,7 +1249,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
 
     if (selection) {
       // Check if user is clicking on a resize handle
-      const handle = getResizeHandle(x, y, selection);
+      const handle = isEditorWindow ? null : getResizeHandle(x, y, selection);
       if (handle) {
         setDragMode(handle);
         setDragStartPoint({ x, y });
@@ -1432,7 +1455,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
 
       if (canvasRef.current) {
         let handle = null;
-        if (selection) {
+        if (selection && !isEditorWindow) {
           handle = getResizeHandle(x, y, selection);
         }
 
@@ -1785,17 +1808,17 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
       let displayW = Math.min(imgElement.naturalWidth / (window.devicePixelRatio || 1), maxW);
       let scale = displayW / imgElement.naturalWidth;
       let displayH = imgElement.naturalHeight * scale;
-      
+
       if (selection && selection.h < window.innerHeight - 80 && Math.abs(selection.h - displayH) > 1) {
-         displayH = selection.h;
-         scale = displayH / imgElement.naturalHeight;
-         displayW = imgElement.naturalWidth * scale;
+        displayH = selection.h;
+        scale = displayH / imgElement.naturalHeight;
+        displayW = imgElement.naturalWidth * scale;
       }
 
       const offX = (window.innerWidth - displayW) / 2;
       const offY = selection && selection.y > 20 && selection.y === (window.innerHeight - displayH) / 2
-                   ? selection.y 
-                   : -scrollY + 20;
+        ? selection.y
+        : -scrollY + 20;
 
       tempCtx.save();
       // Translate screen annotations to natural image coordinates
@@ -1927,7 +1950,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
     const quality = Number(localStorage.getItem("imageQuality") || "90");
     const base64 = getCroppedBase64(format, quality);
     if (!base64) return;
-    
+
     saveToHistoryIfNew(base64);
     try {
       playShutterSoundIfEnabled();
@@ -1942,7 +1965,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
   const handleUpload = async () => {
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
-    
+
     saveToHistoryIfNew(base64);
     setIsUploading(true);
     try {
@@ -1961,7 +1984,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
   const handlePin = async () => {
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
-    
+
     saveToHistoryIfNew(base64);
 
     const w = selection ? selection.w : window.innerWidth;
@@ -1982,7 +2005,7 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
   const handleOcr = async () => {
     const base64 = getCroppedBase64("PNG", 100);
     if (!base64) return;
-    
+
     saveToHistoryIfNew(base64);
     setIsOcring(true);
     try {
@@ -2194,7 +2217,14 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
       )}
 
       {selection && !isSelecting && !isScrollingMode && (
-        <div className="capture-toolbar" ref={toolbarRef} style={getToolbarStyle()}>
+        <div 
+          className="capture-toolbar" 
+          ref={toolbarRef} 
+          style={getToolbarStyle()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseMove={(e) => e.stopPropagation()}
+          onMouseUp={(e) => e.stopPropagation()}
+        >
           <button
             className={`toolbar-btn ${activeTool === "pencil" ? "active" : ""}`}
             onClick={() => setActiveTool("pencil")}
