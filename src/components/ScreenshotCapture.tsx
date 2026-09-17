@@ -23,6 +23,16 @@ interface Point {
   time?: number;
 }
 
+interface WindowInfo {
+  id: number;
+  title: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  is_minimized: boolean;
+}
+
 interface DrawingAction {
   type: Tool;
   points?: Point[]; // for pencil
@@ -259,6 +269,11 @@ function ScreenshotCapture() {
   const [dragStartPoint, setDragStartPoint] = useState<Point | null>(null);
   const [initialSelection, setInitialSelection] = useState<SelectionRect | null>(null);
 
+  // Window capture state
+  const [systemWindows, setSystemWindows] = useState<WindowInfo[]>([]);
+  const [hoveredWindow, setHoveredWindow] = useState<WindowInfo | null>(null);
+  const [windowCaptureImage, setWindowCaptureImage] = useState<HTMLImageElement | null>(null);
+
   // Drawing state
   const [activeTool, setActiveTool] = useState<Tool>("pencil");
   const [lastShape, setLastShape] = useState<Tool>("rect");
@@ -372,6 +387,7 @@ function ScreenshotCapture() {
       setImgElement(null);
       setImageSrc(null);
       setSelection(null);
+      setWindowCaptureImage(null);
       setDrawings([]);
       setActiveTool("pencil");
       setBoardMode("normal");
@@ -379,6 +395,13 @@ function ScreenshotCapture() {
 
       const base64Data = await invoke<string>("get_last_screenshot");
       setImageSrc(`data:image/png;base64,${base64Data}`);
+
+      try {
+        const windows = await invoke<WindowInfo[]>("fetch_all_windows");
+        setSystemWindows(windows);
+      } catch (err) {
+        console.error("Failed to load windows:", err);
+      }
     } catch (e) {
       console.error("Failed to load screenshot:", e);
     }
@@ -391,6 +414,7 @@ function ScreenshotCapture() {
       setImgElement(null);
       setImageSrc(null);
       setSelection(null);
+      setWindowCaptureImage(null);
       setIsTallImage(false);
       setIsScrollingMode(false);
       setScrollY(0);
@@ -595,6 +619,18 @@ function ScreenshotCapture() {
         } else if (boardMode === "black") {
           ctx.fillStyle = "#000000";
           ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
+        } else if (windowCaptureImage) {
+          ctx.drawImage(
+            windowCaptureImage,
+            0,
+            0,
+            windowCaptureImage.naturalWidth,
+            windowCaptureImage.naturalHeight,
+            selection.x,
+            selection.y,
+            selection.w,
+            selection.h
+          );
         } else {
           ctx.drawImage(
             imgElement,
@@ -926,8 +962,25 @@ function ScreenshotCapture() {
       });
 
       ctx.restore();
+    } else if (hoveredWindow && !isSelecting) {
+      const scaleX = imgElement.naturalWidth / w;
+      const scaleY = imgElement.naturalHeight / h;
+      
+      ctx.clearRect(hoveredWindow.x, hoveredWindow.y, hoveredWindow.width, hoveredWindow.height);
+      ctx.drawImage(
+        imgElement,
+        hoveredWindow.x * scaleX,
+        hoveredWindow.y * scaleY,
+        hoveredWindow.width * scaleX,
+        hoveredWindow.height * scaleY,
+        hoveredWindow.x, hoveredWindow.y, hoveredWindow.width, hoveredWindow.height
+      );
+
+      ctx.strokeStyle = "rgba(0, 195, 255, 0.8)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(hoveredWindow.x, hoveredWindow.y, hoveredWindow.width, hoveredWindow.height);
     }
-  }, [imgElement, selection, drawings, isDrawing, currentPencilPoints, currentEraserPoints, fadingEraserTrails, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough, blurAmount, animFrame]);
+  }, [imgElement, selection, windowCaptureImage, hoveredWindow, drawings, isDrawing, currentPencilPoints, currentEraserPoints, fadingEraserTrails, drawingStart, drawingEnd, activeTool, drawColor, textBold, textItalic, textUnderline, textStrikethrough, blurAmount, animFrame]);
 
   useEffect(() => {
     if (textInput.visible && textInputRef.current) {
@@ -1073,11 +1126,35 @@ function ScreenshotCapture() {
         }
       }
     } else {
-      // Clicked outside selection, start drawing a new selection box
-      setIsSelecting(true);
-      setStartPoint({ x, y });
-      setSelection({ x, y, w: 0, h: 0 });
-      setDrawings([]);
+      if (hoveredWindow) {
+        setSelection({
+          x: hoveredWindow.x,
+          y: hoveredWindow.y,
+          w: hoveredWindow.width,
+          h: hoveredWindow.height,
+        });
+        
+        // Capture specific window directly from OS
+        const winId = hoveredWindow.id;
+        invoke<string>("capture_window", { id: winId })
+          .then((base64Str) => {
+            const img = new Image();
+            img.onload = () => {
+              setWindowCaptureImage(img);
+            };
+            img.src = `data:image/png;base64,${base64Str}`;
+          })
+          .catch((err) => console.error("Failed to capture specific window:", err));
+
+        setHoveredWindow(null);
+      } else {
+        // Clicked outside selection, start drawing a new selection box
+        setIsSelecting(true);
+        setStartPoint({ x, y });
+        setSelection({ x, y, w: 0, h: 0 });
+        setDrawings([]);
+        setWindowCaptureImage(null);
+      }
     }
   };
 
@@ -1204,7 +1281,15 @@ function ScreenshotCapture() {
         if (handle) {
           canvasRef.current.style.cursor = getCursorForHandle(handle); // Force resize cursor over active tools
         } else if (!selection) {
-          canvasRef.current.style.cursor = "crosshair"; // Always crosshair before selection
+          let found = null;
+          for (const win of systemWindows) {
+            if (x >= win.x && x <= win.x + win.width && y >= win.y && y <= win.y + win.height) {
+              found = win;
+              break;
+            }
+          }
+          setHoveredWindow(found);
+          canvasRef.current.style.cursor = found ? "pointer" : "crosshair";
         } else {
           canvasRef.current.style.cursor = activeTool === "text" ? "text" : (activeTool === "eraser" ? ERASER_CURSOR : (activeTool === "pencil" ? PENCIL_CURSOR : "crosshair"));
         }

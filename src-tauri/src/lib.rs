@@ -7,6 +7,7 @@ use base64::prelude::*;
 use chrono::Local;
 
 mod scrolling;
+pub mod windows_cmd;
 // use tauri_plugin_notification::NotificationExt;
 
 // DEBUG LOGGING HELPER
@@ -2364,7 +2365,9 @@ pub fn run() {
             get_scrolling_settings,
             scrolling::start_scrolling_capture,
             scrolling::stop_scrolling_capture,
-            scrolling::cancel_scrolling_capture
+            scrolling::cancel_scrolling_capture,
+            windows_cmd::fetch_all_windows,
+            windows_cmd::capture_window
         ])
 
         .run(tauri::generate_context!())
