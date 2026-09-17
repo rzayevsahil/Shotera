@@ -2261,8 +2261,24 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
                 <polygon points="6,9 18,9 12,18" />
               </svg>
             </button>
-            {showShapeMenu && (
-              <div style={{ position: "absolute", top: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 100) ? "auto" : "calc(100% + 8px)", bottom: (window.innerHeight - ((getToolbarStyle().top as number) + 44) < 100) ? "calc(100% + 8px)" : "auto", left: "-8px", background: "rgba(15, 23, 42, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: 8, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4, zIndex: 100 }}>
+            {showShapeMenu && (() => {
+              const tbStyle = getToolbarStyle();
+              const opensUp = isEditorWindow || (tbStyle.top !== undefined && window.innerHeight - (Number(tbStyle.top) + 44) < 100);
+              return (
+              <div style={{ 
+                position: "absolute", 
+                top: opensUp ? "auto" : "calc(100% + 8px)", 
+                bottom: opensUp ? "calc(100% + 8px)" : "auto", 
+                left: "-8px", 
+                background: "rgba(15, 23, 42, 0.95)", 
+                border: "1px solid rgba(255,255,255,0.1)", 
+                borderRadius: 8, 
+                padding: 8, 
+                display: "grid", 
+                gridTemplateColumns: "repeat(5, 1fr)", 
+                gap: 4, 
+                zIndex: 100 
+              }}>
                 {SHAPE_TOOLS.map(tool => (
                   <button
                     key={tool.id}
@@ -2274,7 +2290,8 @@ function ScreenshotCapture({ isEditorWindow = false }: ScreenshotCaptureProps) {
                   </button>
                 ))}
               </div>
-            )}
+              );
+            })()}
           </div>
 
           <button
